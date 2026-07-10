@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+build/
+
+# Environments / Credentials
+.env
+.env.*
+!.env.example
+temp.env
+
+# System / IDE files
+.DS_Store
+.vscode/
+.idea/
+.codex/
+.agents/
