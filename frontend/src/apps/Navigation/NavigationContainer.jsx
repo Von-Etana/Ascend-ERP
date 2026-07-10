@@ -72,7 +72,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'crm-group',
       icon: <FilterOutlined />,
-      label: 'CRM',
+      label: <Link to={'/crm'}>CRM</Link>,
       children: [
         {
           key: 'crm',
@@ -114,7 +114,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'sales-group',
       icon: <TagsOutlined />,
-      label: 'Sales',
+      label: <Link to={'/sales'}>Sales</Link>,
       children: [
         {
           key: 'sales',
@@ -141,7 +141,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'catalog-group',
       icon: <AppstoreOutlined />,
-      label: 'Catalog / Inventory',
+      label: <Link to={'/catalog'}>Catalog / Inventory</Link>,
       children: [
         {
           key: 'catalog',
@@ -189,7 +189,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'automations-group',
       icon: <ThunderboltOutlined />,
-      label: 'Automations',
+      label: <Link to={'/automations'}>Automations</Link>,
       children: [
         {
           key: 'automations',
@@ -211,7 +211,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'ai-studio-group',
       icon: <RobotOutlined />,
-      label: 'AI Studio',
+      label: <Link to={'/ai-studio'}>AI Studio</Link>,
       children: [
         {
           key: 'ai-studio',
@@ -233,7 +233,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'finance-group',
       icon: <WalletOutlined />,
-      label: 'Finance / Settings',
+      label: <Link to={'/finance'}>Finance / Settings</Link>,
       children: [
         {
           key: 'finance',
@@ -275,7 +275,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'operations-group',
       icon: <ApartmentOutlined />,
-      label: 'Operations',
+      label: <Link to={'/operations'}>Operations</Link>,
       children: [
         {
           key: 'operations',
@@ -317,7 +317,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'platform-group',
       icon: <DatabaseOutlined />,
-      label: 'Platform',
+      label: <Link to={'/reports'}>Platform</Link>,
       children: [
         {
           key: 'reports',
