@@ -15,10 +15,10 @@ const AUTH_INITIAL_STATE = {
   isSuccess: false,
 };
 
-const auth_state = storePersist.get('auth')
-  ? storePersist.get('auth')
-  : DEMO_MODE
-    ? demoAuthState
+const auth_state = DEMO_MODE
+  ? demoAuthState
+  : storePersist.get('auth')
+    ? storePersist.get('auth')
     : AUTH_INITIAL_STATE;
 
 const initialState = { auth: auth_state };
