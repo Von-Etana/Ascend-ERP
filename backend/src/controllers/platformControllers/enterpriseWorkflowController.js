@@ -1,4 +1,4 @@
-const { createProviderRegistry } = require('@/services/integrations/providerRegistry');
+const { createProviderRegistryForTenant } = require('@/services/integrations/providerRegistry');
 const { publishAutomationEvent } = require('@/services/automation/eventBus');
 const {
   convertOfferToInvoice,
@@ -83,7 +83,7 @@ const submitForm = async (req, res) => {
       payload: req.body,
       tenantId: req.tenantId,
       actorId: req.admin?._id,
-      providers: createProviderRegistry(process.env),
+      providers: await createProviderRegistryForTenant({ tenantId: req.tenantId }),
       publishEvent: publishAutomationEvent,
     });
 

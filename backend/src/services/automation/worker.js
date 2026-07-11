@@ -1,4 +1,5 @@
 const { processDueAutomationJobs } = require('./runner');
+const { startAgentWorker } = require('@/services/agents/worker');
 
 const startAutomationWorker = ({
   enabled = process.env.AUTOMATION_WORKER_ENABLED === 'true',
@@ -22,3 +23,4 @@ const startAutomationWorker = ({
 };
 
 module.exports = { startAutomationWorker };
+module.exports.startAgentWorker = startAgentWorker;

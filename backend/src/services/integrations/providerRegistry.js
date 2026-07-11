@@ -1,4 +1,5 @@
 const { disabledResult } = require('./disabledProvider');
+const { resolveProviderEnvForTenant } = require('./accountService');
 
 const createResendProvider = (env) => {
   if (!env.RESEND_API) {
@@ -187,4 +188,14 @@ const createProviderRegistry = (env = process.env, options = {}) => {
 };
 };
 
-module.exports = { createProviderRegistry };
+const createProviderRegistryForTenant = async ({
+  tenantId,
+  env = process.env,
+  models = {},
+  fetch,
+} = {}) => {
+  const resolvedEnv = await resolveProviderEnvForTenant({ tenantId, models, env });
+  return createProviderRegistry(resolvedEnv, { fetch });
+};
+
+module.exports = { createProviderRegistry, createProviderRegistryForTenant };

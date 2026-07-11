@@ -35,6 +35,12 @@ const {
   seedTenantAccessControl,
 } = require('../src/services/platform/defaultAccessControl');
 const accessControlController = require('../src/controllers/platformControllers/accessControlController');
+const {
+  buildProviderCatalogForUi,
+  resolveProviderEnvForTenant,
+  sanitizeIntegrationAccount,
+} = require('../src/services/integrations/accountService');
+const { encryptJson } = require('../src/services/integrations/secretStore');
 
 test('buildTenantQuery scopes tenant-aware models to the current tenant', () => {
   const Model = {
@@ -441,6 +447,86 @@ test('configured fal provider sends generation request and returns media url', a
 
   assert.equal(result.disabled, false);
   assert.equal(result.mediaUrl, 'https://cdn.example.test/flyer.png');
+});
+
+test('sanitizeIntegrationAccount returns masked secret previews only', () => {
+  const account = {
+    _id: 'integration-1',
+    provider: 'openai',
+    name: 'OpenAI',
+    status: 'active',
+    enabled: true,
+    publicConfig: { model: 'gpt-4o-mini' },
+    secretFields: ['apiKey'],
+    secretConfigEncrypted: encryptJson({ apiKey: 'sk-demo-123456' }, { JWT_SECRET: 'demo-secret' }),
+  };
+
+  const result = sanitizeIntegrationAccount(account, { JWT_SECRET: 'demo-secret' });
+
+  assert.equal(result.secretConfigured, true);
+  assert.deepEqual(result.secretPreview, [{ key: 'apiKey', maskedValue: 'sk-••••456' }]);
+  assert.equal(result.publicConfig.model, 'gpt-4o-mini');
+});
+
+test('resolveProviderEnvForTenant merges tenant integration credentials into env overrides', async () => {
+  const env = await resolveProviderEnvForTenant({
+    tenantId: 'tenant-1',
+    env: { OPENAI_MODEL: 'gpt-4o-mini', JWT_SECRET: 'demo-secret' },
+    models: {
+      IntegrationAccount: {
+        find() {
+          return {
+            lean: async () => [
+              {
+                provider: 'openai',
+                publicConfig: { model: 'gpt-5-mini' },
+                secretConfigEncrypted: encryptJson({ apiKey: 'sk-tenant-secret' }, { JWT_SECRET: 'demo-secret' }),
+              },
+            ],
+          };
+        },
+      },
+    },
+  });
+
+  assert.equal(env.OPENAI_API_KEY, 'sk-tenant-secret');
+  assert.equal(env.OPENAI_MODEL, 'gpt-5-mini');
+});
+
+test('buildProviderCatalogForUi combines provider definitions with tenant account status', async () => {
+  const result = await buildProviderCatalogForUi({
+    tenantId: 'tenant-1',
+    env: { RESEND_API: 'env-secret', JWT_SECRET: 'demo-secret' },
+    models: {
+      IntegrationAccount: {
+        find() {
+          return {
+            sort() {
+              return {
+                lean: async () => [
+                  {
+                    _id: 'integration-2',
+                    provider: 'resend',
+                    name: 'Mailer',
+                    status: 'active',
+                    enabled: true,
+                    publicConfig: { fromEmail: 'Acme <hello@example.com>' },
+                    secretFields: ['apiKey'],
+                    secretConfigEncrypted: encryptJson({ apiKey: 're_123456789' }, { JWT_SECRET: 'demo-secret' }),
+                  },
+                ],
+              };
+            },
+          };
+        },
+      },
+    },
+  });
+
+  const resend = result.find((item) => item.key === 'resend');
+  assert.equal(resend.account.name, 'Mailer');
+  assert.equal(resend.account.secretConfigured, true);
+  assert.equal(resend.envFallbackActive, true);
 });
 
 test('listAiWorkspaceAssets applies workspace filters', async () => {

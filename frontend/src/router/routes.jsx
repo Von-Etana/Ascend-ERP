@@ -38,6 +38,7 @@ const PurchaseOrder = lazy(() => import('@/pages/Workflows/PurchaseOrderWorkbenc
 const CampaignComposer = lazy(() => import('@/pages/Workflows/CampaignComposer'));
 const TaskBoard = lazy(() => import('@/pages/Workflows/TaskBoard'));
 const AIStudio = lazy(() => import('@/pages/Workflows/AIStudio'));
+const AgentStudio = lazy(() => import('@/pages/Workflows/AgentStudio'));
 const AutomationConsole = lazy(() => import('@/pages/Workflows/AutomationConsole'));
 const UnifiedWorkspace = lazy(() => import('@/pages/UnifiedWorkspace'));
 const GenericEntityManager = lazy(() => import('@/pages/GenericEntityManager'));
@@ -259,14 +260,50 @@ let routes = {
     },
     {
       path: '/ai-studio',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/library',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/builder',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/runs',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/knowledge',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/tools',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/brand',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/social',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/budgets',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/providers',
+      element: <AgentStudio />,
+    },
+    {
+      path: '/ai-studio/content',
       element: <AIStudio />,
     },
     {
       path: '/ai-studio/assets',
-      element: <AIStudio />,
-    },
-    {
-      path: '/ai-studio/providers',
       element: <AIStudio />,
     },
     {

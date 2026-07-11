@@ -1,9 +1,7 @@
-const { createProviderRegistry } = require('@/services/integrations/providerRegistry');
+const { createProviderRegistryForTenant } = require('@/services/integrations/providerRegistry');
+const { getPublishedPublicForm } = require('@/services/platform/enterpriseWorkflows');
 const { publishAutomationEvent } = require('@/services/automation/eventBus');
-const {
-  getPublishedPublicForm,
-  submitPublicForm,
-} = require('@/services/platform/enterpriseWorkflows');
+const { submitPublicForm } = require('@/services/platform/enterpriseWorkflows');
 
 const getForm = async (req, res) => {
   try {
@@ -24,10 +22,11 @@ const getForm = async (req, res) => {
 
 const submit = async (req, res) => {
   try {
+    const form = await getPublishedPublicForm({ slug: req.params.slug });
     const result = await submitPublicForm({
       slug: req.params.slug,
       payload: req.body,
-      providers: createProviderRegistry(process.env),
+      providers: await createProviderRegistryForTenant({ tenantId: form?.tenant }),
       publishEvent: publishAutomationEvent,
     });
 

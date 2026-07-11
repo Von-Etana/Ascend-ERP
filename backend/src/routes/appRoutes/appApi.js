@@ -14,6 +14,9 @@ const accessControlController = require('@/controllers/platformControllers/acces
 const enterpriseWorkflowController = require('@/controllers/platformControllers/enterpriseWorkflowController');
 const reportController = require('@/controllers/platformControllers/reportController');
 const growthWorkspaceController = require('@/controllers/platformControllers/growthWorkspaceController');
+const agentController = require('@/controllers/platformControllers/agentController');
+const knowledgeController = require('@/controllers/platformControllers/knowledgeController');
+const socialWorkspaceController = require('@/controllers/platformControllers/socialWorkspaceController');
 
 const routerApp = (entity, controller) => {
   router.route(`/${entity}/create`).post(catchErrors(controller['create']));
@@ -54,6 +57,30 @@ router.route('/ai/content/generate').post(catchErrors(aiController.generateConte
 router.route('/ai/brand-asset/generate').post(catchErrors(aiController.generateBrandAsset));
 router.route('/ai/campaign/draft').post(catchErrors(aiController.draftCampaign));
 router.route('/ai/workspace/assets').get(catchErrors(growthWorkspaceController.aiAssets));
+router.route('/agent/templates').get(catchErrors(agentController.templates));
+router.route('/agent/tools').get(catchErrors(agentController.tools));
+router.route('/agent/from-template').post(catchErrors(agentController.createFromTemplate));
+router.route('/agent/:id/version').get(catchErrors(agentController.version));
+router.route('/agent/:id/publish').post(catchErrors(agentController.publish));
+router.route('/agent/:id/test').post(catchErrors(agentController.test));
+router.route('/agent/:id/run').post(catchErrors(agentController.run));
+router.route('/agent/run/history').get(catchErrors(agentController.runs));
+router.route('/agent/run/:id').get(catchErrors(agentController.runDetail));
+router.route('/agent/run/:id/cancel').post(catchErrors(agentController.cancel));
+router.route('/agent/approval').get(catchErrors(agentController.approvals));
+router.route('/agent/approval/:id/decide').post(catchErrors(agentController.decideApproval));
+router.route('/agent/assistant/chat').post(catchErrors(agentController.assistant));
+router.route('/agent/run-due').post(catchErrors(agentController.runDue));
+router.route('/integrationaccount/providers').get(catchErrors(appControllers.integrationaccountController.providers));
+router.route('/integrationaccount/test/:provider').post(catchErrors(appControllers.integrationaccountController.testConnection));
+router.route('/integrationaccount/secret/:provider').delete(catchErrors(appControllers.integrationaccountController.clearSecret)).post(catchErrors(appControllers.integrationaccountController.clearSecret));
+router.route('/knowledge/source/:id/ingest').post(catchErrors(knowledgeController.ingest));
+router.route('/knowledge/search').get(catchErrors(knowledgeController.search));
+router.route('/social/calendar').get(catchErrors(socialWorkspaceController.calendar));
+router.route('/social/post/preview').post(catchErrors(socialWorkspaceController.preview));
+router.route('/social/post/schedule').post(catchErrors(socialWorkspaceController.schedule));
+router.route('/social/post/:id/publish').post(catchErrors(socialWorkspaceController.publish));
+router.route('/social/metrics').get(catchErrors(socialWorkspaceController.metrics));
 router.route('/marketing/workspace/summary').get(catchErrors(growthWorkspaceController.marketingSummary));
 router.route('/campaign/launch').post(catchErrors(growthWorkspaceController.launchCampaign));
 router.route('/automation/run-due').post(catchErrors(automationController.runDue));

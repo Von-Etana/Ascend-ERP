@@ -111,6 +111,7 @@ test('buildAccessPreview returns route, workflow, and AI capability badges', () 
     { key: 'route.developer', label: 'Developer API Keys', category: 'route', entity: 'apikey', action: 'read', allowed: true },
     { key: 'route.automations', label: 'Automations', category: 'route', permission: 'automations.runner.read', allowed: false },
     { key: 'route.ai-studio', label: 'AI Studio', category: 'route', permission: 'ai.studio.read', allowed: false },
+    { key: 'route.ai-providers', label: 'AI Provider Accounts', category: 'route', entity: 'integrationaccount', action: 'read', allowed: false },
     { key: 'route.settings-access-control', label: 'Settings / Access Control', category: 'route', entity: 'role', action: 'read', allowed: false },
   ]);
 
@@ -126,6 +127,13 @@ test('buildAccessPreview returns route, workflow, and AI capability badges', () 
   ]);
 
   assert.deepEqual(preview.capabilityGroups.ai, [
+    { key: 'ai.build-agent', label: 'Build Custom Agents', category: 'ai', permission: 'ai.agent.create', allowed: false },
+    { key: 'ai.publish-agent', label: 'Publish AI Agents', category: 'ai', permission: 'ai.agent.publish', allowed: false },
+    { key: 'ai.run-agent', label: 'Run AI Agents', category: 'ai', permission: 'ai.agent.run', allowed: false },
+    { key: 'ai.approve-action', label: 'Approve Agent Actions', category: 'ai', permission: 'ai.approval.decide', allowed: false },
+    { key: 'ai.web-research', label: 'Use Web Research', category: 'ai', permission: 'ai.web.research', allowed: false },
+    { key: 'ai.publish-social', label: 'Publish Social Content', category: 'ai', permission: 'marketing.social.publish', allowed: false },
+    { key: 'ai.manage-providers', label: 'Manage Provider Credentials', category: 'ai', entity: 'integrationaccount', action: 'update', allowed: false },
     { key: 'ai.generate-text', label: 'Generate Text', category: 'ai', permission: 'ai.studio.create', allowed: false },
     { key: 'ai.generate-brand-asset', label: 'Generate Brand Asset', category: 'ai', permission: 'ai.studio.create', allowed: false },
     { key: 'ai.draft-campaign', label: 'Draft Campaign', category: 'ai', permission: 'ai.studio.create', allowed: false },

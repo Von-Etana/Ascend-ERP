@@ -65,6 +65,21 @@ const ENTITY_MODULE_MAP = {
   publicform: 'platform',
   apikey: 'platform',
   ai: 'ai',
+  agent: 'ai',
+  knowledge: 'ai',
+  brand: 'ai',
+  social: 'marketing',
+  agentdefinition: 'ai',
+  agentversion: 'ai',
+  agentrun: 'ai',
+  agentrunstep: 'ai',
+  agentapproval: 'ai',
+  knowledgesource: 'ai',
+  knowledgedocument: 'ai',
+  knowledgechunk: 'ai',
+  brandprofile: 'ai',
+  socialconnection: 'marketing',
+  agentbudget: 'finance',
 };
 
 const getSchemaPath = (Model, field) => {

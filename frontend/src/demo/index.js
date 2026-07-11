@@ -271,6 +271,92 @@ const createDemoDb = () => ({
       createdBy: 'demo-admin-1',
     }),
   ],
+  agentdefinition: [
+    createRecord('agent', {
+      name: 'Growth Strategist',
+      description: 'Research opportunities and prepare a measurable multi-channel growth plan.',
+      specialistType: 'marketing_strategy',
+      instructions: 'Analyze tenant data and approved public sources. Cite evidence and request approval before publishing or allocating budget.',
+      modelPolicy: { provider: 'openai', fallbackProviders: ['kimi'], temperature: 0.3, maxOutputTokens: 2048, maxSteps: 8 },
+      tools: ['erp.search', 'web.research', 'competitor.analyze', 'marketing.strategy', 'budget.plan'],
+      knowledgeSources: ['knowledge-growth', 'knowledge-competitors'],
+      approvalPolicy: { mode: 'risk_based', approvalFor: [] },
+      limits: { tokenBudget: 50000, scrapedPagesPerRun: 20, costBudget: { amount: 50000, currency: DEFAULT_CURRENCY_CODE } },
+      status: 'published', version: 3,
+    }),
+    createRecord('agent', {
+      name: 'Social Media Manager',
+      description: 'Draft, schedule, and optimize social content across all connected channels.',
+      specialistType: 'social_media_manager',
+      instructions: 'Use the brand profile and require approval before live publishing.',
+      modelPolicy: { provider: 'kimi', fallbackProviders: ['openai'], temperature: 0.6, maxOutputTokens: 1600, maxSteps: 7 },
+      tools: ['content.generate', 'social.schedule', 'social.publish', 'social.metrics'],
+      approvalPolicy: { mode: 'risk_based', approvalFor: ['social.publish'] },
+      status: 'published', version: 2,
+    }),
+  ],
+  agentrun: [
+    createRecord('agentrun', { agent: { _id: 'agent-growth', name: 'Growth Strategist' }, trigger: 'schedule', status: 'succeeded', currentStep: 5, usage: { inputTokens: 3420, outputTokens: 1180, totalTokens: 4600 }, cost: { amount: 81.6, currency: DEFAULT_CURRENCY_CODE }, startedAt: iso(-1, -2), output: { content: '## Growth strategy ready\n\nThree evidence-backed channel opportunities were identified with an NGN allocation scenario.' } }),
+    createRecord('agentrun', { agent: { _id: 'agent-social', name: 'Social Media Manager' }, trigger: 'manual', status: 'needs_approval', currentStep: 3, usage: { inputTokens: 2100, outputTokens: 840, totalTokens: 2940 }, cost: { amount: 42.4, currency: DEFAULT_CURRENCY_CODE }, startedAt: iso(0, -1) }),
+  ],
+  agentapproval: [
+    createRecord('approval', { run: 'run-social', tool: 'social.publish', riskLevel: 'high', status: 'pending', payloadPreview: { channels: ['facebook', 'instagram', 'linkedin'], scheduledAt: iso(1, 4) }, expiresAt: iso(1) }),
+  ],
+  knowledgesource: [
+    createRecord('knowledge', { name: 'CRM and campaign performance', type: 'erp', status: 'ready', documentCount: 6, chunkCount: 184, lastIngestedAt: iso(0, -2), config: { entities: ['Lead', 'Campaign', 'Expense'] } }),
+    createRecord('knowledge', { name: 'Competitor websites', type: 'website', status: 'ready', documentCount: 12, chunkCount: 356, lastIngestedAt: iso(-1), config: { url: 'https://example.com' } }),
+    createRecord('knowledge', { name: '2026 Brand Playbook', type: 'file', status: 'ready', documentCount: 1, chunkCount: 48, lastIngestedAt: iso(-2) }),
+  ],
+  brandprofile: [
+    createRecord('brand', { name: 'Acme Growth Labs', voice: 'Clear, confident, commercially practical', audience: 'Nigerian growth leaders and founders', positioning: 'Measured growth without operational chaos', vocabulary: ['measurable', 'practical', 'trusted'], prohibitedClaims: ['guaranteed revenue', 'instant results'], isDefault: true }),
+  ],
+  agentbudget: [
+    createRecord('agentbudget', { name: 'Q3 Growth Agents', allocated: { amount: 750000, currency: DEFAULT_CURRENCY_CODE }, actual: { amount: 286400, currency: DEFAULT_CURRENCY_CODE }, approvalThreshold: { amount: 100000, currency: DEFAULT_CURRENCY_CODE }, status: 'active' }),
+  ],
+  socialconnection: [
+    ...['facebook', 'instagram', 'linkedin', 'x', 'whatsapp'].map((provider) => createRecord('socialconnection', { provider, accountName: `Acme ${provider}`, status: 'connected', scopes: ['publish', 'read_metrics'] })),
+  ],
+  integrationaccount: [
+    createRecord('integrationaccount', {
+      provider: 'openai',
+      name: 'OpenAI Production',
+      status: 'active',
+      enabled: true,
+      publicConfig: { model: 'gpt-4o-mini', baseUrl: 'https://api.openai.com/v1/chat/completions' },
+      secretFields: ['apiKey'],
+      secretConfigured: true,
+      secretPreview: [{ key: 'apiKey', maskedValue: 'sk-••••••123' }],
+      lastTestStatus: 'passed',
+      lastTestMessage: 'OpenAI credentials validated',
+      lastTestedAt: iso(-1),
+    }),
+    createRecord('integrationaccount', {
+      provider: 'resend',
+      name: 'Resend Mailer',
+      status: 'active',
+      enabled: true,
+      publicConfig: { fromEmail: 'IDURAR <hello@acmegrowth.example>' },
+      secretFields: ['apiKey'],
+      secretConfigured: true,
+      secretPreview: [{ key: 'apiKey', maskedValue: 're_••••••789' }],
+      lastTestStatus: 'passed',
+      lastTestMessage: 'Resend credentials validated',
+      lastTestedAt: iso(-2),
+    }),
+    createRecord('integrationaccount', {
+      provider: 'meta',
+      name: 'Meta Channels',
+      status: 'disabled',
+      enabled: false,
+      publicConfig: { whatsappPhoneNumberId: '1234567890', facebookPageId: 'acme-page', instagramAccountId: 'acme-ig' },
+      secretFields: [],
+      secretConfigured: false,
+      secretPreview: [],
+      lastTestStatus: 'untested',
+      lastTestMessage: '',
+      lastTestedAt: null,
+    }),
+  ],
   automationrule: [
     createRecord('automationrule', {
       name: 'Deal Won Follow-up',
@@ -543,6 +629,84 @@ export const demoApi = {
     if (method === 'get' && entity === 'automation/run-history') {
       return success(clone(db.automationrun));
     }
+    if (method === 'get' && entity === 'agent/templates') {
+      const rows = [
+        ['marketing_strategy','Marketing Strategy Agent','Develop positioning, channel plans, KPIs, and budget recommendations.',['erp.search','web.research','competitor.analyze','marketing.strategy','budget.plan']],
+        ['social_media_manager','Social Media Manager','Create channel-native content and maintain the publishing calendar.',['content.generate','social.schedule','social.publish','social.metrics']],
+        ['lead_generation','Lead Generation Agent','Research an ICP, identify prospects, score them, and prepare CRM follow-up.',['web.research','lead.research','crm.lead.create','task.create']],
+        ['competitor_analysis','Competitor Analysis Agent','Monitor competitors and produce evidence-linked comparisons.',['web.research','competitor.analyze','content.generate']],
+        ['web_research','Web Research Agent','Research approved public sources with citations.',['web.research','content.generate']],
+        ['budget_planning','Budget Planning Agent','Compare NGN allocation scenarios and forecast versus actual.',['erp.search','budget.plan','budget.allocate']],
+        ['expense_intelligence','Expense Intelligence Agent','Classify expenses, detect anomalies, and identify variance.',['erp.search','expense.analyze','task.create']],
+        ['brand_guardian','Brand Guardian','Review content against brand voice and prohibited claims.',['erp.search','brand.review','content.generate']],
+        ['content_production','Content Production Agent','Create newsletters, email, blogs, captions, scripts, and flyers.',['content.generate','asset.generate','social.schedule']],
+      ];
+      return success(rows.map(([key,name,description,tools]) => ({ key,name,description,tools })));
+    }
+    if (method === 'get' && entity === 'agent/tools') {
+      const rows = [['erp.search','Search ERP','low'],['web.research','Web Research','low'],['competitor.analyze','Competitor Analysis','low'],['marketing.strategy','Marketing Strategy','low'],['content.generate','Generate Content','low'],['asset.generate','Generate Brand Asset','medium'],['lead.research','Lead Research','low'],['crm.lead.create','Create CRM Lead','medium'],['task.create','Create Task','medium'],['social.schedule','Schedule Social Post','medium'],['social.publish','Publish Social Post','high'],['social.metrics','Read Social Metrics','low'],['brand.review','Review Brand Compliance','low'],['budget.plan','Plan Budget','low'],['budget.allocate','Allocate Budget','high'],['expense.analyze','Analyze Expenses','low']];
+      return success(rows.map(([key,label,riskLevel]) => ({ key,label,riskLevel,available:true })));
+    }
+    if (method === 'get' && entity === 'agent/run/history') return success(clone(db.agentrun));
+    if (method === 'get' && entity === 'agent/approval') return success(clone(db.agentapproval));
+    if (method === 'get' && entity === 'integrationaccount/providers') {
+      const providerDefs = [
+        ['openai', 'OpenAI', 'llm', true, [{ key: 'model', label: 'Model' }, { key: 'baseUrl', label: 'Base URL' }], [{ key: 'apiKey', label: 'API Key', inputType: 'password' }]],
+        ['kimi', 'Kimi', 'llm', true, [{ key: 'model', label: 'Model' }, { key: 'baseUrl', label: 'Base URL' }], [{ key: 'apiKey', label: 'API Key', inputType: 'password' }]],
+        ['hermes', 'Hermes', 'orchestration', false, [{ key: 'baseUrl', label: 'Base URL' }], [{ key: 'apiKey', label: 'API Key', inputType: 'password' }]],
+        ['fal', 'Fal.ai', 'media', false, [{ key: 'baseUrl', label: 'API URL' }], [{ key: 'apiKey', label: 'API Key', inputType: 'password' }]],
+        ['resend', 'Resend', 'email', true, [{ key: 'fromEmail', label: 'Default From Email' }], [{ key: 'apiKey', label: 'API Key', inputType: 'password' }]],
+        ['meta', 'Meta', 'social', true, [{ key: 'whatsappPhoneNumberId', label: 'WhatsApp Phone Number ID' }, { key: 'facebookPageId', label: 'Facebook Page ID' }, { key: 'instagramAccountId', label: 'Instagram Account ID' }], [{ key: 'accessToken', label: 'Access Token', inputType: 'password' }]],
+        ['linkedin', 'LinkedIn', 'social', true, [{ key: 'orgId', label: 'Organization ID' }], [{ key: 'accessToken', label: 'Access Token', inputType: 'password' }]],
+        ['x', 'X', 'social', true, [], [{ key: 'accessToken', label: 'Access Token', inputType: 'password' }]],
+      ];
+      return success(providerDefs.map(([key, label, category, supportsLiveTest, publicFields, secretFields]) => ({
+        key,
+        label,
+        category,
+        supportsLiveTest,
+        publicFields,
+        secretFields,
+        account: clone(db.integrationaccount).find((item) => item.provider === key) || null,
+        envFallbackActive: false,
+      })));
+    }
+
+    if (method === 'post' && entity === 'agent/from-template') {
+      const jsonData = payload.jsonData || {};
+      const agent = createNewRecord('agentdefinition', { name: jsonData.name || 'Custom AI Agent', description: jsonData.description || 'A governed business agent ready to configure.', specialistType: jsonData.templateKey || 'custom', instructions: jsonData.instructions || 'Assist the team while respecting permissions and approvals.', modelPolicy: jsonData.modelPolicy || { provider: 'openai', fallbackProviders: ['kimi'], maxSteps: 8 }, tools: jsonData.tools || ['content.generate'], approvalPolicy: jsonData.approvalPolicy || { mode: 'risk_based' }, status: 'draft', version: 0 });
+      return success(agent, 'Agent created');
+    }
+    if (method === 'post' && entity === 'agent/assistant/chat') {
+      return success({ provider: 'openai', usage: { totalTokens: 420 }, message: `## Recommended agent setup\n\nI would define one measurable outcome, attach the relevant ERP and brand sources, then enable only the tools required for that outcome.\n\n### Guardrails\n\n1. Keep public research citation-backed.\n2. Require approval for publishing and budget allocation.\n3. Test with simulated writes before publishing.` }, 'Assistant response generated');
+    }
+    if (method === 'post' && /agent\/.+\/test$/.test(entity)) {
+      const run = createNewRecord('agentrun', { status: 'succeeded', trigger: 'test', testMode: true, currentStep: 4, usage: { inputTokens: 980, outputTokens: 460, totalTokens: 1440 }, cost: { amount: 18.2, currency: DEFAULT_CURRENCY_CODE }, output: { content: '## Safe test passed\n\nThe configured knowledge and tools were validated. External publishing and financial changes were simulated.' }, startedAt: iso(0), completedAt: iso(0,1) });
+      return success(run, 'Test run completed');
+    }
+    if (method === 'post' && /agent\/.+\/publish$/.test(entity)) return success({ status: 'published', version: 1 }, 'Agent published');
+    if (method === 'post' && /agent\/approval\/.+\/decide$/.test(entity)) {
+      const approval = db.agentapproval.find((item) => entity.includes(item._id));
+      if (approval) approval.status = payload.jsonData?.decision || 'approved';
+      return success(approval || {}, `Approval ${payload.jsonData?.decision || 'approved'}`);
+    }
+    if (method === 'post' && /integrationaccount\/test\/.+$/.test(entity)) {
+      const provider = entity.split('/').pop();
+      const account = db.integrationaccount.find((item) => item.provider === provider) || null;
+      if (account) {
+        account.lastTestStatus = account.secretConfigured ? 'passed' : 'skipped';
+        account.lastTestMessage = account.secretConfigured ? `${provider} credentials validated in demo mode` : 'No secret saved in demo mode';
+        account.lastTestedAt = iso(0);
+        account.status = account.secretConfigured ? 'active' : account.status;
+      }
+      return success({
+        provider,
+        ok: Boolean(account?.secretConfigured),
+        skipped: !account?.secretConfigured,
+        message: account?.lastTestMessage || 'No account configured',
+        account,
+      }, 'Integration connection test completed');
+    }
 
     if (method === 'post' && entity === 'ai/content/generate') {
       const jsonData = payload.jsonData || {};
@@ -653,6 +817,63 @@ export const demoApi = {
       }, 'Automation jobs processed');
     }
 
+    if (method === 'post' && /integrationaccount\/secret\/.+$/.test(entity)) {
+      const provider = entity.split('/').pop();
+      const account = db.integrationaccount.find((item) => item.provider === provider);
+      if (account) {
+        account.secretConfigured = false;
+        account.secretFields = [];
+        account.secretPreview = [];
+        account.status = 'disabled';
+        account.lastTestStatus = 'untested';
+        account.lastTestMessage = 'Secret removed from demo mode';
+      }
+      return success(account || {}, 'Integration secret removed');
+    }
+
+    if (method === 'create' && entity === 'integrationaccount') {
+      const secretFields = Object.keys(payload.jsonData?.secretConfig || {});
+      const record = createNewRecord(entity, {
+        ...payload.jsonData,
+        publicConfig: payload.jsonData?.publicConfig || {},
+        secretConfigured: secretFields.length > 0,
+        secretFields,
+        secretPreview: secretFields.map((key) => ({ key, maskedValue: '********' })),
+        lastTestStatus: 'untested',
+        lastTestMessage: '',
+        lastTestedAt: null,
+      });
+      return success(record, `${entity} record created`);
+    }
+
+    if (method === 'update' && entity === 'integrationaccount') {
+      const collection = getCollection(entity);
+      const index = collection.findIndex((item) => item._id === payload.id);
+      const integrationSecretFields = Object.keys(payload.jsonData?.secretConfig || {});
+      const nextRecord = {
+        ...(index >= 0 ? collection[index] : {}),
+        ...(payload.jsonData || {}),
+        publicConfig: payload.jsonData?.publicConfig || (index >= 0 ? collection[index].publicConfig : {}) || {},
+        ...(integrationSecretFields.length
+          ? {
+              secretConfigured: true,
+              secretPreview: integrationSecretFields.map((key) => ({
+                key,
+                maskedValue: '********',
+              })),
+              secretFields: integrationSecretFields,
+            }
+          : {}),
+        updated: iso(0, 1),
+      };
+      if (index >= 0) {
+        collection[index] = nextRecord;
+        return success(collection[index], `${entity} updated`);
+      }
+      const record = createNewRecord(entity, nextRecord);
+      return success(record, `${entity} updated`);
+    }
+
     if (method === 'create') {
       const record = createNewRecord(entity, payload.jsonData || {});
       return success(record, `${entity} record created`);
@@ -662,11 +883,39 @@ export const demoApi = {
       const collection = getCollection(entity);
       const index = collection.findIndex((item) => item._id === payload.id);
       if (index >= 0) {
-        collection[index] = { ...collection[index], ...(payload.jsonData || {}), updated: iso(0, 1) };
+        collection[index] = {
+          ...collection[index],
+          ...(payload.jsonData || {}),
+          ...(entity === 'integrationaccount' && payload.jsonData?.secretConfig
+            ? {
+                secretConfigured: true,
+                secretPreview: Object.keys(payload.jsonData.secretConfig).map((key) => ({
+                  key,
+                  maskedValue: '••••••••',
+                })),
+                secretFields: Object.keys(payload.jsonData.secretConfig),
+              }
+            : {}),
+          updated: iso(0, 1),
+        };
         return success(collection[index], `${entity} updated`);
       }
       const record = createNewRecord(entity, payload.jsonData || {});
       return success(record, `${entity} updated`);
+    }
+
+    if (method === 'delete' && /integrationaccount\/secret\/.+$/.test(entity)) {
+      const provider = entity.split('/').pop();
+      const account = db.integrationaccount.find((item) => item.provider === provider);
+      if (account) {
+        account.secretConfigured = false;
+        account.secretFields = [];
+        account.secretPreview = [];
+        account.status = 'disabled';
+        account.lastTestStatus = 'untested';
+        account.lastTestMessage = 'Secret removed from demo mode';
+      }
+      return success(account || {}, 'Integration secret removed');
     }
 
     if (method === 'delete') {

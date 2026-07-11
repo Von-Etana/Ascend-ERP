@@ -215,17 +215,32 @@ function Sidebar({ collapsible, isMobile = false }) {
       children: [
         {
           key: 'ai-studio',
-          label: <Link to={'/ai-studio'}>Workspace</Link>,
+          label: <Link to={'/ai-studio'}>Agent Library</Link>,
           disabled: !canAccessPermission(currentAdmin, 'ai.studio.read'),
         },
         {
-          key: 'ai-studio-assets',
-          label: <Link to={'/ai-studio/assets'}>Assets</Link>,
+          key: 'ai-studio-builder',
+          label: <Link to={'/ai-studio/builder'}>Agent Builder</Link>,
+          disabled: !canAccessPermission(currentAdmin, 'ai.studio.read'),
+        },
+        {
+          key: 'ai-studio-runs',
+          label: <Link to={'/ai-studio/runs'}>Runs & Approvals</Link>,
+          disabled: !canAccessPermission(currentAdmin, 'ai.studio.read'),
+        },
+        {
+          key: 'ai-studio-social',
+          label: <Link to={'/ai-studio/social'}>Social Scheduler</Link>,
           disabled: !canAccessPermission(currentAdmin, 'ai.studio.read'),
         },
         {
           key: 'ai-studio-providers',
           label: <Link to={'/ai-studio/providers'}>Provider Accounts</Link>,
+          disabled: !canAccessEntityAction(currentAdmin, 'integrationaccount', 'read'),
+        },
+        {
+          key: 'ai-studio-content',
+          label: <Link to={'/ai-studio/content'}>Content Workspace</Link>,
           disabled: !canAccessPermission(currentAdmin, 'ai.studio.read'),
         },
       ],

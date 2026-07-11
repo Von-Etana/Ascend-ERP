@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { createProviderRegistry } = require('@/services/integrations/providerRegistry');
+const { createProviderRegistryForTenant } = require('@/services/integrations/providerRegistry');
 
 const contentTypePrompts = {
   newsletter: 'Write a newsletter for this brand and audience.',
@@ -12,7 +12,7 @@ const contentTypePrompts = {
 
 const generateContent = async (req, res) => {
   const { type = 'email', prompt = '', brandContext = {}, save = true } = req.body;
-  const providers = createProviderRegistry(process.env);
+  const providers = await createProviderRegistryForTenant({ tenantId: req.tenantId });
   const result = await providers.kimi.request('generateContent', {
     instruction: contentTypePrompts[type] || contentTypePrompts.email,
     prompt,
@@ -43,7 +43,7 @@ const generateContent = async (req, res) => {
 
 const generateBrandAsset = async (req, res) => {
   const { prompt = '', brandContext = {}, save = true } = req.body;
-  const providers = createProviderRegistry(process.env);
+  const providers = await createProviderRegistryForTenant({ tenantId: req.tenantId });
   const result = await providers.fal.request('generateBrandAsset', { prompt, brandContext });
 
   let asset = null;

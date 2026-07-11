@@ -43,6 +43,7 @@ export const ACCESS_CAPABILITY_GROUPS = {
     { key: 'route.developer', label: 'Developer API Keys', category: 'route', ...byEntity('apikey', 'read') },
     { key: 'route.automations', label: 'Automations', category: 'route', ...byPermission('automations.runner.read') },
     { key: 'route.ai-studio', label: 'AI Studio', category: 'route', ...byPermission('ai.studio.read') },
+    { key: 'route.ai-providers', label: 'AI Provider Accounts', category: 'route', ...byEntity('integrationaccount', 'read') },
     {
       key: 'route.settings-access-control',
       label: 'Settings / Access Control',
@@ -61,6 +62,13 @@ export const ACCESS_CAPABILITY_GROUPS = {
     { key: 'workflow.run-due-jobs', label: 'Run Due Jobs', category: 'workflow', ...byPermission('automations.runner.create') },
   ],
   ai: [
+    { key: 'ai.build-agent', label: 'Build Custom Agents', category: 'ai', ...byPermission('ai.agent.create') },
+    { key: 'ai.publish-agent', label: 'Publish AI Agents', category: 'ai', ...byPermission('ai.agent.publish') },
+    { key: 'ai.run-agent', label: 'Run AI Agents', category: 'ai', ...byPermission('ai.agent.run') },
+    { key: 'ai.approve-action', label: 'Approve Agent Actions', category: 'ai', ...byPermission('ai.approval.decide') },
+    { key: 'ai.web-research', label: 'Use Web Research', category: 'ai', ...byPermission('ai.web.research') },
+    { key: 'ai.publish-social', label: 'Publish Social Content', category: 'ai', ...byPermission('marketing.social.publish') },
+    { key: 'ai.manage-providers', label: 'Manage Provider Credentials', category: 'ai', ...byEntity('integrationaccount', 'update') },
     { key: 'ai.generate-text', label: 'Generate Text', category: 'ai', ...byPermission('ai.studio.create') },
     { key: 'ai.generate-brand-asset', label: 'Generate Brand Asset', category: 'ai', ...byPermission('ai.studio.create') },
     { key: 'ai.draft-campaign', label: 'Draft Campaign', category: 'ai', ...byPermission('ai.studio.create') },

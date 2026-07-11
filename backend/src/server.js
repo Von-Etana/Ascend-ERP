@@ -32,9 +32,10 @@ for (const filePath of modelsFiles) {
 
 // Start our app!
 const app = require('./app');
-const { startAutomationWorker } = require('./services/automation/worker');
+const { startAutomationWorker, startAgentWorker } = require('./services/automation/worker');
 app.set('port', process.env.PORT || 8888);
 const server = app.listen(app.get('port'), () => {
   startAutomationWorker();
+  startAgentWorker();
   console.log(`Express running → On PORT : ${server.address().port}`);
 });

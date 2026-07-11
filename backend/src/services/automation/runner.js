@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { createProviderRegistry } = require('../integrations/providerRegistry');
+const { createProviderRegistry, createProviderRegistryForTenant } = require('../integrations/providerRegistry');
 const { executeAutomationAction } = require('./actionExecutor');
 
 const getDefaultModels = () => mongoose.models;
@@ -35,11 +35,15 @@ const loadRunInputs = async ({ models, job }) => {
 
 const processAutomationJob = async ({
   models = getDefaultModels(),
-  providers = createProviderRegistry(),
+  providers,
   now = new Date(),
 } = {}) => {
   const job = await claimDueJob({ models, now });
   if (!job) return { processed: false, reason: 'no_due_job' };
+  const resolvedProviders =
+    providers ||
+    (await createProviderRegistryForTenant({ tenantId: job.tenant, models })) ||
+    createProviderRegistry();
 
   let run = null;
   try {
@@ -54,7 +58,9 @@ const processAutomationJob = async ({
 
     const actionResults = [];
     for (const action of rule.actions || []) {
-      actionResults.push(await executeAutomationAction({ action, event, models, providers }));
+      actionResults.push(
+        await executeAutomationAction({ action, event, models, providers: resolvedProviders })
+      );
     }
 
     run.status = 'succeeded';

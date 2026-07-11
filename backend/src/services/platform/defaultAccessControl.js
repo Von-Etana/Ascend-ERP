@@ -3,6 +3,16 @@ const { permissionFor, ENTITY_MODULE_MAP } = require('./accessControl');
 
 const DEFAULT_ACTIONS = ['read', 'create', 'update', 'delete'];
 const EXTRA_ENTITIES = ['role', 'permission', 'tenant', 'orgunit', 'auditlog', 'automation', 'workflows', 'ai'];
+const WORKFLOW_PERMISSIONS = [
+  ['ai.agent.publish', 'ai', 'agent', 'publish', 'publish AI agents'],
+  ['ai.agent.run', 'ai', 'agent', 'run', 'run AI agents'],
+  ['ai.approval.decide', 'ai', 'approval', 'decide', 'approve sensitive agent actions'],
+  ['ai.knowledge.manage', 'ai', 'knowledge', 'manage', 'manage agent knowledge sources'],
+  ['ai.web.research', 'ai', 'web', 'research', 'research compliant public websites'],
+  ['marketing.social.publish', 'marketing', 'social', 'publish', 'publish approved social content'],
+  ['finance.agent.read', 'finance', 'agent', 'read', 'read finance data through agents'],
+  ['finance.agent.allocate', 'finance', 'agent', 'allocate', 'approve agent budget allocation'],
+];
 
 const uniq = (items) => [...new Set(items)];
 
@@ -11,7 +21,7 @@ const getModel = (name, models) => models?.[name] || mongoose.model(name);
 const buildPermissionCatalog = () => {
   const entities = uniq([...Object.keys(ENTITY_MODULE_MAP), ...EXTRA_ENTITIES]);
 
-  return entities.flatMap((entity) =>
+  return [...entities.flatMap((entity) =>
     DEFAULT_ACTIONS.map((action) => {
       const key = permissionFor(entity, action);
       const [module, entityName, actionName] = key.split('.');
@@ -24,7 +34,7 @@ const buildPermissionCatalog = () => {
         description: `${actionName} ${entityName} records in ${module}`,
       };
     })
-  );
+  ), ...WORKFLOW_PERMISSIONS.map(([key, module, entity, action, description]) => ({ key, module, entity, action, description }))];
 };
 
 const collectPermissions = (...prefixes) => {
@@ -151,8 +161,20 @@ const DEFAULT_ROLE_DEFINITIONS = [
         'marketing.contentasset.',
         'platform.publicform.',
         'tasks.task.',
-        'ai.studio.'
+        'ai.studio.',
+        'ai.agentdefinition.',
+        'ai.agentrun.',
+        'ai.agentapproval.',
+        'ai.knowledgesource.',
+        'ai.brandprofile.',
+        'marketing.socialconnection.'
       ),
+      'ai.agent.publish',
+      'ai.agent.run',
+      'ai.approval.decide',
+      'ai.knowledge.manage',
+      'ai.web.research',
+      'marketing.social.publish',
       'crm.contact.read',
       'crm.company.read',
       'crm.lead.read',
@@ -161,6 +183,9 @@ const DEFAULT_ROLE_DEFINITIONS = [
     dataScope: 'tenant',
   },
 ];
+
+const financeRole = DEFAULT_ROLE_DEFINITIONS.find((role) => role.key === 'finance_officer');
+financeRole.permissions = uniq([...financeRole.permissions, 'finance.agent.read', 'finance.agent.allocate']);
 
 const seedTenantAccessControl = async ({ tenantId, actorId = null, models = {} }) => {
   const Permission = getModel('Permission', models);
