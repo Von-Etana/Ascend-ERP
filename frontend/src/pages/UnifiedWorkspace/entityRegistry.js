@@ -273,7 +273,7 @@ export const moduleRegistry = {
     ],
   },
   finance: {
-    title: 'Finance and Settings',
+    title: 'Finance Management',
     description: 'Accounts, invoices, payments, expenses, taxes, payment modes, currencies, and document output settings.',
     themeColor: '#8b5cf6', // Solid violet purple
     stats: [

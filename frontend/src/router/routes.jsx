@@ -41,6 +41,7 @@ const AIStudio = lazy(() => import('@/pages/Workflows/AIStudio'));
 const AgentStudio = lazy(() => import('@/pages/Workflows/AgentStudio'));
 const AutomationConsole = lazy(() => import('@/pages/Workflows/AutomationConsole'));
 const UnifiedWorkspace = lazy(() => import('@/pages/UnifiedWorkspace'));
+const FinanceManagement = lazy(() => import('@/pages/Workflows/FinanceManagement'));
 const GenericEntityManager = lazy(() => import('@/pages/GenericEntityManager'));
 const Settings = lazy(() => import('@/pages/Settings/Settings'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -148,7 +149,7 @@ let routes = {
     },
     {
       path: '/finance',
-      element: <WorkspaceRoute moduleKey="finance" />,
+      element: <FinanceManagement />,
     },
     {
       path: '/vendors',

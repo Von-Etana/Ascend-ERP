@@ -248,7 +248,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     {
       key: 'finance-group',
       icon: <WalletOutlined />,
-      label: <Link to={'/finance'}>Finance / Settings</Link>,
+      label: <Link to={'/finance'}>Finance Management</Link>,
       children: [
         {
           key: 'finance',
