@@ -1,5 +1,6 @@
 const express = require('express');
 const { catchErrors } = require('@/handlers/errorHandlers');
+const { singleStorageUpload } = require('@/middlewares/uploadMiddleware');
 const router = express.Router();
 
 const appControllers = require('@/controllers/appControllers');
@@ -94,5 +95,15 @@ router.route('/permission/catalog').get(catchErrors(accessControlController.list
 router.route('/role/bootstrap-defaults').post(catchErrors(accessControlController.bootstrapDefaults));
 router.route('/role/admin-access').get(catchErrors(accessControlController.listAdminAccess));
 router.route('/role/admin-access/:id').patch(catchErrors(accessControlController.updateAdminAccess));
+
+// Finance Document Vault — upload, list, delete
+router
+  .route('/finance/document/upload')
+  .post(
+    singleStorageUpload({ entity: 'financedocument', fieldName: 'fileUrl', fileType: 'default' }),
+    catchErrors(appControllers.documentController.create),
+  );
+router.route('/finance/document/list').get(catchErrors(appControllers.documentController.list));
+router.route('/finance/document/:id').delete(catchErrors(appControllers.documentController.delete));
 
 module.exports = router;
