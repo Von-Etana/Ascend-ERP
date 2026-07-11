@@ -359,11 +359,6 @@ function Sidebar({ collapsible, isMobile = false }) {
         },
       ],
     },
-    {
-      key: 'about',
-      label: <Link to={'/about'}>{translate('about')}</Link>,
-      icon: <ReconciliationOutlined />,
-    },
   ], [currentAdmin, translate]);
   const parentMap = useMemo(() => buildParentMap(items), [items]);
 

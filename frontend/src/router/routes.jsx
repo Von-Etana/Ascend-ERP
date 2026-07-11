@@ -45,7 +45,6 @@ const FinanceManagement = lazy(() => import('@/pages/Workflows/FinanceManagement
 const GenericEntityManager = lazy(() => import('@/pages/GenericEntityManager'));
 const Settings = lazy(() => import('@/pages/Settings/Settings'));
 const Profile = lazy(() => import('@/pages/Profile'));
-const About = lazy(() => import('@/pages/About'));
 
 const WorkspaceRoute = ({ moduleKey }) => <UnifiedWorkspace moduleKey={moduleKey} />;
 const RecordRoute = ({ entity, title, description, sample, links }) => (
@@ -68,10 +67,6 @@ let routes = {
     {
       path: '/logout',
       element: <Logout />,
-    },
-    {
-      path: '/about',
-      element: <About />,
     },
     {
       path: '/',
