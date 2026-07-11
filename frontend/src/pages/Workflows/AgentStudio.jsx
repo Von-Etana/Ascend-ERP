@@ -6,7 +6,8 @@ import {
 } from 'antd';
 import {
   ApiOutlined, AuditOutlined, BookOutlined, BulbOutlined, CalendarOutlined, CheckCircleOutlined,
-  ClockCircleOutlined, DollarOutlined, ExperimentOutlined, GlobalOutlined, PlayCircleOutlined,
+  ClockCircleOutlined, DollarOutlined, DownloadOutlined, ExperimentOutlined, EyeOutlined,
+  FileTextOutlined, GlobalOutlined, MailOutlined, PlayCircleOutlined,
   PlusOutlined, ReloadOutlined, RobotOutlined, SafetyCertificateOutlined, SendOutlined,
   SettingOutlined, TeamOutlined, ToolOutlined,
 } from '@ant-design/icons';
@@ -27,6 +28,7 @@ const STUDIO_NAV = [
   ['tools', 'Tools', ToolOutlined], ['brand', 'Brand Center', BulbOutlined],
   ['social', 'Social Scheduler', CalendarOutlined], ['budgets', 'Budgets', DollarOutlined],
   ['providers', 'Provider Accounts', ApiOutlined],
+  ['docgen', 'Doc Generator', FileTextOutlined],
 ];
 const BUILDER_STEPS = ['Purpose', 'Knowledge', 'Tools', 'Guardrails', 'Test & Publish'];
 const CHANNELS = ['facebook', 'instagram', 'linkedin', 'x', 'whatsapp'];
@@ -74,6 +76,13 @@ export default function AgentStudio() {
   const [posts, setPosts] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [providerCatalog, setProviderCatalog] = useState([]);
+  const [docTemplates, setDocTemplates] = useState([]);
+  const [docTemplateId, setDocTemplateId] = useState(null);
+  const [docPrompt, setDocPrompt] = useState('');
+  const [docRecipient, setDocRecipient] = useState('');
+  const [docSendEmail, setDocSendEmail] = useState(false);
+  const [docResult, setDocResult] = useState(null);
+  const [docBusy, setDocBusy] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState();
   const [selectedRun, setSelectedRun] = useState();
   const [builderStep, setBuilderStep] = useState(0);
@@ -95,11 +104,12 @@ export default function AgentStudio() {
       request.list({ entity: 'socialpost', options: { page: 1, items: 100 } }),
       request.list({ entity: 'agentbudget', options: { page: 1, items: 100 } }),
       request.get({ entity: 'integrationaccount/providers' }),
+      request.get({ entity: 'ai/document/templates' }),
     ]);
     const value = (index) => calls[index].status === 'fulfilled' ? listResult(calls[index].value) : [];
     setTemplates(value(0)); setTools(value(1)); setAgents(value(2)); setRuns(value(3));
     setApprovals(value(4)); setKnowledge(value(5)); setBrands(value(6)); setPosts(value(7)); setBudgets(value(8));
-    setProviderCatalog(value(9));
+    setProviderCatalog(value(9)); setDocTemplates(value(10));
     if (!selectedAgentId && value(2)[0]) setSelectedAgentId(value(2)[0]._id);
     setLoading(false);
   };
@@ -158,6 +168,21 @@ export default function AgentStudio() {
   const decide = async (approval, decision) => { await request.post({ entity: `agent/approval/${approval._id}/decide`, jsonData: { decision } }); await load(); message.success(`Action ${decision}`); };
 
   const pendingApprovals = approvals.filter((item) => item.status === 'pending').length;
+
+  const generateDocument = async () => {
+    if (!docPrompt.trim()) return message.warning('Enter a description of the document to generate.');
+    setDocBusy(true); setDocResult(null);
+    try {
+      const response = await request.post({
+        entity: 'ai/document/generate-from-template',
+        jsonData: { templateId: docTemplateId, prompt: docPrompt, recipientEmail: docRecipient, sendEmail: docSendEmail },
+      });
+      setDocResult(response?.result || null);
+      if (response?.result) message.success(response.message || 'Document generated successfully');
+    } catch { message.error('Generation failed. Please try again.'); }
+    setDocBusy(false);
+  };
+
   const content = loading ? <div className="agent-loading"><Spin size="large" /></div> : (
     view === 'library' ? <LibraryView {...{ templates, agents, runs, createAgent, busy, openBuilder: (id) => { setSelectedAgentId(id); openView('builder'); } }} /> :
     view === 'builder' ? <BuilderView {...{ form, templates, tools, knowledge, brands, selectedAgent, agents, setSelectedAgentId, builderStep, setBuilderStep, saveAgent, testAgent, publishAgent, busy, selectedRun, assistantMessages, assistantInput, setAssistantInput, sendAssistant }} /> :
@@ -167,6 +192,7 @@ export default function AgentStudio() {
     view === 'brand' ? <BrandView items={brands} reload={load} /> :
     view === 'social' ? <SocialView items={posts} reload={load} /> :
     view === 'providers' ? <ProvidersView items={providerCatalog} reload={load} currentAdmin={currentAdmin} /> :
+    view === 'docgen' ? <DocGeneratorView {...{ docTemplates, docTemplateId, setDocTemplateId, docPrompt, setDocPrompt, docRecipient, setDocRecipient, docSendEmail, setDocSendEmail, docResult, docBusy, generateDocument, reload: load }} /> :
     <BudgetsView items={budgets} money={money} reload={load} />
   );
 
@@ -361,3 +387,201 @@ function ProvidersView({ items, reload, currentAdmin }) {
 }
 
 function ResourceView({ title, description, action, children }) { return <Space direction="vertical" size={18} style={{ width:'100%' }}><div className="agent-view-heading"><div><Title level={3}>{title}</Title><Paragraph type="secondary">{description}</Paragraph></div>{action}</div>{children}</Space>; }
+
+function DocGeneratorView({ docTemplates, docTemplateId, setDocTemplateId, docPrompt, setDocPrompt, docRecipient, setDocRecipient, docSendEmail, setDocSendEmail, docResult, docBusy, generateDocument, reload }) {
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm] = Form.useForm();
+
+  const saveTemplate = async () => {
+    const values = await createForm.validateFields();
+    await request.create({ entity: 'documenttemplate', jsonData: values });
+    setCreateOpen(false); createForm.resetFields(); await reload(); message.success('Template saved');
+  };
+
+  const selectedTemplate = docTemplates.find((t) => t._id === docTemplateId);
+  const typeColor = { invoice: '#1677ff', receipt: '#52c41a', quote: '#fa8c16', contract: '#722ed1', other: '#595959' };
+
+  return (
+    <Space direction="vertical" size={20} style={{ width: '100%' }}>
+      <div className="agent-view-heading">
+        <div>
+          <Title level={3}>AI Document Generator</Title>
+          <Paragraph type="secondary">Describe what you need in plain English. The AI will extract client details, amounts, and line items — then compile a ready-to-send document.</Paragraph>
+        </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>New Template</Button>
+      </div>
+
+      {/* Template Gallery */}
+      <Card title="Document Templates" extra={<Text type="secondary">{docTemplates.length} templates</Text>}>
+        {docTemplates.length === 0 ? <Empty description="No templates yet. Create one to get started." /> : (
+          <Row gutter={[12, 12]}>
+            {docTemplates.map((tpl) => (
+              <Col xs={24} sm={12} md={8} xl={6} key={tpl._id}>
+                <Card
+                  hoverable
+                  size="small"
+                  style={{ border: docTemplateId === tpl._id ? `2px solid ${typeColor[tpl.type] || '#1677ff'}` : '1px solid #e2e8f0', borderRadius: 8 }}
+                  onClick={() => setDocTemplateId(docTemplateId === tpl._id ? null : tpl._id)}
+                >
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Space>
+                      <FileTextOutlined style={{ fontSize: 20, color: typeColor[tpl.type] || '#1677ff' }} />
+                      <Text strong>{tpl.name}</Text>
+                    </Space>
+                    <Tag color={typeColor[tpl.type] || 'default'}>{tpl.type}</Tag>
+                    <Text type="secondary" style={{ fontSize: 12 }}>{tpl.description || 'No description'}</Text>
+                    <Space wrap style={{ marginTop: 4 }}>
+                      {(tpl.fields || []).slice(0, 4).map((f) => <Tag key={f} style={{ fontSize: 11 }}>{f}</Tag>)}
+                      {(tpl.fields || []).length > 4 && <Tag style={{ fontSize: 11 }}>+{tpl.fields.length - 4} more</Tag>}
+                    </Space>
+                  </Space>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+      </Card>
+
+      {/* Generation Panel */}
+      <Row gutter={16}>
+        <Col xs={24} lg={12}>
+          <Card title={<Space><RobotOutlined />Generate Document</Space>}
+            extra={selectedTemplate && <Tag color={typeColor[selectedTemplate.type]}>{selectedTemplate.name}</Tag>}>
+            <Space direction="vertical" size={14} style={{ width: '100%' }}>
+              <div>
+                <Text strong>Describe the document</Text>
+                <Paragraph type="secondary" style={{ marginBottom: 6, marginTop: 2, fontSize: 12 }}>
+                  Write naturally: e.g. &ldquo;Invoice for Ada at ada@email.com — NGN 45,000 for 3 months of social media management&rdquo;
+                </Paragraph>
+                <Input.TextArea
+                  rows={5}
+                  value={docPrompt}
+                  onChange={(e) => setDocPrompt(e.target.value)}
+                  placeholder="Invoice for Northwind Retail — NGN 120,000 for Q3 campaign management services"
+                  allowClear
+                />
+              </div>
+              <div>
+                <Text strong>Recipient email (optional)</Text>
+                <Input
+                  prefix={<MailOutlined style={{ color: '#94a3b8' }} />}
+                  value={docRecipient}
+                  onChange={(e) => setDocRecipient(e.target.value)}
+                  placeholder="client@company.com"
+                  style={{ marginTop: 6 }}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Switch checked={docSendEmail} onChange={setDocSendEmail} id="doc-send-email-toggle" />
+                <Text>Send document via email after generation</Text>
+              </div>
+              <Button
+                type="primary"
+                block
+                size="large"
+                icon={<SendOutlined />}
+                loading={docBusy}
+                onClick={generateDocument}
+              >
+                Generate {selectedTemplate ? selectedTemplate.type : 'document'}
+              </Button>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={12}>
+          <Card
+            title={<Space><EyeOutlined />Preview</Space>}
+            extra={docResult?.pdfFileName ? <Button size="small" icon={<DownloadOutlined />}>Download PDF</Button> : null}
+            style={{ height: '100%' }}
+          >
+            {!docResult && !docBusy && (
+              <Empty
+                image={<FileTextOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />}
+                description="Your generated document will appear here"
+              />
+            )}
+            {docBusy && <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" /><br/><Text type="secondary" style={{ marginTop: 12, display: 'block' }}>AI is extracting fields and compiling your document…</Text></div>}
+            {docResult && !docBusy && (
+              <Space direction="vertical" size={14} style={{ width: '100%' }}>
+                {/* Extracted fields */}
+                <Card size="small" title="Extracted fields" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <Descriptions size="small" column={2}>
+                    {Object.entries(docResult.extractedFields || {}).filter(([, v]) => v && !Array.isArray(v)).map(([k, v]) => (
+                      <Descriptions.Item key={k} label={k.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}>
+                        {String(v)}
+                      </Descriptions.Item>
+                    ))}
+                  </Descriptions>
+                  {(docResult.extractedFields?.items || []).length > 0 && (
+                    <Table
+                      size="small"
+                      rowKey="description"
+                      pagination={false}
+                      style={{ marginTop: 8 }}
+                      dataSource={docResult.extractedFields.items}
+                      columns={[
+                        { title: 'Item', dataIndex: 'description' },
+                        { title: 'Qty', dataIndex: 'qty', width: 60 },
+                        { title: 'Price', dataIndex: 'price', width: 90 },
+                        { title: 'Total', render: (_, r) => (r.qty || 1) * (r.price || 0), width: 90 },
+                      ]}
+                    />
+                  )}
+                </Card>
+
+                {/* Email status */}
+                {docResult.emailResult && (
+                  <Alert
+                    type={docResult.emailResult.error ? 'error' : 'success'}
+                    showIcon
+                    message={docResult.emailResult.error ? `Email failed: ${docResult.emailResult.error}` : `Email sent to ${(docResult.emailResult.accepted || []).join(', ')}`}
+                  />
+                )}
+
+                {/* HTML preview */}
+                <Card size="small" title="Document preview" bodyStyle={{ padding: 0 }}>
+                  <div
+                    style={{ maxHeight: 400, overflow: 'auto', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{ __html: docResult.compiledHtml || '' }}
+                  />
+                </Card>
+              </Space>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Create Template Drawer */}
+      <Drawer
+        title="Create Document Template"
+        open={createOpen}
+        width={520}
+        onClose={() => { setCreateOpen(false); createForm.resetFields(); }}
+        extra={<Space><Button onClick={() => setCreateOpen(false)}>Cancel</Button><Button type="primary" onClick={saveTemplate}>Save template</Button></Space>}
+      >
+        <Form form={createForm} layout="vertical">
+          <Form.Item name="name" label="Template name" rules={[{ required: true }]}>
+            <Input placeholder="Standard Invoice" />
+          </Form.Item>
+          <Form.Item name="type" label="Document type" rules={[{ required: true }]}>
+            <Select options={['invoice', 'receipt', 'quote', 'contract', 'other'].map((v) => ({ value: v, label: v.charAt(0).toUpperCase() + v.slice(1) }))} />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea rows={2} placeholder="Describe when this template is used" />
+          </Form.Item>
+          <Form.Item name="accentColor" label="Accent colour" initialValue="#1677ff">
+            <Input placeholder="#1677ff" />
+          </Form.Item>
+          <Form.Item name="footerText" label="Footer text" initialValue="Thank you for your business.">
+            <Input />
+          </Form.Item>
+          <Form.Item name="fields" label="Expected fields" help="Fields the AI will extract from the prompt">
+            <Select mode="tags" placeholder="clientName, total, items..." />
+          </Form.Item>
+        </Form>
+      </Drawer>
+    </Space>
+  );
+}

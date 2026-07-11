@@ -79,8 +79,8 @@ const createDemoDb = () => ({
     createRecord('invoice', { number: 'INV-2003', status: 'sent', total: 900, date: iso(-1) }),
   ],
   payment: [
-    createRecord('payment', { number: 'PAY-3001', status: 'paid', amount: 3200, date: iso(-2) }),
-    createRecord('payment', { number: 'PAY-3002', status: 'pending', amount: 900, date: iso(-1) }),
+    createRecord('payment', { number: 'PAY-3001', status: 'paid', amount: 3200, date: iso(-2), reconciled: true, reconciledAt: iso(-2) }),
+    createRecord('payment', { number: 'PAY-3002', status: 'pending', amount: 900, date: iso(-1), reconciled: false }),
   ],
   offer: [
     createRecord('offer', { name: 'Q3 Retainer Upsell', kind: 'proforma', status: 'converted' }),
@@ -450,6 +450,44 @@ const createDemoDb = () => ({
   apikey: [
     createRecord('apikey', { name: 'Partner Demo Key', keyPreview: 'pk_demo_1234', scopes: ['crm.contact.read'], status: 'active' }),
   ],
+  documenttemplate: [
+    createRecord('documenttemplate', {
+      name: 'Standard Invoice',
+      type: 'invoice',
+      description: 'Professional invoice template with line items, totals, and client details.',
+      fields: ['clientName', 'clientEmail', 'date', 'documentNumber', 'currency', 'total', 'items', 'notes'],
+      accentColor: '#1677ff',
+      footerText: 'Thank you for your business. Payment is due within 30 days.',
+      enabled: true,
+    }),
+    createRecord('documenttemplate', {
+      name: 'Payment Receipt',
+      type: 'receipt',
+      description: 'Receipt confirming payment received from a client.',
+      fields: ['clientName', 'clientEmail', 'date', 'documentNumber', 'currency', 'total', 'paymentMethod', 'notes'],
+      accentColor: '#52c41a',
+      footerText: 'This receipt confirms payment in full. Keep for your records.',
+      enabled: true,
+    }),
+    createRecord('documenttemplate', {
+      name: 'Service Quote',
+      type: 'quote',
+      description: 'Quotation template for proposed services with validity period.',
+      fields: ['clientName', 'clientEmail', 'date', 'documentNumber', 'currency', 'total', 'items', 'validUntil', 'notes'],
+      accentColor: '#fa8c16',
+      footerText: 'This quote is valid for 14 days from the issue date.',
+      enabled: true,
+    }),
+    createRecord('documenttemplate', {
+      name: 'Service Contract',
+      type: 'contract',
+      description: 'Formal service agreement outlining scope, terms, and deliverables.',
+      fields: ['clientName', 'clientEmail', 'date', 'documentNumber', 'startDate', 'endDate', 'scope', 'currency', 'total', 'notes'],
+      accentColor: '#722ed1',
+      footerText: 'Both parties agree to the terms outlined in this contract.',
+      enabled: true,
+    }),
+  ],
 });
 
 const ensureDb = () => {
@@ -506,8 +544,8 @@ const buildReportOverview = () => {
       payments: {
         count: payments.length,
         total: sum(payments, (item) => item.amount),
-        reconciledCount: 1,
-        unreconciledCount: Math.max(0, payments.length - 1),
+        reconciledCount: payments.filter((p) => p.reconciled).length,
+        unreconciledCount: payments.filter((p) => !p.reconciled).length,
       },
     },
     operations: {
@@ -518,8 +556,8 @@ const buildReportOverview = () => {
       publicFormSubmissions: 14,
       publishedForms: forms.filter((item) => item.status === 'published').length,
       convertedOffers: offers.filter((item) => item.status === 'converted').length,
-      paymentsRecorded: 5,
-      reconciledPayments: 1,
+      paymentsRecorded: payments.length,
+      reconciledPayments: payments.filter((p) => p.reconciled).length,
     },
   };
 };
@@ -606,6 +644,50 @@ export const demoApi = {
     const entity = normalizeEntity(payload.entity || '');
     const query = parseQueryString(payload.entity || '');
     const db = ensureDb();
+
+    if (method === 'post' && /invoice\/([^\/]+)\/record-payment/.test(entity)) {
+      const invoiceId = entity.split('/')[1];
+      const invoices = getCollection('invoice');
+      const invoice = invoices.find((item) => item._id === invoiceId);
+      if (!invoice) {
+        return { success: false, result: null, message: 'Invoice not found' };
+      }
+      const amount = Number(payload.jsonData?.amount || 0);
+      invoice.credit = (invoice.credit || 0) + amount;
+      if (invoice.credit >= invoice.total) {
+        invoice.status = 'paid';
+        invoice.paymentStatus = 'paid';
+      } else if (invoice.credit > 0) {
+        invoice.status = 'sent';
+        invoice.paymentStatus = 'partially';
+      }
+      const payment = createNewRecord('payment', {
+        number: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+        status: 'paid',
+        amount,
+        invoice: invoiceId,
+        client: invoice.client,
+        date: payload.jsonData?.date || iso(),
+        paymentMode: payload.jsonData?.paymentMode || 'Bank Transfer',
+        ref: payload.jsonData?.ref || '',
+        description: payload.jsonData?.description || 'Invoice Payment Recorded',
+        reconciled: false,
+      });
+      return success(payment, 'Invoice payment recorded successfully');
+    }
+
+    if (method === 'patch' && /payment\/([^\/]+)\/reconcile/.test(entity)) {
+      const paymentId = entity.split('/')[1];
+      const payments = getCollection('payment');
+      const payment = payments.find((item) => item._id === paymentId);
+      if (!payment) {
+        return { success: false, result: null, message: 'Payment not found' };
+      }
+      payment.reconciled = true;
+      payment.reconciledAt = iso();
+      return success(payment, 'Payment reconciled successfully');
+    }
+
 
     if (method === 'get' && entity === 'reports/overview') {
       return success(buildReportOverview(), 'Report overview loaded');
@@ -782,6 +864,110 @@ export const demoApi = {
           hasChannel: Boolean(jsonData.channel),
         },
       }, 'Campaign launched successfully');
+    }
+
+    // ─── AI Document Template management ───────────────────────────────────────
+    if (method === 'get' && entity === 'ai/document/templates') {
+      return success(clone(db.documenttemplate || []), 'Templates loaded');
+    }
+
+    if (method === 'post' && entity === 'documenttemplate/create') {
+      const jsonData = payload.jsonData || {};
+      const template = createNewRecord('documenttemplate', {
+        name: jsonData.name || 'New Template',
+        type: jsonData.type || 'invoice',
+        description: jsonData.description || '',
+        fields: jsonData.fields || ['clientName', 'clientEmail', 'total', 'currency', 'date', 'items', 'notes', 'documentNumber'],
+        htmlContent: jsonData.htmlContent || '',
+        accentColor: jsonData.accentColor || '#1677ff',
+        footerText: jsonData.footerText || 'Thank you for your business.',
+        enabled: true,
+      });
+      if (!db.documenttemplate) db.documenttemplate = [];
+      db.documenttemplate.push(template);
+      return success(template, 'Document template created');
+    }
+
+    if (method === 'get' && /^documenttemplate\/list/.test(entity)) {
+      return success(clone(db.documenttemplate || []), 'Templates loaded');
+    }
+
+    if (method === 'post' && entity === 'ai/document/generate-from-template') {
+      const jsonData = payload.jsonData || {};
+      const prompt = jsonData.prompt || '';
+      const templateId = jsonData.templateId;
+      const sendEmail = Boolean(jsonData.sendEmail);
+
+      // Load or fall back to default template
+      const template = (db.documenttemplate || []).find((t) => t._id === templateId) || null;
+      const templateType = template?.type || 'invoice';
+      const accentColor = template?.accentColor || '#1677ff';
+      const footerText = template?.footerText || 'Thank you for your business.';
+
+      // Deterministic demo AI parser: extract email, amount, name
+      const emailMatch = prompt.match(/[\w.-]+@[\w.-]+\.\w+/);
+      const amountMatch = prompt.match(/[\d,]+(\.\d{1,2})?/);
+      const nameMatch = prompt.match(/(?:for|to|client)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+      const total = amountMatch ? parseFloat(amountMatch[0].replace(',', '')) : 0;
+      const clientName = nameMatch ? nameMatch[1] : 'Demo Client';
+      const clientEmail = emailMatch ? emailMatch[0] : (jsonData.recipientEmail || 'client@example.com');
+      const today = new Date().toISOString().slice(0, 10);
+      const docNumber = `${templateType.slice(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const extractedFields = {
+        clientName,
+        clientEmail,
+        date: today,
+        documentNumber: docNumber,
+        currency: 'NGN',
+        total,
+        items: [{ description: prompt.slice(0, 60) || 'Professional services', qty: 1, price: total }],
+        notes: '',
+      };
+
+      // Build compiled HTML preview
+      const compiledHtml = `<html><body style="font-family:Arial;padding:24px;color:#1e293b;">
+        <div style="border-left:5px solid ${accentColor};padding-left:16px;margin-bottom:20px;">
+          <h2 style="margin:0;text-transform:uppercase;color:${accentColor};">${templateType}</h2>
+          <span style="color:#64748b;font-size:13px;">${docNumber} &mdash; ${today}</span>
+        </div>
+        <p><strong>Bill To:</strong> ${clientName} &lt;${clientEmail}&gt;</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:16px;">
+          <thead><tr style="background:#f1f5f9;">
+            <th style="padding:8px 12px;text-align:left;color:#64748b;font-size:11px;">DESCRIPTION</th>
+            <th style="padding:8px;color:#64748b;font-size:11px;">QTY</th>
+            <th style="padding:8px;color:#64748b;font-size:11px;">PRICE</th>
+            <th style="padding:8px;color:#64748b;font-size:11px;">AMOUNT</th>
+          </tr></thead>
+          <tbody>
+            ${extractedFields.items.map((item) => `<tr><td style="padding:10px 12px;border-bottom:1px solid #e2e8f0;">${item.description}</td><td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;">${item.qty}</td><td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;">${item.price}</td><td style="padding:10px 8px;border-bottom:1px solid #e2e8f0;">${item.qty * item.price}</td></tr>`).join('')}
+          </tbody>
+          <tfoot><tr style="font-weight:bold;border-top:2px solid ${accentColor};">
+            <td colspan="3" style="padding:10px 12px;">Total</td>
+            <td style="padding:10px 8px;color:${accentColor};">NGN ${total}</td>
+          </tr></tfoot>
+        </table>
+        <div style="margin-top:32px;border-top:1px solid #e2e8f0;padding-top:12px;color:#94a3b8;font-size:11px;text-align:center;">${footerText}</div>
+      </body></html>`;
+
+      // Simulate email send
+      const emailResult = sendEmail && clientEmail
+        ? { id: `email-${Date.now()}`, accepted: [clientEmail], message: `Document dispatched to ${clientEmail} in demo mode` }
+        : null;
+
+      // Save content asset record
+      const asset = createNewRecord('contentasset', {
+        title: `${templateType} — ${clientName} — ${today}`,
+        type: templateType,
+        prompt,
+        content: compiledHtml,
+        provider: 'kimi',
+        brandContext: { documentType: templateType },
+        createdBy: demoAuthState.current._id,
+      });
+
+      return success({ extractedFields, compiledHtml, pdfFileName: null, emailResult, asset },
+        `${templateType} generated${sendEmail ? ' and dispatched via email' : ''} successfully`);
     }
 
     if (method === 'post' && entity === 'automation/preview') {

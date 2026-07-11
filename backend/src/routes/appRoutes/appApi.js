@@ -56,6 +56,8 @@ router.route('/socialpost/schedule').post(catchErrors(socialPostController.sched
 router.route('/ai/content/generate').post(catchErrors(aiController.generateContent));
 router.route('/ai/brand-asset/generate').post(catchErrors(aiController.generateBrandAsset));
 router.route('/ai/campaign/draft').post(catchErrors(aiController.draftCampaign));
+router.route('/ai/document/generate-from-template').post(catchErrors(aiController.generateFromTemplate));
+router.route('/ai/document/templates').get(catchErrors(appControllers.documenttemplateController.list));
 router.route('/ai/workspace/assets').get(catchErrors(growthWorkspaceController.aiAssets));
 router.route('/agent/templates').get(catchErrors(agentController.templates));
 router.route('/agent/tools').get(catchErrors(agentController.tools));
