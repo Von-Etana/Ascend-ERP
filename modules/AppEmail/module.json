@@ -1,0 +1,10 @@
+{
+    "name": "AppEmail",
+    "alias": "appemail",
+    "description": "Email inbox, Resend delivery, newsletter campaigns, and lead management.",
+    "keywords": ["email", "resend", "newsletter", "leads", "marketing"],
+    "priority": -80,
+    "providers": [
+        "Modules\\AppEmail\\Providers\\AppEmailServiceProvider"
+    ]
+}

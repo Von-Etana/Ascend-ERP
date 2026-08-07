@@ -1,0 +1,9 @@
+{
+    "name": "AppAgents",
+    "alias": "appagents",
+    "description": "Configurable AI agents, run history, and shared agent execution for Ascend Systems.",
+    "providers": [
+        "Modules\\AppAgents\\Providers\\AppAgentsServiceProvider"
+    ],
+    "priority": 120
+}

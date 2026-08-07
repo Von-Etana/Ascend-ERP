@@ -1,0 +1,10 @@
+{
+    "name": "AppInbox",
+    "alias": "appinbox",
+    "description": "Unified social inbox with AI autoresponder and human handoff.",
+    "keywords": ["inbox", "messaging", "ai", "whatsapp", "instagram", "messenger", "telegram"],
+    "priority": -90,
+    "providers": [
+        "Modules\\AppInbox\\Providers\\AppInboxServiceProvider"
+    ]
+}

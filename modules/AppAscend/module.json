@@ -1,0 +1,10 @@
+{
+    "name": "AppAscend",
+    "alias": "appascend",
+    "description": "Ascend Systems ERP and growth operating workspace.",
+    "keywords": ["erp", "crm", "finance", "inventory", "pos", "operations"],
+    "priority": -100,
+    "providers": [
+        "Modules\\AppAscend\\Providers\\AppAscendServiceProvider"
+    ]
+}
