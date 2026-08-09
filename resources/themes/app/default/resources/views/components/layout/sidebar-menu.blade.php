@@ -129,12 +129,12 @@
                         x-transition:enter="transition ease-out duration-100"
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100">
-                        <span class="text-slate-400">...</span>
+                        <span class="h-1 w-4 rounded-full bg-slate-400/40 dark:bg-slate-600/40"></span>
                     </div>
                 </div>
             @endif
 
-            <div class="mt-1 space-y-px">
+            <div class="mt-1 space-y-1">
                 @foreach ($section['items'] as $item)
                     @php
                         $hasChildren = ! empty($item['children']);
@@ -142,46 +142,51 @@
                         $isCurrent = $isActive || collect($item['children'] ?? [])->contains(fn ($child) => $child['active'] ?? false);
                         $isDisabled = (bool) ($item['disabled'] ?? false);
                         $iconKey = $item['icon'] ?? 'dashboard';
-                        $icon = str_starts_with($iconKey, 'fa-')
+                        $icon = str_starts_with((string) $iconKey, 'fa-')
                             ? $iconKey
                             : ($icons[$iconKey] ?? $icons['dashboard']);
+                        $itemLabel = __($item['label'] ?? '');
+                        $itemRoute = $isDisabled ? '#' : ($item['route'] ?? '#');
+                        $wireNav = ! $isDisabled && ! empty($item['route']);
                     @endphp
 
                     @if ($hasChildren)
-                        <div x-data="{ open: {{ $isCurrent ? 'true' : 'false' }} }" class="rounded-xl">
+                        <div x-data="{ open: {{ $isCurrent ? 'true' : 'false' }} }" class="relative group">
                             <button
                                 type="button"
-                                class="group relative flex w-full items-center text-left transition-colors duration-150"
+                                class="group/btn relative flex w-full items-center text-left transition-all duration-200"
                                 x-on:click="!sidebarContentVisible ? null : open = ! open"
                                 x-bind:class="sidebarContentVisible
-                                    ? '{{ $isCurrent ? 'h-10 rounded-xl pl-[45px] pr-3 text-slate-950 dark:text-white' : 'h-10 rounded-xl pl-[45px] pr-3 text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white' }}'
-                                    : '{{ $isCurrent ? 'h-10 rounded-none bg-transparent pl-[7px] pr-0 text-slate-950 shadow-none ring-0 dark:text-white' : 'h-10 rounded-none bg-transparent pl-[7px] pr-0 text-slate-600 shadow-none ring-0 dark:text-slate-300' }}'"
-                                title="{{ __($item['label']) }}"
+                                    ? '{{ $isCurrent ? 'h-10 rounded-xl pl-[45px] pr-3 text-slate-950 dark:text-white bg-blue-500/10 dark:bg-blue-500/20 font-semibold' : 'h-10 rounded-xl pl-[45px] pr-3 text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60' }}'
+                                    : '{{ $isCurrent ? 'h-10 w-10 mx-auto justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'h-10 w-10 mx-auto justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white' }}'"
                             >
-                                <span class="absolute left-[7px] top-1/2 inline-flex h-[1.875rem] w-[1.875rem] -translate-y-1/2 items-center justify-center rounded-lg border border-transparent transition-colors duration-100"
-                                    x-bind:class="sidebarContentVisible
-                                        ? '{{ $isCurrent ? 'shadow-[0_10px_18px_-16px_rgba(var(--theme-accent-rgb),0.32)]' : 'bg-transparent text-slate-500 group-hover:border-[color:rgba(var(--theme-accent-rgb),0.16)] group-hover:bg-[color:rgba(var(--theme-accent-rgb),0.12)] group-hover:text-[var(--theme-accent)] dark:text-slate-300 dark:group-hover:border-[color:rgba(var(--theme-accent-rgb),0.22)] dark:group-hover:bg-[color:rgba(var(--theme-accent-rgb),0.16)] dark:group-hover:text-[var(--theme-accent)]' }}'
-                                        : '{{ $isCurrent ? 'bg-[var(--theme-accent)] text-white shadow-[0_10px_18px_-14px_rgba(var(--theme-accent-rgb),0.65)] dark:bg-[var(--theme-accent)] dark:text-white' : 'bg-transparent text-slate-600 group-hover:text-slate-900 dark:text-slate-200 dark:group-hover:text-white' }}'"
-                                    @if ($isCurrent)
-                                        x-bind:style="sidebarContentVisible ? 'border-color: rgba(var(--theme-accent-rgb), 0.16); background-color: rgba(var(--theme-accent-rgb), 0.12); color: var(--theme-accent);' : ''"
-                                    @endif>
+                                <span class="inline-flex items-center justify-center transition-transform duration-200 group-hover/btn:scale-110"
+                                    x-bind:class="sidebarContentVisible ? 'absolute left-[12px] top-1/2 -translate-y-1/2 text-slate-500 group-hover/btn:text-blue-600 dark:text-slate-400 dark:group-hover/btn:text-blue-400' : ''">
                                     <i class="{{ $icon }} fa-fw text-[16px] leading-none"></i>
                                 </span>
-                                <span class="min-w-0 truncate text-[13.5px] font-medium tracking-[0.005em] {{ $isCurrent ? 'text-slate-950 dark:text-white' : 'text-slate-700 dark:text-slate-300' }}"
+
+                                <span class="min-w-0 truncate text-[13.5px] font-medium tracking-[0.005em]"
                                     x-cloak
                                     x-show="sidebarContentVisible"
                                     x-transition:enter="transition ease-out duration-140"
                                     x-transition:enter-start="opacity-0 -translate-x-1.5"
-                                    x-transition:enter-end="opacity-100 translate-x-0">{{ __($item['label']) }}</span>
-                                <span class="ml-auto inline-flex h-5 w-5 items-center justify-center text-slate-500"
+                                    x-transition:enter-end="opacity-100 translate-x-0">
+                                    {{ $itemLabel }}
+                                </span>
+
+                                <span class="ml-auto inline-flex h-5 w-5 items-center justify-center text-slate-400"
                                     x-cloak
-                                    x-show="sidebarContentVisible"
-                                    x-transition:enter="transition ease-out duration-120"
-                                    x-transition:enter-start="opacity-0"
-                                    x-transition:enter-end="opacity-100">
-                                    <i class="fa-solid text-[10px]" :class="open ? 'fa-minus' : 'fa-plus'"></i>
+                                    x-show="sidebarContentVisible">
+                                    <i class="fa-solid text-[9px]" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                                 </span>
                             </button>
+
+                            <!-- Floating Tooltip in Collapsed Mode -->
+                            <div x-cloak x-show="!sidebarContentVisible" class="pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 z-[200] opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
+                                <div class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-xl dark:bg-slate-800 dark:text-slate-100">
+                                    {{ $itemLabel }}
+                                </div>
+                            </div>
 
                             <div class="relative ml-[1.75rem] mt-1 space-y-1 overflow-hidden pl-4 before:absolute before:bottom-1.5 before:left-0 before:top-1.5 before:w-px before:bg-slate-300/75 dark:before:bg-slate-700"
                                 x-cloak
@@ -194,48 +199,54 @@
                                     <a
                                         href="{{ $childDisabled ? '#' : ($child['route'] ?? '#') }}"
                                         @if (! $childDisabled && ! empty($child['route'])) wire:navigate @endif
-                                        class="{{ ($child['active'] ?? false) ? 'text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' }} group relative flex items-center rounded-lg px-3 py-1.5 text-[12.5px] font-medium tracking-[0.005em] transition {{ $childDisabled ? 'cursor-default opacity-60' : '' }}"
+                                        class="{{ ($child['active'] ?? false) ? 'text-blue-600 font-semibold dark:text-blue-400' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' }} group relative flex items-center rounded-lg px-3 py-1.5 text-[12.5px] font-medium tracking-[0.005em] transition {{ $childDisabled ? 'cursor-default opacity-60' : '' }}"
                                     >
-                                        <span class="absolute left-0 top-1/2 h-px w-3 -translate-x-[1rem] -translate-y-1/2 {{ ($child['active'] ?? false) ? 'bg-slate-400 dark:bg-slate-500' : 'bg-slate-300/90 dark:bg-slate-700' }}"></span>
+                                        <span class="absolute left-0 top-1/2 h-px w-3 -translate-x-[1rem] -translate-y-1/2 {{ ($child['active'] ?? false) ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-300/90 dark:bg-slate-700' }}"></span>
                                         <span class="truncate">{{ __($child['label']) }}</span>
                                     </a>
                                 @endforeach
                             </div>
                         </div>
                     @else
-                        <a
-                            href="{{ $isDisabled ? '#' : ($item['route'] ?? '#') }}"
-                            @if (! $isDisabled && ! empty($item['route'])) wire:navigate @endif
-                            class="group relative flex items-center transition-colors duration-150 {{ $isDisabled ? 'cursor-default opacity-60' : '' }}"
-                            x-bind:class="sidebarContentVisible
-                                ? '{{ $isCurrent ? 'h-10 rounded-xl pl-[45px] pr-3 text-slate-950 dark:text-white' : 'h-10 rounded-xl pl-[45px] pr-3 text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white' }}'
-                                : '{{ $isCurrent ? 'h-10 rounded-none bg-transparent pl-[7px] pr-0 text-slate-950 shadow-none ring-0 dark:text-white' : 'h-10 rounded-none bg-transparent pl-[7px] pr-0 text-slate-600 shadow-none ring-0 dark:text-slate-300' }}'"
-                            title="{{ __($item['label']) }}"
-                        >
-                                <span class="absolute left-[7px] top-1/2 inline-flex h-[1.875rem] w-[1.875rem] -translate-y-1/2 items-center justify-center rounded-lg border border-transparent transition-colors duration-100"
-                                    x-bind:class="sidebarContentVisible
-                                    ? '{{ $isCurrent ? 'shadow-[0_10px_18px_-16px_rgba(var(--theme-accent-rgb),0.32)]' : 'bg-transparent text-slate-500 group-hover:border-[color:rgba(var(--theme-accent-rgb),0.16)] group-hover:bg-[color:rgba(var(--theme-accent-rgb),0.12)] group-hover:text-[var(--theme-accent)] dark:text-slate-300 dark:group-hover:border-[color:rgba(var(--theme-accent-rgb),0.22)] dark:group-hover:bg-[color:rgba(var(--theme-accent-rgb),0.16)] dark:group-hover:text-[var(--theme-accent)]' }}'
-                                    : '{{ $isCurrent ? 'bg-[var(--theme-accent)] text-white shadow-[0_10px_18px_-14px_rgba(var(--theme-accent-rgb),0.65)] dark:bg-[var(--theme-accent)] dark:text-white' : 'bg-transparent text-slate-600 group-hover:text-slate-900 dark:text-slate-200 dark:group-hover:text-white' }}'"
-                                @if ($isCurrent)
-                                    x-bind:style="sidebarContentVisible ? 'border-color: rgba(var(--theme-accent-rgb), 0.16); background-color: rgba(var(--theme-accent-rgb), 0.12); color: var(--theme-accent);' : ''"
-                                @endif>
-                                <i class="{{ $icon }} fa-fw text-[16px] leading-none"></i>
-                            </span>
-                            <span class="min-w-0 truncate text-[13.5px] font-medium tracking-[0.005em] {{ $isCurrent ? 'text-slate-950 dark:text-white' : 'text-slate-700 dark:text-slate-300' }}"
-                                x-cloak
-                                x-show="sidebarContentVisible"
-                                x-transition:enter="transition ease-out duration-140"
-                                x-transition:enter-start="opacity-0 -translate-x-1.5"
-                                x-transition:enter-end="opacity-100 translate-x-0">{{ __($item['label']) }}</span>
-                            @if (! empty($item['suffix']))
-                                <span class="text-[12px] text-slate-400 group-hover:text-slate-500"
+                        <div class="relative group">
+                            <a
+                                href="{{ $itemRoute }}"
+                                @if ($wireNav) wire:navigate @endif
+                                class="group/btn relative flex items-center transition-all duration-200 {{ $isDisabled ? 'cursor-default opacity-60' : '' }}"
+                                x-bind:class="sidebarContentVisible
+                                    ? '{{ $isCurrent ? 'h-10 rounded-xl pl-[45px] pr-3 text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/20 font-bold border-l-4 border-blue-600 dark:border-blue-400' : 'h-10 rounded-xl pl-[45px] pr-3 text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60' }}'
+                                    : '{{ $isCurrent ? 'h-10 w-10 mx-auto justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/40 ring-2 ring-blue-400/30' : 'h-10 w-10 mx-auto justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400' }}'"
+                            >
+                                <span class="inline-flex items-center justify-center transition-transform duration-200 group-hover/btn:scale-110"
+                                    x-bind:class="sidebarContentVisible ? 'absolute left-[12px] top-1/2 -translate-y-1/2 {{ $isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 group-hover/btn:text-blue-600 dark:text-slate-400 dark:group-hover/btn:text-blue-400' }}' : ''">
+                                    <i class="{{ $icon }} fa-fw text-[16px] leading-none"></i>
+                                </span>
+
+                                <span class="min-w-0 truncate text-[13.5px] font-medium tracking-[0.005em]"
                                     x-cloak
                                     x-show="sidebarContentVisible"
-                                    x-transition:enter="transition ease-out duration-120"
-                                    x-transition:enter-start="opacity-0"
-                                    x-transition:enter-end="opacity-100">{{ $item['suffix'] }}</span>
-                            @endif
-                        </a>
+                                    x-transition:enter="transition ease-out duration-140"
+                                    x-transition:enter-start="opacity-0 -translate-x-1.5"
+                                    x-transition:enter-end="opacity-100 translate-x-0">
+                                    {{ $itemLabel }}
+                                </span>
+
+                                @if (! empty($item['suffix']))
+                                    <span class="ml-auto text-[11px] font-semibold text-slate-400"
+                                        x-cloak
+                                        x-show="sidebarContentVisible">
+                                        {{ $item['suffix'] }}
+                                    </span>
+                                @endif
+                            </a>
+
+                            <!-- Floating Tooltip in Collapsed Mode -->
+                            <div x-cloak x-show="!sidebarContentVisible" class="pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 z-[200] opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
+                                <div class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-xl dark:bg-slate-800 dark:text-slate-100">
+                                    {{ $itemLabel }}
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 @endforeach
             </div>
