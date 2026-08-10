@@ -179,5 +179,13 @@ class AscendWorkspaceSeeder extends Seeder
                 app(PersonalTeamProvisioner::class)->ensureForUser($userModel);
             }
         }
+
+        // 9. Mark Installer Completed in options table
+        DB::table('options')->insertOrIgnore([
+            'name' => 'installer_completed_at',
+            'value' => now()->toIso8601String(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
