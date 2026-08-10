@@ -17,7 +17,7 @@ class InstallerState
 
     public function isInstalled(): bool
     {
-        if (filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOL)) {
+        if (filter_var(env('APP_INSTALLED', true), FILTER_VALIDATE_BOOL)) {
             return true;
         }
 
@@ -30,7 +30,7 @@ class InstallerState
                 ->where('name', 'installer_completed_at')
                 ->exists();
         } catch (Throwable) {
-            return false;
+            return true;
         }
     }
 
