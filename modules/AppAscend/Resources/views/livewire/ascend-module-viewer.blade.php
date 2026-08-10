@@ -146,6 +146,8 @@
                         'overview' => ['label' => 'Overview & Banking', 'icon' => 'fa-light fa-building-columns'],
                         'invoices' => ['label' => 'Invoices & Estimates', 'icon' => 'fa-light fa-file-invoice-dollar'],
                         'expenses' => ['label' => 'Expenses & Receipts', 'icon' => 'fa-light fa-receipt'],
+                        'salary'   => ['label' => 'Payroll & Salary', 'icon' => 'fa-light fa-money-bill-wave'],
+                        'ai_finance' => ['label' => 'AI Financial Intelligence', 'icon' => 'fa-light fa-brain-circuit'],
                         'ledger' => ['label' => 'General Ledger & Balance Sheet', 'icon' => 'fa-light fa-book-journal-whills'],
                         'reports' => ['label' => 'Profit & Loss Reports', 'icon' => 'fa-light fa-chart-pie'],
                     ],
@@ -186,16 +188,20 @@
                         'social' => ['label' => 'Social Channels', 'icon' => 'fa-light fa-share-nodes'],
                         'blasts' => ['label' => 'Audience Blasts', 'icon' => 'fa-light fa-paper-plane'],
                         'email' => ['label' => 'Email Marketing Workspace', 'icon' => 'fa-light fa-envelope-open-text'],
+                        'whatsapp' => ['label' => 'WhatsApp Automation & DM', 'icon' => 'fa-brands fa-whatsapp'],
+                        'ads' => ['label' => 'Ads Sync & AI Insights', 'icon' => 'fa-light fa-bullseye-arrow'],
                         'analytics' => ['label' => 'Campaign Analytics', 'icon' => 'fa-light fa-chart-pie'],
                     ],
                     'ai-agents' => [
-                        'caption' => ['label' => 'Caption Generator', 'icon' => 'fa-light fa-sparkles'],
+                        'agents' => ['label' => 'AI Agent Fleet & Logs', 'icon' => 'fa-light fa-sparkles'],
+                        'caption' => ['label' => 'Caption Generator', 'icon' => 'fa-light fa-pen-sparkles'],
                         'repurpose' => ['label' => 'Content Repurposer', 'icon' => 'fa-light fa-repeat'],
                         'planner' => ['label' => 'Content Planner', 'icon' => 'fa-light fa-calendar-star'],
                         'besttime' => ['label' => 'Best Time Scheduler', 'icon' => 'fa-light fa-clock-rotate-left'],
                     ],
                     'automation' => [
                         'rules' => ['label' => 'Active Automation Rules', 'icon' => 'fa-light fa-bolt'],
+                        'templates' => ['label' => 'Quick Rule Templates', 'icon' => 'fa-light fa-wand-magic-sparkles'],
                         'triggers' => ['label' => 'Triggers & Webhooks', 'icon' => 'fa-light fa-link'],
                         'logs' => ['label' => 'Execution Logs', 'icon' => 'fa-light fa-receipt'],
                     ],
@@ -206,6 +212,7 @@
                     ],
                     'administration' => [
                         'users' => ['label' => 'User Management', 'icon' => 'fa-light fa-users'],
+                        'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
                         'roles' => ['label' => 'Roles & Permissions', 'icon' => 'fa-light fa-user-shield'],
                         'clients' => ['label' => 'Client & External Access', 'icon' => 'fa-light fa-user-group'],
                         'security' => ['label' => 'Security & Audit Logs', 'icon' => 'fa-light fa-shield-check'],
@@ -225,6 +232,16 @@
                     {{ __($tab['label']) }}
                 </button>
             @endforeach
+            @if ($moduleKey === 'finance')
+                <button type="button" wire:click="setTab('salary')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === 'salary' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}" {{ $activeTab === 'salary' ? 'style="color: '.$accent.';"' : '' }}>
+                    <i class="fa-light fa-money-bill-wave text-sm"></i>
+                    {{ __('Payroll & Salary') }}
+                </button>
+                <button type="button" wire:click="setTab('ai_finance')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === 'ai_finance' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}" {{ $activeTab === 'ai_finance' ? 'style="color: '.$accent.';"' : '' }}>
+                    <i class="fa-light fa-sparkles text-sm"></i>
+                    {{ __('AI Analysis') }}
+                </button>
+            @endif
         </div>
     </div>
 
@@ -355,42 +372,126 @@
                 </div>
             </section>
         @elseif ($activeTab === 'expenses')
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Expenses & Vendor Receipts Log') }}</h2>
-                        <p class="text-sm text-slate-500">{{ __('Record company expenses, vendor payments, and operational costs.') }}</p>
-                    </div>
-                    <button type="button" wire:click="openCreateModal('expense')" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700">
-                        <i class="fa-light fa-plus mr-1.5"></i>{{ __('Log Expense') }}
-                    </button>
-                </div>
+            <div class="space-y-6">
+                <div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+                    <!-- Expense Log Table -->
+                    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between border-b p-5 dark:border-slate-800">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Expense & Receipt Log') }}</h2>
+                                <p class="text-xs text-slate-500">{{ __('All vendor expenses with approval status and receipt attachments') }}</p>
+                            </div>
+                            <span class="rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600">{{ count($expenseRecords) }} Records</span>
+                        </div>
+                        @if (empty($expenseRecords))
+                            <div class="flex flex-col items-center py-12 text-center">
+                                <i class="fa-light fa-receipt text-4xl text-slate-300 dark:text-slate-600"></i>
+                                <p class="mt-3 text-sm font-semibold text-slate-500">{{ __('No expenses logged yet') }}</p>
+                            </div>
+                        @else
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="border-b bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
+                                        <tr>
+                                            <th class="px-5 py-3 font-bold text-slate-500">{{ __('Vendor / Category') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Amount') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Date') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Receipt') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Status') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        @foreach ($expenseRecords as $exp)
+                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                                <td class="px-5 py-3">
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $exp['vendor'] }}</p>
+                                                    <p class="text-slate-400">{{ $exp['category'] }}</p>
+                                                </td>
+                                                <td class="px-4 py-3 font-black text-slate-900 dark:text-white">₦{{ number_format($exp['amount'], 2) }}</td>
+                                                <td class="px-4 py-3 text-slate-500">{{ $exp['expense_date'] }}</td>
+                                                <td class="px-4 py-3">
+                                                    @if ($exp['receipt_path'])
+                                                        <a href="/storage/{{ $exp['receipt_path'] }}" target="_blank" class="text-blue-600 hover:underline text-[10px] font-bold"><i class="fa-light fa-paperclip mr-1"></i>View</a>
+                                                    @else
+                                                        <span class="text-slate-300 text-[10px]">No receipt</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <span class="rounded-full px-2.5 py-1 text-[10px] font-bold
+                                                        {{ ($exp['approval_status'] ?? 'pending') === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : (($exp['approval_status'] ?? 'pending') === 'rejected' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600') }}">
+                                                        {{ ucfirst($exp['approval_status'] ?? 'pending') }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex gap-2">
+                                                        @if (($exp['approval_status'] ?? 'pending') === 'pending')
+                                                            <button type="button" wire:click="approveExpense({{ $exp['id'] }})" class="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20">✓ Approve</button>
+                                                            <button type="button" wire:click="rejectExpense({{ $exp['id'] }})" class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-500/20">✗ Reject</button>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </section>
 
-                <div class="mt-5 overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
-                            <tr>
-                                <th class="px-4 py-3.5">Category</th>
-                                <th class="px-4 py-3.5">Vendor / Payee</th>
-                                <th class="px-4 py-3.5">Amount (NGN)</th>
-                                <th class="px-4 py-3.5">Payment Method</th>
-                                <th class="px-4 py-3.5">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            @foreach ($dbExpenses as $exp)
-                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                                    <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">{{ $exp->category }}</td>
-                                    <td class="px-4 py-3.5 font-medium">{{ $exp->vendor }}</td>
-                                    <td class="px-4 py-3.5 font-black text-rose-600">₦{{ number_format($exp->amount, 2) }}</td>
-                                    <td class="px-4 py-3.5 text-xs text-slate-500 uppercase">{{ str_replace('_', ' ', $exp->payment_method) }}</td>
-                                    <td class="px-4 py-3.5 text-slate-500 text-xs">{{ $exp->expense_date?->format('Y-m-d') ?: now()->format('Y-m-d') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <!-- Log Expense Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Log New Expense') }}</h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Category') }}</label>
+                            <select wire:model="expenseForm.category" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                @foreach (['Office Supplies', 'Cloud & SaaS', 'Travel & Transport', 'Utilities', 'Marketing & Ads', 'Salaries', 'Equipment', 'Maintenance', 'Legal & Compliance', 'Miscellaneous'] as $cat)
+                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Vendor / Payee') }}</label>
+                            <input wire:model="expenseForm.vendor" type="text" placeholder="e.g. AWS Nigeria" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Amount (₦)') }}</label>
+                                <input wire:model="expenseForm.amount" type="number" placeholder="45000" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Date') }}</label>
+                                <input wire:model="expenseForm.expense_date" type="date" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Payment Method') }}</label>
+                            <select wire:model="expenseForm.payment_method" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                @foreach (['Bank Transfer', 'Cash', 'POS Terminal', 'Mobile Money', 'Cheque', 'Corporate Card'] as $method)
+                                    <option value="{{ $method }}">{{ $method }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Description / Notes') }}</label>
+                            <textarea wire:model="expenseForm.description" rows="2" placeholder="Brief description of expense..." class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Reference / Invoice #') }}</label>
+                            <input wire:model="expenseForm.reference" type="text" placeholder="EXP-2026-001" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-4 text-center dark:border-slate-700">
+                            <i class="fa-light fa-cloud-arrow-up text-2xl text-slate-400"></i>
+                            <p class="mt-2 text-xs font-semibold text-slate-500">{{ __('Receipt Upload') }}</p>
+                            <p class="text-[10px] text-slate-400">{{ __('PDF, JPG, PNG up to 5MB') }}</p>
+                            <input type="file" class="mt-2 w-full text-xs text-slate-400" accept=".pdf,.jpg,.png,.jpeg">
+                        </div>
+                        <button type="button" wire:click="saveExpense" class="w-full rounded-xl bg-orange-600 py-3 text-sm font-bold text-white hover:bg-orange-700 transition">
+                            <i class="fa-light fa-plus mr-1.5"></i> {{ __('Log Expense') }}
+                        </button>
+                    </section>
                 </div>
-            </section>
+            </div>
         @elseif ($activeTab === 'ledger')
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
@@ -436,7 +537,7 @@
                     </table>
                 </div>
             </section>
-        @else
+        @elseif ($activeTab === 'reports')
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
                     <div>
@@ -464,6 +565,206 @@
                     </div>
                 </div>
             </section>
+        {{-- SALARY & PAYROLL MANAGEMENT TAB --}}
+        @elseif ($activeTab === 'salary')
+            <div class="space-y-6">
+                <!-- Payroll KPI Summary -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Total Payroll (This Month)') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format(collect($salaryRecords)->where('status', 'paid')->sum('net_salary'), 0) }}</p>
+                        <p class="mt-1 text-xs text-slate-400">{{ collect($salaryRecords)->where('status', 'paid')->count() }} payslips processed</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Pending Payroll') }}</p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">₦{{ number_format(collect($salaryRecords)->where('status', 'pending')->sum('net_salary'), 0) }}</p>
+                        <p class="mt-1 text-xs text-slate-400">{{ collect($salaryRecords)->where('status', 'pending')->count() }} awaiting disbursement</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Total Employees') }}</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">{{ collect($salaryRecords)->unique('employee_name')->count() }}</p>
+                        <p class="mt-1 text-xs text-slate-400">Across all departments</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('PAYE Tax Deducted') }}</p>
+                        <p class="mt-2 text-2xl font-black text-rose-600">₦{{ number_format(collect($salaryRecords)->sum('paye_tax'), 0) }}</p>
+                        <p class="mt-1 text-xs text-slate-400">Nigeria PAYE compliance</p>
+                    </div>
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
+                    <!-- Salary Records Table -->
+                    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between border-b p-5 dark:border-slate-800">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Payroll Register') }}</h2>
+                                <p class="text-xs text-slate-500">{{ __('All employee salary records and payslip history') }}</p>
+                            </div>
+                            <button type="button" wire:click="runPayroll" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="fa-light fa-play"></i> {{ __('Run Payroll') }}
+                            </button>
+                        </div>
+                        @if (empty($salaryRecords))
+                            <div class="flex flex-col items-center justify-center py-16 text-center">
+                                <i class="fa-light fa-money-bill-wave text-4xl text-slate-300 dark:text-slate-600"></i>
+                                <p class="mt-4 text-sm font-semibold text-slate-500">{{ __('No salary records yet') }}</p>
+                                <p class="mt-1 text-xs text-slate-400">{{ __('Add employee records using the form to start tracking payroll') }}</p>
+                            </div>
+                        @else
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="border-b bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
+                                        <tr>
+                                            <th class="px-5 py-3 font-bold text-slate-500">{{ __('Employee') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Department') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Gross') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('PAYE') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Net Pay') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Period') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Status') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        @foreach ($salaryRecords as $rec)
+                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                                <td class="px-5 py-3">
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $rec['employee_name'] }}</p>
+                                                    <p class="text-slate-400">{{ $rec['role'] ?? '' }}</p>
+                                                </td>
+                                                <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $rec['department'] ?? '—' }}</td>
+                                                <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">₦{{ number_format($rec['gross_salary'] ?? 0, 0) }}</td>
+                                                <td class="px-4 py-3 text-rose-600">₦{{ number_format($rec['paye_tax'] ?? 0, 0) }}</td>
+                                                <td class="px-4 py-3 font-black text-emerald-600">₦{{ number_format($rec['net_salary'] ?? 0, 0) }}</td>
+                                                <td class="px-4 py-3 text-slate-500">{{ $rec['pay_period'] ?? '—' }}</td>
+                                                <td class="px-4 py-3">
+                                                    <span class="rounded-full px-2.5 py-1 text-[10px] font-bold {{ ($rec['status'] ?? '') === 'paid' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600' }}">
+                                                        {{ ucfirst($rec['status'] ?? 'pending') }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </section>
+
+                    <!-- Add Salary Record Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Add Employee Payroll Record') }}</h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Employee Name') }}</label>
+                            <input wire:model="salaryForm.employee_name" type="text" placeholder="e.g. Babatunde Adeleke" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Department') }}</label>
+                                <input wire:model="salaryForm.department" type="text" placeholder="Finance" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Role') }}</label>
+                                <input wire:model="salaryForm.role" type="text" placeholder="Manager" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Gross Salary (₦)') }}</label>
+                            <input wire:model="salaryForm.gross_salary" type="number" placeholder="350000" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            @if ($salaryForm['gross_salary'])
+                                <p class="mt-1 text-xs text-slate-400">Net (est.): ₦{{ number_format((float)$salaryForm['gross_salary'] * 0.85, 0) }} after PAYE + Pension</p>
+                            @endif
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Pay Period') }}</label>
+                                <input wire:model="salaryForm.pay_period" type="month" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Bank Name') }}</label>
+                                <input wire:model="salaryForm.bank_name" type="text" placeholder="Access Bank" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Account Number') }}</label>
+                            <input wire:model="salaryForm.account_number" type="text" placeholder="0123456789" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <button type="button" wire:click="saveSalaryRecord" class="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            <i class="fa-light fa-plus mr-1.5"></i> {{ __('Add to Payroll') }}
+                        </button>
+                    </section>
+                </div>
+            </div>
+
+        {{-- AI FINANCIAL ANALYSIS TAB --}}
+        @elseif ($activeTab === 'ai_finance')
+            <div class="space-y-6">
+                <!-- AI Header -->
+                <div class="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:to-teal-950/20">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white text-xl shadow-lg">
+                                <i class="fa-light fa-brain-circuit"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ __('AI Financial Intelligence') }}</h2>
+                                <p class="text-xs text-slate-500">{{ __('Real-time analysis, anomaly detection and cash flow forecasting powered by AI') }}</p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="generateAiFinanceInsights" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition flex items-center gap-2">
+                            <i class="fa-light fa-rotate"></i> {{ __('Refresh Analysis') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Insight Cards -->
+                @if (empty($aiFinanceInsights))
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <i class="fa-light fa-brain-circuit text-5xl text-slate-300 dark:text-slate-600"></i>
+                        <p class="mt-4 font-semibold text-slate-500">{{ __('Click Refresh Analysis to generate AI insights') }}</p>
+                        <button type="button" wire:click="generateAiFinanceInsights" class="mt-4 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            <i class="fa-light fa-sparkles mr-2"></i>{{ __('Generate Now') }}
+                        </button>
+                    </div>
+                @else
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($aiFinanceInsights as $insight)
+                            <div class="rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md {{ ($insight['severity'] ?? 'info') === 'critical' ? 'border-rose-200 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20' : (($insight['severity'] ?? 'info') === 'warning' ? 'border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900') }}">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm {{ ($insight['severity'] ?? 'info') === 'critical' ? 'bg-rose-500/10 text-rose-600' : (($insight['severity'] ?? 'info') === 'warning' ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600') }}">
+                                        <i class="{{ $insight['icon'] ?? 'fa-light fa-lightbulb' }}"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black text-slate-900 dark:text-white">{{ $insight['title'] }}</p>
+                                        <p class="mt-1 text-xs text-slate-500 leading-relaxed">{{ $insight['body'] }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Suggested Financial Features -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800 mb-4">{{ __('Additional Financial Modules — Recommended') }}</h3>
+                        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ([
+                                ['icon' => 'fa-light fa-chart-gantt', 'name' => 'Budget & Forecast', 'desc' => 'Set department budgets with variance alerts'],
+                                ['icon' => 'fa-light fa-coins', 'name' => 'Multi-Currency', 'desc' => 'USD/GBP/NGN with live exchange rates'],
+                                ['icon' => 'fa-light fa-file-certificate', 'name' => 'Tax Filing Assistant', 'desc' => 'VAT/PAYE reminders and filing prep'],
+                                ['icon' => 'fa-light fa-building-columns', 'name' => 'Vendor Payments', 'desc' => 'Bulk payment batches with bank integration'],
+                                ['icon' => 'fa-light fa-chart-tree-map', 'name' => 'Profit Centre', 'desc' => 'P&L by branch and department'],
+                                ['icon' => 'fa-light fa-warehouse', 'name' => 'Fixed Asset Register', 'desc' => 'Depreciation tracking per asset'],
+                            ] as $feat)
+                                <div class="flex items-start gap-3 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
+                                    <i class="{{ $feat['icon'] }} text-lg text-emerald-600 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $feat['name'] }}</p>
+                                        <p class="mt-0.5 text-[10px] text-slate-400">{{ $feat['desc'] }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            </div>
         @endif
     @endif
 
@@ -1690,7 +1991,145 @@
                     </div>
                 </section>
             </div>
-        @else
+        @elseif ($activeTab === 'whatsapp')
+            <div class="space-y-6">
+                <!-- WhatsApp Header -->
+                <div class="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:to-teal-950/20">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white text-xl shadow-lg">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ __('WhatsApp Business Automation & Direct Messaging') }}</h2>
+                                <p class="text-xs text-slate-500">{{ __('Automate WhatsApp payment requests, receipts, OTPs and broadcast lists') }}</p>
+                            </div>
+                        </div>
+                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">Official API Active</span>
+                    </div>
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+                    <!-- WhatsApp Broadcasts & Templates -->
+                    <div class="space-y-6">
+                        <!-- Message Templates Grid -->
+                        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800 mb-4">{{ __('WhatsApp Message Templates') }}</h3>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @foreach ($whatsappTemplates as $wt)
+                                    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600">{{ $wt['category'] ?? 'TRANSACTIONAL' }}</span>
+                                            <span class="text-[10px] font-bold text-slate-400">✓ {{ ucfirst($wt['status'] ?? 'approved') }}</span>
+                                        </div>
+                                        <h4 class="text-xs font-bold text-slate-900 dark:text-white">{{ $wt['name'] }}</h4>
+                                        <p class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg dark:bg-slate-800/60 font-mono">{{ $wt['body'] }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </section>
+
+                        <!-- WhatsApp Broadcast Log -->
+                        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800 mb-4">{{ __('Broadcast History') }}</h3>
+                            @if (empty($whatsappBroadcasts))
+                                <div class="py-8 text-center text-xs text-slate-400">
+                                    <i class="fa-brands fa-whatsapp text-3xl mb-2 text-slate-300"></i>
+                                    <p>{{ __('No broadcast campaigns dispatched yet.') }}</p>
+                                </div>
+                            @else
+                                <div class="space-y-3">
+                                    @foreach ($whatsappBroadcasts as $wb)
+                                        <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $wb['name'] ?? 'Broadcast' }}</p>
+                                                <p class="text-[10px] text-slate-400">{{ $wb['message'] ?? '' }}</p>
+                                            </div>
+                                            <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600">Dispatched</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </section>
+                    </div>
+
+                    <!-- Direct Message Composer -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Send Direct WhatsApp Message') }}</h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Recipient Phone Number') }}</label>
+                            <input wire:model="dmForm.phone" type="text" placeholder="+234 803 123 4567" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Message Body') }}</label>
+                            <textarea wire:model="dmForm.message" rows="4" placeholder="Type your WhatsApp message..." class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <button type="button" wire:click="sendWhatsAppDM" class="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            <i class="fa-brands fa-whatsapp mr-1.5"></i> {{ __('Send WhatsApp Message') }}
+                        </button>
+                        <button type="button" wire:click="sendWhatsAppBroadcast" class="w-full rounded-xl border border-emerald-200 bg-emerald-50 py-2.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+                            <i class="fa-light fa-bullhorn mr-1.5"></i> {{ __('Broadcast to All Contacts') }}
+                        </button>
+                    </section>
+                </div>
+            </div>
+
+        @elseif ($activeTab === 'ads')
+            <div class="space-y-6">
+                <!-- Connected Ads Accounts -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Ad Networks & Multi-Channel Sync') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Connected ad platforms with live campaign performance and ROAS analytics') }}</p>
+                        </div>
+                        <button type="button" wire:click="getAiAdsRecommendations" class="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-700">
+                            <i class="fa-light fa-sparkles mr-1.5"></i>{{ __('Get AI Ads Insights') }}
+                        </button>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-3">
+                        @foreach ($adsAccounts as $acc)
+                            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl {{ match($acc['platform'] ?? '') { 'meta' => 'bg-blue-500/10 text-blue-600', 'google' => 'bg-red-500/10 text-red-600', default => 'bg-slate-500/10 text-slate-600' } }} text-lg">
+                                        <i class="{{ match($acc['platform'] ?? '') { 'meta' => 'fa-brands fa-meta', 'google' => 'fa-brands fa-google', 'tiktok' => 'fa-brands fa-tiktok', default => 'fa-light fa-bullseye' } }}"></i>
+                                    </span>
+                                    <button type="button" wire:click="syncAdsAccount('{{ $acc['platform'] ?? 'meta' }}')" class="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200">
+                                        <i class="fa-light fa-rotate mr-1"></i>Sync
+                                    </button>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $acc['account_name'] }}</h3>
+                                <div class="grid grid-cols-2 gap-2 text-xs border-t pt-2 dark:border-slate-800">
+                                    <div><span class="text-slate-400">Total Spend:</span> <span class="font-bold">₦{{ number_format($acc['total_spend'] ?? 0, 0) }}</span></div>
+                                    <div><span class="text-slate-400">ROAS:</span> <span class="font-bold text-emerald-600">{{ $acc['roas'] ?? 0 }}x</span></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+
+                <!-- AI Recommendations Panel -->
+                @if (!empty($adsRecommendations))
+                    <section class="rounded-2xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/40 dark:bg-purple-950/20">
+                        <h3 class="text-sm font-bold text-purple-900 dark:text-purple-200 border-b pb-3 border-purple-200 dark:border-purple-800/40 mb-4">{{ __('AI Ad Performance Recommendations') }}</h3>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            @foreach ($adsRecommendations as $rec)
+                                <div class="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                    <i class="{{ $rec['icon'] }} text-lg text-purple-600 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $rec['title'] }}</p>
+                                        <p class="mt-1 text-[11px] text-slate-500 leading-relaxed">{{ $rec['body'] }}</p>
+                                        <span class="mt-2 inline-block text-[10px] font-bold text-purple-600 hover:underline cursor-pointer">{{ $rec['action'] }} →</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            </div>
+
+        @elseif ($activeTab === 'analytics')
             <!-- Campaign Analytics & ROAS Dashboard -->
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
@@ -1731,62 +2170,153 @@
 
     <!-- MODULE 8: AI AGENTS ENHANCED -->
     @if ($moduleKey === 'ai-agents')
-        <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('AI Content & Caption Studio') }}</h2>
-                        <p class="text-sm text-slate-500">{{ __('Generate high-converting social posts, captions, and marketing copy.') }}</p>
+        @if ($activeTab === 'agents' || empty($activeTab))
+            <div class="space-y-6">
+                <!-- AI Fleet Overview Header -->
+                <div class="rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 dark:border-purple-900/40 dark:from-purple-950/30 dark:to-indigo-950/20">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-600 text-white text-xl shadow-lg">
+                                <i class="fa-light fa-sparkles"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ __('Autonomous AI Agent Fleet') }}</h2>
+                                <p class="text-xs text-slate-500">{{ __('6 specialized AI agents running automated workflows across content, finance, CRM & ads') }}</p>
+                            </div>
+                        </div>
+                        <span class="rounded-full bg-purple-500/10 px-3.5 py-1 text-xs font-bold text-purple-600 border border-purple-500/20">6 Agents Active</span>
                     </div>
-                    <span class="rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20 px-3 py-1 text-xs font-bold">AI Model Active</span>
                 </div>
 
-                <form wire:submit.prevent="generateAiContent" class="mt-5 space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Select Copy Tone</label>
-                        <select wire:model.live="aiTone" class="mt-1 w-full rounded-2xl border border-slate-200 p-3 text-sm font-semibold outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                            <option value="professional">Professional Enterprise</option>
-                            <option value="persuasive">High-Converting Sales / Persuasive</option>
-                            <option value="casual">Casual & Engaging</option>
-                            <option value="urgent">Urgent Call-to-Action</option>
-                        </select>
+                <!-- Agent Catalog Grid -->
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($agentCatalog as $ag)
+                        <div wire:click="$set('selectedAgent', '{{ $ag['id'] }}')" class="cursor-pointer rounded-2xl border p-5 transition-all hover:shadow-md {{ $selectedAgent === $ag['id'] ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/30 ring-2 ring-purple-500/20' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900' }}">
+                            <div class="flex items-center justify-between">
+                                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 text-lg">
+                                    <i class="{{ $ag['icon'] }}"></i>
+                                </span>
+                                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600">● {{ ucfirst($ag['status']) }}</span>
+                            </div>
+                            <h3 class="mt-3 text-sm font-bold text-slate-900 dark:text-white">{{ $ag['name'] }}</h3>
+                            <p class="mt-1 text-xs text-slate-500 leading-relaxed">{{ $ag['desc'] }}</p>
+                            <div class="mt-3 flex items-center justify-between border-t pt-2.5 text-[10px] text-slate-400 dark:border-slate-800">
+                                <span>Tasks Run: <strong class="text-slate-700 dark:text-slate-200">{{ $ag['tasks_run'] }}</strong></span>
+                                <span>Avg: <strong class="text-purple-600">{{ $ag['avg_ms'] ? $ag['avg_ms'].'ms' : '< 1s' }}</strong></span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Interactive Task Queue & Log Stream -->
+                <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
+                    <!-- Task Input & Output Panel -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Dispatch Task to ') }} {{ collect($agentCatalog)->firstWhere('id', $selectedAgent)['name'] ?? 'AI Agent' }}</h3>
+                            <span class="text-xs text-slate-400 font-mono">Agent ID: {{ $selectedAgent }}</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Instruction / Task Prompt') }}</label>
+                            <textarea wire:model="agentTaskInput" rows="4" placeholder="e.g. Generate 3 high-converting ad headlines for our Lagos POS sale launching next week..." class="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <button type="button" wire:click="dispatchAgentTask" class="w-full rounded-xl bg-purple-600 py-3 text-sm font-bold text-white hover:bg-purple-700 transition shadow-lg shadow-purple-500/20">
+                            <i class="fa-light fa-paper-plane-top mr-2"></i> {{ __('Dispatch Agent Task Now') }}
+                        </button>
+
+                        @if ($agentResult)
+                            <div class="rounded-2xl border border-purple-200 bg-purple-50/70 p-5 dark:border-purple-900/60 dark:bg-purple-950/40 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-purple-700 dark:text-purple-300">✓ Agent Execution Result</span>
+                                    <button type="button" wire:click="clearAgentResult" class="text-[10px] font-bold text-slate-400 hover:text-slate-600">Clear</button>
+                                </div>
+                                <p class="text-xs text-slate-800 dark:text-purple-100 font-medium leading-relaxed">{{ $agentResult }}</p>
+                            </div>
+                        @endif
+                    </section>
+
+                    <!-- Execution Audit Logs -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Agent Execution Logs') }}</h3>
+                        @if (empty($agentLogs))
+                            <div class="py-12 text-center text-xs text-slate-400">
+                                <i class="fa-light fa-list-check text-3xl mb-2 text-slate-300"></i>
+                                <p>{{ __('No agent tasks logged yet. Dispatch a task to see live execution logs.') }}</p>
+                            </div>
+                        @else
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                @foreach ($agentLogs as $log)
+                                    <div class="rounded-xl border border-slate-100 p-3 text-xs dark:border-slate-800 space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-purple-600 uppercase text-[9px]">{{ $log['agent'] }}</span>
+                                            <span class="text-[9px] text-slate-400 font-mono">{{ $log['ms'] }}ms</span>
+                                        </div>
+                                        <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ $log['task'] }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </section>
+                </div>
+            </div>
+        @else
+            <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('AI Content & Caption Studio') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Generate high-converting social posts, captions, and marketing copy.') }}</p>
+                        </div>
+                        <span class="rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20 px-3 py-1 text-xs font-bold">AI Model Active</span>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Content Prompt / Topic</label>
-                        <textarea wire:model="aiPrompt" rows="3" placeholder="e.g. Write a promotion for our new Abuja branch POS equipment release..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3.5 text-sm font-medium outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
-                    </div>
+                    <form wire:submit.prevent="generateAiContent" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Select Copy Tone</label>
+                            <select wire:model.live="aiTone" class="mt-1 w-full rounded-2xl border border-slate-200 p-3 text-sm font-semibold outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="professional">Professional Enterprise</option>
+                                <option value="persuasive">High-Converting Sales / Persuasive</option>
+                                <option value="casual">Casual & Engaging</option>
+                                <option value="urgent">Urgent Call-to-Action</option>
+                            </select>
+                        </div>
 
-                    <button type="submit" class="w-full rounded-2xl bg-purple-600 py-3.5 text-center text-sm font-extrabold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-700">
-                        <i class="fa-light fa-sparkles mr-2"></i>{{ __('Generate AI Content') }}
-                    </button>
-                </form>
-            </section>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Content Prompt / Topic</label>
+                            <textarea wire:model="aiPrompt" rows="3" placeholder="e.g. Write a promotion for our new Abuja branch POS equipment release..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3.5 text-sm font-medium outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('AI Output & Publishing') }}</h2>
+                        <button type="submit" class="w-full rounded-2xl bg-purple-600 py-3.5 text-center text-sm font-extrabold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-700">
+                            <i class="fa-light fa-sparkles mr-2"></i>{{ __('Generate AI Content') }}
+                        </button>
+                    </form>
+                </section>
 
-                @if ($generatedResult || $repurposedResult)
-                    @if ($generatedResult)
-                        <div class="mt-4 rounded-2xl border border-purple-200 bg-purple-50/50 p-5 dark:border-purple-900/60 dark:bg-purple-950/30">
-                            <p class="text-xs font-bold uppercase tracking-wider text-purple-600">Generated Post ({{ ucfirst($aiTone) }} Tone)</p>
-                            <p class="mt-2 text-sm font-medium text-slate-800 dark:text-purple-100">{{ $generatedResult }}</p>
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('AI Output & Publishing') }}</h2>
+
+                    @if ($generatedResult || $repurposedResult)
+                        @if ($generatedResult)
+                            <div class="mt-4 rounded-2xl border border-purple-200 bg-purple-50/50 p-5 dark:border-purple-900/60 dark:bg-purple-950/30">
+                                <p class="text-xs font-bold uppercase tracking-wider text-purple-600">Generated Post ({{ ucfirst($aiTone) }} Tone)</p>
+                                <p class="mt-2 text-sm font-medium text-slate-800 dark:text-purple-100">{{ $generatedResult }}</p>
+                            </div>
+                        @endif
+
+                        <div class="mt-4 flex flex-col gap-2">
+                            <button type="button" wire:click="sendGeneratedToPublishing" class="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700">
+                                <i class="fa-light fa-calendar-plus mr-2"></i>{{ __('Schedule in Social Calendar') }}
+                            </button>
+                        </div>
+                    @else
+                        <div class="my-12 text-center text-slate-400">
+                            <i class="fa-light fa-sparkles text-5xl text-purple-300"></i>
+                            <p class="mt-3 text-sm font-medium">{{ __('Enter a prompt on the left to generate AI content.') }}</p>
                         </div>
                     @endif
-
-                    <div class="mt-4 flex flex-col gap-2">
-                        <button type="button" wire:click="sendGeneratedToPublishing" class="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700">
-                            <i class="fa-light fa-calendar-plus mr-2"></i>{{ __('Schedule in Social Calendar') }}
-                        </button>
-                    </div>
-                @else
-                    <div class="my-12 text-center text-slate-400">
-                        <i class="fa-light fa-sparkles text-5xl text-purple-300"></i>
-                        <p class="mt-3 text-sm font-medium">{{ __('Enter a prompt on the left to generate AI content.') }}</p>
-                    </div>
-                @endif
-            </section>
-        </div>
+                </section>
+            </div>
+        @endif
     @endif
 
     <!-- MODULE 9: WORKFLOW AUTOMATION ENHANCED -->
@@ -1846,6 +2376,37 @@
                                     <button type="button" wire:click="deleteAutomationRule({{ $rule['id'] }})" class="text-xs font-bold text-slate-400 hover:text-rose-500">
                                         <i class="fa-light fa-trash-can"></i>
                                     </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'templates')
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Pre-Built Automation Rule Templates') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('One-click enable high-value background automation recipes') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach ($ruleTemplates as $tpl)
+                            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 text-lg">
+                                        <i class="{{ $tpl['icon'] }}"></i>
+                                    </span>
+                                    <button type="button" wire:click="enableRuleTemplate('{{ $tpl['id'] }}')" class="rounded-xl px-3 py-1.5 text-xs font-bold transition {{ $tpl['enabled'] ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white hover:bg-amber-700' }}">
+                                        {{ $tpl['enabled'] ? '✓ Enabled' : '+ Enable' }}
+                                    </button>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $tpl['name'] }}</h3>
+                                <div class="text-xs text-slate-400 space-y-1">
+                                    <p><span class="font-bold text-slate-600 dark:text-slate-300">Trigger:</span> {{ $tpl['trigger'] }}</p>
+                                    <p><span class="font-bold text-blue-600">Action:</span> {{ $tpl['action'] }}</p>
                                 </div>
                             </div>
                         @endforeach
@@ -2196,6 +2757,62 @@
                 </div>
             </div>
         </section>
+    <!-- MODULE 11: ADMINISTRATION & NOTIFICATIONS CENTRE -->
+    @if ($moduleKey === 'administration')
+        @if ($activeTab === 'notifications')
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Notifications Centre & System Alerts') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Real-time alerts, payment reminders, stock warnings and workflow notifications') }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600">{{ $unreadCount }} Unread</span>
+                            <button type="button" wire:click="markAllNotificationsRead" class="rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200">
+                                {{ __('Mark All Read') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (empty($notifications))
+                        <div class="py-16 text-center text-slate-400">
+                            <i class="fa-light fa-bell-slash text-5xl mb-3 text-slate-300"></i>
+                            <p class="text-sm font-semibold">{{ __('No notifications yet') }}</p>
+                            <p class="text-xs text-slate-400 mt-1">{{ __('System alerts and event notices will appear here') }}</p>
+                        </div>
+                    @else
+                        <div class="space-y-3">
+                            @foreach ($notifications as $n)
+                                <div class="flex items-start justify-between gap-4 rounded-2xl border p-4 transition {{ ($n['is_read'] ?? false) ? 'border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40' : 'border-blue-200 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20' }}">
+                                    <div class="flex items-start gap-3">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 text-sm">
+                                            <i class="fa-light fa-bell"></i>
+                                        </span>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $n['title'] ?? 'System Alert' }}</p>
+                                            <p class="text-xs text-slate-500 mt-0.5">{{ $n['message'] ?? $n['body'] ?? '' }}</p>
+                                            <p class="text-[10px] text-slate-400 font-mono mt-1">{{ $n['created_at'] ?? '—' }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        @if (!($n['is_read'] ?? false))
+                                            <button type="button" wire:click="markNotificationRead({{ $n['id'] }})" class="text-[10px] font-bold text-blue-600 hover:underline">Mark Read</button>
+                                        @endif
+                                        <button type="button" wire:click="deleteNotification({{ $n['id'] }})" class="text-slate-400 hover:text-rose-500 text-xs"><i class="fa-light fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
+            </div>
+        @else
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('Administration & Access Control') }}</h2>
+                <p class="mt-4 text-sm text-slate-500">{{ __('Manage system users, roles, module permissions and security settings.') }}</p>
+            </section>
+        @endif
     @endif
 
     <!-- Interactive Full-Page Dedicated Workspace Creation Interface -->
