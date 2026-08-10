@@ -211,6 +211,21 @@ class AscendModuleViewer extends Component
     public string $agentResult = '';
     public bool $agentRunning = false;
 
+    // === USER ROLES & PERMISSIONS STATE ===
+    public array $newUserForm = [
+        'name' => '',
+        'username' => '',
+        'email' => '',
+        'password' => '',
+        'role_id' => '',
+        'is_super_admin' => false,
+    ];
+    public array $newRoleForm = [
+        'name' => '',
+        'description' => '',
+        'permissions' => [],
+    ];
+
     public function mount(string $moduleKey = 'finance'): void
     {
         $this->moduleKey = $moduleKey;
@@ -1861,6 +1876,135 @@ class AscendModuleViewer extends Component
         $this->closeModal();
     }
 
+    // =========================================================
+    // USER ROLES & PERMISSIONS MANAGEMENT METHODS
+    // =========================================================
+
+    public function createNewUser(): void
+    {
+        if (blank($this->newUserForm['name']) || blank($this->newUserForm['email'])) {
+            session()->flash('warning', __('Name and Email are required.'));
+            return;
+        }
+
+        try {
+            $user = User::create([
+                'name'           => $this->newUserForm['name'],
+                'username'       => $this->newUserForm['username'] ?: \Illuminate\Support\Str::slug($this->newUserForm['name']),
+                'email'          => $this->newUserForm['email'],
+                'password'       => \Illuminate\Support\Facades\Hash::make($this->newUserForm['password'] ?: 'password123'),
+                'role_id'        => $this->newUserForm['role_id'] ? (int) $this->newUserForm['role_id'] : null,
+                'is_super_admin' => (bool) $this->newUserForm['is_super_admin'],
+            ]);
+
+            $this->newUserForm = ['name' => '', 'username' => '', 'email' => '', 'password' => '', 'role_id' => '', 'is_super_admin' => false];
+            $this->hydrateLiveData();
+            session()->flash('status', __('User ":name" created with assigned role permissions!', ['name' => $user->name]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', 'Failed to create user: '.$e->getMessage());
+        }
+    }
+
+    public function updateUserRole(int $userId, mixed $roleId): void
+    {
+        try {
+            $user = User::find($userId);
+            if ($user) {
+                $user->update(['role_id' => $roleId ? (int) $roleId : null]);
+                $this->hydrateLiveData();
+                session()->flash('status', __('User ":name" role updated successfully.', ['name' => $user->name]));
+            }
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
+    }
+
+    public function toggleUserSuperAdmin(int $userId): void
+    {
+        try {
+            $user = User::find($userId);
+            if ($user) {
+                $user->update(['is_super_admin' => ! $user->is_super_admin]);
+                $this->hydrateLiveData();
+                $state = $user->is_super_admin ? 'granted' : 'revoked';
+                session()->flash('status', __('Super Admin status :state for ":name".', ['state' => $state, 'name' => $user->name]));
+            }
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
+    }
+
+    public function deleteUserAccount(int $userId): void
+    {
+        if ((int) auth()->id() === $userId) {
+            session()->flash('warning', __('You cannot delete your own active signed-in account.'));
+            return;
+        }
+
+        try {
+            User::where('id', $userId)->delete();
+            $this->hydrateLiveData();
+            session()->flash('status', __('User account deleted successfully.'));
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
+    }
+
+    public function saveAdminRole(): void
+    {
+        if (blank($this->newRoleForm['name'])) {
+            session()->flash('warning', __('Role name is required.'));
+            return;
+        }
+
+        try {
+            $role = AdminRole::create([
+                'name'        => $this->newRoleForm['name'],
+                'slug'        => \Illuminate\Support\Str::slug($this->newRoleForm['name']),
+                'description' => $this->newRoleForm['description'] ?: null,
+                'permissions' => array_values(array_unique($this->newRoleForm['permissions'] ?? [])),
+            ]);
+
+            $this->newRoleForm = ['name' => '', 'description' => '', 'permissions' => []];
+            $this->hydrateLiveData();
+            session()->flash('status', __('Admin role ":name" created with permissions!', ['name' => $role->name]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
+    }
+
+    public function deleteAdminRole(int $roleId): void
+    {
+        try {
+            User::where('role_id', $roleId)->update(['role_id' => null]);
+            AdminRole::where('id', $roleId)->delete();
+            $this->hydrateLiveData();
+            session()->flash('status', __('Admin role deleted and associated users unassigned.'));
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
+    }
+
+    public function togglePermissionInRole(int $roleId, string $permKey): void
+    {
+        try {
+            $role = AdminRole::find($roleId);
+            if ($role) {
+                $perms = collect($role->permissions ?? []);
+                if ($perms->contains($permKey)) {
+                    $perms = $perms->reject(fn($p) => $p === $permKey)->values();
+                } else {
+                    $perms->push($permKey);
+                }
+                $role->update(['permissions' => $perms->toArray()]);
+                $this->hydrateLiveData();
+                session()->flash('status', __('Permission ":key" updated for role ":role".', ['key' => $permKey, 'role' => $role->name]));
+            }
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
+    }
+
     public function render(): View
     {
         if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
@@ -1892,9 +2036,10 @@ class AscendModuleViewer extends Component
             'dbProjectTasks' => $dbTasks,
             'dbProducts' => InventoryProduct::query()->orderBy('name')->get(),
             'dbPosReceipts' => PosReceipt::query()->latest()->get(),
-            'users' => User::query()->orderBy('name')->take(10)->get(),
-            'roles' => AdminRole::query()->orderBy('name')->get(),
-            'logs' => AuditLog::query()->latest()->take(10)->get(),
+            'users' => User::query()->with('role')->orderBy('name')->get(),
+            'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
+            'logs' => AuditLog::query()->latest()->take(20)->get(),
+            'permissionGroups' => \Modules\AdminUser\Support\AdminPermissionCatalog::groups(),
         ])->layout(theme_view('layouts.app', 'app'), [
             'title' => __(ucfirst($this->moduleKey)).' — Ascend Systems',
         ]);

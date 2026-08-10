@@ -2809,11 +2809,195 @@
                     @endif
                 </section>
             </div>
+        @elseif ($activeTab === 'roles')
+            <div class="space-y-6">
+                <!-- Create Role & Permission Matrix -->
+                <div class="grid gap-6 lg:grid-cols-[380px_1fr]">
+                    <!-- Create New Admin Role Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Create Admin Role') }}</h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Role Name') }}</label>
+                            <input wire:model="newRoleForm.name" type="text" placeholder="e.g. Finance Manager" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Description') }}</label>
+                            <textarea wire:model="newRoleForm.description" rows="2" placeholder="Brief role description..." class="w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <button type="button" wire:click="saveAdminRole" class="w-full rounded-xl bg-slate-900 py-3 text-xs font-bold text-white hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 transition">
+                            <i class="fa-light fa-user-shield mr-1.5"></i> {{ __('Save & Create Role') }}
+                        </button>
+                    </section>
+
+                    <!-- Roles List & Permission Badges -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Configured Roles & Permission Catalog') }}</h3>
+                        <div class="space-y-4">
+                            @foreach ($roles as $r)
+                                <div class="rounded-2xl border border-slate-100 p-4 dark:border-slate-800 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="text-sm font-extrabold text-slate-900 dark:text-white">{{ $r->name }}</h4>
+                                            <p class="text-xs text-slate-400">{{ $r->description ?: 'No description provided.' }}</p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-600">{{ $r->users_count ?? $r->users->count() }} Users</span>
+                                            <button type="button" wire:click="deleteAdminRole({{ $r->id }})" class="text-slate-400 hover:text-rose-500 text-xs"><i class="fa-light fa-trash-can"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Interactive Permission Toggles -->
+                                    <div class="border-t pt-3 dark:border-slate-800">
+                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Module Permissions (Click to Toggle)</p>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach (['finance.view', 'finance.create', 'crm.view', 'crm.edit', 'inventory.view', 'pos.view', 'marketing.view', 'automation.view', 'users.view', 'users.edit'] as $permKey)
+                                                @php $hasPerm = collect($r->permissions ?? [])->contains($permKey); @endphp
+                                                <button type="button" wire:click="togglePermissionInRole({{ $r->id }}, '{{ $permKey }}')" class="rounded-lg px-2 py-1 text-[10px] font-bold transition {{ $hasPerm ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                    {{ $hasPerm ? '✓' : '+' }} {{ $permKey }}
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+        @elseif ($activeTab === 'security')
+            <div class="space-y-6">
+                <!-- Security Audit Logs Stream -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Security Audit Log Stream') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Immutable activity tracking for compliance and security auditing') }}</p>
+                        </div>
+                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">Audit Active</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3">Timestamp</th>
+                                    <th class="px-4 py-3">Event</th>
+                                    <th class="px-4 py-3">Description</th>
+                                    <th class="px-4 py-3">Area</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-medium">
+                                @foreach ($logs as $l)
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3 font-mono text-slate-400">{{ $l->created_at?->toDateTimeString() ?? '—' }}</td>
+                                        <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">{{ $l->event }}</td>
+                                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ $l->description }}</td>
+                                        <td class="px-4 py-3"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ $l->area }}</span></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
         @else
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('Administration & Access Control') }}</h2>
-                <p class="mt-4 text-sm text-slate-500">{{ __('Manage system users, roles, module permissions and security settings.') }}</p>
-            </section>
+            <!-- USERS MANAGEMENT & ROLE ASSIGNMENT TAB -->
+            <div class="space-y-6">
+                <!-- User Creation & Roles Grid -->
+                <div class="grid gap-6 lg:grid-cols-[380px_1fr]">
+                    <!-- Create User Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Create Backend User') }}</h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Full Name') }}</label>
+                            <input wire:model="newUserForm.name" type="text" placeholder="e.g. Chidi Okonkwo" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Email Address') }}</label>
+                            <input wire:model="newUserForm.email" type="email" placeholder="chidi@ascendsystems.ng" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Assigned Role') }}</label>
+                            <select wire:model="newUserForm.role_id" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="">No Role Assigned</option>
+                                @foreach ($roles as $r)
+                                    <option value="{{ $r->id }}">{{ $r->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <input wire:model="newUserForm.is_super_admin" type="checkbox" id="chkSuperAdmin" class="rounded border-slate-300">
+                            <label for="chkSuperAdmin" class="text-xs font-bold text-slate-700 dark:text-slate-200">{{ __('Grant Super Admin Privileges') }}</label>
+                        </div>
+                        <button type="button" wire:click="createNewUser" class="w-full rounded-xl bg-blue-600 py-3 text-xs font-bold text-white hover:bg-blue-700 transition shadow-md">
+                            <i class="fa-light fa-user-plus mr-1.5"></i> {{ __('Create User Account') }}
+                        </button>
+                    </section>
+
+                    <!-- Users Directory & Role Assignment Table -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-4">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('User Accounts & Role Permissions') }}</h2>
+                                <p class="text-sm text-slate-500">{{ __('Assign role permissions, grant super admin access, and manage accounts.') }}</p>
+                            </div>
+                            <span class="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600">{{ count($users) }} Accounts</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                    <tr>
+                                        <th class="px-4 py-3.5">User</th>
+                                        <th class="px-4 py-3.5">Assigned Role</th>
+                                        <th class="px-4 py-3.5">Access Level</th>
+                                        <th class="px-4 py-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    @foreach ($users as $u)
+                                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                            <td class="px-4 py-3.5">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-black text-white dark:bg-slate-700">{{ strtoupper(substr($u->name, 0, 2)) }}</span>
+                                                    <div>
+                                                        <p class="font-bold text-slate-900 dark:text-white">{{ $u->name }}</p>
+                                                        <p class="text-xs text-slate-400">{{ $u->email }}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3.5">
+                                                <select wire:change="updateUserRole({{ $u->id }}, $event.target.value)" class="rounded-xl border border-slate-200 bg-transparent px-2.5 py-1 text-xs font-semibold outline-none dark:border-slate-700 dark:bg-slate-800">
+                                                    <option value="" {{ !$u->role_id ? 'selected' : '' }}>No Role</option>
+                                                    @foreach ($roles as $r)
+                                                        <option value="{{ $r->id }}" {{ $u->role_id === $r->id ? 'selected' : '' }}>{{ $r->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td class="px-4 py-3.5">
+                                                <button type="button" wire:click="toggleUserSuperAdmin({{ $u->id }})" class="rounded-full px-3 py-1 text-xs font-bold transition {{ $u->is_super_admin ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' : 'bg-slate-100 text-slate-500 dark:bg-slate-800' }}">
+                                                    {{ $u->is_super_admin ? '★ Super Admin' : 'Standard User' }}
+                                                </button>
+                                            </td>
+                                            <td class="px-4 py-3.5 text-right">
+                                                @if (auth()->id() !== $u->id)
+                                                    <button type="button" wire:click="deleteUserAccount({{ $u->id }})" class="text-xs font-bold text-slate-400 hover:text-rose-500">
+                                                        <i class="fa-light fa-trash-can"></i>
+                                                    </button>
+                                                @else
+                                                    <span class="text-[10px] font-bold text-slate-400">Signed In</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
         @endif
     @endif
 
