@@ -18,8 +18,8 @@ return new class extends Migration
                     $table->id();
                     $table->unsignedBigInteger('owner_user_id');
                     $table->unsignedBigInteger('team_id')->nullable();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->text('description')->nullable();
                     $table->string('color', 24)->default('#2563eb');
                     $table->string('status', 32)->default('active');
@@ -47,8 +47,8 @@ return new class extends Migration
             if (! Schema::hasTable('admin_roles')) {
             Schema::create('admin_roles', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->text('description')->nullable();
                     $table->json('permissions')->nullable();
                     $table->timestamp('created_at')->nullable();
@@ -120,7 +120,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('owner_user_id');
                     $table->unsignedBigInteger('requested_by_user_id');
                     $table->unsignedBigInteger('team_id')->nullable();
-                    $table->string('title', 255)->nullable();
+                    $table->string('title', 191)->nullable();
                     $table->text('brief');
                     $table->date('start_date');
                     $table->unsignedSmallInteger('days')->default(14);
@@ -307,7 +307,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('requested_by_user_id')->nullable();
                     $table->unsignedBigInteger('team_id')->nullable();
                     $table->unsignedBigInteger('file_id')->nullable();
-                    $table->string('external_video_id', 255);
+                    $table->string('external_video_id', 191);
                     $table->string('provider', 40);
                     $table->string('model', 120);
                     $table->string('status', 40)->default('queued');
@@ -335,11 +335,11 @@ return new class extends Migration
             Schema::create('audit_logs', function (Blueprint $table): void {
                     $table->id();
                     $table->unsignedBigInteger('causer_user_id')->nullable();
-                    $table->string('event', 255);
-                    $table->string('description', 255)->nullable();
-                    $table->string('subject_type', 255)->nullable();
+                    $table->string('event', 191);
+                    $table->string('description', 191)->nullable();
+                    $table->string('subject_type', 191)->nullable();
                     $table->unsignedBigInteger('subject_id')->nullable();
-                    $table->string('route_name', 255)->nullable();
+                    $table->string('route_name', 191)->nullable();
                     $table->string('area', 20)->default('admin');
                     $table->string('ip_address', 45)->nullable();
                     $table->text('user_agent')->nullable();
@@ -422,14 +422,14 @@ return new class extends Migration
                     $table->id();
                     $table->string('id_secure', 64);
                     $table->unsignedBigInteger('blog_category_id')->nullable();
-                    $table->string('title', 255);
+                    $table->string('title', 191);
                     $table->json('title_translations')->nullable();
                     $table->text('excerpt')->nullable();
                     $table->json('excerpt_translations')->nullable();
                     $table->longText('content');
                     $table->json('content_translations')->nullable();
-                    $table->string('slug', 255);
-                    $table->string('meta_title', 255)->nullable();
+                    $table->string('slug', 191);
+                    $table->string('meta_title', 191)->nullable();
                     $table->text('meta_description')->nullable();
                     $table->string('canonical_url', 2000)->nullable();
                     $table->text('og_image')->nullable();
@@ -448,12 +448,12 @@ return new class extends Migration
             Schema::create('blog_categories', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 64);
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->json('name_translations')->nullable();
                     $table->text('description')->nullable();
                     $table->json('description_translations')->nullable();
-                    $table->string('slug', 255);
-                    $table->string('icon', 255)->nullable();
+                    $table->string('slug', 191);
+                    $table->string('icon', 191)->nullable();
                     $table->string('color', 32)->default('#0f766e');
                     $table->boolean('status')->default(1);
                     $table->integer('sort_order')->default(0);
@@ -469,10 +469,10 @@ return new class extends Migration
                     $table->id();
                     $table->unsignedBigInteger('blog_rss_source_id');
                     $table->unsignedBigInteger('blog_id')->nullable();
-                    $table->string('external_guid', 255)->nullable();
+                    $table->string('external_guid', 191)->nullable();
                     $table->text('external_url')->nullable();
                     $table->string('content_hash', 64);
-                    $table->string('title', 255)->nullable();
+                    $table->string('title', 191)->nullable();
                     $table->unsignedBigInteger('source_published_at')->nullable();
                     $table->unsignedBigInteger('changed')->default(0);
                     $table->unsignedBigInteger('created')->default(0);
@@ -485,7 +485,7 @@ return new class extends Migration
             Schema::create('blog_rss_sources', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 64);
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->text('feed_url');
                     $table->unsignedBigInteger('blog_category_id')->nullable();
                     $table->json('tag_ids')->nullable();
@@ -510,12 +510,12 @@ return new class extends Migration
             Schema::create('blog_tags', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 64);
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->json('name_translations')->nullable();
                     $table->text('description')->nullable();
                     $table->json('description_translations')->nullable();
-                    $table->string('slug', 255);
-                    $table->string('icon', 255)->nullable();
+                    $table->string('slug', 191);
+                    $table->string('icon', 191)->nullable();
                     $table->string('color', 32)->default('#0f766e');
                     $table->boolean('status')->default(1);
                     $table->unsignedBigInteger('changed')->default(0);
@@ -542,7 +542,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('team_id')->nullable();
                     $table->string('name', 160);
                     $table->string('status', 40)->default('draft');
-                    $table->string('source_filename', 255)->nullable();
+                    $table->string('source_filename', 191)->nullable();
                     $table->json('meta')->nullable();
                     $table->json('stats')->nullable();
                     $table->timestamp('last_processed_at')->nullable();
@@ -583,7 +583,7 @@ return new class extends Migration
             if (! Schema::hasTable('cache_locks')) {
             Schema::create('cache_locks', function (Blueprint $table): void {
                     $table->string('key', 191);
-                    $table->string('owner', 255);
+                    $table->string('owner', 191);
                     $table->integer('expiration');
                     $table->primary('key');
                     $table->index('expiration', 'cache_locks_expiration_index');
@@ -594,7 +594,7 @@ return new class extends Migration
             Schema::create('coupons', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 32)->nullable();
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->string('code', 32);
                     $table->unsignedTinyInteger('type')->default(1);
                     $table->decimal('discount', 12, 2)->default(0);
@@ -616,8 +616,8 @@ return new class extends Migration
             if (! Schema::hasTable('credit_packs')) {
             Schema::create('credit_packs', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->text('description')->nullable();
                     $table->unsignedInteger('credits')->default(0);
                     $table->decimal('price', 12, 2)->default(0);
@@ -678,7 +678,7 @@ return new class extends Migration
             if (! Schema::hasTable('failed_jobs')) {
             Schema::create('failed_jobs', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('uuid', 255);
+                    $table->string('uuid', 191);
                     $table->text('connection');
                     $table->text('queue');
                     $table->longText('payload');
@@ -692,8 +692,8 @@ return new class extends Migration
             Schema::create('faqs', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 32)->nullable();
-                    $table->string('slug', 255);
-                    $table->string('title', 255);
+                    $table->string('slug', 191);
+                    $table->string('title', 191);
                     $table->json('title_translations')->nullable();
                     $table->longText('content');
                     $table->json('content_translations')->nullable();
@@ -714,9 +714,9 @@ return new class extends Migration
                     $table->unsignedBigInteger('team_id')->nullable();
                     $table->unsignedBigInteger('parent_id')->nullable();
                     $table->string('disk', 50)->default('public');
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->string('path', 2048)->nullable();
-                    $table->string('mime_type', 255)->nullable();
+                    $table->string('mime_type', 191)->nullable();
                     $table->string('extension', 20)->nullable();
                     $table->string('category', 50)->default('other');
                     $table->unsignedBigInteger('size_bytes')->default(0);
@@ -739,7 +739,7 @@ return new class extends Migration
             if (! Schema::hasTable('jobs')) {
             Schema::create('jobs', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('queue', 255);
+                    $table->string('queue', 191);
                     $table->longText('payload');
                     $table->unsignedTinyInteger('attempts');
                     $table->unsignedInteger('reserved_at')->nullable();
@@ -751,8 +751,8 @@ return new class extends Migration
 
             if (! Schema::hasTable('job_batches')) {
             Schema::create('job_batches', function (Blueprint $table): void {
-                    $table->string('id', 255);
-                    $table->string('name', 255);
+                    $table->string('id', 191);
+                    $table->string('name', 191);
                     $table->integer('total_jobs');
                     $table->integer('pending_jobs');
                     $table->integer('failed_jobs');
@@ -767,8 +767,8 @@ return new class extends Migration
             if (! Schema::hasTable('languages')) {
             Schema::create('languages', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
-                    $table->string('native_name', 255)->nullable();
+                    $table->string('name', 191);
+                    $table->string('native_name', 191)->nullable();
                     $table->string('code', 10);
                     $table->string('icon', 16)->nullable();
                     $table->string('direction', 3)->default('ltr');
@@ -802,7 +802,7 @@ return new class extends Migration
                     $table->string('id_secure', 32);
                     $table->string('package_key', 160);
                     $table->string('module_name', 160)->nullable();
-                    $table->string('title', 255);
+                    $table->string('title', 191);
                     $table->text('description')->nullable();
                     $table->string('version', 60)->nullable();
                     $table->string('source_type', 40)->default('zip');
@@ -836,9 +836,9 @@ return new class extends Migration
                     $table->string('source', 20)->default('auto');
                     $table->unsignedBigInteger('mid')->nullable();
                     $table->string('type', 50)->default('news');
-                    $table->string('title', 255)->nullable();
+                    $table->string('title', 191)->nullable();
                     $table->text('message')->nullable();
-                    $table->string('url', 255)->nullable();
+                    $table->string('url', 191)->nullable();
                     $table->timestamp('read_at')->nullable();
                     $table->timestamp('created_at')->nullable();
                     $table->timestamp('updated_at')->nullable();
@@ -853,9 +853,9 @@ return new class extends Migration
             Schema::create('notification_manual', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 32)->nullable();
-                    $table->string('title', 255)->nullable();
+                    $table->string('title', 191)->nullable();
                     $table->text('message');
-                    $table->string('url', 255)->nullable();
+                    $table->string('url', 191)->nullable();
                     $table->string('type', 50)->default('news');
                     $table->boolean('is_global')->default(0);
                     $table->unsignedBigInteger('created_by')->nullable();
@@ -883,7 +883,7 @@ return new class extends Migration
             if (! Schema::hasTable('options')) {
             Schema::create('options', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->longText('value')->nullable();
                     $table->timestamp('created_at')->nullable();
                     $table->timestamp('updated_at')->nullable();
@@ -893,8 +893,8 @@ return new class extends Migration
 
             if (! Schema::hasTable('password_reset_tokens')) {
             Schema::create('password_reset_tokens', function (Blueprint $table): void {
-                    $table->string('email', 255);
-                    $table->string('token', 255);
+                    $table->string('email', 191);
+                    $table->string('token', 191);
                     $table->timestamp('created_at')->nullable();
                     $table->primary('email');
                 });
@@ -903,11 +903,11 @@ return new class extends Migration
             if (! Schema::hasTable('payment_history')) {
             Schema::create('payment_history', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('id_secure', 255);
+                    $table->string('id_secure', 191);
                     $table->unsignedBigInteger('uid')->nullable();
                     $table->unsignedBigInteger('plan_id')->nullable();
                     $table->string('from', 120)->nullable();
-                    $table->string('transaction_id', 255);
+                    $table->string('transaction_id', 191);
                     $table->string('currency', 10)->default('USD');
                     $table->string('by', 120)->nullable();
                     $table->decimal('amount', 12, 2)->default(0);
@@ -955,8 +955,8 @@ return new class extends Migration
                     $table->unsignedTinyInteger('type')->nullable();
                     $table->string('service', 120)->nullable();
                     $table->string('source', 120)->nullable();
-                    $table->string('subscription_id', 255)->nullable();
-                    $table->string('customer_id', 255)->nullable();
+                    $table->string('subscription_id', 191)->nullable();
+                    $table->string('customer_id', 191)->nullable();
                     $table->decimal('amount', 12, 2)->default(0);
                     $table->string('currency', 10)->nullable();
                     $table->unsignedTinyInteger('status')->default(1);
@@ -975,8 +975,8 @@ return new class extends Migration
             if (! Schema::hasTable('plans')) {
             Schema::create('plans', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->string('status', 20)->default('active');
                     $table->boolean('featured')->default(0);
                     $table->string('currency', 10)->default('USD');
@@ -1065,8 +1065,8 @@ return new class extends Migration
                     $table->id();
                     $table->unsignedBigInteger('owner_user_id');
                     $table->unsignedBigInteger('team_id')->nullable();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->string('source_type', 20)->default('manual');
                     $table->string('status', 32)->default('active');
                     $table->longText('content');
@@ -1104,8 +1104,8 @@ return new class extends Migration
                     $table->unsignedBigInteger('owner_user_id');
                     $table->unsignedBigInteger('team_id')->nullable();
                     $table->unsignedBigInteger('file_id')->nullable();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->string('type', 20)->default('image');
                     $table->string('status', 32)->default('active');
                     $table->boolean('is_global')->default(0);
@@ -1141,7 +1141,7 @@ return new class extends Migration
                     $table->string('id_secure', 32);
                     $table->unsignedBigInteger('user_id');
                     $table->unsignedBigInteger('team_id')->nullable();
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->string('feed_url', 2000);
                     $table->text('description')->nullable();
                     $table->json('account_ids');
@@ -1169,7 +1169,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('schedule_id');
                     $table->unsignedBigInteger('account_id');
                     $table->unsignedBigInteger('publishing_post_id')->nullable();
-                    $table->string('external_guid', 255)->nullable();
+                    $table->string('external_guid', 191)->nullable();
                     $table->string('external_url', 2000)->nullable();
                     $table->string('content_hash', 64);
                     $table->string('title', 500)->nullable();
@@ -1185,7 +1185,7 @@ return new class extends Migration
 
             if (! Schema::hasTable('sessions')) {
             Schema::create('sessions', function (Blueprint $table): void {
-                    $table->string('id', 255);
+                    $table->string('id', 191);
                     $table->unsignedBigInteger('user_id')->nullable();
                     $table->string('ip_address', 45)->nullable();
                     $table->text('user_agent')->nullable();
@@ -1201,9 +1201,9 @@ return new class extends Migration
                     $table->id();
                     $table->string('provider_key', 80);
                     $table->string('capability_key', 120)->nullable();
-                    $table->string('display_name', 255);
-                    $table->string('username', 255)->nullable();
-                    $table->string('external_id', 255)->nullable();
+                    $table->string('display_name', 191);
+                    $table->string('username', 191)->nullable();
+                    $table->string('external_id', 191)->nullable();
                     $table->string('category', 80)->nullable();
                     $table->string('account_type', 50)->default('manual');
                     $table->text('profile_url')->nullable();
@@ -1236,7 +1236,7 @@ return new class extends Migration
             Schema::create('support_categories', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 40);
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->string('icon', 120)->default('fa-light');
                     $table->string('color', 40)->default('#2563eb');
                     $table->boolean('status')->default(1);
@@ -1265,7 +1265,7 @@ return new class extends Migration
             Schema::create('support_labels', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 40);
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->string('icon', 120)->default('fa-light');
                     $table->string('color', 40)->default('#475569');
                     $table->boolean('status')->default(1);
@@ -1294,7 +1294,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('team_id')->nullable();
                     $table->unsignedBigInteger('cate_id')->nullable();
                     $table->unsignedBigInteger('type_id')->nullable();
-                    $table->string('title', 255);
+                    $table->string('title', 191);
                     $table->text('content');
                     $table->unsignedTinyInteger('status')->default(1);
                     $table->boolean('pin')->default(0);
@@ -1315,7 +1315,7 @@ return new class extends Migration
             Schema::create('support_types', function (Blueprint $table): void {
                     $table->id();
                     $table->string('id_secure', 40);
-                    $table->string('name', 255);
+                    $table->string('name', 191);
                     $table->string('icon', 120)->default('fa-light');
                     $table->string('color', 40)->default('#2563eb');
                     $table->boolean('status')->default(1);
@@ -1328,8 +1328,8 @@ return new class extends Migration
             if (! Schema::hasTable('teams')) {
             Schema::create('teams', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
-                    $table->string('slug', 255);
+                    $table->string('name', 191);
+                    $table->string('slug', 191);
                     $table->text('description')->nullable();
                     $table->json('enabled_modules')->nullable();
                     $table->unsignedBigInteger('owner_user_id')->nullable();
@@ -1346,7 +1346,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('team_id');
                     $table->unsignedBigInteger('created_by_user_id')->nullable();
                     $table->string('type', 50)->default('room');
-                    $table->string('title', 255)->nullable();
+                    $table->string('title', 191)->nullable();
                     $table->text('description')->nullable();
                     $table->timestamp('last_message_at')->nullable();
                     $table->json('metadata')->nullable();
@@ -1377,7 +1377,7 @@ return new class extends Migration
                     $table->unsignedBigInteger('team_id');
                     $table->unsignedBigInteger('invited_by_user_id')->nullable();
                     $table->unsignedBigInteger('accepted_by_user_id')->nullable();
-                    $table->string('email', 255)->nullable();
+                    $table->string('email', 191)->nullable();
                     $table->string('invite_code', 24);
                     $table->string('role', 50)->default('member');
                     $table->json('permissions')->nullable();
@@ -1470,10 +1470,10 @@ return new class extends Migration
             if (! Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table): void {
                     $table->id();
-                    $table->string('name', 255);
-                    $table->string('username', 255)->nullable();
-                    $table->string('email', 255);
-                    $table->string('avatar_path', 255)->nullable();
+                    $table->string('name', 191);
+                    $table->string('username', 191)->nullable();
+                    $table->string('email', 191);
+                    $table->string('avatar_path', 191)->nullable();
                     $table->string('avatar_disk', 40)->nullable();
                     $table->string('locale', 10)->nullable();
                     $table->string('timezone', 100)->nullable();
@@ -1484,7 +1484,7 @@ return new class extends Migration
                     $table->timestamp('plan_started_at')->nullable();
                     $table->timestamp('plan_expires_at')->nullable();
                     $table->timestamp('email_verified_at')->nullable();
-                    $table->string('password', 255);
+                    $table->string('password', 191);
                     $table->text('two_factor_secret')->nullable();
                     $table->text('two_factor_recovery_codes')->nullable();
                     $table->timestamp('two_factor_confirmed_at')->nullable();
