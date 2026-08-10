@@ -2509,56 +2509,94 @@
                 <!-- Productivity KPI Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Active Projects') }}</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Active Projects') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-folder-tree"></i></span>
+                        </div>
                         <p class="mt-2 text-2xl font-black text-sky-600">{{ $dbProjects->where('status', 'active')->count() ?: $dbProjects->count() }}</p>
-                        <p class="mt-1 text-xs font-medium text-sky-500"><i class="fa-light fa-folder-open mr-1"></i>Currently running</p>
+                        <p class="mt-1 text-xs font-medium text-sky-500"><i class="fa-light fa-circle-check mr-1"></i>On-track project portfolio</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Tasks in Progress') }}</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Tasks in Progress') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600"><i class="fa-light fa-spinner"></i></span>
+                        </div>
                         <p class="mt-2 text-2xl font-black text-amber-600">{{ count(array_filter($tasks, fn($t) => $t['status'] === 'in_progress')) }}</p>
-                        <p class="mt-1 text-xs font-medium text-amber-500"><i class="fa-light fa-spinner mr-1"></i>Actively being worked on</p>
+                        <p class="mt-1 text-xs font-medium text-amber-500"><i class="fa-light fa-user-gear mr-1"></i>Active execution queue</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Completed Tasks') }}</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Completed Tasks') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-circle-check"></i></span>
+                        </div>
                         <p class="mt-2 text-2xl font-black text-emerald-600">{{ count(array_filter($tasks, fn($t) => $t['status'] === 'done')) }}</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-check-double mr-1"></i>Done this sprint</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-check-double mr-1"></i>Delivered sprint tasks</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Team Velocity') }}</p>
-                        <p class="mt-2 text-2xl font-black text-purple-600">94%</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+8% vs last sprint</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Sprint Velocity') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-gauge-max"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-purple-600">94.8%</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+8.4% efficiency rate</p>
                     </div>
                 </div>
 
                 <!-- Projects Grid -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Projects & Milestone Tracking') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Organize work, track progress completion, and manage team assignments.') }}</p>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Projects & Milestone Tracking Studio') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Organize enterprise projects, track progress completion, assign leads and manage deliverables.') }}</p>
                         </div>
-                        <button type="button" wire:click="openCreateModal('project')" class="rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
-                            <i class="fa-light fa-plus mr-1.5"></i>{{ __('Create Project') }}
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="openCreateModal('task')" class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <i class="fa-light fa-plus mr-1.5"></i>{{ __('New Task') }}
+                            </button>
+                            <button type="button" wire:click="openCreateModal('project')" class="rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                                <i class="fa-light fa-folder-plus mr-1.5"></i>{{ __('Create Project') }}
+                            </button>
+                        </div>
                     </div>
+
                     <div class="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         @forelse ($dbProjects as $proj)
                             <div class="rounded-2xl border border-slate-200 p-5 transition hover:border-sky-500/40 hover:shadow-md dark:border-slate-800 dark:hover:border-sky-500/40">
                                 <div class="flex items-center justify-between">
-                                    <span class="rounded-full {{ $proj->progress_percent >= 100 ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-sky-500/10 text-sky-600 border border-sky-500/20' }} px-2.5 py-0.5 text-[10px] font-bold">{{ $proj->progress_percent >= 100 ? 'Completed' : 'Active' }}</span>
-                                    <button type="button" wire:click="updateProjectProgress({{ $proj->id }}, {{ min(100, $proj->progress_percent + 25) }})" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition" wire:loading.attr="disabled">
-                                        <i class="fa-light fa-plus mr-0.5"></i>25%
-                                    </button>
+                                    <span class="rounded-full {{ $proj->progress_percent >= 100 ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-sky-500/10 text-sky-600 border border-sky-500/20' }} px-2.5 py-0.5 text-[10px] font-bold">
+                                        {{ $proj->progress_percent >= 100 ? 'Completed' : 'Active' }}
+                                    </span>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" wire:click="updateProjectProgress({{ $proj->id }}, {{ min(100, $proj->progress_percent + 25) }})" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition" title="Add 25% progress">
+                                            <i class="fa-light fa-plus mr-0.5"></i>25%
+                                        </button>
+                                        @if ($proj->progress_percent < 100)
+                                            <button type="button" wire:click="updateProjectProgress({{ $proj->id }}, 100)" class="rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Mark 100% complete">
+                                                <i class="fa-light fa-check"></i>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </div>
                                 <h3 class="mt-3 text-base font-bold text-slate-900 dark:text-white">{{ $proj->name }}</h3>
-                                <p class="mt-1 text-xs text-slate-500"><i class="fa-light fa-calendar mr-1"></i>Due: {{ $proj->due_date?->format('M d, Y') ?: 'Aug 30, 2026' }}</p>
-                                <p class="mt-0.5 text-xs text-slate-400"><i class="fa-light fa-user mr-1"></i>{{ $proj->assignee ?: 'Lagos HQ Team' }}</p>
+                                <p class="mt-1 text-xs text-slate-500 line-clamp-2">{{ $proj->description ?: 'Enterprise project initiative' }}</p>
+                                
+                                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase text-slate-400">Target Due</span>
+                                        <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-light fa-calendar mr-1 text-sky-500"></i>{{ $proj->due_date?->format('M d, Y') ?: 'Aug 30, 2026' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase text-slate-400">Project Lead</span>
+                                        <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-light fa-user mr-1 text-sky-500"></i>{{ $proj->assignee ?: 'Lagos HQ Team' }}</p>
+                                    </div>
+                                </div>
+
                                 <div class="mt-4 pt-3 border-t dark:border-slate-800">
                                     <div class="flex justify-between text-xs font-bold mb-1.5">
-                                        <span class="text-slate-400">Progress</span>
-                                        <span class="text-sky-600">{{ $proj->progress_percent }}%</span>
+                                        <span class="text-slate-400">Milestone Progress</span>
+                                        <span class="{{ $proj->progress_percent >= 100 ? 'text-emerald-600' : 'text-sky-600' }}">{{ $proj->progress_percent }}%</span>
                                     </div>
-                                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                         <div class="h-full rounded-full transition-all duration-500 {{ $proj->progress_percent >= 100 ? 'bg-emerald-500' : 'bg-sky-500' }}" style="width: {{ $proj->progress_percent }}%;"></div>
                                     </div>
                                 </div>
@@ -2566,7 +2604,7 @@
                         @empty
                             <div class="col-span-full py-12 text-center">
                                 <i class="fa-light fa-folder-tree text-4xl text-slate-300"></i>
-                                <p class="mt-3 text-sm font-medium text-slate-400">{{ __('No projects yet. Create your first project.') }}</p>
+                                <p class="mt-3 text-sm font-medium text-slate-400">{{ __('No active projects yet. Create your first project to start tracking.') }}</p>
                                 <button type="button" wire:click="openCreateModal('project')" class="mt-4 rounded-xl bg-sky-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-sky-700">{{ __('Create First Project') }}</button>
                             </div>
                         @endforelse
@@ -2574,151 +2612,249 @@
                 </section>
             </div>
         @elseif ($activeTab === 'assignments')
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Task Assignments & Kanban Board') }}</h2>
-                        <p class="text-sm text-slate-500">{{ __('Track task statuses, assignees, and move tasks through workflow stages.') }}</p>
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Interactive Task Kanban Board') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Organize work across workflow stages, assign responsibilities, and monitor task SLAs.') }}</p>
                     </div>
+                    <button type="button" wire:click="openCreateModal('task')" class="rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                        <i class="fa-light fa-plus mr-1.5"></i>{{ __('Assign New Task') }}
+                    </button>
                 </div>
-                <div class="mt-5 grid gap-4 md:grid-cols-4">
+
+                <!-- Kanban Columns -->
+                <div class="grid gap-4 md:grid-cols-4">
                     @php
                         $taskStatuses = [
-                            'todo' => ['label' => 'To Do', 'color' => 'slate', 'icon' => 'fa-light fa-circle-dashed'],
+                            'todo' => ['label' => 'To Do / Backlog', 'color' => 'slate', 'icon' => 'fa-light fa-circle-dashed'],
                             'in_progress' => ['label' => 'In Progress', 'color' => 'amber', 'icon' => 'fa-light fa-spinner'],
-                            'in_review' => ['label' => 'In Review', 'color' => 'blue', 'icon' => 'fa-light fa-eye'],
-                            'done' => ['label' => 'Done', 'color' => 'emerald', 'icon' => 'fa-light fa-circle-check'],
+                            'in_review' => ['label' => 'Under Review', 'color' => 'blue', 'icon' => 'fa-light fa-eye'],
+                            'done' => ['label' => 'Completed', 'color' => 'emerald', 'icon' => 'fa-light fa-circle-check'],
                         ];
                     @endphp
 
                     @foreach ($taskStatuses as $statusKey => $statusMeta)
                         <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-                            <div class="flex items-center gap-2 border-b pb-3 dark:border-slate-800">
-                                <i class="{{ $statusMeta['icon'] }} text-{{ $statusMeta['color'] }}-500"></i>
-                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $statusMeta['label'] }}</h3>
-                                <span class="ml-auto rounded-full bg-{{ $statusMeta['color'] }}-500/10 px-2 py-0.5 text-[10px] font-bold text-{{ $statusMeta['color'] }}-600">{{ count(array_filter($tasks, fn($t) => $t['status'] === $statusKey)) }}</span>
+                            <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                                <div class="flex items-center gap-2">
+                                    <i class="{{ $statusMeta['icon'] }} text-{{ $statusMeta['color'] }}-500"></i>
+                                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">{{ $statusMeta['label'] }}</h3>
+                                </div>
+                                <span class="rounded-full bg-{{ $statusMeta['color'] }}-500/10 px-2 py-0.5 text-[10px] font-extrabold text-{{ $statusMeta['color'] }}-600">
+                                    {{ count(array_filter($tasks, fn($t) => $t['status'] === $statusKey)) }}
+                                </span>
                             </div>
 
-                            <div class="mt-3 space-y-2.5">
-                                @foreach ($tasks as $tIdx => $task)
-                                    @if ($task['status'] === $statusKey)
-                                        <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs transition hover:shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                                            <div class="flex items-start justify-between">
-                                                <span class="rounded-full px-2 py-0.5 text-[9px] font-bold {{ match($task['priority']) {
-                                                    'Critical' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
-                                                    'High' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
-                                                    'Normal' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
-                                                    default => 'bg-slate-100 text-slate-500',
-                                                } }}">{{ $task['priority'] }}</span>
+                            <div class="mt-3 space-y-3">
+                                @forelse (array_filter($tasks, fn($t) => $t['status'] === $statusKey) as $tIdx => $task)
+                                    <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs transition hover:border-sky-500/40 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 space-y-2">
+                                        <div class="flex items-start justify-between">
+                                            <span class="rounded-full px-2 py-0.5 text-[9px] font-bold {{ match($task['priority'] ?? 'Normal') {
+                                                'Critical' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                                'High' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                'Normal' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                default => 'bg-slate-100 text-slate-500',
+                                            } }}">{{ $task['priority'] ?? 'Normal' }}</span>
+
+                                            <div class="flex items-center gap-1">
+                                                @if ($statusKey !== 'todo')
+                                                    @php $prevStatus = match($statusKey) { 'in_progress' => 'todo', 'in_review' => 'in_progress', 'done' => 'in_review', default => 'todo' }; @endphp
+                                                    <button type="button" wire:click="updateTaskStatus({{ $tIdx }}, '{{ $prevStatus }}')" class="p-1 text-[10px] font-bold text-slate-400 hover:text-slate-600" title="Move back">
+                                                        <i class="fa-light fa-arrow-left"></i>
+                                                    </button>
+                                                @endif
                                                 @if ($statusKey !== 'done')
                                                     @php $nextStatus = match($statusKey) { 'todo' => 'in_progress', 'in_progress' => 'in_review', 'in_review' => 'done', default => 'done' }; @endphp
-                                                    <button type="button" wire:click="updateTaskStatus({{ $tIdx }}, '{{ $nextStatus }}')" class="text-[10px] font-bold text-sky-600 hover:underline"><i class="fa-light fa-arrow-right"></i></button>
+                                                    <button type="button" wire:click="updateTaskStatus({{ $tIdx }}, '{{ $nextStatus }}')" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition">
+                                                        <i class="fa-light fa-arrow-right mr-0.5"></i>Next
+                                                    </button>
                                                 @endif
                                             </div>
-                                            <p class="mt-2 text-xs font-bold text-slate-900 dark:text-white leading-snug">{{ $task['title'] }}</p>
-                                            <div class="mt-2.5 flex items-center justify-between text-[10px] text-slate-400">
-                                                <span><i class="fa-light fa-user mr-0.5"></i>{{ explode(' ', $task['assignee'])[0] }}</span>
-                                                <span><i class="fa-light fa-calendar mr-0.5"></i>{{ $task['due'] }}</span>
-                                            </div>
                                         </div>
-                                    @endif
-                                @endforeach
+
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white leading-snug">{{ $task['title'] }}</p>
+                                        <p class="text-[10px] font-semibold text-sky-600 dark:text-sky-400"><i class="fa-light fa-folder mr-1"></i>{{ $task['project'] ?? 'Enterprise Task' }}</p>
+
+                                        <div class="pt-2 border-t dark:border-slate-700/50 flex items-center justify-between text-[10px] text-slate-400">
+                                            <span class="font-medium text-slate-600 dark:text-slate-300"><i class="fa-light fa-user mr-1 text-slate-400"></i>{{ explode(' ', $task['assignee'])[0] }}</span>
+                                            <span class="font-semibold text-slate-500"><i class="fa-light fa-calendar mr-1"></i>{{ $task['due'] }}</span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-slate-400 dark:border-slate-800">
+                                        No tasks in this column
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
                     @endforeach
                 </div>
             </section>
         @elseif ($activeTab === 'progress')
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Activity Timeline & Progress Log') }}</h2>
-                        <p class="text-sm text-slate-500">{{ __('Chronological feed of project milestones, task completions, and team updates.') }}</p>
-                    </div>
-                </div>
-
-                <div class="mt-6 relative">
-                    <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
-
-                    <div class="space-y-6">
-                        @foreach ([
-                            ['time' => '2 hours ago', 'user' => 'Babatunde Adeleke', 'action' => 'Completed task', 'detail' => 'Implement POS receipt thermal printing', 'icon' => 'fa-light fa-check-circle', 'color' => 'emerald'],
-                            ['time' => '5 hours ago', 'user' => 'Fatima Bello', 'action' => 'Started working on', 'detail' => 'Design CRM pipeline Kanban board UI', 'icon' => 'fa-light fa-play-circle', 'color' => 'amber'],
-                            ['time' => 'Yesterday', 'user' => 'Emeka Nwosu', 'action' => 'Updated progress to 75%', 'detail' => 'Inventory Automation project', 'icon' => 'fa-light fa-arrow-up-right', 'color' => 'blue'],
-                            ['time' => '2 days ago', 'user' => 'Sola Adeyemi', 'action' => 'Created new project', 'detail' => 'Marketing Channels integration Q3', 'icon' => 'fa-light fa-folder-plus', 'color' => 'purple'],
-                            ['time' => '3 days ago', 'user' => 'System', 'action' => 'Auto-assigned overdue alert', 'detail' => 'Q3 Executive Financial Report deadline approaching', 'icon' => 'fa-light fa-bell', 'color' => 'rose'],
-                        ] as $event)
-                            <div class="relative flex gap-4 pl-12">
-                                <span class="absolute left-3 flex h-5 w-5 items-center justify-center rounded-full bg-{{ $event['color'] }}-500/10 ring-4 ring-white dark:ring-slate-900">
-                                    <i class="{{ $event['icon'] }} text-xs text-{{ $event['color'] }}-500"></i>
-                                </span>
-                                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 flex-1 dark:border-slate-800 dark:bg-slate-800/50">
-                                    <div class="flex items-center justify-between">
-                                        <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $event['user'] }} <span class="font-normal text-slate-400">{{ $event['action'] }}</span></p>
-                                        <span class="text-[10px] font-semibold text-slate-400">{{ $event['time'] }}</span>
-                                    </div>
-                                    <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $event['detail'] }}</p>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </section>
-        @else
-            <!-- Performance Metrics -->
             <div class="space-y-6">
-                <div class="grid gap-4 md:grid-cols-3">
+                <!-- Log Work Progress Studio Form -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Log Work Progress & Work Hours') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Record task completion, log hours worked, and update milestone progress in real-time.') }}</p>
+                    </div>
+
+                    <form wire:submit.prevent="submitWorkLog" class="mt-5 space-y-4">
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Select Target Project</label>
+                                <select wire:model="workLogForm.project_id" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="">-- Choose Project --</option>
+                                    @foreach ($dbProjects as $proj)
+                                        <option value="{{ $proj->id }}">{{ $proj->name }} (Currently {{ $proj->progress_percent }}%)</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Team Member Name</label>
+                                <input type="text" wire:model="workLogForm.user_name" placeholder="e.g. Babatunde Adeleke" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Work Hours Spent</label>
+                                <input type="number" step="0.5" wire:model="workLogForm.hours_spent" placeholder="e.g. 4.5 hrs" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Activity Summary & Work Progress Notes</label>
+                                <input type="text" wire:model="workLogForm.summary" required placeholder="e.g. Completed POS thermal printer API integration and unit test suite" class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Update Project Progress %</label>
+                                <input type="number" min="0" max="100" wire:model="workLogForm.progress_percent" placeholder="e.g. 75" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button type="submit" class="rounded-xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                                <i class="fa-light fa-clock-rotate-left mr-1.5"></i>{{ __('Record Work Log') }}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Activity Timeline Feed -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Activity Timeline & Project Audit Stream') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Chronological feed of project milestone achievements, work logs, and task completions.') }}</p>
+                    </div>
+
+                    <div class="mt-6 relative">
+                        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
+
+                        <div class="space-y-6">
+                            @foreach ([
+                                ['time' => '10 mins ago', 'user' => 'Babatunde Adeleke', 'action' => 'Logged 4.5 hours', 'detail' => 'Completed POS receipt thermal printing & dynamic line items builder', 'icon' => 'fa-light fa-circle-check', 'color' => 'emerald'],
+                                ['time' => '2 hours ago', 'user' => 'Fatima Bello', 'action' => 'Moved task to In Review', 'detail' => 'Design CRM pipeline Kanban board UI and customer detail fields', 'icon' => 'fa-light fa-play-circle', 'color' => 'amber'],
+                                ['time' => 'Yesterday', 'user' => 'Emeka Nwosu', 'action' => 'Updated progress to 85%', 'detail' => 'Inventory Automation & barcode scanning module', 'icon' => 'fa-light fa-arrow-up-right', 'color' => 'blue'],
+                                ['time' => '2 days ago', 'user' => 'Sola Adeyemi', 'action' => 'Created project milestone', 'detail' => 'Marketing Multi-Channel Social & WhatsApp Automation Q3', 'icon' => 'fa-light fa-folder-plus', 'color' => 'purple'],
+                                ['time' => '3 days ago', 'user' => 'System Engine', 'action' => 'SLA Audit Alert', 'detail' => 'Q3 Executive Financial Report & Audit logs on schedule', 'icon' => 'fa-light fa-bell', 'color' => 'rose'],
+                            ] as $event)
+                                <div class="relative flex gap-4 pl-12">
+                                    <span class="absolute left-3 flex h-5 w-5 items-center justify-center rounded-full bg-{{ $event['color'] }}-500/10 ring-4 ring-white dark:ring-slate-900">
+                                        <i class="{{ $event['icon'] }} text-xs text-{{ $event['color'] }}-500"></i>
+                                    </span>
+                                    <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 flex-1 dark:border-slate-800 dark:bg-slate-800/50">
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $event['user'] }} <span class="font-normal text-slate-400">{{ $event['action'] }}</span></p>
+                                            <span class="text-[10px] font-semibold text-slate-400">{{ $event['time'] }}</span>
+                                        </div>
+                                        <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $event['detail'] }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @else
+            <!-- Performance Metrics & Productivity Analytics Tab -->
+            <div class="space-y-6">
+                <!-- Summary Metrics Grid -->
+                <div class="grid gap-4 md:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase text-slate-400">Sprint Completion Rate</p>
-                        <p class="mt-2 text-2xl font-black text-emerald-600">87.5%</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">92.4%</p>
                         <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                            <div class="h-full rounded-full bg-emerald-500" style="width: 87.5%;"></div>
+                            <div class="h-full rounded-full bg-emerald-500" style="width: 92.4%;"></div>
                         </div>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase text-slate-400">Average Task Duration</p>
-                        <p class="mt-2 text-2xl font-black text-sky-600">3.2 Days</p>
-                        <p class="mt-1 text-xs text-emerald-500 font-medium"><i class="fa-light fa-arrow-trend-down mr-1"></i>-0.8 days vs last sprint</p>
+                        <p class="mt-2 text-2xl font-black text-sky-600">2.8 Days</p>
+                        <p class="mt-1 text-xs text-emerald-500 font-medium"><i class="fa-light fa-arrow-trend-down mr-1"></i>-0.6 days vs target</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase text-slate-400">Tasks Delivered On Time</p>
-                        <p class="mt-2 text-2xl font-black text-purple-600">92%</p>
-                        <p class="mt-1 text-xs text-slate-400 font-medium">11 of 12 tasks this sprint</p>
+                        <p class="text-xs font-bold uppercase text-slate-400">On-Time Delivery Rate</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">95.8%</p>
+                        <p class="mt-1 text-xs text-slate-400 font-medium">23 of 24 tasks on SLA</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">Total Work Hours Logged</p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">184.5 Hrs</p>
+                        <p class="mt-1 text-xs text-amber-500 font-medium">This month</p>
                     </div>
                 </div>
 
-                <!-- Team Contributor Stats -->
+                <!-- Team Contributor Performance & Workload Utilization Table -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('Team Contributor Performance') }}</h2>
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Team Contributor Productivity & Workload Utilization') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Monitor team member task velocity, completion rates, and workload capacity.') }}</p>
+                        </div>
+                    </div>
+
                     <div class="mt-5 overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
                                 <tr>
                                     <th class="px-4 py-3.5">Team Member</th>
-                                    <th class="px-4 py-3.5">Tasks Completed</th>
+                                    <th class="px-4 py-3.5">Completed Tasks</th>
                                     <th class="px-4 py-3.5">In Progress</th>
                                     <th class="px-4 py-3.5">On-Time Rate</th>
-                                    <th class="px-4 py-3.5">Avg Duration</th>
+                                    <th class="px-4 py-3.5">Workload Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                 @foreach ([
-                                    ['name' => 'Babatunde Adeleke', 'completed' => 8, 'in_progress' => 2, 'ontime' => '95%', 'avg' => '2.8 days'],
-                                    ['name' => 'Fatima Bello', 'completed' => 6, 'in_progress' => 1, 'ontime' => '100%', 'avg' => '3.1 days'],
-                                    ['name' => 'Emeka Nwosu', 'completed' => 5, 'in_progress' => 2, 'ontime' => '80%', 'avg' => '3.5 days'],
-                                    ['name' => 'Sola Adeyemi', 'completed' => 4, 'in_progress' => 1, 'ontime' => '100%', 'avg' => '2.4 days'],
+                                    ['name' => 'Babatunde Adeleke', 'completed' => 12, 'in_progress' => 2, 'ontime' => '98%', 'status' => 'Optimal Load', 'status_color' => 'emerald'],
+                                    ['name' => 'Fatima Bello', 'completed' => 9, 'in_progress' => 1, 'ontime' => '100%', 'status' => 'Optimal Load', 'status_color' => 'emerald'],
+                                    ['name' => 'Emeka Nwosu', 'completed' => 8, 'in_progress' => 3, 'ontime' => '92%', 'status' => 'High Utilization', 'status_color' => 'amber'],
+                                    ['name' => 'Sola Adeyemi', 'completed' => 7, 'in_progress' => 1, 'ontime' => '100%', 'status' => 'Capacity Available', 'status_color' => 'sky'],
                                 ] as $member)
                                     <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                                         <td class="px-4 py-3.5">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/10 text-xs font-black text-sky-600">{{ strtoupper(substr($member['name'], 0, 2)) }}</span>
-                                                <span class="font-bold text-slate-900 dark:text-white">{{ $member['name'] }}</span>
+                                                <div>
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $member['name'] }}</p>
+                                                    <p class="text-[10px] text-slate-400">Engineering & Operations</p>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3.5 font-black text-emerald-600">{{ $member['completed'] }}</td>
-                                        <td class="px-4 py-3.5 font-bold text-amber-600">{{ $member['in_progress'] }}</td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600">{{ $member['completed'] }} Tasks</td>
+                                        <td class="px-4 py-3.5 font-bold text-amber-600">{{ $member['in_progress'] }} Active</td>
                                         <td class="px-4 py-3.5 font-bold text-sky-600">{{ $member['ontime'] }}</td>
-                                        <td class="px-4 py-3.5 text-xs font-semibold text-slate-500">{{ $member['avg'] }}</td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full bg-{{ $member['status_color'] }}-500/10 border border-{{ $member['status_color'] }}-500/20 px-2.5 py-0.5 text-xs font-bold text-{{ $member['status_color'] }}-600">
+                                                {{ $member['status'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <button type="button" wire:click="openCreateModal('task')" class="rounded-lg bg-sky-500/10 px-2.5 py-1 text-xs font-bold text-sky-600 hover:bg-sky-500/20 transition">
+                                                <i class="fa-light fa-plus mr-1"></i>Assign Task
+                                            </button>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -3700,6 +3836,108 @@
                             <button type="submit" class="rounded-2xl bg-amber-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-700 transition">
                                 <i class="fa-light fa-floppy-disk mr-1.5"></i>Save Automation Rule
                             </button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'task')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Assign New Project Task') }}</h3>
+                            <p class="text-xs text-slate-400">Assign task responsibilities, set target due dates, priority and link to project</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Task Headline / Title</label>
+                            <input type="text" wire:model="form.title" required placeholder="e.g. Implement POS Thermal Printer Integration" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Project</label>
+                                <select wire:model="form.project_id" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="">-- General Task / Select Project --</option>
+                                    @foreach ($dbProjects as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Priority SLA Level</label>
+                                <select wire:model="form.priority" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Critical">Critical (Immediate SLA)</option>
+                                    <option value="High" selected>High Priority</option>
+                                    <option value="Normal">Normal Priority</option>
+                                    <option value="Low">Low Priority</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Assigned Team Member</label>
+                                <select wire:model="form.assignee" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Babatunde Adeleke">Babatunde Adeleke (Lead Developer)</option>
+                                    <option value="Fatima Bello">Fatima Bello (UI/UX Designer)</option>
+                                    <option value="Emeka Nwosu">Emeka Nwosu (Systems Architect)</option>
+                                    <option value="Sola Adeyemi">Sola Adeyemi (QA Engineer)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Due Date</label>
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Task Notes & Instructions</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Task requirements and scope details..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700">Assign Task</button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'project')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Create New Project Milestone') }}</h3>
+                            <p class="text-xs text-slate-400">Set project scope, lead assignee, target completion date and milestones</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Project Title / Name</label>
+                            <input type="text" wire:model="form.title" required placeholder="e.g. POS Hardware & ERP Integration Q3" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Project Lead / Assignee</label>
+                                <input type="text" wire:model="form.assignee" placeholder="e.g. Babatunde Adeleke" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Completion Date</label>
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Project Scope & Deliverable Notes</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Key objectives and deliverables..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700">Create Project</button>
                         </div>
                     </form>
                 @else

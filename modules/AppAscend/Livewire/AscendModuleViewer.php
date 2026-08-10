@@ -212,6 +212,46 @@ class AscendModuleViewer extends Component
     public bool $agentRunning = false;
 
     // === USER ROLES & PERMISSIONS STATE ===
+    public array $workLogForm = [
+        'project_id' => '',
+        'user_name' => '',
+        'hours_spent' => '',
+        'progress_percent' => '',
+        'summary' => '',
+    ];
+    public string $projectSearchQuery = '';
+    public string $taskFilterPriority = 'all';
+    public string $taskFilterAssignee = 'all';
+
+    public function submitWorkLog(): void
+    {
+        $hours = (float) ($this->workLogForm['hours_spent'] ?: 2);
+        $user = $this->workLogForm['user_name'] ?: (auth()->user()?->name ?: 'Babatunde Adeleke');
+        $summary = $this->workLogForm['summary'] ?: 'Logged work progress on project milestone';
+
+        if (! empty($this->workLogForm['project_id'])) {
+            $proj = Project::find($this->workLogForm['project_id']);
+            if ($proj && ! empty($this->workLogForm['progress_percent'])) {
+                $newPct = (int) $this->workLogForm['progress_percent'];
+                $proj->update(['progress_percent' => min(100, max(0, $newPct))]);
+            }
+        }
+
+        log_activity('tasks.work_log', "Logged {$hours} hrs work by {$user}: {$summary}", [
+            'metadata' => ['hours' => $hours, 'user' => $user],
+        ]);
+
+        session()->flash('status', __('Work log of :hrs hours recorded for :user!', ['hrs' => $hours, 'user' => $user]));
+
+        $this->workLogForm = [
+            'project_id' => '',
+            'user_name' => '',
+            'hours_spent' => '',
+            'progress_percent' => '',
+            'summary' => '',
+        ];
+    }
+
     public array $newUserForm = [
         'name' => '',
         'username' => '',
