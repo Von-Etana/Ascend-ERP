@@ -2172,7 +2172,7 @@
     @endif
 
     <!-- MODULE 8: AI AGENTS ENHANCED -->
-    @if ($moduleKey === 'ai-agents')
+    @if ($moduleKey === 'ai-agents' || $moduleKey === 'agents')
         @if ($activeTab === 'agents' || empty($activeTab))
             <div class="space-y-6">
                 <!-- AI Fleet Overview Header -->
