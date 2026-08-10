@@ -2278,3 +2278,9 @@
 [2026-08-10 08:09:15] testing.WARNING: AI Provider priority [0] failed: Primary rate limited. Attempting next fallback provider.  
 [2026-08-10 08:09:15] testing.WARNING: AI Provider priority [0] failed: Primary failed. Attempting next fallback provider.  
 [2026-08-10 08:09:15] testing.WARNING: AI Provider priority [1] failed: Secondary failed. Attempting next fallback provider.  
+[2026-08-10 08:13:26] testing.WARNING: AI Provider priority [0] failed: Primary rate limited. Attempting next fallback provider.  
+[2026-08-10 08:13:27] testing.WARNING: AI Provider priority [0] failed: Primary failed. Attempting next fallback provider.  
+[2026-08-10 08:13:27] testing.WARNING: AI Provider priority [1] failed: Secondary failed. Attempting next fallback provider.  
+[2026-08-10 08:19:49] testing.WARNING: AI Provider priority [0] failed: Primary rate limited. Attempting next fallback provider.  
+[2026-08-10 08:19:49] testing.WARNING: AI Provider priority [0] failed: Primary failed. Attempting next fallback provider.  
+[2026-08-10 08:19:49] testing.WARNING: AI Provider priority [1] failed: Secondary failed. Attempting next fallback provider.  

@@ -129,5 +129,30 @@ class EnterpriseModuleSeeder extends Seeder
             'total' => 91375.00,
             'payment_method' => 'card',
         ]);
+
+        // 8. Super Admin User & System Options
+        \Illuminate\Support\Facades\DB::table('users')->updateOrInsert(
+            ['email' => 'admin@ascendsystems.ng'],
+            [
+                'name' => 'Ascend Administrator',
+                'username' => 'admin',
+                'password' => \Illuminate\Support\Facades\Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'timezone' => 'Africa/Lagos',
+                'locale' => 'en',
+                'is_super_admin' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        \Illuminate\Support\Facades\DB::table('options')->updateOrInsert(
+            ['name' => 'installer_completed_at'],
+            [
+                'value' => now()->toIso8601String(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }
