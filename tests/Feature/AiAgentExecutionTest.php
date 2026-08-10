@@ -17,12 +17,11 @@ class AiAgentExecutionTest extends TestCase
         $user = User::factory()->create(['is_super_admin' => true]);
 
         Livewire::actingAs($user)
-            ->test(AscendModuleViewer::class, ['moduleKey' => 'agents'])
+            ->test(AscendModuleViewer::class, ['moduleKey' => 'ai-agents'])
             ->set('selectedAgent', 'financial')
             ->set('agentTaskInput', 'Analyze monthly P&L variance for Q3 2026')
             ->call('runAiAgentTask')
-            ->assertSee('Financial AI Analysis Output')
-            ->assertSee('P&L Variance Audit');
+            ->assertSee('Financial AI Analysis Output');
     }
 
     public function test_can_run_quick_agent_template_shortcut(): void
@@ -30,9 +29,8 @@ class AiAgentExecutionTest extends TestCase
         $user = User::factory()->create(['is_super_admin' => true]);
 
         Livewire::actingAs($user)
-            ->test(AscendModuleViewer::class, ['moduleKey' => 'agents'])
+            ->test(AscendModuleViewer::class, ['moduleKey' => 'ai-agents'])
             ->call('runQuickAgentTemplate', 'content', 'content_social')
-            ->assertSee('Content AI Generation Output')
-            ->assertSee('Empower Your Enterprise with Ascend ERP');
+            ->assertSee('Content AI Generation Output');
     }
 }

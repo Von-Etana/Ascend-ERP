@@ -2173,7 +2173,7 @@
 
     <!-- MODULE 8: AI AGENTS ENHANCED -->
     @if ($moduleKey === 'ai-agents' || $moduleKey === 'agents')
-        @if ($activeTab === 'agents' || empty($activeTab))
+        @if ($activeTab === 'agents' || $activeTab === 'caption' || $activeTab === 'overview' || empty($activeTab))
             <div class="space-y-6">
                 <!-- AI Fleet Overview Header -->
                 <div class="rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 dark:border-purple-900/40 dark:from-purple-950/30 dark:to-indigo-950/20">
@@ -2279,10 +2279,10 @@
                                 @foreach ($agentLogs as $log)
                                     <div class="rounded-xl border border-slate-100 p-3 text-xs dark:border-slate-800 space-y-1">
                                         <div class="flex items-center justify-between">
-                                            <span class="font-bold text-purple-600 uppercase text-[9px]">{{ $log['agent_name'] ?? $log['agent_id'] }}</span>
-                                            <span class="text-[9px] text-slate-400 font-mono">{{ $log['ms'] }}ms &bull; {{ $log['tokens'] ?? 420 }} tokens</span>
+                                            <span class="font-bold text-purple-600 uppercase text-[9px]">{{ $log['agent_name'] ?? $log['agent'] ?? $log['agent_id'] ?? 'AI Agent' }}</span>
+                                            <span class="text-[9px] text-slate-400 font-mono">{{ $log['ms'] ?? 0 }}ms &bull; {{ $log['tokens'] ?? 420 }} tokens</span>
                                         </div>
-                                        <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ $log['prompt'] }}</p>
+                                        <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ $log['prompt'] ?? $log['task'] ?? 'System Task' }}</p>
                                         <p class="text-[10px] text-slate-400 font-mono">{{ $log['time'] ?? 'Just now' }} &bull; {{ $log['user'] ?? 'Super Admin' }}</p>
                                     </div>
                                 @endforeach
