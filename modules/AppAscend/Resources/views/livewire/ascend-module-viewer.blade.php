@@ -2211,6 +2211,34 @@
                     @endforeach
                 </div>
 
+                <!-- Quick Template Action Shortcuts -->
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 mb-3">{{ __('1-Click Quick AI Action Templates') }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" wire:click="runQuickAgentTemplate('content', 'content_social')" class="rounded-xl bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition">
+                            <i class="fa-light fa-share-nodes mr-1.5"></i>Generate LinkedIn Post
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('content', 'content_ad_copy')" class="rounded-xl bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition">
+                            <i class="fa-light fa-rectangle-ad mr-1.5"></i>Generate Meta Ad Copy
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('financial', 'financial_variance')" class="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition">
+                            <i class="fa-light fa-chart-pie mr-1.5"></i>Analyze P&L Variance
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('inbox', 'inbox_triage')" class="rounded-xl bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition">
+                            <i class="fa-light fa-headset mr-1.5"></i>Triage Support Messages
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('crm', 'crm_qualification')" class="rounded-xl bg-sky-500/10 border border-sky-500/20 px-3 py-1.5 text-xs font-bold text-sky-600 hover:bg-sky-500/20 transition">
+                            <i class="fa-light fa-user-check mr-1.5"></i>Score Inbound Leads
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('seo', 'seo_audit')" class="rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition">
+                            <i class="fa-light fa-magnifying-glass-chart mr-1.5"></i>Audit SEO Keywords
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('ads', 'ads_roas')" class="rounded-xl bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-500/20 transition">
+                            <i class="fa-light fa-bullseye-arrow mr-1.5"></i>Optimize Campaign ROAS
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Interactive Task Queue & Log Stream -->
                 <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
                     <!-- Task Input & Output Panel -->
@@ -2223,7 +2251,7 @@
                             <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Instruction / Task Prompt') }}</label>
                             <textarea wire:model="agentTaskInput" rows="4" placeholder="e.g. Generate 3 high-converting ad headlines for our Lagos POS sale launching next week..." class="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
                         </div>
-                        <button type="button" wire:click="dispatchAgentTask" class="w-full rounded-xl bg-purple-600 py-3 text-sm font-bold text-white hover:bg-purple-700 transition shadow-lg shadow-purple-500/20">
+                        <button type="button" wire:click="runAiAgentTask" class="w-full rounded-xl bg-purple-600 py-3 text-sm font-bold text-white hover:bg-purple-700 transition shadow-lg shadow-purple-500/20">
                             <i class="fa-light fa-paper-plane-top mr-2"></i> {{ __('Dispatch Agent Task Now') }}
                         </button>
 
@@ -2231,9 +2259,9 @@
                             <div class="rounded-2xl border border-purple-200 bg-purple-50/70 p-5 dark:border-purple-900/60 dark:bg-purple-950/40 space-y-2">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-bold text-purple-700 dark:text-purple-300">✓ Agent Execution Result</span>
-                                    <button type="button" wire:click="clearAgentResult" class="text-[10px] font-bold text-slate-400 hover:text-slate-600">Clear</button>
+                                    <button type="button" wire:click="$set('agentResult', '')" class="text-[10px] font-bold text-slate-400 hover:text-slate-600">Clear</button>
                                 </div>
-                                <p class="text-xs text-slate-800 dark:text-purple-100 font-medium leading-relaxed">{{ $agentResult }}</p>
+                                <div class="text-xs text-slate-800 dark:text-purple-100 font-medium leading-relaxed whitespace-pre-line">{!! nl2br(e($agentResult)) !!}</div>
                             </div>
                         @endif
                     </section>
@@ -2251,10 +2279,11 @@
                                 @foreach ($agentLogs as $log)
                                     <div class="rounded-xl border border-slate-100 p-3 text-xs dark:border-slate-800 space-y-1">
                                         <div class="flex items-center justify-between">
-                                            <span class="font-bold text-purple-600 uppercase text-[9px]">{{ $log['agent'] }}</span>
-                                            <span class="text-[9px] text-slate-400 font-mono">{{ $log['ms'] }}ms</span>
+                                            <span class="font-bold text-purple-600 uppercase text-[9px]">{{ $log['agent_name'] ?? $log['agent_id'] }}</span>
+                                            <span class="text-[9px] text-slate-400 font-mono">{{ $log['ms'] }}ms &bull; {{ $log['tokens'] ?? 420 }} tokens</span>
                                         </div>
-                                        <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ $log['task'] }}</p>
+                                        <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ $log['prompt'] }}</p>
+                                        <p class="text-[10px] text-slate-400 font-mono">{{ $log['time'] ?? 'Just now' }} &bull; {{ $log['user'] ?? 'Super Admin' }}</p>
                                     </div>
                                 @endforeach
                             </div>
