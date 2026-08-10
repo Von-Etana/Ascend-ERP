@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\AdminUser\Models\User;
 use Tests\TestCase;
 
 class HrPayrollPdfTest extends TestCase
@@ -12,7 +12,7 @@ class HrPayrollPdfTest extends TestCase
 
     public function test_payslip_pdf_download_generates_successful_response(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_super_admin' => true]);
 
         $response = $this->actingAs($user)->get(route('portal.payslip.pdf', ['id' => 1]));
 
