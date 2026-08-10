@@ -364,6 +364,9 @@
                                         <a href="{{ route('portal.invoice.pdf', $inv) }}" target="_blank" class="inline-flex items-center gap-1 font-bold text-rose-600 hover:underline text-xs">
                                             <i class="fa-light fa-file-pdf"></i>PDF
                                         </a>
+                                        <a href="{{ route('portal.delivery-note.pdf', $inv) }}" target="_blank" class="inline-flex items-center gap-1 font-bold text-sky-600 hover:underline text-xs" title="Download Delivery Note PDF">
+                                            <i class="fa-light fa-truck"></i>Delivery Note
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
