@@ -2757,6 +2757,8 @@
                 </div>
             </div>
         </section>
+    @endif
+
     <!-- MODULE 11: ADMINISTRATION & NOTIFICATIONS CENTRE -->
     @if ($moduleKey === 'administration')
         @if ($activeTab === 'notifications')
