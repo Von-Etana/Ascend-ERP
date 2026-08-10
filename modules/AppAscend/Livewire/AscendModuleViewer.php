@@ -135,7 +135,7 @@ class AscendModuleViewer extends Component
         'body' => '',
         'cta_text' => 'Learn More',
         'cta_url' => '',
-        'footer' => 'Ascend Systems Nigeria — Lagos HQ',
+        'footer' => 'Ascend Systems Nigeria Limited — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
     ];
 
     public array $crmContacts = [];
@@ -1179,7 +1179,7 @@ class AscendModuleViewer extends Component
             'body' => '',
             'cta_text' => 'Learn More',
             'cta_url' => '',
-            'footer' => 'Ascend Systems Nigeria — Lagos HQ',
+            'footer' => 'Ascend Systems Nigeria Limited — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
         ];
     }
 
@@ -1727,7 +1727,7 @@ class AscendModuleViewer extends Component
                 'body' => '',
                 'cta_text' => 'Learn More',
                 'cta_url' => '',
-                'footer' => 'Ascend Systems Nigeria — Lagos HQ',
+                'footer' => 'Ascend Systems Nigeria Limited — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
             ];
         }
 

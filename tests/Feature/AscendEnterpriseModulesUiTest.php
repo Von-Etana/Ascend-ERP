@@ -124,7 +124,7 @@ test('pos fast retail checkout barcode scanning digital receipt thermal printing
         ->call('reprintPosReceipt', 'REC-12345')
         ->assertSet('showModal', true)
         ->assertSet('modalType', 'pos_receipt')
-        ->assertSee('Ascend Systems POS Receipt')
+        ->assertSee('Ascend Systems')
         ->assertSee('Print Thermal Receipt')
         ->call('printBarcodeLabel', 'POS-HDW-004', 50)
         ->assertSet('showModal', true)

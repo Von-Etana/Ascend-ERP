@@ -3083,12 +3083,16 @@
                     </div>
                 @elseif ($modalType === 'pos_receipt' && $modalData)
                     <div class="text-center border-b pb-4 dark:border-slate-800">
-                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500">
-                            <i class="fa-light fa-circle-check text-4xl"></i>
+                        <div class="mx-auto inline-flex items-center gap-2 rounded-2xl bg-orange-600 px-3 py-1.5 text-xs font-black text-white shadow-sm mb-2">
+                            <span>▲</span> ASCEND AI POS STATION
                         </div>
-                        <h3 class="mt-3 text-xl font-bold text-slate-950 dark:text-white">Ascend Systems POS Receipt</h3>
-                        <p class="text-xs text-slate-400 mt-1">Receipt #: {{ $modalData['receipt_no'] }} · {{ $modalData['date'] }}</p>
-                        <p class="text-xs font-bold text-emerald-600 mt-0.5">Method: {{ $modalData['payment_method'] }} · Customer: {{ $modalData['customer'] ?? 'Walk-in Retail Client' }}</p>
+                        <h3 class="text-xl font-black text-slate-950 dark:text-white">Ascend Systems Nigeria Limited</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</p>
+                        <p class="text-[11px] font-semibold text-slate-400">Call: +234 811 763 3020 &nbsp;|&nbsp; Mail: info@ascendsystems.ng</p>
+                        <div class="mt-3 rounded-xl bg-slate-100 p-2 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                            Receipt #: <span class="font-mono text-orange-600">{{ $modalData['receipt_no'] }}</span> &nbsp;·&nbsp; {{ $modalData['date'] }}
+                        </div>
+                        <p class="text-xs font-bold text-emerald-600 mt-1.5">Method: {{ $modalData['payment_method'] }} &nbsp;·&nbsp; Customer: {{ $modalData['customer'] ?? 'Walk-in Retail Client' }}</p>
                     </div>
 
                     <div class="mt-4 space-y-2.5 text-sm border-b pb-4 dark:border-slate-800">

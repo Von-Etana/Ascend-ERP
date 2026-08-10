@@ -9,27 +9,37 @@ use Illuminate\Http\Response;
 
 class PdfExportController
 {
+    protected array $companyInfo = [
+        'companyName'    => 'Ascend Systems Nigeria Limited',
+        'companyAddress' => 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.',
+        'companyPhone'   => '+234 811 763 3020',
+        'companyEmail'   => 'info@ascendsystems.ng',
+    ];
+
     public function downloadInvoice(Invoice $invoice): Response
     {
-        $pdf = Pdf::loadView('pdf.invoice', [
+        $pdf = Pdf::loadView('pdf.invoice', array_merge([
             'invoice' => $invoice,
-            'companyName' => 'Ascend Systems Ltd',
-            'companyAddress' => 'Plot 1042, Constitution Avenue, Central Business District, Abuja HQ, Nigeria',
-            'companyPhone' => '+234 9 876 5432 / +234 803 000 1122',
-            'companyEmail' => 'admin@ascendsystems.ng',
-        ]);
+        ], $this->companyInfo));
 
         return $pdf->download('Invoice-'.$invoice->invoice_number.'.pdf');
     }
 
     public function downloadReceipt(PosReceipt $receipt): Response
     {
-        $pdf = Pdf::loadView('pdf.receipt', [
+        $pdf = Pdf::loadView('pdf.receipt', array_merge([
             'receipt' => $receipt,
-            'companyName' => 'Ascend Systems Ltd',
-            'companyAddress' => 'Abuja HQ Terminal #01 · CBD, Abuja',
-        ]);
+        ], $this->companyInfo));
 
         return $pdf->download('Receipt-'.$receipt->receipt_number.'.pdf');
+    }
+
+    public function downloadDeliveryNote(Invoice $invoice): Response
+    {
+        $pdf = Pdf::loadView('pdf.delivery_note', array_merge([
+            'invoice' => $invoice,
+        ], $this->companyInfo));
+
+        return $pdf->download('DeliveryNote-'.$invoice->invoice_number.'.pdf');
     }
 }
