@@ -36,16 +36,26 @@ return new class extends Migration
         // Extend expenses table
         if (Schema::hasTable('expenses')) {
             $cols = Schema::getColumnListing('expenses');
-            if (! in_array('receipt_path', $cols)) {
-                Schema::table('expenses', function (Blueprint $table) {
-                    $table->string('receipt_path')->nullable()->after('description');
-                    $table->string('receipt_original_name')->nullable()->after('receipt_path');
-                    $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending')->after('receipt_original_name');
-                    $table->unsignedBigInteger('approved_by')->nullable()->after('approval_status');
-                    $table->timestamp('approved_at')->nullable()->after('approved_by');
-                    $table->string('reference')->nullable()->after('approved_at');
-                });
-            }
+            Schema::table('expenses', function (Blueprint $table) use ($cols) {
+                if (! in_array('receipt_path', $cols)) {
+                    $table->string('receipt_path')->nullable();
+                }
+                if (! in_array('receipt_original_name', $cols)) {
+                    $table->string('receipt_original_name')->nullable();
+                }
+                if (! in_array('approval_status', $cols)) {
+                    $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending');
+                }
+                if (! in_array('approved_by', $cols)) {
+                    $table->unsignedBigInteger('approved_by')->nullable();
+                }
+                if (! in_array('approved_at', $cols)) {
+                    $table->timestamp('approved_at')->nullable();
+                }
+                if (! in_array('reference', $cols)) {
+                    $table->string('reference')->nullable();
+                }
+            });
         }
 
         // AI Finance Insights cache table
@@ -71,24 +81,41 @@ return new class extends Migration
                 $table->id();
                 $table->string('name');
                 $table->string('category')->default('General');
-                $table->string('subject');
-                $table->longText('body');
+                $table->string('subject')->nullable();
+                $table->longText('body')->nullable();
                 $table->string('cta_text')->nullable();
                 $table->string('cta_url')->nullable();
                 $table->string('footer')->nullable();
-                $table->enum('status', ['active', 'draft', 'archived'])->default('draft');
+                $table->string('status')->default('draft');
                 $table->json('stats')->nullable(); // open_rate, click_rate
                 $table->unsignedBigInteger('user_id')->nullable();
                 $table->timestamps();
             });
         } else {
-            // Ensure stats column exists
-            if (! in_array('stats', Schema::getColumnListing('email_templates'))) {
-                Schema::table('email_templates', function (Blueprint $table) {
-                    $table->json('stats')->nullable()->after('status');
-                    $table->unsignedBigInteger('user_id')->nullable()->after('stats');
-                });
-            }
+            $existingCols = Schema::getColumnListing('email_templates');
+            Schema::table('email_templates', function (Blueprint $table) use ($existingCols) {
+                if (! in_array('status', $existingCols)) {
+                    $table->string('status')->default('draft')->nullable();
+                }
+                if (! in_array('stats', $existingCols)) {
+                    $table->json('stats')->nullable();
+                }
+                if (! in_array('user_id', $existingCols)) {
+                    $table->unsignedBigInteger('user_id')->nullable();
+                }
+                if (! in_array('body', $existingCols)) {
+                    $table->longText('body')->nullable();
+                }
+                if (! in_array('cta_text', $existingCols)) {
+                    $table->string('cta_text')->nullable();
+                }
+                if (! in_array('cta_url', $existingCols)) {
+                    $table->string('cta_url')->nullable();
+                }
+                if (! in_array('footer', $existingCols)) {
+                    $table->string('footer')->nullable();
+                }
+            });
         }
 
         // WhatsApp Templates table
