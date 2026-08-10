@@ -16,6 +16,7 @@ class Invoice extends Model
         'total',
         'status',
         'notes',
+        'items',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class Invoice extends Model
             'subtotal' => 'decimal:2',
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
+            'items' => 'array',
         ];
     }
 }

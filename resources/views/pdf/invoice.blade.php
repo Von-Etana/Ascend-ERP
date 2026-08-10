@@ -68,18 +68,35 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 70%;">Description / Line Item</th>
-                <th style="text-align: right; width: 30%;">Amount (NGN)</th>
+                <th style="width: 50%;">Description / Line Item</th>
+                <th style="text-align: center; width: 15%;">Qty</th>
+                <th style="text-align: right; width: 17%;">Unit Price</th>
+                <th style="text-align: right; width: 18%;">Amount (NGN)</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>
-                    <div style="font-weight: bold; color: #0f172a; font-size: 13px;">{{ $invoice->notes ?: 'Enterprise Software & Services Package' }}</div>
-                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Official Billing Invoice from Ascend Systems HQ — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</div>
-                </td>
-                <td style="text-align: right; font-weight: bold; font-size: 13px; color: #0f172a;">₦{{ number_format($invoice->subtotal, 2) }}</td>
-            </tr>
+            @if (!empty($invoice->items) && is_array($invoice->items))
+                @foreach ($invoice->items as $item)
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold; color: #0f172a; font-size: 12px;">{{ $item['description'] ?? 'Line Item' }}</div>
+                        </td>
+                        <td style="text-align: center; font-weight: bold; font-size: 12px;">{{ $item['quantity'] ?? 1 }}</td>
+                        <td style="text-align: right; font-weight: 500; font-size: 12px;">₦{{ number_format($item['unit_price'] ?? 0, 2) }}</td>
+                        <td style="text-align: right; font-weight: bold; font-size: 12px; color: #0f172a;">₦{{ number_format($item['amount'] ?? (($item['quantity'] ?? 1) * ($item['unit_price'] ?? 0)), 2) }}</td>
+                    </tr>
+                @endforeach
+            @else
+                <tr>
+                    <td>
+                        <div style="font-weight: bold; color: #0f172a; font-size: 13px;">{{ $invoice->notes ?: 'Enterprise Software & Services Package' }}</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Official Billing Invoice from Ascend Systems HQ — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</div>
+                    </td>
+                    <td style="text-align: center; font-weight: bold;">1</td>
+                    <td style="text-align: right;">₦{{ number_format($invoice->subtotal, 2) }}</td>
+                    <td style="text-align: right; font-weight: bold; font-size: 13px; color: #0f172a;">₦{{ number_format($invoice->subtotal, 2) }}</td>
+                </tr>
+            @endif
         </tbody>
     </table>
 

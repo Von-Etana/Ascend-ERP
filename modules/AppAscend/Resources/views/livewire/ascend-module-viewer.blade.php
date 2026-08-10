@@ -3139,10 +3139,13 @@
                     </div>
 
                     <div class="mt-4 space-y-4">
-                        <!-- Barcode Scanner Quick Input -->
+                        <!-- Barcode Scanner Quick Input & Add Custom Line -->
                         <form wire:submit.prevent="scanBarcode" class="flex items-center gap-2">
                             <input type="text" wire:model="barcodeScannerInput" placeholder="Scan SKU barcode (e.g. POS-HDW-004)..." class="w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             <button type="submit" class="shrink-0 rounded-2xl bg-orange-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-orange-700">Scan</button>
+                            <button type="button" wire:click="addToPosCart('CUSTOM-ITEM', 'Custom Line Item', 35000)" class="shrink-0 rounded-2xl border border-orange-600/30 bg-orange-500/10 px-3.5 py-2 text-xs font-bold text-orange-600 hover:bg-orange-500/20 transition">
+                                <i class="fa-light fa-plus mr-1"></i>+ Add Line Item
+                            </button>
                         </form>
 
                         <!-- Customer Details -->
@@ -3232,6 +3235,31 @@
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Due Date</label>
                                 <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Invoice Line Items Section -->
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">{{ __('Invoice Line Items') }}</span>
+                                <button type="button" wire:click="addInvoiceLine" class="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                    <i class="fa-light fa-plus mr-1"></i>{{ __('Add New Line Item') }}
+                                </button>
+                            </div>
+
+                            <div class="space-y-2">
+                                @foreach ($invoiceItems as $index => $item)
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" wire:model.live="invoiceItems.{{ $index }}.description" wire:change="updateInvoiceLineItem({{ $index }}, 'description', $event.target.value)" placeholder="Line description..." class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                        <input type="number" min="1" wire:model.live="invoiceItems.{{ $index }}.quantity" wire:change="updateInvoiceLineItem({{ $index }}, 'quantity', $event.target.value)" placeholder="Qty" class="w-16 rounded-xl border border-slate-200 p-2 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                        <input type="number" step="0.01" wire:model.live="invoiceItems.{{ $index }}.unit_price" wire:change="updateInvoiceLineItem({{ $index }}, 'unit_price', $event.target.value)" placeholder="Price (NGN)" class="w-32 rounded-xl border border-slate-200 p-2 text-xs font-bold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                        @if (count($invoiceItems) > 1)
+                                            <button type="button" wire:click="removeInvoiceLine({{ $index }})" class="p-2 text-slate-400 hover:text-rose-500 text-xs shrink-0">
+                                                <i class="fa-light fa-trash-can"></i>
+                                            </button>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
 

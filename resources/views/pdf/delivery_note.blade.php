@@ -62,22 +62,35 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 15%;">SKU / Code</th>
+                <th style="width: 15%;">SKU / Line</th>
                 <th style="width: 55%;">Item Description</th>
                 <th style="text-align: center; width: 15%;">Qty Dispatched</th>
                 <th style="text-align: center; width: 15%;">Condition</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="font-family: monospace; font-weight: bold; color: #0284c7;">HDW-ASC-01</td>
-                <td>
-                    <div style="font-weight: bold; color: #0f172a; font-size: 13px;">{{ $invoice->notes ?: 'Enterprise Software & Hardware Package' }}</div>
-                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dispatched from Ascend Systems HQ — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</div>
-                </td>
-                <td style="text-align: center; font-weight: bold; font-size: 13px;">1 Lot</td>
-                <td style="text-align: center; font-weight: bold; color: #16a34a;">Good / Sealed</td>
-            </tr>
+            @if (!empty($invoice->items) && is_array($invoice->items))
+                @foreach ($invoice->items as $index => $item)
+                    <tr>
+                        <td style="font-family: monospace; font-weight: bold; color: #0284c7;">LINE-0{{ $index + 1 }}</td>
+                        <td>
+                            <div style="font-weight: bold; color: #0f172a; font-size: 12px;">{{ $item['description'] ?? 'Item Line' }}</div>
+                        </td>
+                        <td style="text-align: center; font-weight: bold; font-size: 12px;">{{ $item['quantity'] ?? 1 }}</td>
+                        <td style="text-align: center; font-weight: bold; color: #16a34a;">Good / Sealed</td>
+                    </tr>
+                @endforeach
+            @else
+                <tr>
+                    <td style="font-family: monospace; font-weight: bold; color: #0284c7;">HDW-ASC-01</td>
+                    <td>
+                        <div style="font-weight: bold; color: #0f172a; font-size: 13px;">{{ $invoice->notes ?: 'Enterprise Software & Hardware Package' }}</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dispatched from Ascend Systems HQ — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</div>
+                    </td>
+                    <td style="text-align: center; font-weight: bold; font-size: 13px;">1 Lot</td>
+                    <td style="text-align: center; font-weight: bold; color: #16a34a;">Good / Sealed</td>
+                </tr>
+            @endif
         </tbody>
     </table>
 

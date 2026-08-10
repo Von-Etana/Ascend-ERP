@@ -33,6 +33,26 @@ return new class extends Migration
             });
         }
 
+        // Extend invoices table with items JSON
+        if (Schema::hasTable('invoices')) {
+            $cols = Schema::getColumnListing('invoices');
+            if (! in_array('items', $cols)) {
+                Schema::table('invoices', function (Blueprint $table) {
+                    $table->json('items')->nullable();
+                });
+            }
+        }
+
+        // Extend pos_receipts table with items JSON
+        if (Schema::hasTable('pos_receipts')) {
+            $cols = Schema::getColumnListing('pos_receipts');
+            if (! in_array('items', $cols)) {
+                Schema::table('pos_receipts', function (Blueprint $table) {
+                    $table->json('items')->nullable();
+                });
+            }
+        }
+
         // Extend expenses table
         if (Schema::hasTable('expenses')) {
             $cols = Schema::getColumnListing('expenses');

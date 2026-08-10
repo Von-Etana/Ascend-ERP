@@ -13,6 +13,7 @@ class PosReceipt extends Model
         'tax',
         'total',
         'payment_method',
+        'items',
     ];
 
     protected function casts(): array
@@ -21,6 +22,7 @@ class PosReceipt extends Model
             'subtotal' => 'decimal:2',
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
+            'items' => 'array',
         ];
     }
 }

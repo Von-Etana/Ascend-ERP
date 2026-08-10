@@ -226,6 +226,53 @@ class AscendModuleViewer extends Component
         'permissions' => [],
     ];
 
+    // === DYNAMIC LINE ITEMS FOR INVOICES, RECEIPTS & DELIVERY NOTES ===
+    public array $invoiceItems = [
+        ['description' => 'Enterprise Software & Services Package', 'quantity' => 1, 'unit_price' => 250000.00, 'amount' => 250000.00],
+    ];
+
+    public function addInvoiceLine(): void
+    {
+        $this->invoiceItems[] = [
+            'description' => 'Additional Line Item #' . (count($this->invoiceItems) + 1),
+            'quantity' => 1,
+            'unit_price' => 50000.00,
+            'amount' => 50000.00,
+        ];
+        $this->recalculateInvoiceTotals();
+    }
+
+    public function removeInvoiceLine(int $index): void
+    {
+        if (isset($this->invoiceItems[$index])) {
+            unset($this->invoiceItems[$index]);
+            $this->invoiceItems = array_values($this->invoiceItems);
+            $this->recalculateInvoiceTotals();
+        }
+    }
+
+    public function updateInvoiceLineItem(int $index, string $field, mixed $value): void
+    {
+        if (isset($this->invoiceItems[$index])) {
+            $this->invoiceItems[$index][$field] = $value;
+            $qty = (float) ($this->invoiceItems[$index]['quantity'] ?? 1);
+            $price = (float) ($this->invoiceItems[$index]['unit_price'] ?? 0);
+            $this->invoiceItems[$index]['amount'] = $qty * $price;
+            $this->recalculateInvoiceTotals();
+        }
+    }
+
+    public function recalculateInvoiceTotals(): void
+    {
+        $subtotal = collect($this->invoiceItems)->sum(fn($item) => (float) ($item['amount'] ?? 0));
+        $tax = $subtotal * 0.075;
+        $total = $subtotal + $tax;
+
+        $this->form['subtotal'] = number_format($subtotal, 2, '.', '');
+        $this->form['tax'] = number_format($tax, 2, '.', '');
+        $this->form['total'] = number_format($total, 2, '.', '');
+    }
+
     public function mount(string $moduleKey = 'finance'): void
     {
         $this->moduleKey = $moduleKey;
@@ -1794,6 +1841,7 @@ class AscendModuleViewer extends Component
                     'total' => $total,
                     'status' => 'pending',
                     'notes' => $this->form['notes'] ?: 'Created via finance module modal',
+                    'items' => $this->invoiceItems,
                 ]),
             },
             'crm' => match ($this->modalType) {

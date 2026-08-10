@@ -32,10 +32,23 @@
     <div class="divider"></div>
 
     <table class="table">
-        <tr>
-            <td class="bold">Item Subtotal</td>
-            <td class="text-right bold">₦{{ number_format($receipt->subtotal, 2) }}</td>
-        </tr>
+        @if (!empty($receipt->items) && is_array($receipt->items))
+            @foreach ($receipt->items as $item)
+                <tr>
+                    <td>{{ $item['name'] ?? $item['description'] ?? 'Item' }} (x{{ $item['quantity'] ?? 1 }})</td>
+                    <td class="text-right">₦{{ number_format(($item['price'] ?? $item['unit_price'] ?? 0) * ($item['quantity'] ?? 1), 2) }}</td>
+                </tr>
+            @endforeach
+            <tr style="border-top: 1px dotted #000;">
+                <td class="bold">Subtotal</td>
+                <td class="text-right bold">₦{{ number_format($receipt->subtotal, 2) }}</td>
+            </tr>
+        @else
+            <tr>
+                <td class="bold">Item Subtotal</td>
+                <td class="text-right bold">₦{{ number_format($receipt->subtotal, 2) }}</td>
+            </tr>
+        @endif
         <tr>
             <td>VAT (7.5%)</td>
             <td class="text-right">₦{{ number_format($receipt->tax, 2) }}</td>
