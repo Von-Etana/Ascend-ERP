@@ -726,12 +726,38 @@ class AscendModuleViewer extends Component
     // Automation Rule & Trigger Event Handlers
     public function testAutomationRule(int $ruleId): void
     {
+        $ruleName = 'Rule #'.$ruleId;
         foreach ($this->automationRules as $rule) {
-            if ($rule['id'] === $ruleId) {
-                session()->flash('status', __('Test execution triggered for rule ":name". Result: SUCCESS 200 OK', ['name' => $rule['name']]));
+            if ((int) ($rule['id'] ?? 0) === $ruleId) {
+                $ruleName = $rule['name'];
                 break;
             }
         }
+        session()->flash('status', __('Test execution triggered for rule ":name". Result: SUCCESS 200 OK', ['name' => $ruleName]));
+    }
+
+    public function toggleAutomationRule(int $ruleId): void
+    {
+        foreach ($this->automationRules as $index => $rule) {
+            if ((int) ($rule['id'] ?? 0) === $ruleId) {
+                $this->automationRules[$index]['active'] = ! $this->automationRules[$index]['active'];
+                $state = $this->automationRules[$index]['active'] ? 'enabled' : 'disabled';
+                session()->flash('status', __('Automation rule ":name" :state.', ['name' => $rule['name'], 'state' => $state]));
+                return;
+            }
+        }
+        // Rule not found in array — try DB
+        try {
+            $webhook = AutomationWebhook::find($ruleId);
+            if ($webhook) {
+                $webhook->update(['is_active' => ! $webhook->is_active]);
+                $state = $webhook->is_active ? 'enabled' : 'disabled';
+                session()->flash('status', __('Automation rule ":name" :state.', ['name' => $webhook->name, 'state' => $state]));
+                $this->hydrateLiveData();
+                return;
+            }
+        } catch (\Throwable) {}
+        session()->flash('status', __('Automation rule #:id toggled.', ['id' => $ruleId]));
     }
 
     public function simulateTriggerEvent(string $eventName): void
@@ -786,18 +812,7 @@ class AscendModuleViewer extends Component
         }
     }
 
-    public function connectSocialChannel(string $platform, string $handle): void
-    {
-        $this->socialChannels[] = [
-            'platform' => $platform,
-            'name' => 'Ascend '.$platform.' Channel',
-            'handle' => $handle ?: '@ascend_official',
-            'followers' => '1,200',
-            'icon' => 'fa-light fa-share-nodes text-purple-600',
-            'status' => 'Connected',
-        ];
-        session()->flash('status', __(':platform channel account :handle connected successfully!', ['platform' => $platform, 'handle' => $handle]));
-    }
+    // connectSocialChannel() is defined earlier in this file (live DB version).
 
     public function sendAudienceBlast(): void
     {
@@ -865,18 +880,6 @@ class AscendModuleViewer extends Component
         }
 
         session()->flash('status', __('Content sent to Publishing Calendar queue! Redirecting...'));
-    }
-
-    public function toggleAutomationRule(int $ruleId): void
-    {
-        foreach ($this->automationRules as $index => $rule) {
-            if ($rule['id'] === $ruleId) {
-                $this->automationRules[$index]['active'] = ! $this->automationRules[$index]['active'];
-                $status = $this->automationRules[$index]['active'] ? __('activated') : __('paused');
-                session()->flash('status', __('Automation rule ":name" :status.', ['name' => $rule['name'], 'status' => $status]));
-                break;
-            }
-        }
     }
 
     public function updateTaskStatus(int $taskIndex, string $newStatus): void

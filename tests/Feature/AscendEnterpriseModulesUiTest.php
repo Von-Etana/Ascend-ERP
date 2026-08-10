@@ -182,6 +182,8 @@ test('marketing hub multi-channel campaigns social channels audience blasts and 
         ->assertSee('Create & Dispatch Audience Broadcast')
         ->call('sendTestBlast')
         ->assertSee('Test email blast preview sent')
+        ->set('blastForm.subject', 'Q3 ERP Feature Broadcast')
+        ->set('blastForm.segment', 'All Active Clients')
         ->call('sendAudienceBlast')
         ->assertSee('dispatched successfully')
         ->call('setTab', 'analytics')
