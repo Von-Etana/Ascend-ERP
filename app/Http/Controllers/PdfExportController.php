@@ -75,4 +75,40 @@ class PdfExportController
 
         return $pdf->download('DeliveryNote-'.$invoice->invoice_number.'.pdf');
     }
+
+    public function downloadPayslip(int $id): Response
+    {
+        $salaryRecord = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('salary_records')) {
+            $record = \Illuminate\Support\Facades\DB::table('salary_records')->where('id', $id)->first();
+            if ($record) {
+                $salaryRecord = (array) $record;
+            }
+        }
+
+        if (! $salaryRecord) {
+            $salaryRecord = [
+                'id' => $id,
+                'staff_name' => 'Babatunde Adeleke',
+                'role' => 'Senior Software Engineer',
+                'department' => 'Engineering & Operations',
+                'payroll_period' => date('F Y'),
+                'base_salary' => 650000.00,
+                'housing' => 162500.00,
+                'transport' => 97500.00,
+                'allowances' => 50000.00,
+                'paye_tax' => 115200.00,
+                'pension_employee' => 76800.00,
+                'nhf' => 16250.00,
+                'bank_name' => 'Access Bank Nigeria',
+                'account_number' => '0129481029',
+            ];
+        }
+
+        $pdf = Pdf::loadView('pdf.payslip', array_merge([
+            'salaryRecord' => $salaryRecord,
+        ], $this->getCompanyInfo()));
+
+        return $pdf->download('Payslip-'.$id.'-'.date('Ym').'.pdf');
+    }
 }

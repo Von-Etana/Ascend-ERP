@@ -2865,6 +2865,300 @@
         @endif
     @endif
 
+    <!-- MODULE 5: HUMAN RESOURCES & PAYROLL ENHANCED WORKSPACE -->
+    @if ($moduleKey === 'hr')
+        @if ($activeTab === 'employees')
+            <div class="space-y-6">
+                <!-- HR Summary KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Total Headcount') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600"><i class="fa-light fa-user-group"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-teal-600">{{ count($employees) }} Staff</p>
+                        <p class="mt-1 text-xs font-medium text-teal-500"><i class="fa-light fa-badge-check mr-1"></i>Active full-time workforce</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Monthly Base Payroll') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-money-bill-wave"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format(array_sum(array_column($employees, 'base_salary')), 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">Basic monthly commitment</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Active Departments') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-sitemap"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-purple-600">3 Depts</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500"><i class="fa-light fa-building mr-1"></i>Engineering, Product, QA</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Staff Retention Rate') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-heart-pulse"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-sky-600">96.8%</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+2.1% YTD retention</p>
+                    </div>
+                </div>
+
+                <!-- Staff Directory Table -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Employee Staff Directory & Pay Grades') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Manage staff profiles, pay grades, tax identification numbers, and banking details.') }}</p>
+                        </div>
+                        <button type="button" wire:click="openCreateModal('employee')" class="rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                            <i class="fa-light fa-user-plus mr-1.5"></i>{{ __('Add New Employee') }}
+                        </button>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Staff Member & ID</th>
+                                    <th class="px-4 py-3.5">Department & Role</th>
+                                    <th class="px-4 py-3.5">Basic Salary (NGN)</th>
+                                    <th class="px-4 py-3.5">Bank & Account No</th>
+                                    <th class="px-4 py-3.5">Tax TIN</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach ($employees as $emp)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-xs font-black text-teal-600">
+                                                    {{ strtoupper(substr($emp['name'], 0, 2)) }}
+                                                </span>
+                                                <div>
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $emp['name'] }}</p>
+                                                    <p class="font-mono text-[10px] text-slate-400">{{ $emp['staff_id'] }} &bull; {{ $emp['email'] }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <p class="font-bold text-slate-800 dark:text-slate-200">{{ $emp['role'] }}</p>
+                                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">{{ $emp['department'] }}</span>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($emp['base_salary'], 2) }}</td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-semibold text-slate-700 dark:text-slate-300">{{ $emp['bank'] }}</p>
+                                            <p class="font-mono text-slate-400">{{ $emp['acc_no'] }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-mono text-xs text-slate-500">{{ $emp['tin'] }}</td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <a href="/portal/payslip/{{ $emp['id'] }}/pdf" target="_blank" class="rounded-lg bg-teal-500/10 px-2.5 py-1 text-xs font-bold text-teal-600 hover:bg-teal-500/20 transition">
+                                                <i class="fa-light fa-file-pdf mr-1"></i>Payslip
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'payroll')
+            <div class="space-y-6">
+                <!-- Payroll Processing Studio Form -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Monthly Payroll Processing Studio & Statutory Calculator') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Process monthly salary disbursements with automated Nigerian PAYE Tax, 8% Employee Pension & NHF calculations.') }}</p>
+                        </div>
+                        <button type="button" wire:click="processPayrollRun" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition">
+                            <i class="fa-light fa-bolt mr-1.5"></i>{{ __('Disburse Monthly Payroll Run') }}
+                        </button>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Payroll Cycle Period</label>
+                            <input type="text" wire:model="payrollRunForm.period" placeholder="e.g. August 2026" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Performance Bonus (NGN)</label>
+                            <input type="number" wire:model="payrollRunForm.bonus_override" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Utility Allowance (NGN)</label>
+                            <input type="number" wire:model="payrollRunForm.allowance_override" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">PAYE Effective Rate (%)</label>
+                            <input type="number" wire:model="payrollRunForm.paye_rate" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payroll Disbursement Summary Table -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Disbursement Summary & Employee Payslip Stream') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Detailed breakdown of Gross Earnings, PAYE Tax, Pension deductions, and Net Take-Home Pay.') }}</p>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Staff Member</th>
+                                    <th class="px-4 py-3.5">Basic Salary</th>
+                                    <th class="px-4 py-3.5">Gross Earnings</th>
+                                    <th class="px-4 py-3.5">PAYE Tax (12%)</th>
+                                    <th class="px-4 py-3.5">Pension (8%)</th>
+                                    <th class="px-4 py-3.5">Net Take-Home Pay</th>
+                                    <th class="px-4 py-3.5 text-right">PDF Payslip</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach ($employees as $emp)
+                                    @php
+                                        $base = (float) $emp['base_salary'];
+                                        $housing = $base * 0.25;
+                                        $transport = $base * 0.15;
+                                        $bonus = (float) ($payrollRunForm['bonus_override'] ?? 50000);
+                                        $gross = $base + $housing + $transport + $bonus;
+                                        $paye = $gross * (((float) ($payrollRunForm['paye_rate'] ?? 12)) / 100);
+                                        $pension = $gross * 0.08;
+                                        $net = $gross - ($paye + $pension);
+                                    @endphp
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5">
+                                            <p class="font-bold text-slate-900 dark:text-white">{{ $emp['name'] }}</p>
+                                            <p class="text-xs text-slate-400">{{ $emp['role'] }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-semibold text-slate-600 dark:text-slate-300">₦{{ number_format($base, 2) }}</td>
+                                        <td class="px-4 py-3.5 font-bold text-teal-600">₦{{ number_format($gross, 2) }}</td>
+                                        <td class="px-4 py-3.5 font-semibold text-rose-600">-₦{{ number_format($paye, 2) }}</td>
+                                        <td class="px-4 py-3.5 font-semibold text-amber-600">-₦{{ number_format($pension, 2) }}</td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600">₦{{ number_format($net, 2) }}</td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <a href="/portal/payslip/{{ $emp['id'] }}/pdf" target="_blank" class="rounded-lg bg-teal-500/10 px-2.5 py-1 text-xs font-bold text-teal-600 hover:bg-teal-500/20 transition">
+                                                <i class="fa-light fa-download mr-1"></i>Download PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'leave')
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Leave Management & Time-Off Approvals') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Track employee annual leave applications, medical sick days, and approval workflows.') }}</p>
+                    </div>
+                    <button type="button" wire:click="openCreateModal('leave_request')" class="rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                        <i class="fa-light fa-calendar-plus mr-1.5"></i>{{ __('Request Leave') }}
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                            <tr>
+                                <th class="px-4 py-3.5">Staff Member</th>
+                                <th class="px-4 py-3.5">Leave Type</th>
+                                <th class="px-4 py-3.5">Duration & Days</th>
+                                <th class="px-4 py-3.5">Reason / Scope</th>
+                                <th class="px-4 py-3.5">Status</th>
+                                <th class="px-4 py-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            @foreach ($leaveRequests as $idx => $req)
+                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                    <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">{{ $req['staff_name'] }}</td>
+                                    <td class="px-4 py-3.5">
+                                        <span class="rounded-full bg-teal-500/10 text-teal-600 border border-teal-500/20 px-2.5 py-0.5 text-xs font-bold">
+                                            {{ $req['type'] }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-600 dark:text-slate-300">
+                                        <p class="font-bold">{{ $req['start_date'] }} → {{ $req['end_date'] }}</p>
+                                        <p class="text-slate-400">{{ $req['days'] }} Business Days</p>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500 max-w-xs truncate">{{ $req['reason'] }}</td>
+                                    <td class="px-4 py-3.5">
+                                        <span class="rounded-full px-3 py-1 text-xs font-bold {{ match($req['status']) {
+                                            'Approved' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                            'Rejected' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                            default => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                        } }}">{{ $req['status'] }}</span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right">
+                                        @if ($req['status'] === 'Pending')
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button type="button" wire:click="approveLeaveRequest({{ $idx }})" class="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition">Approve</button>
+                                                <button type="button" wire:click="rejectLeaveRequest({{ $idx }})" class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-600 hover:bg-rose-500/20 transition">Reject</button>
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-slate-400 font-semibold">Processed</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @else
+            <!-- HR Analytics & Compliance Reports Tab -->
+            <div class="space-y-6">
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">PAYE Tax Remittance Compliance</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">100% Verified</p>
+                        <p class="mt-1 text-xs text-slate-400">FCT-IRS & LIRS Tax Filings On-Time</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">RSA Pension Contribution Fund</p>
+                        <p class="mt-2 text-2xl font-black text-teal-600">₦405,000.00</p>
+                        <p class="mt-1 text-xs text-teal-500 font-medium">8% Employee + 10% Employer match</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">Average Staff Tenure</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">2.4 Years</p>
+                        <p class="mt-1 text-xs text-purple-500 font-medium">Low turnover rate</p>
+                    </div>
+                </div>
+
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('Departmental Payroll Allocation') }}</h2>
+                    <div class="mt-5 space-y-4">
+                        @foreach ([
+                            ['dept' => 'Engineering & Operations', 'amount' => 1250000.00, 'pct' => 55.6, 'color' => 'teal'],
+                            ['dept' => 'Product & Design', 'amount' => 550000.00, 'pct' => 24.4, 'color' => 'purple'],
+                            ['dept' => 'Quality Assurance', 'amount' => 450000.00, 'pct' => 20.0, 'color' => 'sky'],
+                        ] as $item)
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1">
+                                    <span class="text-slate-700 dark:text-slate-300">{{ $item['dept'] }}</span>
+                                    <span class="text-{{ $item['color'] }}-600">₦{{ number_format($item['amount'], 2) }} ({{ $item['pct'] }}%)</span>
+                                </div>
+                                <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div class="h-full rounded-full bg-{{ $item['color'] }}-500" style="width: {{ $item['pct'] }}%;"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            </div>
+        @endif
+    @endif
+
     <!-- MODULE 10: REPORTS ENHANCED -->
     @if ($moduleKey === 'reports')
         <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -3938,6 +4232,110 @@
                         <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
                             <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
                             <button type="submit" class="rounded-2xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700">Create Project</button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'employee')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Add New Employee Profile Studio') }}</h3>
+                            <p class="text-xs text-slate-400">Register staff profile, department, job role, basic salary, bank info & TIN</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Full Staff Name</label>
+                            <input type="text" wire:model="form.name" required placeholder="e.g. Babatunde Adeleke" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Job Title / Designation</label>
+                                <input type="text" wire:model="form.category" required placeholder="e.g. Senior Software Engineer" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Department</label>
+                                <select wire:model="form.location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Engineering & Operations">Engineering & Operations</option>
+                                    <option value="Product & Design">Product & Design</option>
+                                    <option value="Quality Assurance">Quality Assurance</option>
+                                    <option value="Finance & Accounting">Finance & Accounting</option>
+                                    <option value="Sales & Marketing">Sales & Marketing</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Email</label>
+                                <input type="email" wire:model="form.client_email" placeholder="e.g. babatunde@ascendsystems.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number</label>
+                                <input type="text" wire:model="form.client_phone" placeholder="+234 803 111 2233" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Basic Monthly Salary (NGN)</label>
+                                <input type="number" wire:model="form.subtotal" required placeholder="650000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Tax TIN Number</label>
+                                <input type="text" wire:model="form.client_tin" placeholder="TIN-NG-94810291" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700">Add Staff Member</button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'leave_request')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Submit Leave Request Studio') }}</h3>
+                            <p class="text-xs text-slate-400">Apply for annual leave, medical sick days or casual time-off</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Staff Member Name</label>
+                            <input type="text" wire:model="form.name" required placeholder="e.g. Fatima Bello" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Leave Category</label>
+                                <select wire:model="form.category" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Annual Leave">Annual Leave</option>
+                                    <option value="Medical / Sick Leave">Medical / Sick Leave</option>
+                                    <option value="Casual Leave">Casual Leave</option>
+                                    <option value="Maternity / Paternity">Maternity / Paternity</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Start Date</label>
+                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Leave Reason & Details</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Details regarding leave request..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700">Submit Request</button>
                         </div>
                     </form>
                 @else

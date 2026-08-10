@@ -252,6 +252,88 @@ class AscendModuleViewer extends Component
         ];
     }
 
+    // === HR & PAYROLL WORKSPACE STATE ===
+    public array $employees = [
+        ['id' => 1, 'staff_id' => 'EMP-2026-001', 'name' => 'Babatunde Adeleke', 'role' => 'Senior Software Engineer', 'department' => 'Engineering & Operations', 'email' => 'babatunde@ascendsystems.ng', 'phone' => '+234 803 111 2233', 'base_salary' => 650000.00, 'bank' => 'Access Bank Nigeria', 'acc_no' => '0129481029', 'tin' => 'TIN-NG-94810291', 'status' => 'Active'],
+        ['id' => 2, 'staff_id' => 'EMP-2026-002', 'name' => 'Fatima Bello', 'role' => 'Lead UI/UX Product Designer', 'department' => 'Product & Design', 'email' => 'fatima@ascendsystems.ng', 'phone' => '+234 802 444 5566', 'base_salary' => 550000.00, 'bank' => 'GTBank Nigeria', 'acc_no' => '0239481018', 'tin' => 'TIN-NG-83910283', 'status' => 'Active'],
+        ['id' => 3, 'staff_id' => 'EMP-2026-003', 'name' => 'Emeka Nwosu', 'role' => 'Systems & DevOps Architect', 'department' => 'Engineering & Operations', 'email' => 'emeka@ascendsystems.ng', 'phone' => '+234 805 777 8899', 'base_salary' => 600000.00, 'bank' => 'Zenith Bank', 'acc_no' => '1019482012', 'tin' => 'TIN-NG-10294810', 'status' => 'Active'],
+        ['id' => 4, 'staff_id' => 'EMP-2026-004', 'name' => 'Sola Adeyemi', 'role' => 'QA & Automation Engineer', 'department' => 'Quality Assurance', 'email' => 'sola@ascendsystems.ng', 'phone' => '+234 808 222 3344', 'base_salary' => 450000.00, 'bank' => 'First Bank Nigeria', 'acc_no' => '3019481023', 'tin' => 'TIN-NG-40192841', 'status' => 'Active'],
+    ];
+
+    public array $leaveRequests = [
+        ['id' => 1, 'staff_name' => 'Fatima Bello', 'type' => 'Annual Leave', 'start_date' => '2026-08-18', 'end_date' => '2026-08-25', 'days' => 6, 'reason' => 'Annual family vacation', 'status' => 'Pending'],
+        ['id' => 2, 'staff_name' => 'Sola Adeyemi', 'type' => 'Medical / Sick Leave', 'start_date' => '2026-08-10', 'end_date' => '2026-08-12', 'days' => 2, 'reason' => 'Outpatient clinical checkup', 'status' => 'Approved'],
+        ['id' => 3, 'staff_name' => 'Emeka Nwosu', 'type' => 'Casual Leave', 'start_date' => '2026-08-28', 'end_date' => '2026-08-29', 'days' => 1, 'reason' => 'Personal emergency', 'status' => 'Pending'],
+    ];
+
+    public array $payrollRunForm = [
+        'period' => 'August 2026',
+        'bonus_override' => '50000',
+        'allowance_override' => '75000',
+        'paye_rate' => '12',
+    ];
+
+    public function processPayrollRun(): void
+    {
+        $period = $this->payrollRunForm['period'] ?: date('F Y');
+        $totalDisbursed = 0;
+        foreach ($this->employees as $emp) {
+            $base = (float) ($emp['base_salary'] ?? 500000);
+            $housing = $base * 0.25;
+            $transport = $base * 0.15;
+            $gross = $base + $housing + $transport + (float) $this->payrollRunForm['bonus_override'];
+            $paye = $gross * ((float) $this->payrollRunForm['paye_rate'] / 100);
+            $pension = $gross * 0.08;
+            $net = $gross - ($paye + $pension);
+            $totalDisbursed += $net;
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('salary_records')) {
+                \Illuminate\Support\Facades\DB::table('salary_records')->insert([
+                    'staff_name' => $emp['name'],
+                    'role' => $emp['role'],
+                    'department' => $emp['department'],
+                    'payroll_period' => $period,
+                    'basic_salary' => $base,
+                    'housing' => $housing,
+                    'transport' => $transport,
+                    'allowances' => (float) $this->payrollRunForm['bonus_override'],
+                    'paye_tax' => $paye,
+                    'pension_employee' => $pension,
+                    'nhf' => $base * 0.025,
+                    'net_salary' => $net,
+                    'bank_name' => $emp['bank'],
+                    'account_number' => $emp['acc_no'],
+                    'status' => 'disbursed',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        log_activity('hr.payroll_run', "Disbursed monthly payroll run for {$period}. Total Net: ₦" . number_format($totalDisbursed, 2));
+
+        session()->flash('status', __('Monthly payroll run for :period processed successfully! Total Net Disbursed: ₦:total.', [
+            'period' => $period,
+            'total' => number_format($totalDisbursed, 2),
+        ]));
+    }
+
+    public function approveLeaveRequest(int $index): void
+    {
+        if (isset($this->leaveRequests[$index])) {
+            $this->leaveRequests[$index]['status'] = 'Approved';
+            session()->flash('status', __('Leave request for :name approved.', ['name' => $this->leaveRequests[$index]['staff_name']]));
+        }
+    }
+
+    public function rejectLeaveRequest(int $index): void
+    {
+        if (isset($this->leaveRequests[$index])) {
+            $this->leaveRequests[$index]['status'] = 'Rejected';
+            session()->flash('warning', __('Leave request for :name rejected.', ['name' => $this->leaveRequests[$index]['staff_name']]));
+        }
+    }
+
     public array $newUserForm = [
         'name' => '',
         'username' => '',
@@ -2026,9 +2108,35 @@ class AscendModuleViewer extends Component
                 'id' => rand(100, 999),
                 'name' => $title,
                 'trigger' => $this->form['category'] ?: 'CRM Lead Qualified',
-                'action' => $this->form['notes'] ?: 'Create NGN Invoice',
-                'active' => true,
+                'action' => $this->form['notes'] ?: 'Dispatch Email & Slack Notice',
+                'status' => 'Active',
             ],
+            'hr' => match ($this->modalType) {
+                'leave_request' => $this->leaveRequests[] = [
+                    'id' => rand(10, 99),
+                    'staff_name' => $title,
+                    'type' => $this->form['category'] ?: 'Annual Leave',
+                    'start_date' => $this->form['issue_date'] ?: date('Y-m-d'),
+                    'end_date' => $this->form['due_date'] ?: date('Y-m-d', strtotime('+5 days')),
+                    'days' => 5,
+                    'reason' => $this->form['notes'] ?: 'Personal leave request',
+                    'status' => 'Pending',
+                ],
+                default => $this->employees[] = [
+                    'id' => rand(10, 99),
+                    'staff_id' => 'EMP-2026-'.rand(100, 999),
+                    'name' => $title,
+                    'role' => $this->form['category'] ?: 'Software Engineer',
+                    'department' => $this->form['location'] ?: 'Engineering & Operations',
+                    'email' => $this->form['client_email'] ?: (strtolower(str_replace(' ', '.', $title)).'@ascendsystems.ng'),
+                    'phone' => $this->form['client_phone'] ?: '+234 800 000 0000',
+                    'base_salary' => $subtotal ?: 500000.00,
+                    'bank' => 'Access Bank Nigeria',
+                    'acc_no' => '0'.rand(100000009, 999999999),
+                    'tin' => 'TIN-NG-'.rand(10000000, 99999999),
+                    'status' => 'Active',
+                ],
+            },
             default => null,
         };
 
