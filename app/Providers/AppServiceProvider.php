@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureDefaults(): void
     {
+        \Illuminate\Support\Facades\Schema::defaultStringLength(191);
         Date::use(CarbonImmutable::class);
 
         DB::prohibitDestructiveCommands(
