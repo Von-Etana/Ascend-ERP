@@ -47,7 +47,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 group-hover:text-blue-600 transition-colors">{{ __('Revenue') }}</p>
-                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">₦1,245,780</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{{ $totalRevenueFormatted }}</p>
                 </div>
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <i class="fa-light fa-circle-dollar text-lg"></i>
@@ -63,7 +63,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 group-hover:text-violet-600 transition-colors">{{ __('Open deals') }}</p>
-                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">56</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{{ $openDealsCount }}</p>
                 </div>
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors">
                     <i class="fa-light fa-users text-lg"></i>
@@ -79,7 +79,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 group-hover:text-amber-600 transition-colors">{{ __('Low stock') }}</p>
-                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">23</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{{ $lowStockCount }}</p>
                 </div>
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                     <i class="fa-light fa-triangle-exclamation text-lg"></i>
@@ -95,7 +95,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 group-hover:text-emerald-600 transition-colors">{{ __('Tasks due') }}</p>
-                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">19</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">{{ $tasksDueCount }}</p>
                 </div>
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                     <i class="fa-light fa-circle-check text-lg"></i>
@@ -145,12 +145,22 @@
             </div>
 
             <div class="mt-5 grid grid-cols-4 divide-x divide-slate-100 dark:divide-slate-800">
-                @foreach ([['label' => 'Total revenue', 'value' => '₦1,245,780'], ['label' => 'Net revenue', 'value' => '₦1,120,450'], ['label' => 'Avg. order', 'value' => '₦385.40'], ['label' => 'Orders', 'value' => '3,248']] as $stat)
-                    <div class="px-4 first:pl-0 last:pr-0">
-                        <p class="text-[11px] text-slate-400">{{ __($stat['label']) }}</p>
-                        <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $stat['value'] }}</p>
-                    </div>
-                @endforeach
+                <div class="px-4 first:pl-0">
+                    <p class="text-[11px] text-slate-400">{{ __('Total revenue') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $totalRevenueFormatted }}</p>
+                </div>
+                <div class="px-4">
+                    <p class="text-[11px] text-slate-400">{{ __('Net revenue') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $netRevenueFormatted }}</p>
+                </div>
+                <div class="px-4">
+                    <p class="text-[11px] text-slate-400">{{ __('Avg. order') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $avgOrderFormatted }}</p>
+                </div>
+                <div class="px-4 last:pr-0">
+                    <p class="text-[11px] text-slate-400">{{ __('Orders') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $totalOrdersFormatted }}</p>
+                </div>
             </div>
         </section>
 
@@ -159,7 +169,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Sales pipeline') }}</h2>
-                    <p class="mt-1 text-sm text-slate-500">{{ __('56 open deals · ₦1.24M total value') }}</p>
+                    <p class="mt-1 text-sm text-slate-500">{{ __(':count open deals · :value total value', ['count' => $openDealsCount, 'value' => $openDealsValueFormatted]) }}</p>
                 </div>
                 <a href="{{ route('portal.publishing.calendar') }}" wire:navigate class="text-sm font-semibold text-blue-600 hover:underline">
                     {{ __('View all deals') }}
@@ -167,23 +177,17 @@
             </div>
 
             <div class="mt-6 grid grid-cols-5 gap-2">
-                @foreach ([
-                    ['name' => 'Prospecting', 'count' => 12, 'color' => 'text-blue-600', 'amount' => '₦287,400'],
-                    ['name' => 'Qualified', 'count' => 8, 'color' => 'text-violet-600', 'amount' => '₦415,600'],
-                    ['name' => 'Proposal', 'count' => 6, 'color' => 'text-amber-600', 'amount' => '₦261,300'],
-                    ['name' => 'Negotiation', 'count' => 4, 'color' => 'text-teal-600', 'amount' => '₦198,750'],
-                    ['name' => 'Closed won', 'count' => 7, 'color' => 'text-emerald-600', 'amount' => '₦556,730']
-                ] as $stage)
+                @foreach ($pipelineStages as $stage)
                     <div class="min-w-0 rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/70">
                         <p class="truncate text-[11px] font-semibold {{ $stage['color'] }}">
                             {{ __($stage['name']) }} <span class="text-slate-400">({{ $stage['count'] }})</span>
                         </p>
                         <p class="mt-1 text-[10px] text-slate-500">{{ $stage['amount'] }}</p>
                         <div class="mt-3 space-y-2">
-                            @foreach (['Northbridge Ltd', 'Brighton Labs', 'Omega Corp'] as $index => $deal)
+                            @foreach ($stage['deals'] as $deal)
                                 <div class="rounded-lg border border-slate-200 bg-white p-2 shadow-xs transition hover:border-blue-400 dark:border-slate-700 dark:bg-slate-900">
-                                    <p class="truncate text-[11px] font-semibold text-slate-700 dark:text-slate-200">{{ $deal }}</p>
-                                    <p class="mt-1 text-[10px] text-slate-400">₦{{ [45000, 78400, 92000][$index] }}</p>
+                                    <p class="truncate text-[11px] font-semibold text-slate-700 dark:text-slate-200">{{ $deal['name'] }}</p>
+                                    <p class="mt-1 text-[10px] text-slate-400">{{ $deal['amount'] }}</p>
                                 </div>
                             @endforeach
                         </div>
