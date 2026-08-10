@@ -212,10 +212,10 @@
                     ],
                     'administration' => [
                         'users' => ['label' => 'User Management', 'icon' => 'fa-light fa-users'],
-                        'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
                         'roles' => ['label' => 'Roles & Permissions', 'icon' => 'fa-light fa-user-shield'],
-                        'clients' => ['label' => 'Client & External Access', 'icon' => 'fa-light fa-user-group'],
+                        'organization' => ['label' => 'Corporate HQ & Branches', 'icon' => 'fa-light fa-building-user'],
                         'security' => ['label' => 'Security & Audit Logs', 'icon' => 'fa-light fa-shield-check'],
+                        'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
                     ],
                     default => ['overview' => ['label' => 'Overview', 'icon' => 'fa-light fa-border-all']],
                 };
@@ -3541,16 +3541,73 @@
                 </div>
             </div>
 
+        @elseif ($activeTab === 'organization')
+            <div class="space-y-6">
+                <!-- Corporate Organization & Branch Governance Studio -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Corporate Headquarters & Multi-Branch Governance') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Manage company organization profile, corporate address, Tax TIN, and regional branches.') }}</p>
+                        </div>
+                        <span class="rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-bold text-blue-600">HQ Verified</span>
+                    </div>
+
+                    <form wire:submit.prevent="saveOrgProfile" class="mt-5 space-y-4">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Registered Company Name</label>
+                                <input type="text" wire:model="orgProfileForm.company_name" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-bold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">CAC Registration Number</label>
+                                <input type="text" wire:model="orgProfileForm.cac_rc" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Headquarters Address (Abuja HQ)</label>
+                            <input type="text" wire:model="orgProfileForm.headquarters" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Official Phone Number</label>
+                                <input type="text" wire:model="orgProfileForm.phone" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Email</label>
+                                <input type="email" wire:model="orgProfileForm.email" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">FIRS Tax TIN</label>
+                                <input type="text" wire:model="orgProfileForm.tin" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-3">
+                            <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                <i class="fa-light fa-floppy-disk mr-1.5"></i>{{ __('Save Organization Profile') }}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
         @elseif ($activeTab === 'security')
             <div class="space-y-6">
                 <!-- Security Audit Logs Stream -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-4">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Security Audit Log Stream') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Immutable activity tracking for compliance and security auditing') }}</p>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Security Audit Log Stream & System Backups') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Immutable activity tracking for compliance and enterprise database backups.') }}</p>
                         </div>
-                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">Audit Active</span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="triggerDatabaseBackup" class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-slate-800 transition dark:bg-slate-800 dark:hover:bg-slate-700">
+                                <i class="fa-light fa-database mr-1.5"></i>{{ __('Trigger Database Backup') }}
+                            </button>
+                            <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">Audit Active</span>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
