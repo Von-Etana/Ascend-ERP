@@ -228,18 +228,46 @@ class AscendModuleViewer extends Component
 
     // === DYNAMIC LINE ITEMS FOR INVOICES, RECEIPTS & DELIVERY NOTES ===
     public array $invoiceItems = [
-        ['description' => 'Enterprise Software & Services Package', 'quantity' => 1, 'unit_price' => 250000.00, 'amount' => 250000.00],
+        ['product_id' => '', 'sku' => 'ENT-LIC-001', 'description' => 'Enterprise Software & Services Package', 'quantity' => 1, 'unit_price' => 250000.00, 'discount_percent' => 0, 'amount' => 250000.00],
     ];
 
     public function addInvoiceLine(): void
     {
         $this->invoiceItems[] = [
-            'description' => 'Additional Line Item #' . (count($this->invoiceItems) + 1),
+            'product_id' => '',
+            'sku' => '',
+            'description' => 'Custom Line Item #' . (count($this->invoiceItems) + 1),
             'quantity' => 1,
             'unit_price' => 50000.00,
+            'discount_percent' => 0,
             'amount' => 50000.00,
         ];
         $this->recalculateInvoiceTotals();
+    }
+
+    public function selectProductForInvoiceLine(int $index, mixed $productId): void
+    {
+        if (isset($this->invoiceItems[$index])) {
+            if ($productId) {
+                $prod = InventoryProduct::find($productId);
+                if ($prod) {
+                    $this->invoiceItems[$index]['product_id'] = $prod->id;
+                    $this->invoiceItems[$index]['sku'] = $prod->sku;
+                    $this->invoiceItems[$index]['description'] = $prod->name;
+                    $this->invoiceItems[$index]['unit_price'] = (float) $prod->unit_price;
+                }
+            } else {
+                $this->invoiceItems[$index]['product_id'] = null;
+                $this->invoiceItems[$index]['sku'] = '';
+            }
+            $qty = (float) ($this->invoiceItems[$index]['quantity'] ?? 1);
+            $price = (float) ($this->invoiceItems[$index]['unit_price'] ?? 0);
+            $discPct = (float) ($this->invoiceItems[$index]['discount_percent'] ?? 0);
+            $lineGross = $qty * $price;
+            $lineDisc = $lineGross * ($discPct / 100);
+            $this->invoiceItems[$index]['amount'] = max(0, $lineGross - $lineDisc);
+            $this->recalculateInvoiceTotals();
+        }
     }
 
     public function removeInvoiceLine(int $index): void
@@ -257,18 +285,44 @@ class AscendModuleViewer extends Component
             $this->invoiceItems[$index][$field] = $value;
             $qty = (float) ($this->invoiceItems[$index]['quantity'] ?? 1);
             $price = (float) ($this->invoiceItems[$index]['unit_price'] ?? 0);
-            $this->invoiceItems[$index]['amount'] = $qty * $price;
+            $discPct = (float) ($this->invoiceItems[$index]['discount_percent'] ?? 0);
+            $lineGross = $qty * $price;
+            $lineDisc = $lineGross * ($discPct / 100);
+            $this->invoiceItems[$index]['amount'] = max(0, $lineGross - $lineDisc);
             $this->recalculateInvoiceTotals();
         }
     }
 
     public function recalculateInvoiceTotals(): void
     {
-        $subtotal = collect($this->invoiceItems)->sum(fn($item) => (float) ($item['amount'] ?? 0));
-        $tax = $subtotal * 0.075;
-        $total = $subtotal + $tax;
+        $grossSubtotal = 0;
+        foreach ($this->invoiceItems as $i => $item) {
+            $qty = (float) ($item['quantity'] ?? 1);
+            $price = (float) ($item['unit_price'] ?? 0);
+            $discPct = (float) ($item['discount_percent'] ?? 0);
+            $lineGross = $qty * $price;
+            $lineDisc = $lineGross * ($discPct / 100);
+            $amount = max(0, $lineGross - $lineDisc);
+            $this->invoiceItems[$i]['amount'] = $amount;
+            $grossSubtotal += $amount;
+        }
 
-        $this->form['subtotal'] = number_format($subtotal, 2, '.', '');
+        $discountValue = (float) ($this->form['discount_value'] ?? 0);
+        $discountType = $this->form['discount_type'] ?? 'fixed';
+
+        if ($discountType === 'percent') {
+            $globalDiscount = $grossSubtotal * ($discountValue / 100);
+        } else {
+            $globalDiscount = $discountValue;
+        }
+        $globalDiscount = min($grossSubtotal, max(0, $globalDiscount));
+
+        $taxableSubtotal = max(0, $grossSubtotal - $globalDiscount);
+        $tax = $taxableSubtotal * 0.075;
+        $total = $taxableSubtotal + $tax;
+
+        $this->form['subtotal'] = number_format($grossSubtotal, 2, '.', '');
+        $this->form['discount_amount'] = number_format($globalDiscount, 2, '.', '');
         $this->form['tax'] = number_format($tax, 2, '.', '');
         $this->form['total'] = number_format($total, 2, '.', '');
     }
@@ -1793,6 +1847,14 @@ class AscendModuleViewer extends Component
             'supplier' => 'Apex Hardware Supplies Ltd',
             'invoice_number' => 'INV-'.rand(20500, 29999),
             'client_name' => '',
+            'client_phone' => '',
+            'client_email' => '',
+            'client_address' => '',
+            'client_tin' => '',
+            'discount_type' => 'fixed',
+            'discount_value' => '0',
+            'discount_amount' => '0',
+            'promo_code' => '',
             'issue_date' => now()->format('Y-m-d'),
             'due_date' => now()->addDays(14)->format('Y-m-d'),
             'subtotal' => $this->form['subtotal'] ?? '250000',
@@ -1841,7 +1903,17 @@ class AscendModuleViewer extends Component
                     'total' => $total,
                     'status' => 'pending',
                     'notes' => $this->form['notes'] ?: 'Created via finance module modal',
-                    'items' => $this->invoiceItems,
+                    'items' => [
+                        'client_phone' => $this->form['client_phone'] ?? ($this->form['phone'] ?? ''),
+                        'client_email' => $this->form['client_email'] ?? ($this->form['email'] ?? ''),
+                        'client_address' => $this->form['client_address'] ?? ($this->form['address'] ?? ''),
+                        'client_tin' => $this->form['client_tin'] ?? ($this->form['tin'] ?? ''),
+                        'discount_type' => $this->form['discount_type'] ?? 'fixed',
+                        'discount_value' => (float) ($this->form['discount_value'] ?? 0),
+                        'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
+                        'promo_code' => $this->form['promo_code'] ?? '',
+                        'line_items' => $this->invoiceItems,
+                    ],
                 ]),
             },
             'crm' => match ($this->modalType) {

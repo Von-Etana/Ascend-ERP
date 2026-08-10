@@ -3215,76 +3215,155 @@
                         </button>
                     </div>
 
-                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-3.5">
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <!-- Invoice Header Info -->
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Invoice Number</label>
                                 <div class="relative mt-1">
-                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                                     <button type="button" wire:click="autoGenerateInvoiceNumber" class="absolute right-2 top-2 text-[10px] font-bold text-emerald-600 hover:underline">Auto</button>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Customer Name</label>
-                                <input type="text" wire:model="form.client_name" required placeholder="Northbridge Media Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Apex Technology Solutions Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <!-- Customer Detailed Information -->
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('Detailed Customer Contact & Shipping Info') }}</div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Phone Number</label>
+                                    <input type="text" wire:model="form.client_phone" placeholder="+234 803 111 2233" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Email Address</label>
+                                    <input type="email" wire:model="form.client_email" placeholder="billing@clientcompany.ng" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Delivery / Shipping Address</label>
+                                    <input type="text" wire:model="form.client_address" placeholder="Suite 402, Victoria Island, Lagos" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax ID / TIN</label>
+                                    <input type="text" wire:model="form.client_tin" placeholder="TIN-98491029-001" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
                             </div>
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Issue Date</label>
-                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Due Date</label>
-                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
-                        <!-- Dynamic Invoice Line Items Section -->
+                        <!-- Dynamic Invoice Line Items Section with Inventory Dropdown -->
                         <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">{{ __('Invoice Line Items') }}</span>
+                                <span class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">{{ __('Invoice Product & Service Line Items') }}</span>
                                 <button type="button" wire:click="addInvoiceLine" class="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
                                     <i class="fa-light fa-plus mr-1"></i>{{ __('Add New Line Item') }}
                                 </button>
                             </div>
 
-                            <div class="space-y-2">
+                            <div class="space-y-3">
                                 @foreach ($invoiceItems as $index => $item)
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" wire:model.live="invoiceItems.{{ $index }}.description" wire:change="updateInvoiceLineItem({{ $index }}, 'description', $event.target.value)" placeholder="Line description..." class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                                        <input type="number" min="1" wire:model.live="invoiceItems.{{ $index }}.quantity" wire:change="updateInvoiceLineItem({{ $index }}, 'quantity', $event.target.value)" placeholder="Qty" class="w-16 rounded-xl border border-slate-200 p-2 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                                        <input type="number" step="0.01" wire:model.live="invoiceItems.{{ $index }}.unit_price" wire:change="updateInvoiceLineItem({{ $index }}, 'unit_price', $event.target.value)" placeholder="Price (NGN)" class="w-32 rounded-xl border border-slate-200 p-2 text-xs font-bold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                                        @if (count($invoiceItems) > 1)
-                                            <button type="button" wire:click="removeInvoiceLine({{ $index }})" class="p-2 text-slate-400 hover:text-rose-500 text-xs shrink-0">
-                                                <i class="fa-light fa-trash-can"></i>
-                                            </button>
-                                        @endif
+                                    <div class="rounded-xl border border-slate-200 p-3 dark:border-slate-800 bg-white dark:bg-slate-800 space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <!-- Product Selection Dropdown from Inventory Stock -->
+                                            <select wire:change="selectProductForInvoiceLine({{ $index }}, $event.target.value)" class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                <option value="">-- Custom Line Item / Free Text --</option>
+                                                @foreach ($dbProducts as $prod)
+                                                    <option value="{{ $prod->id }}" {{ ($item['product_id'] ?? '') == $prod->id ? 'selected' : '' }}>
+                                                        [{{ $prod->sku }}] {{ $prod->name }} — ₦{{ number_format($prod->unit_price, 2) }} (Stock: {{ $prod->stock_quantity }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @if (count($invoiceItems) > 1)
+                                                <button type="button" wire:click="removeInvoiceLine({{ $index }})" class="p-2 text-slate-400 hover:text-rose-500 text-xs shrink-0" title="Remove Line">
+                                                    <i class="fa-light fa-trash-can"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        <div class="grid gap-2 sm:grid-cols-4">
+                                            <div class="sm:col-span-2">
+                                                <input type="text" wire:model.live="invoiceItems.{{ $index }}.description" wire:change="updateInvoiceLineItem({{ $index }}, 'description', $event.target.value)" placeholder="Item Description..." class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-1">
+                                                    <span class="text-[10px] text-slate-400 font-bold">Qty:</span>
+                                                    <input type="number" min="1" wire:model.live="invoiceItems.{{ $index }}.quantity" wire:change="updateInvoiceLineItem({{ $index }}, 'quantity', $event.target.value)" placeholder="1" class="w-full rounded-xl border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-1">
+                                                    <span class="text-[10px] text-slate-400 font-bold">Price:</span>
+                                                    <input type="number" step="0.01" wire:model.live="invoiceItems.{{ $index }}.unit_price" wire:change="updateInvoiceLineItem({{ $index }}, 'unit_price', $event.target.value)" placeholder="₦0.00" class="w-full rounded-xl border border-slate-200 p-1.5 text-xs font-bold outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
+                        <!-- Custom Promo & Global Discount Section -->
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-emerald-50/30 dark:bg-emerald-950/20 space-y-3">
+                            <div class="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">{{ __('Custom Promo Code & Discount Override') }}</div>
+                            <div class="grid gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Promo Code</label>
+                                    <input type="text" wire:model="form.promo_code" placeholder="e.g. PROMO2026" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-bold uppercase outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Discount Type</label>
+                                    <select wire:model.live="form.discount_type" wire:change="recalculateInvoiceTotals" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="fixed">Fixed NGN Amount (₦)</option>
+                                        <option value="percent">Percentage (%)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Discount Value</label>
+                                    <input type="number" step="0.01" wire:model.live="form.discount_value" wire:change="recalculateInvoiceTotals" placeholder="0" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculation Breakdown -->
+                        <div class="grid gap-3 sm:grid-cols-3">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Subtotal Amount (NGN)</label>
-                                <input type="text" wire:model="form.subtotal" required placeholder="250000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Gross Line Subtotal (NGN)</label>
+                                <input type="text" wire:model="form.subtotal" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Applied Discount (NGN)</label>
+                                <input type="text" wire:model="form.discount_amount" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-blue-600 bg-slate-100 dark:bg-slate-800 dark:text-blue-400">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">VAT (7.5% Auto)</label>
-                                <input type="text" wire:model="form.tax" placeholder="18750" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="text" wire:model="form.tax" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Payment Notes / Bank Details</label>
-                            <textarea wire:model="form.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Payment Notes / Bank Transfer Instructions</label>
+                            <textarea wire:model="form.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white" placeholder="Payment due within 14 days to Access Bank Account 0129481029"></textarea>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
                             <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
-                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Invoice</button>
+                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Commercial Invoice</button>
                         </div>
                     </form>
                 @elseif ($modalType === 'product')
