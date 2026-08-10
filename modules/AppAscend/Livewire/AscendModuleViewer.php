@@ -12,10 +12,14 @@ use App\Models\PosReceipt;
 use App\Models\Project;
 use App\Models\ProjectTask;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Modules\AdminUser\Models\AdminRole;
 use Modules\AdminUser\Models\AuditLog;
 use Modules\AdminUser\Models\User;
+use Modules\AppAutomation\Models\AutomationWebhook;
+use Modules\AppChannels\Models\SocialAccount;
+use Modules\AppEmail\Models\EmailCampaign;
 
 class AscendModuleViewer extends Component
 {
@@ -87,89 +91,41 @@ class AscendModuleViewer extends Component
         'stage' => 'prospecting',
     ];
 
-    public array $generalLedger = [
-        ['code' => '1010', 'account' => 'Cash at Bank (Access Bank HQ)', 'type' => 'Asset', 'debit' => 4850000.00, 'credit' => 0.00, 'balance' => 4850000.00],
-        ['code' => '1020', 'account' => 'GTBank Operations Reserve', 'type' => 'Asset', 'debit' => 2140500.00, 'credit' => 0.00, 'balance' => 2140500.00],
-        ['code' => '1200', 'account' => 'Accounts Receivable (Clients)', 'type' => 'Asset', 'debit' => 3800000.00, 'credit' => 0.00, 'balance' => 3800000.00],
-        ['code' => '2010', 'account' => 'Accounts Payable (Vendors)', 'type' => 'Liability', 'debit' => 0.00, 'credit' => 180000.00, 'balance' => -180000.00],
-        ['code' => '4010', 'account' => 'Enterprise ERP Software Revenue', 'type' => 'Revenue', 'debit' => 0.00, 'credit' => 1245780.00, 'balance' => 1245780.00],
-        ['code' => '5010', 'account' => 'Cloud Infrastructure & Hosting Expenses', 'type' => 'Expense', 'debit' => 324500.00, 'credit' => 0.00, 'balance' => -324500.00],
-    ];
+    // -------------------------------------------------------------------------
+    // Live data arrays — hydrated from DB in mount(). No hardcoded mock data.
+    // -------------------------------------------------------------------------
+    public array $generalLedger = [];
 
-    public array $warehouses = [
-        ['name' => 'Lagos HQ Central Warehouse', 'location' => 'Ikeja, Lagos', 'manager' => 'Babatunde Adeleke', 'contact' => '+234 802 300 1122', 'capacity' => 85, 'skus' => 245, 'status' => 'Optimal'],
-        ['name' => 'Abuja Regional Distribution Hub', 'location' => 'CBD, Abuja', 'manager' => 'Fatima Bello', 'contact' => '+234 809 110 4455', 'capacity' => 42, 'skus' => 110, 'status' => 'Optimal'],
-        ['name' => 'Port Harcourt Logistics Hub', 'location' => 'Trans-Amadi, PH', 'manager' => 'Emeka Nwosu', 'contact' => '+234 803 998 7766', 'capacity' => 60, 'skus' => 85, 'status' => 'Optimal'],
-    ];
+    public array $warehouses = [];
 
-    public array $suppliers = [
-        ['name' => 'Apex Hardware Supplies Ltd', 'category' => 'POS Hardware & Electronics', 'contact' => 'Tunde Bakare', 'email' => 'orders@apexhardware.ng', 'phone' => '+234 801 222 3333', 'lead_time' => '3 Days', 'rating' => 4.9],
-        ['name' => 'Zhengzhou Tech Equipment Corp', 'category' => 'Thermal Printers & Scanners', 'contact' => 'Li Wei', 'email' => 'export@zhengzhoutech.cn', 'phone' => '+86 371 6688 9900', 'lead_time' => '10 Days', 'rating' => 4.8],
-        ['name' => 'Lagoon Thermal Paper Industries', 'category' => 'Consumables & Rolls', 'contact' => 'Sola Adeyemi', 'email' => 'sales@lagoonpaper.ng', 'phone' => '+234 805 444 5555', 'lead_time' => '1 Day', 'rating' => 4.7],
-    ];
+    public array $suppliers = [];
 
-    public array $stockMovements = [
-        ['date' => '2026-08-09 16:45', 'sku' => 'POS-HDW-004', 'product' => 'Barcode Scanner Unit', 'type' => 'Inbound PO', 'qty' => 50, 'origin' => 'Apex Hardware', 'destination' => 'Lagos HQ Central Warehouse'],
-        ['date' => '2026-08-09 14:10', 'sku' => 'ENT-LIC-001', 'product' => 'Enterprise License Key Card', 'type' => 'Branch Transfer', 'qty' => 15, 'origin' => 'Lagos HQ', 'destination' => 'Abuja Regional Hub'],
-        ['date' => '2026-08-08 11:30', 'sku' => 'REC-PRN-002', 'product' => 'Thermal Receipt Printer', 'type' => 'POS Dispatch', 'qty' => -5, 'origin' => 'Lagos HQ', 'destination' => 'Abuja Retail Store'],
-    ];
+    public array $stockMovements = [];
 
-    public array $automationRules = [
-        ['id' => 1, 'name' => 'Auto-generate Invoice on Qualified CRM Lead', 'trigger' => 'CRM Lead Qualified', 'action' => 'Create NGN Invoice', 'active' => true],
-        ['id' => 2, 'name' => 'Low Stock Reorder Alert Notification', 'trigger' => 'Stock Quantity < Reorder Level', 'action' => 'Notify Operations Team', 'active' => true],
-        ['id' => 3, 'name' => 'POS Receipt Email Dispatch', 'trigger' => 'POS Checkout Completed', 'action' => 'Send Email Receipt', 'active' => true],
-    ];
+    public array $automationRules = [];
 
-    public array $salesOrders = [
-        ['id' => 'SO-10458', 'customer' => 'Northbridge Media Nigeria', 'date' => '2026-08-08', 'amount' => 4500000.00, 'status' => 'Confirmed'],
-        ['id' => 'SO-10462', 'customer' => 'Apex Technology Solutions', 'date' => '2026-08-09', 'amount' => 2150000.00, 'status' => 'Processing'],
-        ['id' => 'SO-10465', 'customer' => 'Horizon Media Communications', 'date' => '2026-08-09', 'amount' => 7800000.00, 'status' => 'Draft'],
-    ];
+    public array $salesOrders = [];
 
-    public array $marketingCampaigns = [
-        ['name' => 'Q3 Enterprise ERP Launch', 'channel' => 'Multi-Channel (Meta, LinkedIn, Google)', 'budget' => 2500000.00, 'leads' => 142, 'status' => 'Active'],
-        ['name' => 'Abuja Retail POS Hardware Promo', 'channel' => 'Facebook & Instagram Ads', 'budget' => 850000.00, 'leads' => 88, 'status' => 'Active'],
-        ['name' => 'SaaS AI Assistant Upgrade Push', 'channel' => 'Email Newsletter Blast', 'budget' => 350000.00, 'leads' => 210, 'status' => 'Scheduled'],
-    ];
+    public array $marketingCampaigns = [];
 
-    public array $socialChannels = [
-        ['platform' => 'Facebook', 'name' => 'Ascend Systems Meta Page', 'handle' => '@AscendSystems', 'followers' => '24,500', 'icon' => 'fa-brands fa-facebook text-blue-600', 'status' => 'Connected'],
-        ['platform' => 'Instagram', 'name' => 'Ascend AI Nigeria', 'handle' => '@ascend_ai_ng', 'followers' => '18,200', 'icon' => 'fa-brands fa-instagram text-pink-600', 'status' => 'Connected'],
-        ['platform' => 'LinkedIn', 'name' => 'Ascend Systems Enterprise', 'handle' => 'Ascend Systems Ltd', 'followers' => '12,800', 'icon' => 'fa-brands fa-linkedin text-blue-700', 'status' => 'Connected'],
-        ['platform' => 'Twitter/X', 'name' => 'Ascend ERP Tech', 'handle' => '@AscendERP', 'followers' => '31,000', 'icon' => 'fa-brands fa-x-twitter text-slate-900 dark:text-white', 'status' => 'Connected'],
-    ];
+    public array $socialChannels = [];
 
-    public array $audienceBlasts = [
-        ['subject' => 'Q3 Enterprise ERP Feature Release', 'segment' => 'All Active Clients', 'recipients' => 4850, 'delivered' => '98.4%', 'opened' => '42.1%', 'date' => '2026-08-05', 'status' => 'Sent'],
-        ['subject' => 'Abuja Regional Branch Opening Promo', 'segment' => 'Qualified CRM Leads', 'recipients' => 1240, 'delivered' => '99.1%', 'opened' => '54.8%', 'date' => '2026-08-01', 'status' => 'Sent'],
-    ];
+    public array $audienceBlasts = [];
 
     public array $blastForm = [
-        'segment' => 'All Active Clients (4,850 Subscribers)',
-        'subject' => 'Special Announcement: New POS & AI Features Released!',
-        'message' => 'Dear Partner, We are excited to announce our latest software update with integrated AI marketing and cashier POS terminals in Lagos & Abuja!',
+        'segment' => '',
+        'subject' => '',
+        'message' => '',
         'channel' => 'email',
     ];
 
     public bool $abTestEnabled = false;
 
-    public string $subjectB = '🚀 Exclusive Access: Try Ascend AI ERP Now!';
+    public string $subjectB = '';
 
-    public array $tasks = [
-        ['id' => 1, 'title' => 'Implement POS receipt thermal printing', 'project' => 'POS Hardware Integration', 'assignee' => 'Babatunde Adeleke', 'priority' => 'High', 'status' => 'in_progress', 'due' => '2026-08-15'],
-        ['id' => 2, 'title' => 'Design CRM pipeline Kanban board UI', 'project' => 'CRM Overhaul Q3', 'assignee' => 'Fatima Bello', 'priority' => 'Critical', 'status' => 'todo', 'due' => '2026-08-12'],
-        ['id' => 3, 'title' => 'Setup automated low-stock email alerts', 'project' => 'Inventory Automation', 'assignee' => 'Emeka Nwosu', 'priority' => 'Normal', 'status' => 'done', 'due' => '2026-08-08'],
-        ['id' => 4, 'title' => 'Configure WhatsApp Business API integration', 'project' => 'Marketing Channels', 'assignee' => 'Sola Adeyemi', 'priority' => 'High', 'status' => 'in_review', 'due' => '2026-08-18'],
-        ['id' => 5, 'title' => 'Generate Q3 executive financial report', 'project' => 'Finance Reporting', 'assignee' => 'Babatunde Adeleke', 'priority' => 'Normal', 'status' => 'todo', 'due' => '2026-08-20'],
-        ['id' => 6, 'title' => 'Migrate Abuja warehouse SKU barcodes', 'project' => 'POS Hardware Integration', 'assignee' => 'Emeka Nwosu', 'priority' => 'Low', 'status' => 'in_progress', 'due' => '2026-08-22'],
-    ];
+    public array $tasks = [];
 
-    public array $emailTemplates = [
-        ['id' => 1, 'name' => 'Welcome Series — New Client Onboarding', 'category' => 'Onboarding', 'opens' => '68.2%', 'clicks' => '24.5%', 'status' => 'Active'],
-        ['id' => 2, 'name' => 'Monthly Product Newsletter', 'category' => 'Newsletter', 'opens' => '42.1%', 'clicks' => '12.8%', 'status' => 'Active'],
-        ['id' => 3, 'name' => 'Abandoned Cart Recovery Sequence', 'category' => 'Re-engagement', 'opens' => '55.4%', 'clicks' => '31.2%', 'status' => 'Active'],
-        ['id' => 4, 'name' => 'Q3 Seasonal Promotion Blast', 'category' => 'Promotional', 'opens' => '38.9%', 'clicks' => '18.6%', 'status' => 'Draft'],
-    ];
+    public array $emailTemplates = [];
 
     public array $emailForm = [
         'template' => 'blank',
@@ -181,18 +137,9 @@ class AscendModuleViewer extends Component
         'footer' => 'Ascend Systems Nigeria — Lagos HQ',
     ];
 
-    public array $crmContacts = [
-        ['name' => 'Adebayo Ogundimu', 'company' => 'Northbridge Media Nigeria', 'email' => 'adebayo@northbridge.ng', 'phone' => '+234 802 111 2233', 'deals' => 3, 'value' => 8500000.00, 'last_contact' => '2026-08-08'],
-        ['name' => 'Chioma Eze', 'company' => 'Apex Technology Solutions', 'email' => 'chioma@apextech.ng', 'phone' => '+234 803 444 5566', 'deals' => 2, 'value' => 4200000.00, 'last_contact' => '2026-08-07'],
-        ['name' => 'Ibrahim Musa', 'company' => 'Horizon Media Communications', 'email' => 'ibrahim@horizonmedia.ng', 'phone' => '+234 805 777 8899', 'deals' => 1, 'value' => 7800000.00, 'last_contact' => '2026-08-09'],
-        ['name' => 'Ngozi Okafor', 'company' => 'Sterling Finance Corp', 'email' => 'ngozi@sterlingfinance.ng', 'phone' => '+234 808 222 3344', 'deals' => 4, 'value' => 12500000.00, 'last_contact' => '2026-08-06'],
-    ];
+    public array $crmContacts = [];
 
-    public array $crmContracts = [
-        ['id' => 'CTR-2026-001', 'client' => 'Northbridge Media Nigeria', 'type' => 'Annual SaaS License', 'value' => 4500000.00, 'start' => '2026-01-15', 'end' => '2027-01-14', 'status' => 'Active'],
-        ['id' => 'CTR-2026-002', 'client' => 'Apex Technology Solutions', 'type' => 'POS Hardware Lease', 'value' => 2150000.00, 'start' => '2026-03-01', 'end' => '2027-02-28', 'status' => 'Active'],
-        ['id' => 'CTR-2026-003', 'client' => 'Horizon Media Communications', 'type' => 'Enterprise Integration', 'value' => 7800000.00, 'start' => '2026-06-01', 'end' => '2026-11-30', 'status' => 'In Review'],
-    ];
+    public array $crmContracts = [];
 
     public function mount(string $moduleKey = 'finance'): void
     {
@@ -211,6 +158,236 @@ class AscendModuleViewer extends Component
             'administration' => 'users',
             default => 'overview',
         };
+
+        $this->hydrateLiveData();
+    }
+
+    /**
+     * Load all module data from live DB tables.
+     * Each block is wrapped in a try/catch so a missing table or
+     * a module that is not yet installed degrades gracefully.
+     */
+    protected function hydrateLiveData(): void
+    {
+        $userId = (int) optional(auth()->user())->id;
+
+        // --- Social Channels (marketing + workspace) ---
+        try {
+            $providerIcons = [
+                'facebook'  => 'fa-brands fa-facebook text-blue-500',
+                'instagram' => 'fa-brands fa-instagram text-pink-500',
+                'linkedin'  => 'fa-brands fa-linkedin text-blue-700',
+                'twitter'   => 'fa-brands fa-x-twitter',
+                'x'         => 'fa-brands fa-x-twitter',
+                'tiktok'    => 'fa-brands fa-tiktok',
+                'youtube'   => 'fa-brands fa-youtube text-red-600',
+                'whatsapp'  => 'fa-brands fa-whatsapp text-green-500',
+                'telegram'  => 'fa-brands fa-telegram text-sky-500',
+            ];
+
+            $this->socialChannels = SocialAccount::query()
+                ->when($userId, fn ($q) => $q->where(function ($q) use ($userId) {
+                    $q->where('user_id', $userId)
+                      ->orWhere('created_by_user_id', $userId);
+                }))
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(fn ($acct) => [
+                    'id'        => $acct->id,
+                    'platform'  => ucfirst((string) $acct->provider_key),
+                    'name'      => (string) $acct->display_name,
+                    'handle'    => $acct->username ? '@'.$acct->username : (string) $acct->display_name,
+                    'followers' => number_format((int) data_get($acct->metadata, 'followers_count', 0)),
+                    'icon'      => $providerIcons[strtolower((string) $acct->provider_key)] ?? 'fa-light fa-share-nodes',
+                    'status'    => $acct->is_active ? 'Connected' : 'Disconnected',
+                    'avatar'    => $acct->avatar_url,
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->socialChannels = [];
+        }
+
+        // --- Marketing Campaigns (email campaigns) ---
+        try {
+            $this->marketingCampaigns = EmailCampaign::query()
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn ($c) => [
+                    'id'      => $c->id,
+                    'name'    => (string) ($c->name ?? $c->subject ?? 'Untitled Campaign'),
+                    'channel' => 'Email',
+                    'budget'  => 0.0,
+                    'leads'   => $c->recipients()->count(),
+                    'status'  => ucfirst((string) ($c->status ?? 'Draft')),
+                ])
+                ->toArray();
+
+            // Also pull sent email blasts for the audience tab
+            $this->audienceBlasts = EmailCampaign::query()
+                ->where('status', 'sent')
+                ->latest('sent_at')
+                ->limit(20)
+                ->get()
+                ->map(fn ($c) => [
+                    'subject'    => (string) ($c->subject ?? $c->name ?? 'Campaign'),
+                    'segment'    => (string) ($c->audience_label ?? 'Subscribers'),
+                    'recipients' => $c->recipients()->count(),
+                    'delivered'  => data_get($c->stats ?? [], 'delivered_pct', '—'),
+                    'opened'     => data_get($c->stats ?? [], 'open_rate', '—'),
+                    'date'       => $c->sent_at?->toDateString() ?? $c->created_at?->toDateString(),
+                    'status'     => 'Sent',
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->marketingCampaigns = [];
+            $this->audienceBlasts = [];
+        }
+
+        // --- CRM Contacts (leads) ---
+        try {
+            $this->crmContacts = CrmLead::query()
+                ->withCount('deals')
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn ($lead) => [
+                    'id'           => $lead->id,
+                    'name'         => (string) $lead->contact_person,
+                    'company'      => (string) $lead->company_name,
+                    'email'        => (string) $lead->email,
+                    'phone'        => (string) ($lead->phone ?? '—'),
+                    'deals'        => $lead->deals_count,
+                    'value'        => (float) $lead->deal_value,
+                    'last_contact' => $lead->updated_at?->toDateString() ?? '—',
+                    'status'       => (string) ($lead->status ?? 'prospect'),
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->crmContacts = [];
+        }
+
+        // --- CRM Contracts (deals) ---
+        try {
+            $this->crmContracts = CrmDeal::query()
+                ->with('lead')
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn ($deal) => [
+                    'id'     => 'DL-'.$deal->id,
+                    'client' => (string) ($deal->lead?->company_name ?? 'Unknown Client'),
+                    'type'   => (string) $deal->deal_name,
+                    'value'  => (float) $deal->value,
+                    'start'  => $deal->created_at?->toDateString() ?? '—',
+                    'end'    => $deal->expected_close?->toDateString() ?? '—',
+                    'status' => ucfirst((string) ($deal->stage ?? 'open')),
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->crmContracts = [];
+        }
+
+        // --- Tasks & Projects ---
+        try {
+            $this->tasks = ProjectTask::query()
+                ->with('project')
+                ->latest()
+                ->limit(50)
+                ->get()
+                ->map(fn ($task) => [
+                    'id'       => $task->id,
+                    'title'    => (string) $task->title,
+                    'project'  => (string) ($task->project?->name ?? 'General'),
+                    'assignee' => (string) ($task->assignee ?? 'Unassigned'),
+                    'priority' => (string) ($task->priority ?? 'Normal'),
+                    'status'   => $task->completed ? 'done' : 'todo',
+                    'due'      => $task->due_date?->toDateString() ?? '—',
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->tasks = [];
+        }
+
+        // --- Sales Orders (Invoices) ---
+        try {
+            $this->salesOrders = Invoice::query()
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn ($inv) => [
+                    'id'       => (string) $inv->invoice_number,
+                    'customer' => (string) $inv->client_name,
+                    'date'     => $inv->issue_date?->toDateString() ?? $inv->created_at?->toDateString() ?? '—',
+                    'amount'   => (float) $inv->total,
+                    'status'   => ucfirst((string) ($inv->status ?? 'draft')),
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->salesOrders = [];
+        }
+
+        // --- General Ledger (Bank Accounts) ---
+        try {
+            $this->generalLedger = BankAccount::query()
+                ->get()
+                ->map(fn ($acct, $i) => [
+                    'code'    => str_pad((string) ((1000 + $i) * 10), 4, '0', STR_PAD_LEFT),
+                    'account' => (string) $acct->name.' ('.(string) $acct->bank_name.')',
+                    'type'    => 'Asset',
+                    'debit'   => (float) $acct->balance,
+                    'credit'  => 0.0,
+                    'balance' => (float) $acct->balance,
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->generalLedger = [];
+        }
+
+        // --- Inventory / Stock Movements ---
+        try {
+            $this->stockMovements = InventoryProduct::query()
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn ($prod) => [
+                    'date'        => $prod->updated_at?->format('Y-m-d H:i') ?? now()->format('Y-m-d H:i'),
+                    'sku'         => (string) $prod->sku,
+                    'product'     => (string) $prod->name,
+                    'type'        => 'Stock Record',
+                    'qty'         => (int) $prod->stock_quantity,
+                    'origin'      => (string) ($prod->location ?? 'Warehouse'),
+                    'destination' => '—',
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->stockMovements = [];
+        }
+
+        // --- Automation Webhooks / Rules ---
+        try {
+            $this->automationRules = AutomationWebhook::query()
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn ($wh) => [
+                    'id'      => $wh->id,
+                    'name'    => (string) $wh->name,
+                    'trigger' => implode(', ', (array) ($wh->events ?? ['Webhook Event'])),
+                    'action'  => 'POST → '.(string) $wh->url,
+                    'active'  => (bool) $wh->is_active,
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->automationRules = [];
+        }
+
+        // Warehouses & Suppliers: no dedicated models yet — leave empty for empty-state UI.
+        $this->warehouses = [];
+        $this->suppliers  = [];
+        // Email templates: no dedicated model yet — user creates via form.
+        $this->emailTemplates = [];
     }
 
     // Finance & Invoice Flow Actions
@@ -381,6 +558,76 @@ class AscendModuleViewer extends Component
     public function syncChannelStats(string $platform): void
     {
         session()->flash('status', __('Synced API analytics and follower statistics for :platform channel!', ['platform' => $platform]));
+        // Reload live channel data from DB after sync
+        try {
+            $providerIcons = [
+                'facebook'  => 'fa-brands fa-facebook text-blue-500',
+                'instagram' => 'fa-brands fa-instagram text-pink-500',
+                'linkedin'  => 'fa-brands fa-linkedin text-blue-700',
+                'twitter'   => 'fa-brands fa-x-twitter',
+                'x'         => 'fa-brands fa-x-twitter',
+                'tiktok'    => 'fa-brands fa-tiktok',
+                'youtube'   => 'fa-brands fa-youtube text-red-600',
+                'whatsapp'  => 'fa-brands fa-whatsapp text-green-500',
+                'telegram'  => 'fa-brands fa-telegram text-sky-500',
+            ];
+            $userId = (int) optional(auth()->user())->id;
+            $this->socialChannels = SocialAccount::query()
+                ->when($userId, fn ($q) => $q->where(function ($q) use ($userId) {
+                    $q->where('user_id', $userId)->orWhere('created_by_user_id', $userId);
+                }))
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(fn ($acct) => [
+                    'id'        => $acct->id,
+                    'platform'  => ucfirst((string) $acct->provider_key),
+                    'name'      => (string) $acct->display_name,
+                    'handle'    => $acct->username ? '@'.$acct->username : (string) $acct->display_name,
+                    'followers' => number_format((int) data_get($acct->metadata, 'followers_count', 0)),
+                    'icon'      => $providerIcons[strtolower((string) $acct->provider_key)] ?? 'fa-light fa-share-nodes',
+                    'status'    => $acct->is_active ? 'Connected' : 'Disconnected',
+                    'avatar'    => $acct->avatar_url,
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            // Keep current state on error
+        }
+    }
+
+    /**
+     * Connect a new social account (called from the onboarding wizard & marketing module).
+     * Stores a placeholder record; real OAuth flow handled by AppChannels module.
+     */
+    public function connectSocialChannel(string $platform, string $handle): void
+    {
+        if (blank($handle)) {
+            session()->flash('warning', __('Please enter a valid account handle.'));
+            return;
+        }
+
+        try {
+            $userId = (int) optional(auth()->user())->id;
+            SocialAccount::create([
+                'provider_key'        => strtolower($platform),
+                'display_name'        => trim($handle, '@'),
+                'username'            => ltrim(trim($handle), '@'),
+                'account_type'        => 'manual',
+                'is_active'           => true,
+                'user_id'             => $userId ?: null,
+                'created_by_user_id'  => $userId ?: null,
+                'connected_at'        => now(),
+            ]);
+
+            // Reload channels from DB
+            $this->syncChannelStats($platform);
+            session()->flash('status', __(':platform account ":handle" connected successfully!', [
+                'platform' => $platform,
+                'handle'   => $handle,
+            ]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', __('Could not connect channel: :msg', ['msg' => $e->getMessage()]));
+        }
     }
 
     // Inventory & Supply Chain Helper Actions
