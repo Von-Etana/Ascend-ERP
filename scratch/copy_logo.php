@@ -1,6 +1,6 @@
 <?php
 
-$source = 'C:/Users/DELL/Downloads/ascend logo.png';
+$source = 'C:/Users/DELL/OneDrive/Dokumente/Ascend website/logo-19 (1).png';
 
 if (!file_exists($source)) {
     die("Source logo file not found at: $source\n");
@@ -40,4 +40,4 @@ foreach ($targets as $relPath) {
     }
 }
 
-echo "Logo replacement completed!\n";
+echo "Logo-19 replacement completed!\n";
