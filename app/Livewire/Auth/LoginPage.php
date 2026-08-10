@@ -27,7 +27,9 @@ class LoginPage extends Component
 
     public function mount(): void
     {
-        request()->session()->forget('url.intended');
+        if (request()->hasSession()) {
+            request()->session()->forget('url.intended');
+        }
     }
 
     public function login()
@@ -92,11 +94,13 @@ class LoginPage extends Component
         RateLimiter::clear($this->throttleKey());
 
         if ($this->requiresTwoFactorChallenge($user)) {
-            request()->session()->put([
-                'login.id' => $user->getKey(),
-                'login.remember' => $this->remember,
-                'url.intended' => Fortify::redirects('login') ?? config('fortify.home'),
-            ]);
+            if (request()->hasSession()) {
+                request()->session()->put([
+                    'login.id' => $user->getKey(),
+                    'login.remember' => $this->remember,
+                    'url.intended' => Fortify::redirects('login') ?? config('fortify.home'),
+                ]);
+            }
 
             TwoFactorAuthenticationChallenged::dispatch($user);
 
@@ -104,7 +108,9 @@ class LoginPage extends Component
         }
 
         $guard->login($user, $this->remember);
-        request()->session()->regenerate();
+        if (request()->hasSession()) {
+            request()->session()->regenerate();
+        }
 
         return redirect()->to(Fortify::redirects('login') ?? config('fortify.home'));
     }
