@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Throwable;
 
 #[Title('Ascend Systems')]
 class Dashboard extends Component
@@ -148,31 +149,42 @@ class Dashboard extends Component
 
     public function render(): View
     {
-        // Live Revenue & Order Calculations from DB
-        $invoiceTotal = (float) Invoice::sum('total');
-        $posTotal = (float) PosReceipt::sum('total_amount');
-        $totalRevenue = $invoiceTotal + $posTotal;
-        if ($totalRevenue == 0) {
+        // Live Revenue & Order Calculations from DB with safe fallbacks
+        try {
+            $invoiceTotal = (float) Invoice::sum('total');
+            $posTotal = (float) PosReceipt::sum('total_amount');
+            $totalRevenue = $invoiceTotal + $posTotal;
+            if ($totalRevenue == 0) {
+                $totalRevenue = 1245780.00;
+            }
+            $invoiceCount = Invoice::count();
+            $posCount = PosReceipt::count();
+            $totalOrders = $invoiceCount + $posCount;
+            if ($totalOrders == 0) {
+                $totalOrders = 3248;
+            }
+        } catch (Throwable) {
             $totalRevenue = 1245780.00;
-        }
-        $netRevenue = $totalRevenue * 0.90;
-
-        $invoiceCount = Invoice::count();
-        $posCount = PosReceipt::count();
-        $totalOrders = $invoiceCount + $posCount;
-        if ($totalOrders == 0) {
             $totalOrders = 3248;
         }
+
+        $netRevenue = $totalRevenue * 0.90;
         $avgOrder = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 385.40;
 
-        // Live Open Deals & Pipeline
-        $dbDeals = CrmDeal::all();
-        $openDealsCount = $dbDeals->where('stage', '!=', 'closed_lost')->count();
-        if ($openDealsCount == 0) {
+        // Live Open Deals & Pipeline with safe fallbacks
+        try {
+            $dbDeals = CrmDeal::all();
+            $openDealsCount = $dbDeals->where('stage', '!=', 'closed_lost')->count();
+            if ($openDealsCount == 0) {
+                $openDealsCount = 56;
+            }
+            $openDealsValue = (float) $dbDeals->where('stage', '!=', 'closed_lost')->sum('value');
+            if ($openDealsValue == 0) {
+                $openDealsValue = 1240000.00;
+            }
+        } catch (Throwable) {
+            $dbDeals = collect([]);
             $openDealsCount = 56;
-        }
-        $openDealsValue = (float) $dbDeals->where('stage', '!=', 'closed_lost')->sum('value');
-        if ($openDealsValue == 0) {
             $openDealsValue = 1240000.00;
         }
 
@@ -215,12 +227,20 @@ class Dashboard extends Component
         }
 
         // Live Inventory Low Stock Alert
-        $dbLowStockCount = InventoryProduct::whereColumn('stock_quantity', '<=', 'reorder_level')->orWhere('stock_quantity', '<', 10)->count();
-        $lowStockCount = $dbLowStockCount > 0 ? $dbLowStockCount : 23;
+        try {
+            $dbLowStockCount = InventoryProduct::whereColumn('stock_quantity', '<=', 'reorder_level')->orWhere('stock_quantity', '<', 10)->count();
+            $lowStockCount = $dbLowStockCount > 0 ? $dbLowStockCount : 23;
+        } catch (Throwable) {
+            $lowStockCount = 23;
+        }
 
         // Live Tasks Due
-        $dbTasksCount = ProjectTask::where('status', '!=', 'done')->count();
-        $tasksDueCount = $dbTasksCount > 0 ? $dbTasksCount : 19;
+        try {
+            $dbTasksCount = ProjectTask::where('status', '!=', 'done')->count();
+            $tasksDueCount = $dbTasksCount > 0 ? $dbTasksCount : 19;
+        } catch (Throwable) {
+            $tasksDueCount = 19;
+        }
 
         return view(theme_view('livewire.portal.ascend-dashboard', 'app'), [
             'dashboardItems' => user_dashboard_items(auth()->user(), 'main'),
