@@ -572,7 +572,7 @@ return new class extends Migration
 
             if (! Schema::hasTable('cache')) {
             Schema::create('cache', function (Blueprint $table): void {
-                    $table->string('key', 255);
+                    $table->string('key', 191);
                     $table->mediumText('value');
                     $table->integer('expiration');
                     $table->primary('key');
@@ -582,7 +582,7 @@ return new class extends Migration
 
             if (! Schema::hasTable('cache_locks')) {
             Schema::create('cache_locks', function (Blueprint $table): void {
-                    $table->string('key', 255);
+                    $table->string('key', 191);
                     $table->string('owner', 255);
                     $table->integer('expiration');
                     $table->primary('key');
@@ -786,7 +786,7 @@ return new class extends Migration
             Schema::create('language_translations', function (Blueprint $table): void {
                     $table->id();
                     $table->string('language_code', 10);
-                    $table->string('key', 255);
+                    $table->string('key', 191);
                     $table->longText('value')->nullable();
                     $table->boolean('is_custom')->default(1);
                     $table->timestamp('created_at')->nullable();
