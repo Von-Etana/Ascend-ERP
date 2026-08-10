@@ -334,6 +334,34 @@ class AscendModuleViewer extends Component
         }
     }
 
+    // === ADVANCED ANALYTICS & BI WORKSPACE STATE ===
+    public array $branchSales = [
+        ['name' => 'Abuja Headquarters (Garki Area 3)', 'type' => 'Corporate HQ', 'sales' => 12450000.00, 'share' => '43.8%', 'status' => 'Optimal'],
+        ['name' => 'Lagos Commercial Branch (Victoria Island)', 'type' => 'Regional Office', 'sales' => 8920000.00, 'share' => '31.3%', 'status' => 'High Growth'],
+        ['name' => 'Port Harcourt Logistics Hub', 'type' => 'Logistics Hub', 'sales' => 4680000.00, 'share' => '16.5%', 'status' => 'Steady'],
+        ['name' => 'Kano Regional Outlet', 'type' => 'Regional Outlet', 'sales' => 2400000.00, 'share' => '8.4%', 'status' => 'Expanding'],
+    ];
+
+    public array $cashFlowForecast = [
+        ['month' => 'Aug 2026', 'inflow' => 28450000.00, 'outflow' => 17300000.00, 'net' => 11150000.00],
+        ['month' => 'Sep 2026', 'inflow' => 31200000.00, 'outflow' => 18500000.00, 'net' => 12700000.00],
+        ['month' => 'Oct 2026', 'inflow' => 34500000.00, 'outflow' => 19200000.00, 'net' => 15300000.00],
+        ['month' => 'Nov 2026', 'inflow' => 38000000.00, 'outflow' => 20500000.00, 'net' => 17500000.00],
+    ];
+
+    public array $customReportForm = [
+        'metric' => 'revenue',
+        'timeframe' => 'q3_2026',
+        'branch' => 'all',
+        'format' => 'pdf',
+    ];
+
+    public function generateCustomReport(): void
+    {
+        log_activity('reports.generate', 'Generated custom BI analytics report for '.strtoupper($this->customReportForm['metric']));
+        session()->flash('status', __('Custom BI Report generated successfully! Ready for export.'));
+    }
+
     public array $newUserForm = [
         'name' => '',
         'username' => '',

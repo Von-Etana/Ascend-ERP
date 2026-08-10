@@ -111,4 +111,11 @@ class PdfExportController
 
         return $pdf->download('Payslip-'.$id.'-'.date('Ym').'.pdf');
     }
+
+    public function downloadExecutiveReport(): Response
+    {
+        $pdf = Pdf::loadView('pdf.executive_report', $this->getCompanyInfo());
+
+        return $pdf->download('Executive-Financial-Report-'.date('Y-Q').'.pdf');
+    }
 }

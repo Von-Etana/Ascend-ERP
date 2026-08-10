@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('portal/receipt/{receipt}/pdf', [PdfExportController::class, 'downloadReceipt'])->name('portal.receipt.pdf');
     Route::get('portal/delivery-note/{invoice}/pdf', [PdfExportController::class, 'downloadDeliveryNote'])->name('portal.delivery-note.pdf');
     Route::get('portal/payslip/{id}/pdf', [PdfExportController::class, 'downloadPayslip'])->name('portal.payslip.pdf');
+    Route::get('portal/reports/executive/pdf', [PdfExportController::class, 'downloadExecutiveReport'])->name('portal.reports.executive.pdf');
     Route::get('portal/finance/export-csv', [CsvExportController::class, 'exportInvoices'])->name('portal.finance.export-csv');
     Route::get('portal/crm/export-csv', [CsvExportController::class, 'exportLeads'])->name('portal.crm.export-csv');
     Route::get('portal/inventory/export-csv', [CsvExportController::class, 'exportInventory'])->name('portal.inventory.export-csv');

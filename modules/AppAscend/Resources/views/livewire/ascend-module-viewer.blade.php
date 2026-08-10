@@ -3159,37 +3159,251 @@
         @endif
     @endif
 
-    <!-- MODULE 10: REPORTS ENHANCED -->
+    <!-- MODULE 10: REPORTS ENHANCED — ADVANCED ANALYTICS & BI STUDIO -->
     @if ($moduleKey === 'reports')
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Executive Management Reports & Business Intelligence') }}</h2>
-                    <p class="text-sm text-slate-500">{{ __('Unified business intelligence across Lagos HQ and regional branches.') }}</p>
+        @if ($activeTab === 'executive' || $activeTab === 'overview' || empty($activeTab))
+            <div class="space-y-6">
+                <!-- Top Financial Summary KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Gross Revenue') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600"><i class="fa-light fa-chart-line-up"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-teal-600">₦28,450,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+14.2% vs last quarter</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Gross Operating Profit') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-money-bill-wave"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦18,600,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500">65.4% Gross Margin</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('EBITDA Income') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-vault"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-purple-600">₦11,150,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">39.2% Operating Margin</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Net Profit After Tax') }}</p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-shield-check"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-sky-600">₦9,477,500.00</p>
+                        <p class="mt-1 text-xs font-medium text-teal-500">33.3% Net Margin</p>
+                    </div>
                 </div>
-                <a href="{{ route('portal.finance.export-csv') }}" class="rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white hover:bg-teal-700">
-                    <i class="fa-light fa-file-excel mr-2"></i>{{ __('Export Master Executive Report (CSV)') }}
-                </a>
-            </div>
 
-            <div class="mt-6 grid gap-4 md:grid-cols-3">
-                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Monthly Revenue</p>
-                    <p class="mt-2 text-2xl font-black text-emerald-600">₦1,245,780.00</p>
-                    <p class="mt-1 text-xs text-slate-500">From 182 settled transactions</p>
-                </div>
-                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Active CRM Pipeline</p>
-                    <p class="mt-2 text-2xl font-black text-blue-600">₦12,000,000.00</p>
-                    <p class="mt-1 text-xs text-slate-500">56 open leads in pipeline</p>
-                </div>
-                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Total Inventory Valuation</p>
-                    <p class="mt-2 text-2xl font-black text-orange-600">₦18,450,000.00</p>
-                    <p class="mt-1 text-xs text-slate-500">342 active product SKUs</p>
-                </div>
+                <!-- Master P&L Statement Section -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Executive Master Profit & Loss (P&L) Statement') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Consolidated P&L statement across Abuja Headquarters and regional branch operations.') }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('portal.finance.export-csv') }}" class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <i class="fa-light fa-file-excel mr-1.5"></i>{{ __('Export CSV') }}
+                            </a>
+                            <a href="{{ route('portal.reports.executive.pdf') }}" target="_blank" class="rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                                <i class="fa-light fa-file-pdf mr-1.5"></i>{{ __('Export Executive PDF Report') }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Financial Line Item</th>
+                                    <th class="px-4 py-3.5">Category Scope</th>
+                                    <th class="px-4 py-3.5 text-right">Amount (NGN)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <tr>
+                                    <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">Gross Operating Revenue</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Sales, POS & Subscriptions</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-slate-900 dark:text-white">₦28,450,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Cost of Goods Sold (COGS)</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Hardware & Stock Procurement</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦9,850,000.00</td>
+                                </tr>
+                                <tr class="bg-teal-50/50 dark:bg-teal-950/20 font-bold">
+                                    <td class="px-4 py-3.5 text-teal-700 dark:text-teal-400">GROSS OPERATING PROFIT</td>
+                                    <td class="px-4 py-3.5 text-xs text-teal-600 dark:text-teal-400">65.4% Gross Margin</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-teal-600 dark:text-teal-400">₦18,600,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Operating Expenses (OPEX)</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Marketing, Logistics, Cloud Infra</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦5,200,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Personnel & Staff Payroll</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Monthly Gross Payroll</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦2,250,000.00</td>
+                                </tr>
+                                <tr class="bg-emerald-50/50 dark:bg-emerald-950/20 font-bold">
+                                    <td class="px-4 py-3.5 text-emerald-700 dark:text-emerald-400">NET OPERATING INCOME (EBITDA)</td>
+                                    <td class="px-4 py-3.5 text-xs text-emerald-600 dark:text-emerald-400">39.2% Operating Margin</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-emerald-600 dark:text-emerald-400">₦11,150,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Tax Provision & Statutory Reserve</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Corporate Income Tax Reserve (15%)</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦1,672,500.00</td>
+                                </tr>
+                                <tr class="bg-teal-100/50 dark:bg-teal-900/40 font-black text-base">
+                                    <td class="px-4 py-4 text-teal-800 dark:text-teal-300">NET PROFIT AFTER TAX (NPAT)</td>
+                                    <td class="px-4 py-4 text-xs font-semibold text-teal-700 dark:text-teal-300">33.3% Net Margin</td>
+                                    <td class="px-4 py-4 text-right text-teal-800 dark:text-teal-300">₦9,477,500.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
-        </section>
+        @elseif ($activeTab === 'sales_analytics')
+            <div class="space-y-6">
+                <!-- Regional Branch Sales Matrix -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Regional Branch Revenue Contribution Matrix') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Sales breakdown across Abuja Headquarters and regional commercial offices.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Branch Location</th>
+                                    <th class="px-4 py-3.5">Designation Scope</th>
+                                    <th class="px-4 py-3.5">Monthly Revenue (NGN)</th>
+                                    <th class="px-4 py-3.5">Revenue Share %</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach ($branchSales as $branch)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-light fa-building-circle-check text-teal-600"></i>
+                                                {{ $branch['name'] }}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs text-slate-500 font-semibold">{{ $branch['type'] }}</td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($branch['sales'], 2) }}</td>
+                                        <td class="px-4 py-3.5 font-bold text-teal-600">{{ $branch['share'] }}</td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full bg-teal-500/10 border border-teal-500/20 px-2.5 py-0.5 text-xs font-bold text-teal-600">
+                                                {{ $branch['status'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'cash_flow')
+            <div class="space-y-6">
+                <!-- Cash Flow Forecast Grid -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('6-Month Cash Flow & Liquidity Forecast') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Projected monthly cash inflows, outflows, and net liquidity reserves.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Forecast Month</th>
+                                    <th class="px-4 py-3.5">Projected Inflow</th>
+                                    <th class="px-4 py-3.5">Projected Outflow</th>
+                                    <th class="px-4 py-3.5">Net Cash Flow</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach ($cashFlowForecast as $cf)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">{{ $cf['month'] }}</td>
+                                        <td class="px-4 py-3.5 font-bold text-emerald-600">₦{{ number_format($cf['inflow'], 2) }}</td>
+                                        <td class="px-4 py-3.5 font-bold text-rose-600">-₦{{ number_format($cf['outflow'], 2) }}</td>
+                                        <td class="px-4 py-3.5 font-black text-teal-600">₦{{ number_format($cf['net'], 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @else
+            <!-- Custom BI Report Builder Tab -->
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="border-b pb-4 dark:border-slate-800">
+                    <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Custom BI Query Builder & Scheduled Reports') }}</h2>
+                    <p class="text-sm text-slate-500">{{ __('Configure custom executive analytics queries and automated email dispatch.') }}</p>
+                </div>
+
+                <form wire:submit.prevent="generateCustomReport" class="mt-5 space-y-4">
+                    <div class="grid gap-4 sm:grid-cols-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Metric</label>
+                            <select wire:model="customReportForm.metric" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="revenue">Revenue & Sales</option>
+                                <option value="expenses">Operating Expenses</option>
+                                <option value="payroll">Payroll & Tax Statutory</option>
+                                <option value="inventory">Inventory Valuation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Time Range</label>
+                            <select wire:model="customReportForm.timeframe" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="q3_2026">Q3 2026</option>
+                                <option value="ytd_2026">Year-to-Date (YTD 2026)</option>
+                                <option value="month_current">Current Month</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Branch Location Filter</label>
+                            <select wire:model="customReportForm.branch" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="all">All Locations (Consolidated)</option>
+                                <option value="abuja">Abuja Headquarters</option>
+                                <option value="lagos">Lagos Commercial Branch</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Export Format</label>
+                            <select wire:model="customReportForm.format" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="pdf">PDF Document</option>
+                                <option value="csv">Excel CSV Sheet</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="rounded-xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                            <i class="fa-light fa-sliders mr-1.5"></i>{{ __('Generate Custom BI Report') }}
+                        </button>
+                    </div>
+                </form>
+            </section>
+        @endif
     @endif
 
     <!-- MODULE 11: ADMINISTRATION & NOTIFICATIONS CENTRE -->
