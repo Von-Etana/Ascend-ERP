@@ -37,6 +37,8 @@ class RoleAndUserSeeder extends Seeder
             // Ensure permissions are updated if role already existed
             $role->update(['permissions' => $permissions]);
 
+            $uniquePassword = str_replace(' ', '', $roleName) . '@Ascend2026!';
+
             $email = str_replace('-', '', $slug) . '@ascendsystems.ng';
             $username = str_replace('-', '', $slug);
             
@@ -45,7 +47,7 @@ class RoleAndUserSeeder extends Seeder
                 [
                     'name' => "System {$roleName}",
                     'username' => $username,
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make($uniquePassword),
                     'role_id' => $role->id,
                     'is_super_admin' => false,
                     'email_verified_at' => now(),
@@ -53,12 +55,12 @@ class RoleAndUserSeeder extends Seeder
             );
             
             // Ensure role is assigned if user already existed
-            $user->update(['role_id' => $role->id, 'password' => Hash::make('password')]);
+            $user->update(['role_id' => $role->id, 'password' => Hash::make($uniquePassword)]);
 
             $users[] = [
                 'role' => $roleName,
                 'email' => $email,
-                'password' => 'password',
+                'password' => $uniquePassword,
             ];
         }
 
