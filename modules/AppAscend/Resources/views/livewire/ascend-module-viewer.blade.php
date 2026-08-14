@@ -166,6 +166,7 @@
                     ],
                     'sales' => [
                         'pipeline' => ['label' => 'Deals Pipeline & Revenue', 'icon' => 'fa-light fa-chart-line-up'],
+                        'solar_calculator' => ['label' => 'Solar Capacity & Battery Sizing Calculator', 'icon' => 'fa-light fa-calculator-simple'],
                         'orders' => ['label' => 'Sales Orders', 'icon' => 'fa-light fa-cart-shopping'],
                         'quotes' => ['label' => 'Price Quotes & Proposals', 'icon' => 'fa-light fa-file-signature'],
                         'invoices' => ['label' => 'Billing & Payments', 'icon' => 'fa-light fa-credit-card'],
@@ -426,8 +427,11 @@
                                             <button type="button" wire:click="generatePaystackPaymentLink({{ $inv->id }})" class="rounded-lg bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition">
                                                 <i class="fa-brands fa-paystack mr-1 text-blue-500"></i>Paystack NGN
                                             </button>
-                                            <button type="button" wire:click="sendWhatsAppInvoiceNotice({{ $inv->id }})" class="text-xs font-bold text-emerald-600 hover:underline" title="Send WhatsApp Payment Notice">
-                                                <i class="fa-brands fa-whatsapp mr-1 text-emerald-500"></i>WhatsApp
+                                            <button type="button" wire:click="sendInvoiceWhatsApp({{ $inv->id }})" class="inline-flex items-center gap-1 font-bold text-emerald-600 hover:underline text-xs" title="Dispatch PDF via WhatsApp">
+                                                <i class="fa-brands fa-whatsapp text-emerald-500"></i>WhatsApp PDF
+                                            </button>
+                                            <button type="button" wire:click="sendInvoiceEmail({{ $inv->id }})" class="inline-flex items-center gap-1 font-bold text-blue-600 hover:underline text-xs" title="Dispatch PDF via Email">
+                                                <i class="fa-light fa-envelope text-blue-500"></i>Email PDF
                                             </button>
                                             <button type="button" wire:click="sendInvoiceReminder({{ $inv->id }})" class="text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white">
                                                 <i class="fa-light fa-bell mr-1"></i>Reminder
@@ -1648,7 +1652,117 @@
 
     <!-- MODULE 3: SALES ORDERS & REVENUE ENHANCED -->
     @if ($moduleKey === 'sales')
-        @if ($activeTab === 'orders')
+        @if ($activeTab === 'solar_calculator')
+            <!-- SOLAR CAPACITY & BATTERY SIZING CALCULATOR ENGINE -->
+            @php $calcRes = $this->calculateSolarRequirement(); @endphp
+            <div class="space-y-6">
+                <!-- Calculator Header Banner -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+                                <i class="fa-light fa-calculator-simple"></i> Solar System Sizing Engine
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Interactive Solar Inverter & Battery Capacity Calculator') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Select household or commercial appliances to instantly compute peak load (Watts), daily energy requirement (kWh), and get auto-recommended Ascend inverter & battery packages.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <!-- Appliance Selection Form -->
+                        <div class="space-y-4 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-plug-circle-bolt text-amber-500 mr-1"></i> Appliance Count & Operating Hours</h3>
+                            
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Refrigerators / Deep Freezers (300W)</label>
+                                    <input type="number" min="0" wire:model.live="calcQty.fridge" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">1.5HP Inverter Air Conditioners (1200W)</label>
+                                    <input type="number" min="0" wire:model.live="calcQty.ac" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">LED Lighting Points (15W)</label>
+                                    <input type="number" min="0" wire:model.live="calcQty.lights" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Smart TVs & Decoders (150W)</label>
+                                    <input type="number" min="0" wire:model.live="calcQty.tv" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Water Pumping Machine (750W)</label>
+                                    <input type="number" min="0" wire:model.live="calcQty.pump" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Laptops, WiFi & Network Racks (60W)</label>
+                                    <input type="number" min="0" wire:model.live="calcQty.laptops" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Desired Daily Backup Hours</label>
+                                <input type="number" min="1" max="24" wire:model.live="calcHours" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <!-- Auto-Recommendation Card -->
+                        <div class="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-6 dark:border-emerald-800 dark:bg-emerald-950/20 flex flex-col justify-between space-y-6">
+                            <div>
+                                <span class="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white uppercase tracking-wider">
+                                    AI Recommended Package
+                                </span>
+
+                                <div class="mt-4 grid grid-cols-2 gap-4 border-b pb-4 dark:border-emerald-800/40">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">Calculated Peak Load</p>
+                                        <p class="text-2xl font-black text-slate-900 dark:text-white">{{ number_format($calcRes['total_wattage']) }} Watts</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-400 uppercase">Daily Energy Needed</p>
+                                        <p class="text-2xl font-black text-emerald-600">{{ number_format($calcRes['daily_kwh'], 1) }} kWh</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-light fa-bolt-lightning text-lg text-emerald-600"></i>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $calcRes['recommended_inverter'] }}</p>
+                                            <p class="text-[11px] text-slate-500">Pure Sine Wave Hybrid Inverter with MPPT Controller</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-light fa-battery-bolt text-lg text-purple-600"></i>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $calcRes['recommended_battery'] }}</p>
+                                            <p class="text-[11px] text-slate-500">6,000+ Deep Cycle Lifespan LiFePO4 Lithium Battery</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <i class="fa-light fa-solar-panel text-lg text-sky-600"></i>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $calcRes['recommended_panels'] }}</p>
+                                            <p class="text-[11px] text-slate-500">High-Efficiency Monocrystalline Solar Array</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t dark:border-emerald-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs text-slate-400 font-bold uppercase">Estimated Wholesale Price</p>
+                                    <p class="text-2xl font-black text-slate-900 dark:text-white">₦{{ number_format($calcRes['estimated_total_ngn'], 2) }}</p>
+                                </div>
+                                <button type="button" wire:click="addCalculatedBundleToCart" class="rounded-xl bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-emerald-700 transition active:scale-95">
+                                    <i class="fa-light fa-cart-circle-plus mr-1.5"></i>Add Package to Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'orders')
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
                     <div>

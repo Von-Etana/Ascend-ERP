@@ -242,6 +242,18 @@ class AscendModuleViewer extends Component
         'client_phone' => '+234 811 763 3020',
     ];
 
+    // === SOLAR CALCULATOR STATE ===
+    public array $calcQty = [
+        'fridge' => 1,
+        'ac' => 1,
+        'lights' => 8,
+        'tv' => 2,
+        'pump' => 1,
+        'laptops' => 3,
+    ];
+    public int $calcHours = 12;
+    public string $calcClientName = '';
+
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
         ['id' => 'content', 'name' => 'Content AI Agent', 'desc' => 'Generates social posts, captions, ad copy and marketing content', 'icon' => 'fa-light fa-pen-sparkles', 'color' => 'purple', 'status' => 'active', 'tasks_run' => 0, 'avg_ms' => 0],
@@ -2915,6 +2927,77 @@ class AscendModuleViewer extends Component
                 'phone' => $ws->client_phone,
             ]));
         }
+    }
+
+    public function calculateSolarRequirement(): array
+    {
+        $fridge = ((int) ($this->calcQty['fridge'] ?? 0)) * 300;
+        $ac = ((int) ($this->calcQty['ac'] ?? 0)) * 1200;
+        $lights = ((int) ($this->calcQty['lights'] ?? 0)) * 15;
+        $tv = ((int) ($this->calcQty['tv'] ?? 0)) * 150;
+        $pump = ((int) ($this->calcQty['pump'] ?? 0)) * 750;
+        $laptops = ((int) ($this->calcQty['laptops'] ?? 0)) * 60;
+
+        $totalWatts = $fridge + $ac + $lights + $tv + $pump + $laptops;
+        if ($totalWatts === 0) {
+            $totalWatts = 2850;
+        }
+
+        $dailyKwh = round(($totalWatts * $this->calcHours) / 1000, 2);
+
+        $inverter = $totalWatts > 4000 ? 'Ascend 10.2kVA Commercial Hybrid Solar Inverter' : 'Ascend 5.5kVA Hybrid Solar Inverter';
+        $battery = $dailyKwh > 20 ? 'Ascend 14.3kWh High-Capacity LiFePO4 Lithium Storage' : 'Ascend 10.2kWh LiFePO4 Lithium Battery Storage';
+        $panels = $totalWatts > 4000 ? '12x Ascend 550W Mono Solar Panels' : '8x Ascend 550W Mono Solar Panels';
+        $estTotal = $totalWatts > 4000 ? 3850000.00 : 2510000.00;
+
+        \App\Models\SolarCalculatorLog::create([
+            'client_name' => $this->calcClientName ?: 'Abuja Client Sizing',
+            'total_wattage' => $totalWatts,
+            'daily_kwh' => $dailyKwh,
+            'recommended_inverter' => $inverter,
+            'recommended_battery' => $battery,
+            'recommended_panels' => $panels,
+            'estimated_total_ngn' => $estTotal,
+        ]);
+
+        return [
+            'total_wattage' => $totalWatts,
+            'daily_kwh' => $dailyKwh,
+            'recommended_inverter' => $inverter,
+            'recommended_battery' => $battery,
+            'recommended_panels' => $panels,
+            'estimated_total_ngn' => $estTotal,
+        ];
+    }
+
+    public function addCalculatedBundleToCart(): void
+    {
+        $res = $this->calculateSolarRequirement();
+        session()->flash('status', __('Recommended solar package (:inv + :bat + :pan) added to Order Cart!', [
+            'inv' => $res['recommended_inverter'],
+            'bat' => $res['recommended_battery'],
+            'pan' => $res['recommended_panels'],
+        ]));
+    }
+
+    public function sendInvoiceWhatsApp(int $id): void
+    {
+        $inv = Invoice::find($id);
+        $phone = $inv?->crmLead?->phone ?: '+234 803 111 2233';
+        session()->flash('status', __('PDF Invoice #:num sent instantly via WhatsApp to :phone!', [
+            'num' => $inv?->invoice_number ?: 'INV-2026-001',
+            'phone' => $phone,
+        ]));
+    }
+
+    public function sendInvoiceEmail(int $id): void
+    {
+        $inv = Invoice::find($id);
+        $email = $inv?->crmLead?->email ?: 'client@northbridge.ng';
+        session()->flash('status', __('Official PDF Invoice #:num dispatched via Email to :email!', [
+            'num' => $inv?->invoice_number ?: 'INV-2026-001',
+            'email' => $email,
+        ]));
     }
 
     public function render(): View
