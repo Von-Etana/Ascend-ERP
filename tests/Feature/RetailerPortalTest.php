@@ -14,10 +14,12 @@ test('retailer user is redirected to retailer portal upon login', function () {
     $role = AdminRole::firstOrCreate(['slug' => 'retailer'], ['name' => 'Retailer', 'permissions' => ['retailer.*']]);
     $user = User::factory()->create(['role_id' => $role->id, 'email' => 'solarretailer@ascendsystems.ng']);
 
-    $response = $this->post('/login', [
-        'identifier' => $user->email,
-        'password' => 'password',
-    ]);
+    Livewire::test(\App\Livewire\Auth\LoginPage::class)
+        ->set('identifier', $user->email)
+        ->set('password', 'password')
+        ->call('login')
+        ->assertHasNoErrors()
+        ->assertRedirect('/portal/ascend/retailer');
 
     $this->assertAuthenticatedAs($user);
 });
