@@ -565,23 +565,27 @@ class AscendModuleViewer extends Component
         $this->form['total'] = number_format($total, 2, '.', '');
     }
 
-    public function mount(string $moduleKey = 'finance'): void
+    public function mount(string $moduleKey = 'finance', ?string $activeTab = null): void
     {
         $this->moduleKey = $moduleKey;
-        $this->activeTab = match ($moduleKey) {
-            'finance' => 'overview',
-            'crm' => 'leads',
-            'sales' => 'pipeline',
-            'tasks' => 'projects',
-            'inventory' => 'products',
-            'pos' => 'checkout',
-            'marketing' => 'campaigns',
-            'ai-agents' => 'caption',
-            'automation' => 'rules',
-            'reports' => 'executive',
-            'administration' => 'users',
-            default => 'overview',
-        };
+        if ($activeTab) {
+            $this->activeTab = $activeTab;
+        } else {
+            $this->activeTab = match ($moduleKey) {
+                'finance' => 'overview',
+                'crm' => 'leads',
+                'sales' => 'pipeline',
+                'tasks' => 'projects',
+                'inventory' => 'products',
+                'pos' => 'checkout',
+                'marketing' => 'campaigns',
+                'ai-agents' => 'caption',
+                'automation' => 'rules',
+                'reports' => 'executive',
+                'administration' => 'users',
+                default => 'overview',
+            };
+        }
 
         $this->hydrateLiveData();
     }
