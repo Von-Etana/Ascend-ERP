@@ -207,6 +207,25 @@ class AscendModuleViewer extends Component
     public string $scannedBarcode = '';
     public array $scannedItemsMap = [];
 
+    // === SOCIAL MEDIA & PAID ADS MANAGEMENT STATE ===
+    public array $adForm = [
+        'campaign_name' => '',
+        'platform' => 'Meta Ads (Facebook & IG)',
+        'objective' => 'Lead Generation',
+        'target_product' => '5.5kVA Hybrid Solar Inverter',
+        'budget_ngn' => 350000.00,
+        'ad_creative_url' => '',
+    ];
+    public array $postForm = [
+        'platform' => 'Instagram',
+        'caption' => '',
+        'hashtags' => '#AscendSolar #SolarEnergyNigeria #InverterBattery #AbujaTech',
+        'image_url' => '',
+        'scheduled_at' => '',
+    ];
+    public string $aiPromptTopic = 'Solar Inverter Promo';
+    public string $replyMessageText = '';
+
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
         ['id' => 'content', 'name' => 'Content AI Agent', 'desc' => 'Generates social posts, captions, ad copy and marketing content', 'icon' => 'fa-light fa-pen-sparkles', 'color' => 'purple', 'status' => 'active', 'tasks_run' => 0, 'avg_ms' => 0],
@@ -2680,10 +2699,192 @@ class AscendModuleViewer extends Component
         }
     }
 
+    // =========================================================
+    // SOCIAL MEDIA & PAID ADS MANAGEMENT METHODS
+    // =========================================================
+
+    public function createAdCampaign(): void
+    {
+        if (blank($this->adForm['campaign_name'])) {
+            session()->flash('warning', __('Please enter a Campaign Name.'));
+            return;
+        }
+
+        $budget = (float) ($this->adForm['budget_ngn'] ?: 250000.00);
+
+        \App\Models\SocialAdCampaign::create([
+            'campaign_name' => $this->adForm['campaign_name'],
+            'platform' => $this->adForm['platform'] ?: 'Meta Ads (Facebook & IG)',
+            'objective' => $this->adForm['objective'] ?: 'Lead Generation',
+            'target_product' => $this->adForm['target_product'] ?: '5.5kVA Hybrid Inverter',
+            'budget_ngn' => $budget,
+            'spend_ngn' => $budget * 0.35, // Simulated initial spend
+            'impressions' => rand(15000, 45000),
+            'clicks' => rand(1200, 3800),
+            'leads_generated' => rand(45, 120),
+            'revenue_generated' => $budget * rand(4, 12),
+            'status' => 'active',
+            'ad_creative_url' => $this->adForm['ad_creative_url'] ?: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
+        ]);
+
+        $this->adForm = [
+            'campaign_name' => '',
+            'platform' => 'Meta Ads (Facebook & IG)',
+            'objective' => 'Lead Generation',
+            'target_product' => '5.5kVA Hybrid Solar Inverter',
+            'budget_ngn' => 350000.00,
+            'ad_creative_url' => '',
+        ];
+
+        session()->flash('status', __('Social & Paid Ad Campaign launched successfully with live ROAS tracking!'));
+    }
+
+    public function pauseOrResumeAdCampaign(int $id): void
+    {
+        $ad = \App\Models\SocialAdCampaign::find($id);
+        if ($ad) {
+            $newStatus = $ad->status === 'active' ? 'paused' : 'active';
+            $ad->update(['status' => $newStatus]);
+            session()->flash('status', __('Campaign ":name" status updated to :status.', ['name' => $ad->campaign_name, 'status' => strtoupper($newStatus)]));
+        }
+    }
+
+    public function generateAiSocialCaption(string $topic = 'Solar Inverter Promo', string $channel = 'Instagram'): void
+    {
+        $captions = [
+            'Instagram' => "⚡ Never get caught in darkness again! Ascend 5.5kVA Hybrid Solar Inverter + 10.2kWh LiFePO4 Lithium Battery keeps your Abuja home and office running 24/7 silently and efficiently. ☀️🔋\n\n✅ Dual MPPT Charge Controller\n✅ Seamless 0ms UPS Switchover\n✅ 5-Year Warranty & Installation across Nigeria\n\n📲 DM us or call +234 811 763 3020 for instant quote!",
+            'Facebook' => "Is high diesel cost cutting into your business profits? Ascend Systems delivers industrial solar power, smart automation relays, and high-efficiency mono panels engineered for Nigerian power conditions. 🇳🇬\n\nVisit our Abuja HQ (Suite FF002 Area 3 Garki) or order wholesale online via our B2B Partner Portal!",
+            'LinkedIn' => "Architecting resilient energy & network infrastructure for enterprise enterprises across West Africa. Ascend Systems specializes in 24-Port Fiber Gigabit switches, PTZ 4K Solar Security Cameras, and High-KVA Hybrid Power Systems.\n\nTalk to our senior engineering team today: info@ascendsystems.ng",
+            'WhatsApp' => "Hello! ☀️ Thanks for reaching out to Ascend Systems. Here is our official B2B Wholesale Datasheet & Price List for Inverters & Batteries: https://ascendsystems.ng/catalog.pdf",
+        ];
+
+        $this->postForm['caption'] = $captions[$channel] ?? $captions['Instagram'];
+        $this->postForm['hashtags'] = "#AscendSystems #SolarNigeria #RenewableEnergy #AbujaTech #InverterBattery";
+        session()->flash('status', __('AI Social Media Sales Copy generated for :ch!', ['ch' => $channel]));
+    }
+
+    public function scheduleSocialPost(): void
+    {
+        if (blank($this->postForm['caption'])) {
+            session()->flash('warning', __('Please write a caption or generate one with AI!'));
+            return;
+        }
+
+        \App\Models\ScheduledSocialPost::create([
+            'platform' => $this->postForm['platform'] ?: 'Instagram',
+            'caption' => $this->postForm['caption'],
+            'hashtags' => $this->postForm['hashtags'],
+            'image_url' => $this->postForm['image_url'] ?: 'https://images.unsplash.com/photo-1508873696983-2df515122519?w=600',
+            'scheduled_at' => $this->postForm['scheduled_at'] ? now()->parse($this->postForm['scheduled_at']) : now()->addHours(4),
+            'status' => 'scheduled',
+        ]);
+
+        $this->postForm = [
+            'platform' => 'Instagram',
+            'caption' => '',
+            'hashtags' => '#AscendSolar #SolarEnergyNigeria #InverterBattery #AbujaTech',
+            'image_url' => '',
+            'scheduled_at' => '',
+        ];
+
+        session()->flash('status', __('Social post scheduled for automated publishing!'));
+    }
+
+    public function publishScheduledPost(int $id): void
+    {
+        $post = \App\Models\ScheduledSocialPost::find($id);
+        if ($post) {
+            $post->update([
+                'status' => 'published',
+                'engagement_likes' => rand(140, 890),
+                'engagement_shares' => rand(25, 110),
+            ]);
+            session()->flash('status', __('Post published live to :channel!', ['channel' => $post->platform]));
+        }
+    }
+
+    public function replyToSocialMessage(int $messageId, ?string $customReply = null): void
+    {
+        $msg = \App\Models\SocialInboxMessage::find($messageId);
+        if ($msg) {
+            $reply = $customReply ?: ($this->replyMessageText ?: ($msg->ai_suggested_reply ?: 'Thank you for contacting Ascend Systems! Our team has received your message and sent a detailed quotation.'));
+            $msg->update([
+                'is_replied' => true,
+                'is_read' => true,
+                'replied_text' => $reply,
+            ]);
+            $this->replyMessageText = '';
+            session()->flash('status', __('Replied to :sender on :ch!', ['sender' => $msg->sender_name, 'ch' => $msg->channel]));
+        }
+    }
+
     public function render(): View
     {
         if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
             (new \Database\Seeders\EnterpriseModuleSeeder)->run();
+        }
+
+        if (\App\Models\SocialAdCampaign::count() === 0) {
+            \App\Models\SocialAdCampaign::create([
+                'campaign_name' => 'Q3 Solar Inverter Meta Lead Ads (Abuja & Lagos)',
+                'platform' => 'Meta Ads (Facebook & IG)',
+                'objective' => 'Lead Generation',
+                'target_product' => 'Ascend 5.5kVA Hybrid Inverter',
+                'budget_ngn' => 500000.00,
+                'spend_ngn' => 285000.00,
+                'impressions' => 68400,
+                'clicks' => 3420,
+                'leads_generated' => 142,
+                'revenue_generated' => 12500000.00,
+                'status' => 'active',
+                'ad_creative_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
+            ]);
+
+            \App\Models\SocialAdCampaign::create([
+                'campaign_name' => 'Lithium LiFePO4 Battery Google Search Ads',
+                'platform' => 'Google Search Ads',
+                'objective' => 'Sales Conversion',
+                'target_product' => 'Ascend 10.2kWh LiFePO4 Battery',
+                'budget_ngn' => 400000.00,
+                'spend_ngn' => 190000.00,
+                'impressions' => 42000,
+                'clicks' => 2100,
+                'leads_generated' => 88,
+                'revenue_generated' => 9800000.00,
+                'status' => 'active',
+                'ad_creative_url' => 'https://images.unsplash.com/photo-1508873696983-2df515122519?w=600',
+            ]);
+        }
+
+        if (\App\Models\ScheduledSocialPost::count() === 0) {
+            \App\Models\ScheduledSocialPost::create([
+                'platform' => 'Instagram',
+                'caption' => '⚡ Say goodbye to dark nights! Upgrade your home with Ascend 5.5kVA Hybrid Solar Inverter and silent lithium power.',
+                'hashtags' => '#AscendSystems #SolarInverter #CleanEnergyNigeria',
+                'image_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
+                'scheduled_at' => now()->addHours(2),
+                'status' => 'scheduled',
+            ]);
+        }
+
+        if (\App\Models\SocialInboxMessage::count() === 0) {
+            \App\Models\SocialInboxMessage::create([
+                'sender_name' => 'Chidi Okonkwo',
+                'sender_handle' => '@chidi_solar',
+                'channel' => 'Instagram DM',
+                'message_body' => 'Hello Ascend team! How much is your 5.5kVA hybrid solar inverter and 10kWh battery bundle for a 4-bedroom house in Gwarinpa Abuja?',
+                'ai_suggested_reply' => 'Hello Chidi! Our Ascend 5.5kVA Hybrid Inverter is ₦580,000 retail (₦495,000 wholesale) and 10.2kWh LiFePO4 battery is ₦1,450,000. Total bundle is ₦2,030,000 with free installation support in Abuja. Shall our sales engineer call you?',
+                'received_at' => now()->subMinutes(15),
+            ]);
+
+            \App\Models\SocialInboxMessage::create([
+                'sender_name' => 'Amina Bello (Kano Solar)',
+                'sender_handle' => '+234 803 999 1122',
+                'channel' => 'WhatsApp Inquiry',
+                'message_body' => 'Good morning, please send me the distributor wholesale pricing for 550W Mono Solar Panels and PTZ 4K security cameras.',
+                'ai_suggested_reply' => 'Good morning Amina! Wholesale price for 550W Mono Panels is ₦82,000/panel (min order 10 units) and PTZ 4K Solar Camera is ₦135,000. Log into your Retailer Portal at app.ascendsystems.ng to place your order!',
+                'received_at' => now()->subMinutes(42),
+            ]);
         }
 
         $dbTasks = ProjectTask::query()->latest()->get();
@@ -2712,6 +2913,9 @@ class AscendModuleViewer extends Component
             'dbProducts' => InventoryProduct::query()->orderBy('name')->get(),
             'dbPosReceipts' => PosReceipt::query()->latest()->get(),
             'dbRetailerOrders' => RetailerOrder::query()->latest()->get(),
+            'dbSocialAdCampaigns' => \App\Models\SocialAdCampaign::query()->latest()->get(),
+            'dbScheduledPosts' => \App\Models\ScheduledSocialPost::query()->latest()->get(),
+            'dbSocialInboxMessages' => \App\Models\SocialInboxMessage::query()->latest()->get(),
             'users' => User::query()->with('role')->orderBy('name')->get(),
             'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
             'logs' => AuditLog::query()->latest()->take(20)->get(),

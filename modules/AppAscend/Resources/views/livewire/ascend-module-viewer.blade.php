@@ -191,12 +191,11 @@
                     ],
                     'marketing' => [
                         'campaigns' => ['label' => 'Marketing Campaigns', 'icon' => 'fa-light fa-bullhorn'],
+                        'ads_manager' => ['label' => 'Meta & Google Ads Manager', 'icon' => 'fa-light fa-bullseye-arrow'],
+                        'content_studio' => ['label' => 'AI Post Studio & Scheduler', 'icon' => 'fa-light fa-pen-sparkles'],
+                        'social_inbox' => ['label' => 'Unified Customer Social Inbox', 'icon' => 'fa-light fa-comments'],
                         'social' => ['label' => 'Social Channels', 'icon' => 'fa-light fa-share-nodes'],
-                        'blasts' => ['label' => 'Audience Blasts', 'icon' => 'fa-light fa-paper-plane'],
                         'email' => ['label' => 'Email Marketing Workspace', 'icon' => 'fa-light fa-envelope-open-text'],
-                        'whatsapp' => ['label' => 'WhatsApp Automation & DM', 'icon' => 'fa-brands fa-whatsapp'],
-                        'ads' => ['label' => 'Ads Sync & AI Insights', 'icon' => 'fa-light fa-bullseye-arrow'],
-                        'analytics' => ['label' => 'Campaign Analytics', 'icon' => 'fa-light fa-chart-pie'],
                     ],
                     'ai-agents' => [
                         'agents' => ['label' => 'AI Agent Fleet & Logs', 'icon' => 'fa-light fa-sparkles'],
@@ -2212,61 +2211,282 @@
                 </div>
             </div>
 
-        @elseif ($activeTab === 'ads')
+        @elseif ($activeTab === 'ads_manager')
+            <!-- META & GOOGLE ADS MANAGER & ROAS TRACKER -->
             <div class="space-y-6">
-                <!-- Connected Ads Accounts -->
+                <!-- ROAS & Performance KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Ad Spend (NGN)') }}</p>
+                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">₦{{ number_format($dbSocialAdCampaigns->sum('spend_ngn'), 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-purple-600"><i class="fa-light fa-bullseye-arrow mr-1"></i>Across Meta & Google Ads</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Ad Attributed Revenue') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format($dbSocialAdCampaigns->sum('revenue_generated'), 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-chart-line-up mr-1"></i>Direct B2B & B2C sales</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Blended Average ROAS') }}</p>
+                        @php
+                            $totalSpend = $dbSocialAdCampaigns->sum('spend_ngn');
+                            $totalRev = $dbSocialAdCampaigns->sum('revenue_generated');
+                            $blendedRoas = $totalSpend > 0 ? round($totalRev / $totalSpend, 2) : 0.0;
+                        @endphp
+                        <p class="mt-2 text-2xl font-black text-purple-600">{{ $blendedRoas }}x ROAS</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>Return per ₦1 spend</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Ad Generated Leads') }}</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">{{ $dbSocialAdCampaigns->sum('leads_generated') }} Leads</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400"><i class="fa-light fa-user-plus mr-1"></i>Ingested into CRM</p>
+                    </div>
+                </div>
+
+                <!-- Ad Campaigns Management Table & New Campaign Form -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Ad Networks & Multi-Channel Sync') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Connected ad platforms with live campaign performance and ROAS analytics') }}</p>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-600 border border-purple-500/20">
+                                <i class="fa-brands fa-meta"></i> Meta & Google Ads Sync
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Active Paid Ad Campaigns & ROAS Attribution') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Monitor live ad campaigns, cost per lead, click-through rates, and ROAS return.') }}</p>
                         </div>
-                        <button type="button" wire:click="getAiAdsRecommendations" class="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-700">
-                            <i class="fa-light fa-sparkles mr-1.5"></i>{{ __('Get AI Ads Insights') }}
-                        </button>
                     </div>
 
-                    <div class="grid gap-4 md:grid-cols-3">
-                        @foreach ($adsAccounts as $acc)
-                            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl {{ match($acc['platform'] ?? '') { 'meta' => 'bg-blue-500/10 text-blue-600', 'google' => 'bg-red-500/10 text-red-600', default => 'bg-slate-500/10 text-slate-600' } }} text-lg">
-                                        <i class="{{ match($acc['platform'] ?? '') { 'meta' => 'fa-brands fa-meta', 'google' => 'fa-brands fa-google', 'tiktok' => 'fa-brands fa-tiktok', default => 'fa-light fa-bullseye' } }}"></i>
-                                    </span>
-                                    <button type="button" wire:click="syncAdsAccount('{{ $acc['platform'] ?? 'meta' }}')" class="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200">
-                                        <i class="fa-light fa-rotate mr-1"></i>Sync
-                                    </button>
-                                </div>
-                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ $acc['account_name'] }}</h3>
-                                <div class="grid grid-cols-2 gap-2 text-xs border-t pt-2 dark:border-slate-800">
-                                    <div><span class="text-slate-400">Total Spend:</span> <span class="font-bold">₦{{ number_format($acc['total_spend'] ?? 0, 0) }}</span></div>
-                                    <div><span class="text-slate-400">ROAS:</span> <span class="font-bold text-emerald-600">{{ $acc['roas'] ?? 0 }}x</span></div>
-                                </div>
+                    <!-- Create New Ad Campaign Card -->
+                    <form wire:submit.prevent="createAdCampaign" class="mb-8 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-plus-circle mr-1 text-purple-600"></i> Launch New Paid Ad Campaign</h3>
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Campaign Title</label>
+                                <input type="text" wire:model="adForm.campaign_name" placeholder="e.g. Q3 Lithium Battery Promo Meta Ads" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                             </div>
-                        @endforeach
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Ad Platform</label>
+                                <select wire:model="adForm.platform" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="Meta Ads (Facebook & IG)">Meta Ads (Facebook & Instagram)</option>
+                                    <option value="Google Search Ads">Google Search Ads</option>
+                                    <option value="LinkedIn Ads">LinkedIn B2B Ads</option>
+                                    <option value="TikTok Ads">TikTok Video Ads</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Total Budget (NGN)</label>
+                                <input type="number" wire:model="adForm.budget_ngn" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-purple-700 transition">
+                                <i class="fa-light fa-rocket mr-1.5"></i>Launch Ad Campaign
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Ad Campaigns Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Campaign Name</th>
+                                    <th class="px-4 py-3.5">Platform</th>
+                                    <th class="px-4 py-3.5">Spend / Budget</th>
+                                    <th class="px-4 py-3.5">Leads</th>
+                                    <th class="px-4 py-3.5">Revenue (NGN)</th>
+                                    <th class="px-4 py-3.5">ROAS</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbSocialAdCampaigns as $ad)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">
+                                            <p>{{ $ad->campaign_name }}</p>
+                                            <p class="text-[11px] text-slate-400 font-normal">{{ $ad->target_product ?: 'General Renewable Catalog' }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                            <i class="{{ match(true) { str_contains($ad->platform, 'Meta') => 'fa-brands fa-meta text-blue-600', str_contains($ad->platform, 'Google') => 'fa-brands fa-google text-red-500', default => 'fa-light fa-bullseye text-purple-600' } }} mr-1.5"></i>
+                                            {{ $ad->platform }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs font-bold text-slate-900 dark:text-white">
+                                            ₦{{ number_format($ad->spend_ngn, 0) }} / <span class="text-slate-400">₦{{ number_format($ad->budget_ngn, 0) }}</span>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-bold text-blue-600 text-xs">{{ $ad->leads_generated }} leads</td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600">₦{{ number_format($ad->revenue_generated, 2) }}</td>
+                                        <td class="px-4 py-3.5 font-black text-purple-600">
+                                            <span class="rounded-full bg-purple-500/10 px-2.5 py-0.5 text-xs font-bold text-purple-600 border border-purple-500/20">
+                                                {{ $ad->roas }}x ROAS
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold {{ $ad->status === 'active' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20' }}">
+                                                {{ ucfirst($ad->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <button type="button" wire:click="pauseOrResumeAdCampaign({{ $ad->id }})" class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200">
+                                                {{ $ad->status === 'active' ? 'Pause' : 'Resume' }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="px-4 py-8 text-center text-slate-400">No ad campaigns registered yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </section>
-
-                <!-- AI Recommendations Panel -->
-                @if (!empty($adsRecommendations))
-                    <section class="rounded-2xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/40 dark:bg-purple-950/20">
-                        <h3 class="text-sm font-bold text-purple-900 dark:text-purple-200 border-b pb-3 border-purple-200 dark:border-purple-800/40 mb-4">{{ __('AI Ad Performance Recommendations') }}</h3>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            @foreach ($adsRecommendations as $rec)
-                                <div class="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                                    <i class="{{ $rec['icon'] }} text-lg text-purple-600 mt-0.5"></i>
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $rec['title'] }}</p>
-                                        <p class="mt-1 text-[11px] text-slate-500 leading-relaxed">{{ $rec['body'] }}</p>
-                                        <span class="mt-2 inline-block text-[10px] font-bold text-purple-600 hover:underline cursor-pointer">{{ $rec['action'] }} →</span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
             </div>
+        @elseif ($activeTab === 'content_studio')
+            <!-- AI POST STUDIO & CONTENT SCHEDULER -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-600 border border-purple-500/20">
+                                <i class="fa-light fa-sparkles"></i> AI Content Creator & Post Planner
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('AI Social Post Studio & Interactive Scheduler') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Generate high-converting solar product copy with AI, schedule posts, and publish across platforms.') }}</p>
+                        </div>
+                    </div>
 
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <!-- AI Copy Generator Form -->
+                        <form wire:submit.prevent="scheduleSocialPost" class="space-y-4 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-pen-sparkles text-purple-600 mr-1"></i> AI Caption Generator</h3>
+                                <div class="flex gap-1.5">
+                                    <button type="button" wire:click="generateAiSocialCaption('Solar Inverter Promo', 'Instagram')" class="rounded-lg bg-purple-500/10 px-2 py-1 text-[11px] font-bold text-purple-600 hover:bg-purple-500/20">
+                                        Instagram AI Copy
+                                    </button>
+                                    <button type="button" wire:click="generateAiSocialCaption('B2B Solar Wholesale', 'LinkedIn')" class="rounded-lg bg-blue-500/10 px-2 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-500/20">
+                                        LinkedIn AI Copy
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Target Social Platform</label>
+                                <select wire:model="postForm.platform" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="Instagram">Instagram Page & Reels</option>
+                                    <option value="Facebook">Facebook Corporate Page</option>
+                                    <option value="LinkedIn">LinkedIn Company Profile</option>
+                                    <option value="X">X (Twitter)</option>
+                                    <option value="WhatsApp Business">WhatsApp Business Catalog Channel</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Caption Content</label>
+                                <textarea wire:model="postForm.caption" rows="5" placeholder="Write caption or click AI copy buttons above..." class="mt-1 w-full rounded-xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white resize-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Hashtags & Keywords</label>
+                                <input type="text" wire:model="postForm.hashtags" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-mono outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+
+                            <button type="submit" class="w-full rounded-xl bg-purple-600 py-3 text-xs font-bold text-white shadow-md hover:bg-purple-700 transition">
+                                <i class="fa-light fa-calendar-plus mr-1.5"></i>Schedule Post Publication
+                            </button>
+                        </form>
+
+                        <!-- Scheduled Posts List -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-clock-three text-purple-600 mr-1"></i> Content Calendar & Scheduled Queue</h3>
+                            <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                                @forelse ($dbScheduledPosts as $postItem)
+                                    <div class="rounded-2xl border border-slate-200 p-4 shadow-sm dark:border-slate-800 space-y-2 bg-white dark:bg-slate-900">
+                                        <div class="flex items-center justify-between">
+                                            <span class="inline-flex items-center gap-1 text-xs font-bold text-purple-600">
+                                                <i class="fa-light fa-share-nodes"></i> {{ $postItem->platform }}
+                                            </span>
+                                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ $postItem->status === 'published' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600' }}">
+                                                {{ ucfirst($postItem->status) }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-700 dark:text-slate-300 line-clamp-3 font-medium">{{ $postItem->caption }}</p>
+                                        <div class="flex items-center justify-between border-t pt-2 dark:border-slate-800 text-[11px] text-slate-400">
+                                            <span><i class="fa-light fa-calendar mr-1"></i>{{ $postItem->scheduled_at?->format('Y-m-d H:i') }}</span>
+                                            @if ($postItem->status !== 'published')
+                                                <button type="button" wire:click="publishScheduledPost({{ $postItem->id }})" class="text-xs font-bold text-purple-600 hover:underline">
+                                                    Publish Now →
+                                                </button>
+                                            @else
+                                                <span class="text-emerald-600 font-bold"><i class="fa-light fa-heart mr-1"></i>{{ $postItem->engagement_likes }} Likes</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p class="text-xs text-slate-400">No scheduled posts queued.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'social_inbox')
+            <!-- UNIFIED CUSTOMER SOCIAL INBOX & AI AUTO-REPLY -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20">
+                                <i class="fa-light fa-comments"></i> Unified Customer Care Stream
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Unified Social Inbox & AI Price Quote Auto-Reply') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Consolidated DMs and pricing inquiries from Instagram, Facebook Page, LinkedIn, and WhatsApp.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        @forelse ($dbSocialInboxMessages as $msg)
+                            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 space-y-3 bg-white dark:bg-slate-900 transition hover:border-blue-500/40">
+                                <div class="flex items-center justify-between border-b pb-2 dark:border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-600">
+                                            {{ strtoupper(substr($msg->sender_name, 0, 2)) }}
+                                        </span>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-900 dark:text-white">{{ $msg->sender_name }} <span class="text-[11px] font-normal text-slate-400">({{ $msg->sender_handle }})</span></h4>
+                                            <span class="text-[10px] font-bold text-blue-600"><i class="fa-light fa-message mr-1"></i>{{ $msg->channel }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-slate-400">{{ $msg->received_at?->diffForHumans() }}</span>
+                                </div>
+
+                                <div class="rounded-xl bg-slate-50 p-3 text-xs font-medium text-slate-800 dark:bg-slate-800/50 dark:text-slate-200">
+                                    <i class="fa-light fa-quote-left text-slate-400 mr-1.5"></i>{{ $msg->message_body }}
+                                </div>
+
+                                @if ($msg->is_replied)
+                                    <div class="rounded-xl bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 border border-emerald-500/20">
+                                        <p class="text-[10px] font-bold uppercase text-emerald-600 mb-1"><i class="fa-light fa-circle-check mr-1"></i> Replied</p>
+                                        {{ $msg->replied_text }}
+                                    </div>
+                                @else
+                                    <div class="rounded-xl bg-purple-500/10 p-3.5 text-xs text-purple-900 dark:text-purple-200 border border-purple-500/20 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300"><i class="fa-light fa-sparkles mr-1"></i> AI Suggested Price Quote Response</span>
+                                            <button type="button" wire:click="replyToSocialMessage({{ $msg->id }})" class="rounded-lg bg-purple-600 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-purple-700">
+                                                Send AI Reply
+                                            </button>
+                                        </div>
+                                        <p class="font-medium text-xs leading-relaxed">{{ $msg->ai_suggested_reply }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @empty
+                            <p class="text-xs text-slate-400">No social inbox messages.</p>
+                        @endforelse
+                    </div>
+                </section>
+            </div>
         @elseif ($activeTab === 'analytics')
             <!-- Campaign Analytics & ROAS Dashboard -->
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
