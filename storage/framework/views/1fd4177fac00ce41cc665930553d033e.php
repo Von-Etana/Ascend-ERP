@@ -97,7 +97,7 @@
         </div>
     </div>
 
-    <?php if (! $__env->hasRenderedOnce('94111c1d-a198-47cd-b1de-888352efc319')): $__env->markAsRenderedOnce('94111c1d-a198-47cd-b1de-888352efc319'); ?>
+    <?php if (! $__env->hasRenderedOnce('6bfd2f12-4ac4-4ff9-896c-7c4725d1931f')): $__env->markAsRenderedOnce('6bfd2f12-4ac4-4ff9-896c-7c4725d1931f'); ?>
         <script>
             window.adminNotificationsPanel = {
                 updateBadge(unreadCount) {

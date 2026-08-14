@@ -67,20 +67,26 @@ endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
 
-        <div class="relative">
+        <div class="relative" x-data="{ showPassword: false }">
             <div class="space-y-2.5">
                 <label for="password" class="block text-sm font-medium" style="color: var(--theme-header-text-color);"><?php echo e(__('Password')); ?></label>
-                <input
-                    id="password"
-                    wire:model.defer="password"
-                    name="password"
-                    type="password"
-                    required
-                    autocomplete="current-password"
-                    placeholder="<?php echo e(__('Password')); ?>"
-                    class="flex h-11 w-full border px-4 text-sm font-medium shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none transition duration-200 placeholder:font-normal placeholder:text-[var(--theme-input-placeholder)] focus:border-[var(--theme-accent)] focus:ring-4 focus:ring-[color:rgba(var(--theme-accent-rgb),0.10)]"
-                    style="border-radius: var(--theme-input-radius, 0.75rem); border-color: var(--theme-border-color); background-color: var(--theme-input-surface); color: var(--theme-input-text);"
-                >
+                <div class="relative">
+                    <input
+                        id="password"
+                        wire:model.defer="password"
+                        name="password"
+                        x-bind:type="showPassword ? 'text' : 'password'"
+                        required
+                        autocomplete="current-password"
+                        placeholder="<?php echo e(__('Password')); ?>"
+                        class="flex h-11 w-full border px-4 pr-11 text-sm font-medium shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none transition duration-200 placeholder:font-normal placeholder:text-[var(--theme-input-placeholder)] focus:border-[var(--theme-accent)] focus:ring-4 focus:ring-[color:rgba(var(--theme-accent-rgb),0.10)]"
+                        style="border-radius: var(--theme-input-radius, 0.75rem); border-color: var(--theme-border-color); background-color: var(--theme-input-surface); color: var(--theme-input-text);"
+                    >
+                    <button type="button" @click="showPassword = !showPassword" tabindex="-1" class="absolute inset-y-0 end-0 flex h-full w-11 items-center justify-center transition-opacity hover:opacity-80">
+                        <i class="fa-regular fa-eye text-[15px]" style="color: var(--theme-muted-text-color);" x-show="!showPassword"></i>
+                        <i class="fa-regular fa-eye-slash text-[15px]" style="color: var(--theme-muted-text-color);" x-show="showPassword" style="display: none;"></i>
+                    </button>
+                </div>
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['password'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :

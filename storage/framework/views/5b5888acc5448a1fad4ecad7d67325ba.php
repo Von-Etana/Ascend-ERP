@@ -151,6 +151,8 @@
                         'overview' => ['label' => 'Overview & Banking', 'icon' => 'fa-light fa-building-columns'],
                         'invoices' => ['label' => 'Invoices & Estimates', 'icon' => 'fa-light fa-file-invoice-dollar'],
                         'expenses' => ['label' => 'Expenses & Receipts', 'icon' => 'fa-light fa-receipt'],
+                        'salary'   => ['label' => 'Payroll & Salary', 'icon' => 'fa-light fa-money-bill-wave'],
+                        'ai_finance' => ['label' => 'AI Financial Intelligence', 'icon' => 'fa-light fa-brain-circuit'],
                         'ledger' => ['label' => 'General Ledger & Balance Sheet', 'icon' => 'fa-light fa-book-journal-whills'],
                         'reports' => ['label' => 'Profit & Loss Reports', 'icon' => 'fa-light fa-chart-pie'],
                     ],
@@ -191,16 +193,20 @@
                         'social' => ['label' => 'Social Channels', 'icon' => 'fa-light fa-share-nodes'],
                         'blasts' => ['label' => 'Audience Blasts', 'icon' => 'fa-light fa-paper-plane'],
                         'email' => ['label' => 'Email Marketing Workspace', 'icon' => 'fa-light fa-envelope-open-text'],
+                        'whatsapp' => ['label' => 'WhatsApp Automation & DM', 'icon' => 'fa-brands fa-whatsapp'],
+                        'ads' => ['label' => 'Ads Sync & AI Insights', 'icon' => 'fa-light fa-bullseye-arrow'],
                         'analytics' => ['label' => 'Campaign Analytics', 'icon' => 'fa-light fa-chart-pie'],
                     ],
                     'ai-agents' => [
-                        'caption' => ['label' => 'Caption Generator', 'icon' => 'fa-light fa-sparkles'],
+                        'agents' => ['label' => 'AI Agent Fleet & Logs', 'icon' => 'fa-light fa-sparkles'],
+                        'caption' => ['label' => 'Caption Generator', 'icon' => 'fa-light fa-pen-sparkles'],
                         'repurpose' => ['label' => 'Content Repurposer', 'icon' => 'fa-light fa-repeat'],
                         'planner' => ['label' => 'Content Planner', 'icon' => 'fa-light fa-calendar-star'],
                         'besttime' => ['label' => 'Best Time Scheduler', 'icon' => 'fa-light fa-clock-rotate-left'],
                     ],
                     'automation' => [
                         'rules' => ['label' => 'Active Automation Rules', 'icon' => 'fa-light fa-bolt'],
+                        'templates' => ['label' => 'Quick Rule Templates', 'icon' => 'fa-light fa-wand-magic-sparkles'],
                         'triggers' => ['label' => 'Triggers & Webhooks', 'icon' => 'fa-light fa-link'],
                         'logs' => ['label' => 'Execution Logs', 'icon' => 'fa-light fa-receipt'],
                     ],
@@ -212,8 +218,9 @@
                     'administration' => [
                         'users' => ['label' => 'User Management', 'icon' => 'fa-light fa-users'],
                         'roles' => ['label' => 'Roles & Permissions', 'icon' => 'fa-light fa-user-shield'],
-                        'clients' => ['label' => 'Client & External Access', 'icon' => 'fa-light fa-user-group'],
+                        'organization' => ['label' => 'Corporate HQ & Branches', 'icon' => 'fa-light fa-building-user'],
                         'security' => ['label' => 'Security & Audit Logs', 'icon' => 'fa-light fa-shield-check'],
+                        'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
                     ],
                     default => ['overview' => ['label' => 'Overview', 'icon' => 'fa-light fa-border-all']],
                 };
@@ -231,6 +238,18 @@
 
                 </button>
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'finance'): ?>
+                <button type="button" wire:click="setTab('salary')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 <?php echo e($activeTab === 'salary' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white'); ?>" <?php echo e($activeTab === 'salary' ? 'style="color: '.$accent.';"' : ''); ?>>
+                    <i class="fa-light fa-money-bill-wave text-sm"></i>
+                    <?php echo e(__('Payroll & Salary')); ?>
+
+                </button>
+                <button type="button" wire:click="setTab('ai_finance')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 <?php echo e($activeTab === 'ai_finance' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white'); ?>" <?php echo e($activeTab === 'ai_finance' ? 'style="color: '.$accent.';"' : ''); ?>>
+                    <i class="fa-light fa-sparkles text-sm"></i>
+                    <?php echo e(__('AI Analysis')); ?>
+
+                </button>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
     </div>
 
@@ -356,6 +375,9 @@
                                         <a href="<?php echo e(route('portal.invoice.pdf', $inv)); ?>" target="_blank" class="inline-flex items-center gap-1 font-bold text-rose-600 hover:underline text-xs">
                                             <i class="fa-light fa-file-pdf"></i>PDF
                                         </a>
+                                        <a href="<?php echo e(route('portal.delivery-note.pdf', $inv)); ?>" target="_blank" class="inline-flex items-center gap-1 font-bold text-sky-600 hover:underline text-xs" title="Download Delivery Note PDF">
+                                            <i class="fa-light fa-truck"></i>Delivery Note
+                                        </a>
                                     </td>
                                 </tr>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
@@ -364,43 +386,128 @@
                 </div>
             </section>
         <?php elseif($activeTab === 'expenses'): ?>
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Expenses & Vendor Receipts Log')); ?></h2>
-                        <p class="text-sm text-slate-500"><?php echo e(__('Record company expenses, vendor payments, and operational costs.')); ?></p>
-                    </div>
-                    <button type="button" wire:click="openCreateModal('expense')" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700">
-                        <i class="fa-light fa-plus mr-1.5"></i><?php echo e(__('Log Expense')); ?>
+            <div class="space-y-6">
+                <div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+                    <!-- Expense Log Table -->
+                    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between border-b p-5 dark:border-slate-800">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-950 dark:text-white"><?php echo e(__('Expense & Receipt Log')); ?></h2>
+                                <p class="text-xs text-slate-500"><?php echo e(__('All vendor expenses with approval status and receipt attachments')); ?></p>
+                            </div>
+                            <span class="rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600"><?php echo e(count($expenseRecords)); ?> Records</span>
+                        </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($expenseRecords)): ?>
+                            <div class="flex flex-col items-center py-12 text-center">
+                                <i class="fa-light fa-receipt text-4xl text-slate-300 dark:text-slate-600"></i>
+                                <p class="mt-3 text-sm font-semibold text-slate-500"><?php echo e(__('No expenses logged yet')); ?></p>
+                            </div>
+                        <?php else: ?>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="border-b bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
+                                        <tr>
+                                            <th class="px-5 py-3 font-bold text-slate-500"><?php echo e(__('Vendor / Category')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Amount')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Date')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Receipt')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Status')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Actions')); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $expenseRecords; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                                <td class="px-5 py-3">
+                                                    <p class="font-bold text-slate-900 dark:text-white"><?php echo e($exp['vendor']); ?></p>
+                                                    <p class="text-slate-400"><?php echo e($exp['category']); ?></p>
+                                                </td>
+                                                <td class="px-4 py-3 font-black text-slate-900 dark:text-white">₦<?php echo e(number_format($exp['amount'], 2)); ?></td>
+                                                <td class="px-4 py-3 text-slate-500"><?php echo e($exp['expense_date']); ?></td>
+                                                <td class="px-4 py-3">
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($exp['receipt_path']): ?>
+                                                        <a href="/storage/<?php echo e($exp['receipt_path']); ?>" target="_blank" class="text-blue-600 hover:underline text-[10px] font-bold"><i class="fa-light fa-paperclip mr-1"></i>View</a>
+                                                    <?php else: ?>
+                                                        <span class="text-slate-300 text-[10px]">No receipt</span>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <span class="rounded-full px-2.5 py-1 text-[10px] font-bold
+                                                        <?php echo e(($exp['approval_status'] ?? 'pending') === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : (($exp['approval_status'] ?? 'pending') === 'rejected' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600')); ?>">
+                                                        <?php echo e(ucfirst($exp['approval_status'] ?? 'pending')); ?>
 
-                    </button>
-                </div>
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <div class="flex gap-2">
+                                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(($exp['approval_status'] ?? 'pending') === 'pending'): ?>
+                                                            <button type="button" wire:click="approveExpense(<?php echo e($exp['id']); ?>)" class="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20">✓ Approve</button>
+                                                            <button type="button" wire:click="rejectExpense(<?php echo e($exp['id']); ?>)" class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-500/20">✗ Reject</button>
+                                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </section>
 
-                <div class="mt-5 overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
-                            <tr>
-                                <th class="px-4 py-3.5">Category</th>
-                                <th class="px-4 py-3.5">Vendor / Payee</th>
-                                <th class="px-4 py-3.5">Amount (NGN)</th>
-                                <th class="px-4 py-3.5">Payment Method</th>
-                                <th class="px-4 py-3.5">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $dbExpenses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
-                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                                    <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white"><?php echo e($exp->category); ?></td>
-                                    <td class="px-4 py-3.5 font-medium"><?php echo e($exp->vendor); ?></td>
-                                    <td class="px-4 py-3.5 font-black text-rose-600">₦<?php echo e(number_format($exp->amount, 2)); ?></td>
-                                    <td class="px-4 py-3.5 text-xs text-slate-500 uppercase"><?php echo e(str_replace('_', ' ', $exp->payment_method)); ?></td>
-                                    <td class="px-4 py-3.5 text-slate-500 text-xs"><?php echo e($exp->expense_date?->format('Y-m-d') ?: now()->format('Y-m-d')); ?></td>
-                                </tr>
-                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
-                        </tbody>
-                    </table>
+                    <!-- Log Expense Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Log New Expense')); ?></h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Category')); ?></label>
+                            <select wire:model="expenseForm.category" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = ['Office Supplies', 'Cloud & SaaS', 'Travel & Transport', 'Utilities', 'Marketing & Ads', 'Salaries', 'Equipment', 'Maintenance', 'Legal & Compliance', 'Miscellaneous']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <option value="<?php echo e($cat); ?>"><?php echo e($cat); ?></option>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Vendor / Payee')); ?></label>
+                            <input wire:model="expenseForm.vendor" type="text" placeholder="e.g. AWS Nigeria" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Amount (₦)')); ?></label>
+                                <input wire:model="expenseForm.amount" type="number" placeholder="45000" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Date')); ?></label>
+                                <input wire:model="expenseForm.expense_date" type="date" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Payment Method')); ?></label>
+                            <select wire:model="expenseForm.payment_method" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = ['Bank Transfer', 'Cash', 'POS Terminal', 'Mobile Money', 'Cheque', 'Corporate Card']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <option value="<?php echo e($method); ?>"><?php echo e($method); ?></option>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Description / Notes')); ?></label>
+                            <textarea wire:model="expenseForm.description" rows="2" placeholder="Brief description of expense..." class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Reference / Invoice #')); ?></label>
+                            <input wire:model="expenseForm.reference" type="text" placeholder="EXP-2026-001" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-4 text-center dark:border-slate-700">
+                            <i class="fa-light fa-cloud-arrow-up text-2xl text-slate-400"></i>
+                            <p class="mt-2 text-xs font-semibold text-slate-500"><?php echo e(__('Receipt Upload')); ?></p>
+                            <p class="text-[10px] text-slate-400"><?php echo e(__('PDF, JPG, PNG up to 5MB')); ?></p>
+                            <input type="file" class="mt-2 w-full text-xs text-slate-400" accept=".pdf,.jpg,.png,.jpeg">
+                        </div>
+                        <button type="button" wire:click="saveExpense" class="w-full rounded-xl bg-orange-600 py-3 text-sm font-bold text-white hover:bg-orange-700 transition">
+                            <i class="fa-light fa-plus mr-1.5"></i> <?php echo e(__('Log Expense')); ?>
+
+                        </button>
+                    </section>
                 </div>
-            </section>
+            </div>
         <?php elseif($activeTab === 'ledger'): ?>
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
@@ -449,7 +556,7 @@
                     </table>
                 </div>
             </section>
-        <?php else: ?>
+        <?php elseif($activeTab === 'reports'): ?>
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
                     <div>
@@ -478,6 +585,211 @@
                     </div>
                 </div>
             </section>
+        
+        <?php elseif($activeTab === 'salary'): ?>
+            <div class="space-y-6">
+                <!-- Payroll KPI Summary -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Total Payroll (This Month)')); ?></p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦<?php echo e(number_format(collect($salaryRecords)->where('status', 'paid')->sum('net_salary'), 0)); ?></p>
+                        <p class="mt-1 text-xs text-slate-400"><?php echo e(collect($salaryRecords)->where('status', 'paid')->count()); ?> payslips processed</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Pending Payroll')); ?></p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">₦<?php echo e(number_format(collect($salaryRecords)->where('status', 'pending')->sum('net_salary'), 0)); ?></p>
+                        <p class="mt-1 text-xs text-slate-400"><?php echo e(collect($salaryRecords)->where('status', 'pending')->count()); ?> awaiting disbursement</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Total Employees')); ?></p>
+                        <p class="mt-2 text-2xl font-black text-blue-600"><?php echo e(collect($salaryRecords)->unique('employee_name')->count()); ?></p>
+                        <p class="mt-1 text-xs text-slate-400">Across all departments</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('PAYE Tax Deducted')); ?></p>
+                        <p class="mt-2 text-2xl font-black text-rose-600">₦<?php echo e(number_format(collect($salaryRecords)->sum('paye_tax'), 0)); ?></p>
+                        <p class="mt-1 text-xs text-slate-400">Nigeria PAYE compliance</p>
+                    </div>
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
+                    <!-- Salary Records Table -->
+                    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between border-b p-5 dark:border-slate-800">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-950 dark:text-white"><?php echo e(__('Payroll Register')); ?></h2>
+                                <p class="text-xs text-slate-500"><?php echo e(__('All employee salary records and payslip history')); ?></p>
+                            </div>
+                            <button type="button" wire:click="runPayroll" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="fa-light fa-play"></i> <?php echo e(__('Run Payroll')); ?>
+
+                            </button>
+                        </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($salaryRecords)): ?>
+                            <div class="flex flex-col items-center justify-center py-16 text-center">
+                                <i class="fa-light fa-money-bill-wave text-4xl text-slate-300 dark:text-slate-600"></i>
+                                <p class="mt-4 text-sm font-semibold text-slate-500"><?php echo e(__('No salary records yet')); ?></p>
+                                <p class="mt-1 text-xs text-slate-400"><?php echo e(__('Add employee records using the form to start tracking payroll')); ?></p>
+                            </div>
+                        <?php else: ?>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="border-b bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
+                                        <tr>
+                                            <th class="px-5 py-3 font-bold text-slate-500"><?php echo e(__('Employee')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Department')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Gross')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('PAYE')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Net Pay')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Period')); ?></th>
+                                            <th class="px-4 py-3 font-bold text-slate-500"><?php echo e(__('Status')); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $salaryRecords; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rec): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                                <td class="px-5 py-3">
+                                                    <p class="font-bold text-slate-900 dark:text-white"><?php echo e($rec['employee_name']); ?></p>
+                                                    <p class="text-slate-400"><?php echo e($rec['role'] ?? ''); ?></p>
+                                                </td>
+                                                <td class="px-4 py-3 text-slate-600 dark:text-slate-300"><?php echo e($rec['department'] ?? '—'); ?></td>
+                                                <td class="px-4 py-3 font-bold text-slate-900 dark:text-white">₦<?php echo e(number_format($rec['gross_salary'] ?? 0, 0)); ?></td>
+                                                <td class="px-4 py-3 text-rose-600">₦<?php echo e(number_format($rec['paye_tax'] ?? 0, 0)); ?></td>
+                                                <td class="px-4 py-3 font-black text-emerald-600">₦<?php echo e(number_format($rec['net_salary'] ?? 0, 0)); ?></td>
+                                                <td class="px-4 py-3 text-slate-500"><?php echo e($rec['pay_period'] ?? '—'); ?></td>
+                                                <td class="px-4 py-3">
+                                                    <span class="rounded-full px-2.5 py-1 text-[10px] font-bold <?php echo e(($rec['status'] ?? '') === 'paid' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'); ?>">
+                                                        <?php echo e(ucfirst($rec['status'] ?? 'pending')); ?>
+
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </section>
+
+                    <!-- Add Salary Record Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Add Employee Payroll Record')); ?></h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Employee Name')); ?></label>
+                            <input wire:model="salaryForm.employee_name" type="text" placeholder="e.g. Babatunde Adeleke" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Department')); ?></label>
+                                <input wire:model="salaryForm.department" type="text" placeholder="Finance" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Role')); ?></label>
+                                <input wire:model="salaryForm.role" type="text" placeholder="Manager" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Gross Salary (₦)')); ?></label>
+                            <input wire:model="salaryForm.gross_salary" type="number" placeholder="350000" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($salaryForm['gross_salary']): ?>
+                                <p class="mt-1 text-xs text-slate-400">Net (est.): ₦<?php echo e(number_format((float)$salaryForm['gross_salary'] * 0.85, 0)); ?> after PAYE + Pension</p>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Pay Period')); ?></label>
+                                <input wire:model="salaryForm.pay_period" type="month" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Bank Name')); ?></label>
+                                <input wire:model="salaryForm.bank_name" type="text" placeholder="Access Bank" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Account Number')); ?></label>
+                            <input wire:model="salaryForm.account_number" type="text" placeholder="0123456789" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <button type="button" wire:click="saveSalaryRecord" class="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            <i class="fa-light fa-plus mr-1.5"></i> <?php echo e(__('Add to Payroll')); ?>
+
+                        </button>
+                    </section>
+                </div>
+            </div>
+
+        
+        <?php elseif($activeTab === 'ai_finance'): ?>
+            <div class="space-y-6">
+                <!-- AI Header -->
+                <div class="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:to-teal-950/20">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white text-xl shadow-lg">
+                                <i class="fa-light fa-brain-circuit"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black text-slate-950 dark:text-white"><?php echo e(__('AI Financial Intelligence')); ?></h2>
+                                <p class="text-xs text-slate-500"><?php echo e(__('Real-time analysis, anomaly detection and cash flow forecasting powered by AI')); ?></p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="generateAiFinanceInsights" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition flex items-center gap-2">
+                            <i class="fa-light fa-rotate"></i> <?php echo e(__('Refresh Analysis')); ?>
+
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Insight Cards -->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($aiFinanceInsights)): ?>
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <i class="fa-light fa-brain-circuit text-5xl text-slate-300 dark:text-slate-600"></i>
+                        <p class="mt-4 font-semibold text-slate-500"><?php echo e(__('Click Refresh Analysis to generate AI insights')); ?></p>
+                        <button type="button" wire:click="generateAiFinanceInsights" class="mt-4 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            <i class="fa-light fa-sparkles mr-2"></i><?php echo e(__('Generate Now')); ?>
+
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $aiFinanceInsights; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $insight): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                            <div class="rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md <?php echo e(($insight['severity'] ?? 'info') === 'critical' ? 'border-rose-200 bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/20' : (($insight['severity'] ?? 'info') === 'warning' ? 'border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900')); ?>">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm <?php echo e(($insight['severity'] ?? 'info') === 'critical' ? 'bg-rose-500/10 text-rose-600' : (($insight['severity'] ?? 'info') === 'warning' ? 'bg-amber-500/10 text-amber-600' : 'bg-emerald-500/10 text-emerald-600')); ?>">
+                                        <i class="<?php echo e($insight['icon'] ?? 'fa-light fa-lightbulb'); ?>"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black text-slate-900 dark:text-white"><?php echo e($insight['title']); ?></p>
+                                        <p class="mt-1 text-xs text-slate-500 leading-relaxed"><?php echo e($insight['body']); ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                    </div>
+
+                    <!-- Suggested Financial Features -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800 mb-4"><?php echo e(__('Additional Financial Modules — Recommended')); ?></h3>
+                        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = [
+                                ['icon' => 'fa-light fa-chart-gantt', 'name' => 'Budget & Forecast', 'desc' => 'Set department budgets with variance alerts'],
+                                ['icon' => 'fa-light fa-coins', 'name' => 'Multi-Currency', 'desc' => 'USD/GBP/NGN with live exchange rates'],
+                                ['icon' => 'fa-light fa-file-certificate', 'name' => 'Tax Filing Assistant', 'desc' => 'VAT/PAYE reminders and filing prep'],
+                                ['icon' => 'fa-light fa-building-columns', 'name' => 'Vendor Payments', 'desc' => 'Bulk payment batches with bank integration'],
+                                ['icon' => 'fa-light fa-chart-tree-map', 'name' => 'Profit Centre', 'desc' => 'P&L by branch and department'],
+                                ['icon' => 'fa-light fa-warehouse', 'name' => 'Fixed Asset Register', 'desc' => 'Depreciation tracking per asset'],
+                            ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <div class="flex items-start gap-3 rounded-xl border border-slate-100 p-4 dark:border-slate-800">
+                                    <i class="<?php echo e($feat['icon']); ?> text-lg text-emerald-600 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($feat['name']); ?></p>
+                                        <p class="mt-0.5 text-[10px] text-slate-400"><?php echo e($feat['desc']); ?></p>
+                                    </div>
+                                </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+                    </section>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
@@ -1728,7 +2040,148 @@
                     </div>
                 </section>
             </div>
-        <?php else: ?>
+        <?php elseif($activeTab === 'whatsapp'): ?>
+            <div class="space-y-6">
+                <!-- WhatsApp Header -->
+                <div class="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:to-teal-950/20">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white text-xl shadow-lg">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black text-slate-950 dark:text-white"><?php echo e(__('WhatsApp Business Automation & Direct Messaging')); ?></h2>
+                                <p class="text-xs text-slate-500"><?php echo e(__('Automate WhatsApp payment requests, receipts, OTPs and broadcast lists')); ?></p>
+                            </div>
+                        </div>
+                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">Official API Active</span>
+                    </div>
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+                    <!-- WhatsApp Broadcasts & Templates -->
+                    <div class="space-y-6">
+                        <!-- Message Templates Grid -->
+                        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800 mb-4"><?php echo e(__('WhatsApp Message Templates')); ?></h3>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $whatsappTemplates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $wt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600"><?php echo e($wt['category'] ?? 'TRANSACTIONAL'); ?></span>
+                                            <span class="text-[10px] font-bold text-slate-400">✓ <?php echo e(ucfirst($wt['status'] ?? 'approved')); ?></span>
+                                        </div>
+                                        <h4 class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($wt['name']); ?></h4>
+                                        <p class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg dark:bg-slate-800/60 font-mono"><?php echo e($wt['body']); ?></p>
+                                    </div>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </div>
+                        </section>
+
+                        <!-- WhatsApp Broadcast Log -->
+                        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800 mb-4"><?php echo e(__('Broadcast History')); ?></h3>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($whatsappBroadcasts)): ?>
+                                <div class="py-8 text-center text-xs text-slate-400">
+                                    <i class="fa-brands fa-whatsapp text-3xl mb-2 text-slate-300"></i>
+                                    <p><?php echo e(__('No broadcast campaigns dispatched yet.')); ?></p>
+                                </div>
+                            <?php else: ?>
+                                <div class="space-y-3">
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $whatsappBroadcasts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $wb): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                        <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($wb['name'] ?? 'Broadcast'); ?></p>
+                                                <p class="text-[10px] text-slate-400"><?php echo e($wb['message'] ?? ''); ?></p>
+                                            </div>
+                                            <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600">Dispatched</span>
+                                        </div>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                </div>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </section>
+                    </div>
+
+                    <!-- Direct Message Composer -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Send Direct WhatsApp Message')); ?></h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Recipient Phone Number')); ?></label>
+                            <input wire:model="dmForm.phone" type="text" placeholder="+234 803 123 4567" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Message Body')); ?></label>
+                            <textarea wire:model="dmForm.message" rows="4" placeholder="Type your WhatsApp message..." class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <button type="button" wire:click="sendWhatsAppDM" class="w-full rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                            <i class="fa-brands fa-whatsapp mr-1.5"></i> <?php echo e(__('Send WhatsApp Message')); ?>
+
+                        </button>
+                        <button type="button" wire:click="sendWhatsAppBroadcast" class="w-full rounded-xl border border-emerald-200 bg-emerald-50 py-2.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+                            <i class="fa-light fa-bullhorn mr-1.5"></i> <?php echo e(__('Broadcast to All Contacts')); ?>
+
+                        </button>
+                    </section>
+                </div>
+            </div>
+
+        <?php elseif($activeTab === 'ads'): ?>
+            <div class="space-y-6">
+                <!-- Connected Ads Accounts -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Ad Networks & Multi-Channel Sync')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Connected ad platforms with live campaign performance and ROAS analytics')); ?></p>
+                        </div>
+                        <button type="button" wire:click="getAiAdsRecommendations" class="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white hover:bg-purple-700">
+                            <i class="fa-light fa-sparkles mr-1.5"></i><?php echo e(__('Get AI Ads Insights')); ?>
+
+                        </button>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $adsAccounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $acc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl <?php echo e(match($acc['platform'] ?? '') { 'meta' => 'bg-blue-500/10 text-blue-600', 'google' => 'bg-red-500/10 text-red-600', default => 'bg-slate-500/10 text-slate-600' }); ?> text-lg">
+                                        <i class="<?php echo e(match($acc['platform'] ?? '') { 'meta' => 'fa-brands fa-meta', 'google' => 'fa-brands fa-google', 'tiktok' => 'fa-brands fa-tiktok', default => 'fa-light fa-bullseye' }); ?>"></i>
+                                    </span>
+                                    <button type="button" wire:click="syncAdsAccount('<?php echo e($acc['platform'] ?? 'meta'); ?>')" class="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200">
+                                        <i class="fa-light fa-rotate mr-1"></i>Sync
+                                    </button>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white"><?php echo e($acc['account_name']); ?></h3>
+                                <div class="grid grid-cols-2 gap-2 text-xs border-t pt-2 dark:border-slate-800">
+                                    <div><span class="text-slate-400">Total Spend:</span> <span class="font-bold">₦<?php echo e(number_format($acc['total_spend'] ?? 0, 0)); ?></span></div>
+                                    <div><span class="text-slate-400">ROAS:</span> <span class="font-bold text-emerald-600"><?php echo e($acc['roas'] ?? 0); ?>x</span></div>
+                                </div>
+                            </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                    </div>
+                </section>
+
+                <!-- AI Recommendations Panel -->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($adsRecommendations)): ?>
+                    <section class="rounded-2xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/40 dark:bg-purple-950/20">
+                        <h3 class="text-sm font-bold text-purple-900 dark:text-purple-200 border-b pb-3 border-purple-200 dark:border-purple-800/40 mb-4"><?php echo e(__('AI Ad Performance Recommendations')); ?></h3>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $adsRecommendations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rec): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <div class="flex items-start gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                    <i class="<?php echo e($rec['icon']); ?> text-lg text-purple-600 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($rec['title']); ?></p>
+                                        <p class="mt-1 text-[11px] text-slate-500 leading-relaxed"><?php echo e($rec['body']); ?></p>
+                                        <span class="mt-2 inline-block text-[10px] font-bold text-purple-600 hover:underline cursor-pointer"><?php echo e($rec['action']); ?> →</span>
+                                    </div>
+                                </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+                    </section>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            </div>
+
+        <?php elseif($activeTab === 'analytics'): ?>
             <!-- Campaign Analytics & ROAS Dashboard -->
             <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
@@ -1768,65 +2221,186 @@
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- MODULE 8: AI AGENTS ENHANCED -->
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'ai-agents'): ?>
-        <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('AI Content & Caption Studio')); ?></h2>
-                        <p class="text-sm text-slate-500"><?php echo e(__('Generate high-converting social posts, captions, and marketing copy.')); ?></p>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'ai-agents' || $moduleKey === 'agents'): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'agents' || $activeTab === 'caption' || $activeTab === 'overview' || empty($activeTab)): ?>
+            <div class="space-y-6">
+                <!-- AI Fleet Overview Header -->
+                <div class="rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 dark:border-purple-900/40 dark:from-purple-950/30 dark:to-indigo-950/20">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-600 text-white text-xl shadow-lg">
+                                <i class="fa-light fa-sparkles"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black text-slate-950 dark:text-white"><?php echo e(__('Autonomous AI Agent Fleet')); ?></h2>
+                                <p class="text-xs text-slate-500"><?php echo e(__('6 specialized AI agents running automated workflows across content, finance, CRM & ads')); ?></p>
+                            </div>
+                        </div>
+                        <span class="rounded-full bg-purple-500/10 px-3.5 py-1 text-xs font-bold text-purple-600 border border-purple-500/20">6 Agents Active</span>
                     </div>
-                    <span class="rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20 px-3 py-1 text-xs font-bold">AI Model Active</span>
                 </div>
 
-                <form wire:submit.prevent="generateAiContent" class="mt-5 space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Select Copy Tone</label>
-                        <select wire:model.live="aiTone" class="mt-1 w-full rounded-2xl border border-slate-200 p-3 text-sm font-semibold outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                            <option value="professional">Professional Enterprise</option>
-                            <option value="persuasive">High-Converting Sales / Persuasive</option>
-                            <option value="casual">Casual & Engaging</option>
-                            <option value="urgent">Urgent Call-to-Action</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Content Prompt / Topic</label>
-                        <textarea wire:model="aiPrompt" rows="3" placeholder="e.g. Write a promotion for our new Abuja branch POS equipment release..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3.5 text-sm font-medium outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full rounded-2xl bg-purple-600 py-3.5 text-center text-sm font-extrabold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-700">
-                        <i class="fa-light fa-sparkles mr-2"></i><?php echo e(__('Generate AI Content')); ?>
-
-                    </button>
-                </form>
-            </section>
-
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800"><?php echo e(__('AI Output & Publishing')); ?></h2>
-
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($generatedResult || $repurposedResult): ?>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($generatedResult): ?>
-                        <div class="mt-4 rounded-2xl border border-purple-200 bg-purple-50/50 p-5 dark:border-purple-900/60 dark:bg-purple-950/30">
-                            <p class="text-xs font-bold uppercase tracking-wider text-purple-600">Generated Post (<?php echo e(ucfirst($aiTone)); ?> Tone)</p>
-                            <p class="mt-2 text-sm font-medium text-slate-800 dark:text-purple-100"><?php echo e($generatedResult); ?></p>
+                <!-- Agent Catalog Grid -->
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $agentCatalog; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                        <div wire:click="$set('selectedAgent', '<?php echo e($ag['id']); ?>')" class="cursor-pointer rounded-2xl border p-5 transition-all hover:shadow-md <?php echo e($selectedAgent === $ag['id'] ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/30 ring-2 ring-purple-500/20' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'); ?>">
+                            <div class="flex items-center justify-between">
+                                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 text-lg">
+                                    <i class="<?php echo e($ag['icon']); ?>"></i>
+                                </span>
+                                <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600">● <?php echo e(ucfirst($ag['status'])); ?></span>
+                            </div>
+                            <h3 class="mt-3 text-sm font-bold text-slate-900 dark:text-white"><?php echo e($ag['name']); ?></h3>
+                            <p class="mt-1 text-xs text-slate-500 leading-relaxed"><?php echo e($ag['desc']); ?></p>
+                            <div class="mt-3 flex items-center justify-between border-t pt-2.5 text-[10px] text-slate-400 dark:border-slate-800">
+                                <span>Tasks Run: <strong class="text-slate-700 dark:text-slate-200"><?php echo e($ag['tasks_run']); ?></strong></span>
+                                <span>Avg: <strong class="text-purple-600"><?php echo e($ag['avg_ms'] ? $ag['avg_ms'].'ms' : '< 1s'); ?></strong></span>
+                            </div>
                         </div>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                </div>
 
-                    <div class="mt-4 flex flex-col gap-2">
-                        <button type="button" wire:click="sendGeneratedToPublishing" class="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700">
-                            <i class="fa-light fa-calendar-plus mr-2"></i><?php echo e(__('Schedule in Social Calendar')); ?>
-
+                <!-- Quick Template Action Shortcuts -->
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 mb-3"><?php echo e(__('1-Click Quick AI Action Templates')); ?></p>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" wire:click="runQuickAgentTemplate('content', 'content_social')" class="rounded-xl bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition">
+                            <i class="fa-light fa-share-nodes mr-1.5"></i>Generate LinkedIn Post
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('content', 'content_ad_copy')" class="rounded-xl bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition">
+                            <i class="fa-light fa-rectangle-ad mr-1.5"></i>Generate Meta Ad Copy
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('financial', 'financial_variance')" class="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition">
+                            <i class="fa-light fa-chart-pie mr-1.5"></i>Analyze P&L Variance
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('inbox', 'inbox_triage')" class="rounded-xl bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition">
+                            <i class="fa-light fa-headset mr-1.5"></i>Triage Support Messages
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('crm', 'crm_qualification')" class="rounded-xl bg-sky-500/10 border border-sky-500/20 px-3 py-1.5 text-xs font-bold text-sky-600 hover:bg-sky-500/20 transition">
+                            <i class="fa-light fa-user-check mr-1.5"></i>Score Inbound Leads
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('seo', 'seo_audit')" class="rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition">
+                            <i class="fa-light fa-magnifying-glass-chart mr-1.5"></i>Audit SEO Keywords
+                        </button>
+                        <button type="button" wire:click="runQuickAgentTemplate('ads', 'ads_roas')" class="rounded-xl bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-500/20 transition">
+                            <i class="fa-light fa-bullseye-arrow mr-1.5"></i>Optimize Campaign ROAS
                         </button>
                     </div>
-                <?php else: ?>
-                    <div class="my-12 text-center text-slate-400">
-                        <i class="fa-light fa-sparkles text-5xl text-purple-300"></i>
-                        <p class="mt-3 text-sm font-medium"><?php echo e(__('Enter a prompt on the left to generate AI content.')); ?></p>
+                </div>
+
+                <!-- Interactive Task Queue & Log Stream -->
+                <div class="grid gap-6 lg:grid-cols-[1fr_380px]">
+                    <!-- Task Input & Output Panel -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white"><?php echo e(__('Dispatch Task to ')); ?> <?php echo e(collect($agentCatalog)->firstWhere('id', $selectedAgent)['name'] ?? 'AI Agent'); ?></h3>
+                            <span class="text-xs text-slate-400 font-mono">Agent ID: <?php echo e($selectedAgent); ?></span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Instruction / Task Prompt')); ?></label>
+                            <textarea wire:model="agentTaskInput" rows="4" placeholder="e.g. Generate 3 high-converting ad headlines for our Lagos POS sale launching next week..." class="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <button type="button" wire:click="runAiAgentTask" class="w-full rounded-xl bg-purple-600 py-3 text-sm font-bold text-white hover:bg-purple-700 transition shadow-lg shadow-purple-500/20">
+                            <i class="fa-light fa-paper-plane-top mr-2"></i> <?php echo e(__('Dispatch Agent Task Now')); ?>
+
+                        </button>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($agentResult): ?>
+                            <div class="rounded-2xl border border-purple-200 bg-purple-50/70 p-5 dark:border-purple-900/60 dark:bg-purple-950/40 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-purple-700 dark:text-purple-300">✓ Agent Execution Result</span>
+                                    <button type="button" wire:click="$set('agentResult', '')" class="text-[10px] font-bold text-slate-400 hover:text-slate-600">Clear</button>
+                                </div>
+                                <div class="text-xs text-slate-800 dark:text-purple-100 font-medium leading-relaxed whitespace-pre-line"><?php echo nl2br(e($agentResult)); ?></div>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </section>
+
+                    <!-- Execution Audit Logs -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Agent Execution Logs')); ?></h3>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($agentLogs)): ?>
+                            <div class="py-12 text-center text-xs text-slate-400">
+                                <i class="fa-light fa-list-check text-3xl mb-2 text-slate-300"></i>
+                                <p><?php echo e(__('No agent tasks logged yet. Dispatch a task to see live execution logs.')); ?></p>
+                            </div>
+                        <?php else: ?>
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $agentLogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <div class="rounded-xl border border-slate-100 p-3 text-xs dark:border-slate-800 space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-purple-600 uppercase text-[9px]"><?php echo e($log['agent_name'] ?? $log['agent'] ?? $log['agent_id'] ?? 'AI Agent'); ?></span>
+                                            <span class="text-[9px] text-slate-400 font-mono"><?php echo e($log['ms'] ?? 0); ?>ms &bull; <?php echo e($log['tokens'] ?? 420); ?> tokens</span>
+                                        </div>
+                                        <p class="font-medium text-slate-700 dark:text-slate-300 truncate"><?php echo e($log['prompt'] ?? $log['task'] ?? 'System Task'); ?></p>
+                                        <p class="text-[10px] text-slate-400 font-mono"><?php echo e($log['time'] ?? 'Just now'); ?> &bull; <?php echo e($log['user'] ?? 'Super Admin'); ?></p>
+                                    </div>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </section>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('AI Content & Caption Studio')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Generate high-converting social posts, captions, and marketing copy.')); ?></p>
+                        </div>
+                        <span class="rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20 px-3 py-1 text-xs font-bold">AI Model Active</span>
                     </div>
-                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-            </section>
-        </div>
+
+                    <form wire:submit.prevent="generateAiContent" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Select Copy Tone</label>
+                            <select wire:model.live="aiTone" class="mt-1 w-full rounded-2xl border border-slate-200 p-3 text-sm font-semibold outline-none focus:border-purple-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="professional">Professional Enterprise</option>
+                                <option value="persuasive">High-Converting Sales / Persuasive</option>
+                                <option value="casual">Casual & Engaging</option>
+                                <option value="urgent">Urgent Call-to-Action</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Content Prompt / Topic</label>
+                            <textarea wire:model="aiPrompt" rows="3" placeholder="e.g. Write a promotion for our new Abuja branch POS equipment release..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3.5 text-sm font-medium outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full rounded-2xl bg-purple-600 py-3.5 text-center text-sm font-extrabold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-700">
+                            <i class="fa-light fa-sparkles mr-2"></i><?php echo e(__('Generate AI Content')); ?>
+
+                        </button>
+                    </form>
+                </section>
+
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800"><?php echo e(__('AI Output & Publishing')); ?></h2>
+
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($generatedResult || $repurposedResult): ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($generatedResult): ?>
+                            <div class="mt-4 rounded-2xl border border-purple-200 bg-purple-50/50 p-5 dark:border-purple-900/60 dark:bg-purple-950/30">
+                                <p class="text-xs font-bold uppercase tracking-wider text-purple-600">Generated Post (<?php echo e(ucfirst($aiTone)); ?> Tone)</p>
+                                <p class="mt-2 text-sm font-medium text-slate-800 dark:text-purple-100"><?php echo e($generatedResult); ?></p>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                        <div class="mt-4 flex flex-col gap-2">
+                            <button type="button" wire:click="sendGeneratedToPublishing" class="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700">
+                                <i class="fa-light fa-calendar-plus mr-2"></i><?php echo e(__('Schedule in Social Calendar')); ?>
+
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <div class="my-12 text-center text-slate-400">
+                            <i class="fa-light fa-sparkles text-5xl text-purple-300"></i>
+                            <p class="mt-3 text-sm font-medium"><?php echo e(__('Enter a prompt on the left to generate AI content.')); ?></p>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </section>
+            </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- MODULE 9: WORKFLOW AUTOMATION ENHANCED -->
@@ -1888,6 +2462,38 @@
                                     <button type="button" wire:click="deleteAutomationRule(<?php echo e($rule['id']); ?>)" class="text-xs font-bold text-slate-400 hover:text-rose-500">
                                         <i class="fa-light fa-trash-can"></i>
                                     </button>
+                                </div>
+                            </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                    </div>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'templates'): ?>
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Pre-Built Automation Rule Templates')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('One-click enable high-value background automation recipes')); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $ruleTemplates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tpl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm dark:border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 text-lg">
+                                        <i class="<?php echo e($tpl['icon']); ?>"></i>
+                                    </span>
+                                    <button type="button" wire:click="enableRuleTemplate('<?php echo e($tpl['id']); ?>')" class="rounded-xl px-3 py-1.5 text-xs font-bold transition <?php echo e($tpl['enabled'] ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white hover:bg-amber-700'); ?>">
+                                        <?php echo e($tpl['enabled'] ? '✓ Enabled' : '+ Enable'); ?>
+
+                                    </button>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white"><?php echo e($tpl['name']); ?></h3>
+                                <div class="text-xs text-slate-400 space-y-1">
+                                    <p><span class="font-bold text-slate-600 dark:text-slate-300">Trigger:</span> <?php echo e($tpl['trigger']); ?></p>
+                                    <p><span class="font-bold text-blue-600">Action:</span> <?php echo e($tpl['action']); ?></p>
                                 </div>
                             </div>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
@@ -1987,57 +2593,97 @@
                 <!-- Productivity KPI Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Active Projects')); ?></p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Active Projects')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-folder-tree"></i></span>
+                        </div>
                         <p class="mt-2 text-2xl font-black text-sky-600"><?php echo e($dbProjects->where('status', 'active')->count() ?: $dbProjects->count()); ?></p>
-                        <p class="mt-1 text-xs font-medium text-sky-500"><i class="fa-light fa-folder-open mr-1"></i>Currently running</p>
+                        <p class="mt-1 text-xs font-medium text-sky-500"><i class="fa-light fa-circle-check mr-1"></i>On-track project portfolio</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Tasks in Progress')); ?></p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Tasks in Progress')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600"><i class="fa-light fa-spinner"></i></span>
+                        </div>
                         <p class="mt-2 text-2xl font-black text-amber-600"><?php echo e(count(array_filter($tasks, fn($t) => $t['status'] === 'in_progress'))); ?></p>
-                        <p class="mt-1 text-xs font-medium text-amber-500"><i class="fa-light fa-spinner mr-1"></i>Actively being worked on</p>
+                        <p class="mt-1 text-xs font-medium text-amber-500"><i class="fa-light fa-user-gear mr-1"></i>Active execution queue</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Completed Tasks')); ?></p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Completed Tasks')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-circle-check"></i></span>
+                        </div>
                         <p class="mt-2 text-2xl font-black text-emerald-600"><?php echo e(count(array_filter($tasks, fn($t) => $t['status'] === 'done'))); ?></p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-check-double mr-1"></i>Done this sprint</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-check-double mr-1"></i>Delivered sprint tasks</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Team Velocity')); ?></p>
-                        <p class="mt-2 text-2xl font-black text-purple-600">94%</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+8% vs last sprint</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Sprint Velocity')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-gauge-max"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-purple-600">94.8%</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+8.4% efficiency rate</p>
                     </div>
                 </div>
 
                 <!-- Projects Grid -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Projects & Milestone Tracking')); ?></h2>
-                            <p class="text-sm text-slate-500"><?php echo e(__('Organize work, track progress completion, and manage team assignments.')); ?></p>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Projects & Milestone Tracking Studio')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Organize enterprise projects, track progress completion, assign leads and manage deliverables.')); ?></p>
                         </div>
-                        <button type="button" wire:click="openCreateModal('project')" class="rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
-                            <i class="fa-light fa-plus mr-1.5"></i><?php echo e(__('Create Project')); ?>
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="openCreateModal('task')" class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <i class="fa-light fa-plus mr-1.5"></i><?php echo e(__('New Task')); ?>
 
-                        </button>
+                            </button>
+                            <button type="button" wire:click="openCreateModal('project')" class="rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                                <i class="fa-light fa-folder-plus mr-1.5"></i><?php echo e(__('Create Project')); ?>
+
+                            </button>
+                        </div>
                     </div>
+
                     <div class="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $dbProjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $proj): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                             <div class="rounded-2xl border border-slate-200 p-5 transition hover:border-sky-500/40 hover:shadow-md dark:border-slate-800 dark:hover:border-sky-500/40">
                                 <div class="flex items-center justify-between">
-                                    <span class="rounded-full <?php echo e($proj->progress_percent >= 100 ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-sky-500/10 text-sky-600 border border-sky-500/20'); ?> px-2.5 py-0.5 text-[10px] font-bold"><?php echo e($proj->progress_percent >= 100 ? 'Completed' : 'Active'); ?></span>
-                                    <button type="button" wire:click="updateProjectProgress(<?php echo e($proj->id); ?>, <?php echo e(min(100, $proj->progress_percent + 25)); ?>)" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition" wire:loading.attr="disabled">
-                                        <i class="fa-light fa-plus mr-0.5"></i>25%
-                                    </button>
+                                    <span class="rounded-full <?php echo e($proj->progress_percent >= 100 ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-sky-500/10 text-sky-600 border border-sky-500/20'); ?> px-2.5 py-0.5 text-[10px] font-bold">
+                                        <?php echo e($proj->progress_percent >= 100 ? 'Completed' : 'Active'); ?>
+
+                                    </span>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" wire:click="updateProjectProgress(<?php echo e($proj->id); ?>, <?php echo e(min(100, $proj->progress_percent + 25)); ?>)" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition" title="Add 25% progress">
+                                            <i class="fa-light fa-plus mr-0.5"></i>25%
+                                        </button>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($proj->progress_percent < 100): ?>
+                                            <button type="button" wire:click="updateProjectProgress(<?php echo e($proj->id); ?>, 100)" class="rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Mark 100% complete">
+                                                <i class="fa-light fa-check"></i>
+                                            </button>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </div>
                                 </div>
                                 <h3 class="mt-3 text-base font-bold text-slate-900 dark:text-white"><?php echo e($proj->name); ?></h3>
-                                <p class="mt-1 text-xs text-slate-500"><i class="fa-light fa-calendar mr-1"></i>Due: <?php echo e($proj->due_date?->format('M d, Y') ?: 'Aug 30, 2026'); ?></p>
-                                <p class="mt-0.5 text-xs text-slate-400"><i class="fa-light fa-user mr-1"></i><?php echo e($proj->assignee ?: 'Lagos HQ Team'); ?></p>
+                                <p class="mt-1 text-xs text-slate-500 line-clamp-2"><?php echo e($proj->description ?: 'Enterprise project initiative'); ?></p>
+                                
+                                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase text-slate-400">Target Due</span>
+                                        <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-light fa-calendar mr-1 text-sky-500"></i><?php echo e($proj->due_date?->format('M d, Y') ?: 'Aug 30, 2026'); ?></p>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase text-slate-400">Project Lead</span>
+                                        <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-light fa-user mr-1 text-sky-500"></i><?php echo e($proj->assignee ?: 'Lagos HQ Team'); ?></p>
+                                    </div>
+                                </div>
+
                                 <div class="mt-4 pt-3 border-t dark:border-slate-800">
                                     <div class="flex justify-between text-xs font-bold mb-1.5">
-                                        <span class="text-slate-400">Progress</span>
-                                        <span class="text-sky-600"><?php echo e($proj->progress_percent); ?>%</span>
+                                        <span class="text-slate-400">Milestone Progress</span>
+                                        <span class="<?php echo e($proj->progress_percent >= 100 ? 'text-emerald-600' : 'text-sky-600'); ?>"><?php echo e($proj->progress_percent); ?>%</span>
                                     </div>
-                                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div class="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                         <div class="h-full rounded-full transition-all duration-500 <?php echo e($proj->progress_percent >= 100 ? 'bg-emerald-500' : 'bg-sky-500'); ?>" style="width: <?php echo e($proj->progress_percent); ?>%;"></div>
                                     </div>
                                 </div>
@@ -2045,7 +2691,7 @@
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                             <div class="col-span-full py-12 text-center">
                                 <i class="fa-light fa-folder-tree text-4xl text-slate-300"></i>
-                                <p class="mt-3 text-sm font-medium text-slate-400"><?php echo e(__('No projects yet. Create your first project.')); ?></p>
+                                <p class="mt-3 text-sm font-medium text-slate-400"><?php echo e(__('No active projects yet. Create your first project to start tracking.')); ?></p>
                                 <button type="button" wire:click="openCreateModal('project')" class="mt-4 rounded-xl bg-sky-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-sky-700"><?php echo e(__('Create First Project')); ?></button>
                             </div>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -2053,151 +2699,253 @@
                 </section>
             </div>
         <?php elseif($activeTab === 'assignments'): ?>
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Task Assignments & Kanban Board')); ?></h2>
-                        <p class="text-sm text-slate-500"><?php echo e(__('Track task statuses, assignees, and move tasks through workflow stages.')); ?></p>
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Interactive Task Kanban Board')); ?></h2>
+                        <p class="text-sm text-slate-500"><?php echo e(__('Organize work across workflow stages, assign responsibilities, and monitor task SLAs.')); ?></p>
                     </div>
+                    <button type="button" wire:click="openCreateModal('task')" class="rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                        <i class="fa-light fa-plus mr-1.5"></i><?php echo e(__('Assign New Task')); ?>
+
+                    </button>
                 </div>
-                <div class="mt-5 grid gap-4 md:grid-cols-4">
+
+                <!-- Kanban Columns -->
+                <div class="grid gap-4 md:grid-cols-4">
                     <?php
                         $taskStatuses = [
-                            'todo' => ['label' => 'To Do', 'color' => 'slate', 'icon' => 'fa-light fa-circle-dashed'],
+                            'todo' => ['label' => 'To Do / Backlog', 'color' => 'slate', 'icon' => 'fa-light fa-circle-dashed'],
                             'in_progress' => ['label' => 'In Progress', 'color' => 'amber', 'icon' => 'fa-light fa-spinner'],
-                            'in_review' => ['label' => 'In Review', 'color' => 'blue', 'icon' => 'fa-light fa-eye'],
-                            'done' => ['label' => 'Done', 'color' => 'emerald', 'icon' => 'fa-light fa-circle-check'],
+                            'in_review' => ['label' => 'Under Review', 'color' => 'blue', 'icon' => 'fa-light fa-eye'],
+                            'done' => ['label' => 'Completed', 'color' => 'emerald', 'icon' => 'fa-light fa-circle-check'],
                         ];
                     ?>
 
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $taskStatuses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusKey => $statusMeta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-                            <div class="flex items-center gap-2 border-b pb-3 dark:border-slate-800">
-                                <i class="<?php echo e($statusMeta['icon']); ?> text-<?php echo e($statusMeta['color']); ?>-500"></i>
-                                <h3 class="text-sm font-bold text-slate-900 dark:text-white"><?php echo e($statusMeta['label']); ?></h3>
-                                <span class="ml-auto rounded-full bg-<?php echo e($statusMeta['color']); ?>-500/10 px-2 py-0.5 text-[10px] font-bold text-<?php echo e($statusMeta['color']); ?>-600"><?php echo e(count(array_filter($tasks, fn($t) => $t['status'] === $statusKey))); ?></span>
+                            <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                                <div class="flex items-center gap-2">
+                                    <i class="<?php echo e($statusMeta['icon']); ?> text-<?php echo e($statusMeta['color']); ?>-500"></i>
+                                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider"><?php echo e($statusMeta['label']); ?></h3>
+                                </div>
+                                <span class="rounded-full bg-<?php echo e($statusMeta['color']); ?>-500/10 px-2 py-0.5 text-[10px] font-extrabold text-<?php echo e($statusMeta['color']); ?>-600">
+                                    <?php echo e(count(array_filter($tasks, fn($t) => $t['status'] === $statusKey))); ?>
+
+                                </span>
                             </div>
 
-                            <div class="mt-3 space-y-2.5">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $tasks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tIdx => $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($task['status'] === $statusKey): ?>
-                                        <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs transition hover:shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                                            <div class="flex items-start justify-between">
-                                                <span class="rounded-full px-2 py-0.5 text-[9px] font-bold <?php echo e(match($task['priority']) {
-                                                    'Critical' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
-                                                    'High' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
-                                                    'Normal' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
-                                                    default => 'bg-slate-100 text-slate-500',
-                                                }); ?>"><?php echo e($task['priority']); ?></span>
+                            <div class="mt-3 space-y-3">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = array_filter($tasks, fn($t) => $t['status'] === $statusKey); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tIdx => $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <div class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs transition hover:border-sky-500/40 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 space-y-2">
+                                        <div class="flex items-start justify-between">
+                                            <span class="rounded-full px-2 py-0.5 text-[9px] font-bold <?php echo e(match($task['priority'] ?? 'Normal') {
+                                                'Critical' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                                'High' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                'Normal' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                default => 'bg-slate-100 text-slate-500',
+                                            }); ?>"><?php echo e($task['priority'] ?? 'Normal'); ?></span>
+
+                                            <div class="flex items-center gap-1">
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($statusKey !== 'todo'): ?>
+                                                    <?php $prevStatus = match($statusKey) { 'in_progress' => 'todo', 'in_review' => 'in_progress', 'done' => 'in_review', default => 'todo' }; ?>
+                                                    <button type="button" wire:click="updateTaskStatus(<?php echo e($tIdx); ?>, '<?php echo e($prevStatus); ?>')" class="p-1 text-[10px] font-bold text-slate-400 hover:text-slate-600" title="Move back">
+                                                        <i class="fa-light fa-arrow-left"></i>
+                                                    </button>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($statusKey !== 'done'): ?>
                                                     <?php $nextStatus = match($statusKey) { 'todo' => 'in_progress', 'in_progress' => 'in_review', 'in_review' => 'done', default => 'done' }; ?>
-                                                    <button type="button" wire:click="updateTaskStatus(<?php echo e($tIdx); ?>, '<?php echo e($nextStatus); ?>')" class="text-[10px] font-bold text-sky-600 hover:underline"><i class="fa-light fa-arrow-right"></i></button>
+                                                    <button type="button" wire:click="updateTaskStatus(<?php echo e($tIdx); ?>, '<?php echo e($nextStatus); ?>')" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition">
+                                                        <i class="fa-light fa-arrow-right mr-0.5"></i>Next
+                                                    </button>
                                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </div>
-                                            <p class="mt-2 text-xs font-bold text-slate-900 dark:text-white leading-snug"><?php echo e($task['title']); ?></p>
-                                            <div class="mt-2.5 flex items-center justify-between text-[10px] text-slate-400">
-                                                <span><i class="fa-light fa-user mr-0.5"></i><?php echo e(explode(' ', $task['assignee'])[0]); ?></span>
-                                                <span><i class="fa-light fa-calendar mr-0.5"></i><?php echo e($task['due']); ?></span>
-                                            </div>
                                         </div>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white leading-snug"><?php echo e($task['title']); ?></p>
+                                        <p class="text-[10px] font-semibold text-sky-600 dark:text-sky-400"><i class="fa-light fa-folder mr-1"></i><?php echo e($task['project'] ?? 'Enterprise Task'); ?></p>
+
+                                        <div class="pt-2 border-t dark:border-slate-700/50 flex items-center justify-between text-[10px] text-slate-400">
+                                            <span class="font-medium text-slate-600 dark:text-slate-300"><i class="fa-light fa-user mr-1 text-slate-400"></i><?php echo e(explode(' ', $task['assignee'])[0]); ?></span>
+                                            <span class="font-semibold text-slate-500"><i class="fa-light fa-calendar mr-1"></i><?php echo e($task['due']); ?></span>
+                                        </div>
+                                    </div>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    <div class="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-slate-400 dark:border-slate-800">
+                                        No tasks in this column
+                                    </div>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </div>
                         </div>
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                 </div>
             </section>
         <?php elseif($activeTab === 'progress'): ?>
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Activity Timeline & Progress Log')); ?></h2>
-                        <p class="text-sm text-slate-500"><?php echo e(__('Chronological feed of project milestones, task completions, and team updates.')); ?></p>
-                    </div>
-                </div>
-
-                <div class="mt-6 relative">
-                    <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
-
-                    <div class="space-y-6">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = [
-                            ['time' => '2 hours ago', 'user' => 'Babatunde Adeleke', 'action' => 'Completed task', 'detail' => 'Implement POS receipt thermal printing', 'icon' => 'fa-light fa-check-circle', 'color' => 'emerald'],
-                            ['time' => '5 hours ago', 'user' => 'Fatima Bello', 'action' => 'Started working on', 'detail' => 'Design CRM pipeline Kanban board UI', 'icon' => 'fa-light fa-play-circle', 'color' => 'amber'],
-                            ['time' => 'Yesterday', 'user' => 'Emeka Nwosu', 'action' => 'Updated progress to 75%', 'detail' => 'Inventory Automation project', 'icon' => 'fa-light fa-arrow-up-right', 'color' => 'blue'],
-                            ['time' => '2 days ago', 'user' => 'Sola Adeyemi', 'action' => 'Created new project', 'detail' => 'Marketing Channels integration Q3', 'icon' => 'fa-light fa-folder-plus', 'color' => 'purple'],
-                            ['time' => '3 days ago', 'user' => 'System', 'action' => 'Auto-assigned overdue alert', 'detail' => 'Q3 Executive Financial Report deadline approaching', 'icon' => 'fa-light fa-bell', 'color' => 'rose'],
-                        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
-                            <div class="relative flex gap-4 pl-12">
-                                <span class="absolute left-3 flex h-5 w-5 items-center justify-center rounded-full bg-<?php echo e($event['color']); ?>-500/10 ring-4 ring-white dark:ring-slate-900">
-                                    <i class="<?php echo e($event['icon']); ?> text-xs text-<?php echo e($event['color']); ?>-500"></i>
-                                </span>
-                                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 flex-1 dark:border-slate-800 dark:bg-slate-800/50">
-                                    <div class="flex items-center justify-between">
-                                        <p class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($event['user']); ?> <span class="font-normal text-slate-400"><?php echo e($event['action']); ?></span></p>
-                                        <span class="text-[10px] font-semibold text-slate-400"><?php echo e($event['time']); ?></span>
-                                    </div>
-                                    <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300"><?php echo e($event['detail']); ?></p>
-                                </div>
-                            </div>
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
-                    </div>
-                </div>
-            </section>
-        <?php else: ?>
-            <!-- Performance Metrics -->
             <div class="space-y-6">
-                <div class="grid gap-4 md:grid-cols-3">
+                <!-- Log Work Progress Studio Form -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Log Work Progress & Work Hours')); ?></h2>
+                        <p class="text-sm text-slate-500"><?php echo e(__('Record task completion, log hours worked, and update milestone progress in real-time.')); ?></p>
+                    </div>
+
+                    <form wire:submit.prevent="submitWorkLog" class="mt-5 space-y-4">
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Select Target Project</label>
+                                <select wire:model="workLogForm.project_id" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="">-- Choose Project --</option>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $dbProjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $proj): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                        <option value="<?php echo e($proj->id); ?>"><?php echo e($proj->name); ?> (Currently <?php echo e($proj->progress_percent); ?>%)</option>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Team Member Name</label>
+                                <input type="text" wire:model="workLogForm.user_name" placeholder="e.g. Babatunde Adeleke" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Work Hours Spent</label>
+                                <input type="number" step="0.5" wire:model="workLogForm.hours_spent" placeholder="e.g. 4.5 hrs" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Activity Summary & Work Progress Notes</label>
+                                <input type="text" wire:model="workLogForm.summary" required placeholder="e.g. Completed POS thermal printer API integration and unit test suite" class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Update Project Progress %</label>
+                                <input type="number" min="0" max="100" wire:model="workLogForm.progress_percent" placeholder="e.g. 75" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button type="submit" class="rounded-xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                                <i class="fa-light fa-clock-rotate-left mr-1.5"></i><?php echo e(__('Record Work Log')); ?>
+
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Activity Timeline Feed -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Activity Timeline & Project Audit Stream')); ?></h2>
+                        <p class="text-sm text-slate-500"><?php echo e(__('Chronological feed of project milestone achievements, work logs, and task completions.')); ?></p>
+                    </div>
+
+                    <div class="mt-6 relative">
+                        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
+
+                        <div class="space-y-6">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = [
+                                ['time' => '10 mins ago', 'user' => 'Babatunde Adeleke', 'action' => 'Logged 4.5 hours', 'detail' => 'Completed POS receipt thermal printing & dynamic line items builder', 'icon' => 'fa-light fa-circle-check', 'color' => 'emerald'],
+                                ['time' => '2 hours ago', 'user' => 'Fatima Bello', 'action' => 'Moved task to In Review', 'detail' => 'Design CRM pipeline Kanban board UI and customer detail fields', 'icon' => 'fa-light fa-play-circle', 'color' => 'amber'],
+                                ['time' => 'Yesterday', 'user' => 'Emeka Nwosu', 'action' => 'Updated progress to 85%', 'detail' => 'Inventory Automation & barcode scanning module', 'icon' => 'fa-light fa-arrow-up-right', 'color' => 'blue'],
+                                ['time' => '2 days ago', 'user' => 'Sola Adeyemi', 'action' => 'Created project milestone', 'detail' => 'Marketing Multi-Channel Social & WhatsApp Automation Q3', 'icon' => 'fa-light fa-folder-plus', 'color' => 'purple'],
+                                ['time' => '3 days ago', 'user' => 'System Engine', 'action' => 'SLA Audit Alert', 'detail' => 'Q3 Executive Financial Report & Audit logs on schedule', 'icon' => 'fa-light fa-bell', 'color' => 'rose'],
+                            ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <div class="relative flex gap-4 pl-12">
+                                    <span class="absolute left-3 flex h-5 w-5 items-center justify-center rounded-full bg-<?php echo e($event['color']); ?>-500/10 ring-4 ring-white dark:ring-slate-900">
+                                        <i class="<?php echo e($event['icon']); ?> text-xs text-<?php echo e($event['color']); ?>-500"></i>
+                                    </span>
+                                    <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 flex-1 dark:border-slate-800 dark:bg-slate-800/50">
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($event['user']); ?> <span class="font-normal text-slate-400"><?php echo e($event['action']); ?></span></p>
+                                            <span class="text-[10px] font-semibold text-slate-400"><?php echo e($event['time']); ?></span>
+                                        </div>
+                                        <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300"><?php echo e($event['detail']); ?></p>
+                                    </div>
+                                </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        <?php else: ?>
+            <!-- Performance Metrics & Productivity Analytics Tab -->
+            <div class="space-y-6">
+                <!-- Summary Metrics Grid -->
+                <div class="grid gap-4 md:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase text-slate-400">Sprint Completion Rate</p>
-                        <p class="mt-2 text-2xl font-black text-emerald-600">87.5%</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">92.4%</p>
                         <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                            <div class="h-full rounded-full bg-emerald-500" style="width: 87.5%;"></div>
+                            <div class="h-full rounded-full bg-emerald-500" style="width: 92.4%;"></div>
                         </div>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase text-slate-400">Average Task Duration</p>
-                        <p class="mt-2 text-2xl font-black text-sky-600">3.2 Days</p>
-                        <p class="mt-1 text-xs text-emerald-500 font-medium"><i class="fa-light fa-arrow-trend-down mr-1"></i>-0.8 days vs last sprint</p>
+                        <p class="mt-2 text-2xl font-black text-sky-600">2.8 Days</p>
+                        <p class="mt-1 text-xs text-emerald-500 font-medium"><i class="fa-light fa-arrow-trend-down mr-1"></i>-0.6 days vs target</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase text-slate-400">Tasks Delivered On Time</p>
-                        <p class="mt-2 text-2xl font-black text-purple-600">92%</p>
-                        <p class="mt-1 text-xs text-slate-400 font-medium">11 of 12 tasks this sprint</p>
+                        <p class="text-xs font-bold uppercase text-slate-400">On-Time Delivery Rate</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">95.8%</p>
+                        <p class="mt-1 text-xs text-slate-400 font-medium">23 of 24 tasks on SLA</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">Total Work Hours Logged</p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">184.5 Hrs</p>
+                        <p class="mt-1 text-xs text-amber-500 font-medium">This month</p>
                     </div>
                 </div>
 
-                <!-- Team Contributor Stats -->
+                <!-- Team Contributor Performance & Workload Utilization Table -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800"><?php echo e(__('Team Contributor Performance')); ?></h2>
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Team Contributor Productivity & Workload Utilization')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Monitor team member task velocity, completion rates, and workload capacity.')); ?></p>
+                        </div>
+                    </div>
+
                     <div class="mt-5 overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
                                 <tr>
                                     <th class="px-4 py-3.5">Team Member</th>
-                                    <th class="px-4 py-3.5">Tasks Completed</th>
+                                    <th class="px-4 py-3.5">Completed Tasks</th>
                                     <th class="px-4 py-3.5">In Progress</th>
                                     <th class="px-4 py-3.5">On-Time Rate</th>
-                                    <th class="px-4 py-3.5">Avg Duration</th>
+                                    <th class="px-4 py-3.5">Workload Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = [
-                                    ['name' => 'Babatunde Adeleke', 'completed' => 8, 'in_progress' => 2, 'ontime' => '95%', 'avg' => '2.8 days'],
-                                    ['name' => 'Fatima Bello', 'completed' => 6, 'in_progress' => 1, 'ontime' => '100%', 'avg' => '3.1 days'],
-                                    ['name' => 'Emeka Nwosu', 'completed' => 5, 'in_progress' => 2, 'ontime' => '80%', 'avg' => '3.5 days'],
-                                    ['name' => 'Sola Adeyemi', 'completed' => 4, 'in_progress' => 1, 'ontime' => '100%', 'avg' => '2.4 days'],
+                                    ['name' => 'Babatunde Adeleke', 'completed' => 12, 'in_progress' => 2, 'ontime' => '98%', 'status' => 'Optimal Load', 'status_color' => 'emerald'],
+                                    ['name' => 'Fatima Bello', 'completed' => 9, 'in_progress' => 1, 'ontime' => '100%', 'status' => 'Optimal Load', 'status_color' => 'emerald'],
+                                    ['name' => 'Emeka Nwosu', 'completed' => 8, 'in_progress' => 3, 'ontime' => '92%', 'status' => 'High Utilization', 'status_color' => 'amber'],
+                                    ['name' => 'Sola Adeyemi', 'completed' => 7, 'in_progress' => 1, 'ontime' => '100%', 'status' => 'Capacity Available', 'status_color' => 'sky'],
                                 ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                                     <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                                         <td class="px-4 py-3.5">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/10 text-xs font-black text-sky-600"><?php echo e(strtoupper(substr($member['name'], 0, 2))); ?></span>
-                                                <span class="font-bold text-slate-900 dark:text-white"><?php echo e($member['name']); ?></span>
+                                                <div>
+                                                    <p class="font-bold text-slate-900 dark:text-white"><?php echo e($member['name']); ?></p>
+                                                    <p class="text-[10px] text-slate-400">Engineering & Operations</p>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3.5 font-black text-emerald-600"><?php echo e($member['completed']); ?></td>
-                                        <td class="px-4 py-3.5 font-bold text-amber-600"><?php echo e($member['in_progress']); ?></td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600"><?php echo e($member['completed']); ?> Tasks</td>
+                                        <td class="px-4 py-3.5 font-bold text-amber-600"><?php echo e($member['in_progress']); ?> Active</td>
                                         <td class="px-4 py-3.5 font-bold text-sky-600"><?php echo e($member['ontime']); ?></td>
-                                        <td class="px-4 py-3.5 text-xs font-semibold text-slate-500"><?php echo e($member['avg']); ?></td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full bg-<?php echo e($member['status_color']); ?>-500/10 border border-<?php echo e($member['status_color']); ?>-500/20 px-2.5 py-0.5 text-xs font-bold text-<?php echo e($member['status_color']); ?>-600">
+                                                <?php echo e($member['status']); ?>
+
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <button type="button" wire:click="openCreateModal('task')" class="rounded-lg bg-sky-500/10 px-2.5 py-1 text-xs font-bold text-sky-600 hover:bg-sky-500/20 transition">
+                                                <i class="fa-light fa-plus mr-1"></i>Assign Task
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                             </tbody>
@@ -2208,38 +2956,861 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    <!-- MODULE 10: REPORTS ENHANCED -->
+    <!-- MODULE 5: HUMAN RESOURCES & PAYROLL ENHANCED WORKSPACE -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'hr'): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'employees'): ?>
+            <div class="space-y-6">
+                <!-- HR Summary KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Total Headcount')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600"><i class="fa-light fa-user-group"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-teal-600"><?php echo e(count($employees)); ?> Staff</p>
+                        <p class="mt-1 text-xs font-medium text-teal-500"><i class="fa-light fa-badge-check mr-1"></i>Active full-time workforce</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Monthly Base Payroll')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-money-bill-wave"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦<?php echo e(number_format(array_sum(array_column($employees, 'base_salary')), 2)); ?></p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">Basic monthly commitment</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Active Departments')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-sitemap"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-purple-600">3 Depts</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500"><i class="fa-light fa-building mr-1"></i>Engineering, Product, QA</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Staff Retention Rate')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-heart-pulse"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-sky-600">96.8%</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+2.1% YTD retention</p>
+                    </div>
+                </div>
+
+                <!-- Staff Directory Table -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Employee Staff Directory & Pay Grades')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Manage staff profiles, pay grades, tax identification numbers, and banking details.')); ?></p>
+                        </div>
+                        <button type="button" wire:click="openCreateModal('employee')" class="rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                            <i class="fa-light fa-user-plus mr-1.5"></i><?php echo e(__('Add New Employee')); ?>
+
+                        </button>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Staff Member & ID</th>
+                                    <th class="px-4 py-3.5">Department & Role</th>
+                                    <th class="px-4 py-3.5">Basic Salary (NGN)</th>
+                                    <th class="px-4 py-3.5">Bank & Account No</th>
+                                    <th class="px-4 py-3.5">Tax TIN</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5">
+                                            <div class="flex items-center gap-3">
+                                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-xs font-black text-teal-600">
+                                                    <?php echo e(strtoupper(substr($emp['name'], 0, 2))); ?>
+
+                                                </span>
+                                                <div>
+                                                    <p class="font-bold text-slate-900 dark:text-white"><?php echo e($emp['name']); ?></p>
+                                                    <p class="font-mono text-[10px] text-slate-400"><?php echo e($emp['staff_id']); ?> &bull; <?php echo e($emp['email']); ?></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <p class="font-bold text-slate-800 dark:text-slate-200"><?php echo e($emp['role']); ?></p>
+                                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400"><?php echo e($emp['department']); ?></span>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦<?php echo e(number_format($emp['base_salary'], 2)); ?></td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-semibold text-slate-700 dark:text-slate-300"><?php echo e($emp['bank']); ?></p>
+                                            <p class="font-mono text-slate-400"><?php echo e($emp['acc_no']); ?></p>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-mono text-xs text-slate-500"><?php echo e($emp['tin']); ?></td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <a href="/portal/payslip/<?php echo e($emp['id']); ?>/pdf" target="_blank" class="rounded-lg bg-teal-500/10 px-2.5 py-1 text-xs font-bold text-teal-600 hover:bg-teal-500/20 transition">
+                                                <i class="fa-light fa-file-pdf mr-1"></i>Payslip
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'payroll'): ?>
+            <div class="space-y-6">
+                <!-- Payroll Processing Studio Form -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Monthly Payroll Processing Studio & Statutory Calculator')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Process monthly salary disbursements with automated Nigerian PAYE Tax, 8% Employee Pension & NHF calculations.')); ?></p>
+                        </div>
+                        <button type="button" wire:click="processPayrollRun" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition">
+                            <i class="fa-light fa-bolt mr-1.5"></i><?php echo e(__('Disburse Monthly Payroll Run')); ?>
+
+                        </button>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Payroll Cycle Period</label>
+                            <input type="text" wire:model="payrollRunForm.period" placeholder="e.g. August 2026" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Performance Bonus (NGN)</label>
+                            <input type="number" wire:model="payrollRunForm.bonus_override" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Utility Allowance (NGN)</label>
+                            <input type="number" wire:model="payrollRunForm.allowance_override" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">PAYE Effective Rate (%)</label>
+                            <input type="number" wire:model="payrollRunForm.paye_rate" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payroll Disbursement Summary Table -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Disbursement Summary & Employee Payslip Stream')); ?></h2>
+                        <p class="text-sm text-slate-500"><?php echo e(__('Detailed breakdown of Gross Earnings, PAYE Tax, Pension deductions, and Net Take-Home Pay.')); ?></p>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Staff Member</th>
+                                    <th class="px-4 py-3.5">Basic Salary</th>
+                                    <th class="px-4 py-3.5">Gross Earnings</th>
+                                    <th class="px-4 py-3.5">PAYE Tax (12%)</th>
+                                    <th class="px-4 py-3.5">Pension (8%)</th>
+                                    <th class="px-4 py-3.5">Net Take-Home Pay</th>
+                                    <th class="px-4 py-3.5 text-right">PDF Payslip</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <?php
+                                        $base = (float) $emp['base_salary'];
+                                        $housing = $base * 0.25;
+                                        $transport = $base * 0.15;
+                                        $bonus = (float) ($payrollRunForm['bonus_override'] ?? 50000);
+                                        $gross = $base + $housing + $transport + $bonus;
+                                        $paye = $gross * (((float) ($payrollRunForm['paye_rate'] ?? 12)) / 100);
+                                        $pension = $gross * 0.08;
+                                        $net = $gross - ($paye + $pension);
+                                    ?>
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5">
+                                            <p class="font-bold text-slate-900 dark:text-white"><?php echo e($emp['name']); ?></p>
+                                            <p class="text-xs text-slate-400"><?php echo e($emp['role']); ?></p>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-semibold text-slate-600 dark:text-slate-300">₦<?php echo e(number_format($base, 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-bold text-teal-600">₦<?php echo e(number_format($gross, 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-semibold text-rose-600">-₦<?php echo e(number_format($paye, 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-semibold text-amber-600">-₦<?php echo e(number_format($pension, 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600">₦<?php echo e(number_format($net, 2)); ?></td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <a href="/portal/payslip/<?php echo e($emp['id']); ?>/pdf" target="_blank" class="rounded-lg bg-teal-500/10 px-2.5 py-1 text-xs font-bold text-teal-600 hover:bg-teal-500/20 transition">
+                                                <i class="fa-light fa-download mr-1"></i>Download PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'leave'): ?>
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Leave Management & Time-Off Approvals')); ?></h2>
+                        <p class="text-sm text-slate-500"><?php echo e(__('Track employee annual leave applications, medical sick days, and approval workflows.')); ?></p>
+                    </div>
+                    <button type="button" wire:click="openCreateModal('leave_request')" class="rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                        <i class="fa-light fa-calendar-plus mr-1.5"></i><?php echo e(__('Request Leave')); ?>
+
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                            <tr>
+                                <th class="px-4 py-3.5">Staff Member</th>
+                                <th class="px-4 py-3.5">Leave Type</th>
+                                <th class="px-4 py-3.5">Duration & Days</th>
+                                <th class="px-4 py-3.5">Reason / Scope</th>
+                                <th class="px-4 py-3.5">Status</th>
+                                <th class="px-4 py-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $leaveRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $req): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                    <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white"><?php echo e($req['staff_name']); ?></td>
+                                    <td class="px-4 py-3.5">
+                                        <span class="rounded-full bg-teal-500/10 text-teal-600 border border-teal-500/20 px-2.5 py-0.5 text-xs font-bold">
+                                            <?php echo e($req['type']); ?>
+
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-600 dark:text-slate-300">
+                                        <p class="font-bold"><?php echo e($req['start_date']); ?> → <?php echo e($req['end_date']); ?></p>
+                                        <p class="text-slate-400"><?php echo e($req['days']); ?> Business Days</p>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500 max-w-xs truncate"><?php echo e($req['reason']); ?></td>
+                                    <td class="px-4 py-3.5">
+                                        <span class="rounded-full px-3 py-1 text-xs font-bold <?php echo e(match($req['status']) {
+                                            'Approved' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                            'Rejected' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                            default => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                        }); ?>"><?php echo e($req['status']); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($req['status'] === 'Pending'): ?>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button type="button" wire:click="approveLeaveRequest(<?php echo e($idx); ?>)" class="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition">Approve</button>
+                                                <button type="button" wire:click="rejectLeaveRequest(<?php echo e($idx); ?>)" class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-600 hover:bg-rose-500/20 transition">Reject</button>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-xs text-slate-400 font-semibold">Processed</span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        <?php else: ?>
+            <!-- HR Analytics & Compliance Reports Tab -->
+            <div class="space-y-6">
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">PAYE Tax Remittance Compliance</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">100% Verified</p>
+                        <p class="mt-1 text-xs text-slate-400">FCT-IRS & LIRS Tax Filings On-Time</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">RSA Pension Contribution Fund</p>
+                        <p class="mt-2 text-2xl font-black text-teal-600">₦405,000.00</p>
+                        <p class="mt-1 text-xs text-teal-500 font-medium">8% Employee + 10% Employer match</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase text-slate-400">Average Staff Tenure</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">2.4 Years</p>
+                        <p class="mt-1 text-xs text-purple-500 font-medium">Low turnover rate</p>
+                    </div>
+                </div>
+
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800"><?php echo e(__('Departmental Payroll Allocation')); ?></h2>
+                    <div class="mt-5 space-y-4">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = [
+                            ['dept' => 'Engineering & Operations', 'amount' => 1250000.00, 'pct' => 55.6, 'color' => 'teal'],
+                            ['dept' => 'Product & Design', 'amount' => 550000.00, 'pct' => 24.4, 'color' => 'purple'],
+                            ['dept' => 'Quality Assurance', 'amount' => 450000.00, 'pct' => 20.0, 'color' => 'sky'],
+                        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1">
+                                    <span class="text-slate-700 dark:text-slate-300"><?php echo e($item['dept']); ?></span>
+                                    <span class="text-<?php echo e($item['color']); ?>-600">₦<?php echo e(number_format($item['amount'], 2)); ?> (<?php echo e($item['pct']); ?>%)</span>
+                                </div>
+                                <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div class="h-full rounded-full bg-<?php echo e($item['color']); ?>-500" style="width: <?php echo e($item['pct']); ?>%;"></div>
+                                </div>
+                            </div>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                    </div>
+                </section>
+            </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <!-- MODULE 10: REPORTS ENHANCED — ADVANCED ANALYTICS & BI STUDIO -->
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'reports'): ?>
-        <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Executive Management Reports & Business Intelligence')); ?></h2>
-                    <p class="text-sm text-slate-500"><?php echo e(__('Unified business intelligence across Lagos HQ and regional branches.')); ?></p>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'executive' || $activeTab === 'overview' || empty($activeTab)): ?>
+            <div class="space-y-6">
+                <!-- Top Financial Summary KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Gross Revenue')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600"><i class="fa-light fa-chart-line-up"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-teal-600">₦28,450,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+14.2% vs last quarter</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Gross Operating Profit')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-money-bill-wave"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦18,600,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500">65.4% Gross Margin</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('EBITDA Income')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-vault"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-purple-600">₦11,150,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">39.2% Operating Margin</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"><?php echo e(__('Net Profit After Tax')); ?></p>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-shield-check"></i></span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-sky-600">₦9,477,500.00</p>
+                        <p class="mt-1 text-xs font-medium text-teal-500">33.3% Net Margin</p>
+                    </div>
                 </div>
-                <a href="<?php echo e(route('portal.finance.export-csv')); ?>" class="rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white hover:bg-teal-700">
-                    <i class="fa-light fa-file-excel mr-2"></i><?php echo e(__('Export Master Executive Report (CSV)')); ?>
 
-                </a>
+                <!-- Master P&L Statement Section -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Executive Master Profit & Loss (P&L) Statement')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Consolidated P&L statement across Abuja Headquarters and regional branch operations.')); ?></p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <a href="<?php echo e(route('portal.finance.export-csv')); ?>" class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <i class="fa-light fa-file-excel mr-1.5"></i><?php echo e(__('Export CSV')); ?>
+
+                            </a>
+                            <a href="<?php echo e(route('portal.reports.executive.pdf')); ?>" target="_blank" class="rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                                <i class="fa-light fa-file-pdf mr-1.5"></i><?php echo e(__('Export Executive PDF Report')); ?>
+
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Financial Line Item</th>
+                                    <th class="px-4 py-3.5">Category Scope</th>
+                                    <th class="px-4 py-3.5 text-right">Amount (NGN)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <tr>
+                                    <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">Gross Operating Revenue</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Sales, POS & Subscriptions</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-slate-900 dark:text-white">₦28,450,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Cost of Goods Sold (COGS)</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Hardware & Stock Procurement</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦9,850,000.00</td>
+                                </tr>
+                                <tr class="bg-teal-50/50 dark:bg-teal-950/20 font-bold">
+                                    <td class="px-4 py-3.5 text-teal-700 dark:text-teal-400">GROSS OPERATING PROFIT</td>
+                                    <td class="px-4 py-3.5 text-xs text-teal-600 dark:text-teal-400">65.4% Gross Margin</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-teal-600 dark:text-teal-400">₦18,600,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Operating Expenses (OPEX)</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Marketing, Logistics, Cloud Infra</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦5,200,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Personnel & Staff Payroll</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Monthly Gross Payroll</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦2,250,000.00</td>
+                                </tr>
+                                <tr class="bg-emerald-50/50 dark:bg-emerald-950/20 font-bold">
+                                    <td class="px-4 py-3.5 text-emerald-700 dark:text-emerald-400">NET OPERATING INCOME (EBITDA)</td>
+                                    <td class="px-4 py-3.5 text-xs text-emerald-600 dark:text-emerald-400">39.2% Operating Margin</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-emerald-600 dark:text-emerald-400">₦11,150,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Tax Provision & Statutory Reserve</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Corporate Income Tax Reserve (15%)</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦1,672,500.00</td>
+                                </tr>
+                                <tr class="bg-teal-100/50 dark:bg-teal-900/40 font-black text-base">
+                                    <td class="px-4 py-4 text-teal-800 dark:text-teal-300">NET PROFIT AFTER TAX (NPAT)</td>
+                                    <td class="px-4 py-4 text-xs font-semibold text-teal-700 dark:text-teal-300">33.3% Net Margin</td>
+                                    <td class="px-4 py-4 text-right text-teal-800 dark:text-teal-300">₦9,477,500.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'sales_analytics'): ?>
+            <div class="space-y-6">
+                <!-- Regional Branch Sales Matrix -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Regional Branch Revenue Contribution Matrix')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Sales breakdown across Abuja Headquarters and regional commercial offices.')); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Branch Location</th>
+                                    <th class="px-4 py-3.5">Designation Scope</th>
+                                    <th class="px-4 py-3.5">Monthly Revenue (NGN)</th>
+                                    <th class="px-4 py-3.5">Revenue Share %</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $branchSales; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-light fa-building-circle-check text-teal-600"></i>
+                                                <?php echo e($branch['name']); ?>
+
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs text-slate-500 font-semibold"><?php echo e($branch['type']); ?></td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦<?php echo e(number_format($branch['sales'], 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-bold text-teal-600"><?php echo e($branch['share']); ?></td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full bg-teal-500/10 border border-teal-500/20 px-2.5 py-0.5 text-xs font-bold text-teal-600">
+                                                <?php echo e($branch['status']); ?>
+
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'cash_flow'): ?>
+            <div class="space-y-6">
+                <!-- Cash Flow Forecast Grid -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('6-Month Cash Flow & Liquidity Forecast')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Projected monthly cash inflows, outflows, and net liquidity reserves.')); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Forecast Month</th>
+                                    <th class="px-4 py-3.5">Projected Inflow</th>
+                                    <th class="px-4 py-3.5">Projected Outflow</th>
+                                    <th class="px-4 py-3.5">Net Cash Flow</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $cashFlowForecast; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cf): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white"><?php echo e($cf['month']); ?></td>
+                                        <td class="px-4 py-3.5 font-bold text-emerald-600">₦<?php echo e(number_format($cf['inflow'], 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-bold text-rose-600">-₦<?php echo e(number_format($cf['outflow'], 2)); ?></td>
+                                        <td class="px-4 py-3.5 font-black text-teal-600">₦<?php echo e(number_format($cf['net'], 2)); ?></td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php else: ?>
+            <!-- Custom BI Report Builder Tab -->
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="border-b pb-4 dark:border-slate-800">
+                    <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Custom BI Query Builder & Scheduled Reports')); ?></h2>
+                    <p class="text-sm text-slate-500"><?php echo e(__('Configure custom executive analytics queries and automated email dispatch.')); ?></p>
+                </div>
+
+                <form wire:submit.prevent="generateCustomReport" class="mt-5 space-y-4">
+                    <div class="grid gap-4 sm:grid-cols-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Metric</label>
+                            <select wire:model="customReportForm.metric" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="revenue">Revenue & Sales</option>
+                                <option value="expenses">Operating Expenses</option>
+                                <option value="payroll">Payroll & Tax Statutory</option>
+                                <option value="inventory">Inventory Valuation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Time Range</label>
+                            <select wire:model="customReportForm.timeframe" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="q3_2026">Q3 2026</option>
+                                <option value="ytd_2026">Year-to-Date (YTD 2026)</option>
+                                <option value="month_current">Current Month</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Branch Location Filter</label>
+                            <select wire:model="customReportForm.branch" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="all">All Locations (Consolidated)</option>
+                                <option value="abuja">Abuja Headquarters</option>
+                                <option value="lagos">Lagos Commercial Branch</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Export Format</label>
+                            <select wire:model="customReportForm.format" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <option value="pdf">PDF Document</option>
+                                <option value="csv">Excel CSV Sheet</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="rounded-xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700 transition">
+                            <i class="fa-light fa-sliders mr-1.5"></i><?php echo e(__('Generate Custom BI Report')); ?>
+
+                        </button>
+                    </div>
+                </form>
+            </section>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <!-- MODULE 11: ADMINISTRATION & NOTIFICATIONS CENTRE -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'administration'): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'notifications'): ?>
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Notifications Centre & System Alerts')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Real-time alerts, payment reminders, stock warnings and workflow notifications')); ?></p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600"><?php echo e($unreadCount); ?> Unread</span>
+                            <button type="button" wire:click="markAllNotificationsRead" class="rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200">
+                                <?php echo e(__('Mark All Read')); ?>
+
+                            </button>
+                        </div>
+                    </div>
+
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($notifications)): ?>
+                        <div class="py-16 text-center text-slate-400">
+                            <i class="fa-light fa-bell-slash text-5xl mb-3 text-slate-300"></i>
+                            <p class="text-sm font-semibold"><?php echo e(__('No notifications yet')); ?></p>
+                            <p class="text-xs text-slate-400 mt-1"><?php echo e(__('System alerts and event notices will appear here')); ?></p>
+                        </div>
+                    <?php else: ?>
+                        <div class="space-y-3">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $notifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $n): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <div class="flex items-start justify-between gap-4 rounded-2xl border p-4 transition <?php echo e(($n['is_read'] ?? false) ? 'border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40' : 'border-blue-200 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20'); ?>">
+                                    <div class="flex items-start gap-3">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 text-sm">
+                                            <i class="fa-light fa-bell"></i>
+                                        </span>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white"><?php echo e($n['title'] ?? 'System Alert'); ?></p>
+                                            <p class="text-xs text-slate-500 mt-0.5"><?php echo e($n['message'] ?? $n['body'] ?? ''); ?></p>
+                                            <p class="text-[10px] text-slate-400 font-mono mt-1"><?php echo e($n['created_at'] ?? '—'); ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!($n['is_read'] ?? false)): ?>
+                                            <button type="button" wire:click="markNotificationRead(<?php echo e($n['id']); ?>)" class="text-[10px] font-bold text-blue-600 hover:underline">Mark Read</button>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        <button type="button" wire:click="deleteNotification(<?php echo e($n['id']); ?>)" class="text-slate-400 hover:text-rose-500 text-xs"><i class="fa-light fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'roles'): ?>
+            <div class="space-y-6">
+                <!-- Create Role & Permission Matrix -->
+                <div class="grid gap-6 lg:grid-cols-[380px_1fr]">
+                    <!-- Create New Admin Role Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Create Admin Role')); ?></h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Role Name')); ?></label>
+                            <input wire:model="newRoleForm.name" type="text" placeholder="e.g. Finance Manager" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Description')); ?></label>
+                            <textarea wire:model="newRoleForm.description" rows="2" placeholder="Brief role description..." class="w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
+                        </div>
+                        <button type="button" wire:click="saveAdminRole" class="w-full rounded-xl bg-slate-900 py-3 text-xs font-bold text-white hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 transition">
+                            <i class="fa-light fa-user-shield mr-1.5"></i> <?php echo e(__('Save & Create Role')); ?>
+
+                        </button>
+                    </section>
+
+                    <!-- Roles List & Permission Badges -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Configured Roles & Permission Catalog')); ?></h3>
+                        <div class="space-y-4">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <div class="rounded-2xl border border-slate-100 p-4 dark:border-slate-800 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="text-sm font-extrabold text-slate-900 dark:text-white"><?php echo e($r->name); ?></h4>
+                                            <p class="text-xs text-slate-400"><?php echo e($r->description ?: 'No description provided.'); ?></p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-600"><?php echo e($r->users_count ?? $r->users->count()); ?> Users</span>
+                                            <button type="button" wire:click="deleteAdminRole(<?php echo e($r->id); ?>)" class="text-slate-400 hover:text-rose-500 text-xs"><i class="fa-light fa-trash-can"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Interactive Permission Toggles -->
+                                    <div class="border-t pt-3 dark:border-slate-800">
+                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Module Permissions (Click to Toggle)</p>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = ['finance.view', 'finance.create', 'crm.view', 'crm.edit', 'inventory.view', 'pos.view', 'marketing.view', 'automation.view', 'users.view', 'users.edit']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $permKey): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                                <?php $hasPerm = collect($r->permissions ?? [])->contains($permKey); ?>
+                                                <button type="button" wire:click="togglePermissionInRole(<?php echo e($r->id); ?>, '<?php echo e($permKey); ?>')" class="rounded-lg px-2 py-1 text-[10px] font-bold transition <?php echo e($hasPerm ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'); ?>">
+                                                    <?php echo e($hasPerm ? '✓' : '+'); ?> <?php echo e($permKey); ?>
+
+                                                </button>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+                    </section>
+                </div>
             </div>
 
-            <div class="mt-6 grid gap-4 md:grid-cols-3">
-                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Monthly Revenue</p>
-                    <p class="mt-2 text-2xl font-black text-emerald-600">₦1,245,780.00</p>
-                    <p class="mt-1 text-xs text-slate-500">From 182 settled transactions</p>
-                </div>
-                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Active CRM Pipeline</p>
-                    <p class="mt-2 text-2xl font-black text-blue-600">₦12,000,000.00</p>
-                    <p class="mt-1 text-xs text-slate-500">56 open leads in pipeline</p>
-                </div>
-                <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Total Inventory Valuation</p>
-                    <p class="mt-2 text-2xl font-black text-orange-600">₦18,450,000.00</p>
-                    <p class="mt-1 text-xs text-slate-500">342 active product SKUs</p>
+        <?php elseif($activeTab === 'organization'): ?>
+            <div class="space-y-6">
+                <!-- Corporate Organization & Branch Governance Studio -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Corporate Headquarters & Multi-Branch Governance')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Manage company organization profile, corporate address, Tax TIN, and regional branches.')); ?></p>
+                        </div>
+                        <span class="rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-bold text-blue-600">HQ Verified</span>
+                    </div>
+
+                    <form wire:submit.prevent="saveOrgProfile" class="mt-5 space-y-4">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Registered Company Name</label>
+                                <input type="text" wire:model="orgProfileForm.company_name" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-bold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">CAC Registration Number</label>
+                                <input type="text" wire:model="orgProfileForm.cac_rc" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Headquarters Address (Abuja HQ)</label>
+                            <input type="text" wire:model="orgProfileForm.headquarters" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Official Phone Number</label>
+                                <input type="text" wire:model="orgProfileForm.phone" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Email</label>
+                                <input type="email" wire:model="orgProfileForm.email" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">FIRS Tax TIN</label>
+                                <input type="text" wire:model="orgProfileForm.tin" required class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-3">
+                            <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                <i class="fa-light fa-floppy-disk mr-1.5"></i><?php echo e(__('Save Organization Profile')); ?>
+
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'security'): ?>
+            <div class="space-y-6">
+                <!-- Security Audit Logs Stream -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Security Audit Log Stream & System Backups')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Immutable activity tracking for compliance and enterprise database backups.')); ?></p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="triggerDatabaseBackup" class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-slate-800 transition dark:bg-slate-800 dark:hover:bg-slate-700">
+                                <i class="fa-light fa-database mr-1.5"></i><?php echo e(__('Trigger Database Backup')); ?>
+
+                            </button>
+                            <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">Audit Active</span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3">Timestamp</th>
+                                    <th class="px-4 py-3">Event</th>
+                                    <th class="px-4 py-3">Description</th>
+                                    <th class="px-4 py-3">Area</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-medium">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $logs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $l): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3 font-mono text-slate-400"><?php echo e($l->created_at?->toDateTimeString() ?? '—'); ?></td>
+                                        <td class="px-4 py-3 font-bold text-slate-900 dark:text-white"><?php echo e($l->event); ?></td>
+                                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300"><?php echo e($l->description); ?></td>
+                                        <td class="px-4 py-3"><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><?php echo e($l->area); ?></span></td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        <?php else: ?>
+            <!-- USERS MANAGEMENT & ROLE ASSIGNMENT TAB -->
+            <div class="space-y-6">
+                <!-- User Creation & Roles Grid -->
+                <div class="grid gap-6 lg:grid-cols-[380px_1fr]">
+                    <!-- Create User Form -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800"><?php echo e(__('Create Backend User')); ?></h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Full Name')); ?></label>
+                            <input wire:model="newUserForm.name" type="text" placeholder="e.g. Chidi Okonkwo" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Email Address')); ?></label>
+                            <input wire:model="newUserForm.email" type="email" placeholder="chidi@ascendsystems.ng" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1"><?php echo e(__('Assigned Role')); ?></label>
+                            <select wire:model="newUserForm.role_id" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="">No Role Assigned</option>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <option value="<?php echo e($r->id); ?>"><?php echo e($r->name); ?></option>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <input wire:model="newUserForm.is_super_admin" type="checkbox" id="chkSuperAdmin" class="rounded border-slate-300">
+                            <label for="chkSuperAdmin" class="text-xs font-bold text-slate-700 dark:text-slate-200"><?php echo e(__('Grant Super Admin Privileges')); ?></label>
+                        </div>
+                        <button type="button" wire:click="createNewUser" class="w-full rounded-xl bg-blue-600 py-3 text-xs font-bold text-white hover:bg-blue-700 transition shadow-md">
+                            <i class="fa-light fa-user-plus mr-1.5"></i> <?php echo e(__('Create User Account')); ?>
+
+                        </button>
+                    </section>
+
+                    <!-- Users Directory & Role Assignment Table -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-4">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('User Accounts & Role Permissions')); ?></h2>
+                                <p class="text-sm text-slate-500"><?php echo e(__('Assign role permissions, grant super admin access, and manage accounts.')); ?></p>
+                            </div>
+                            <span class="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600"><?php echo e(count($users)); ?> Accounts</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                    <tr>
+                                        <th class="px-4 py-3.5">User</th>
+                                        <th class="px-4 py-3.5">Assigned Role</th>
+                                        <th class="px-4 py-3.5">Access Level</th>
+                                        <th class="px-4 py-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                            <td class="px-4 py-3.5">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-black text-white dark:bg-slate-700"><?php echo e(strtoupper(substr($u->name, 0, 2))); ?></span>
+                                                    <div>
+                                                        <p class="font-bold text-slate-900 dark:text-white"><?php echo e($u->name); ?></p>
+                                                        <p class="text-xs text-slate-400"><?php echo e($u->email); ?></p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3.5">
+                                                <select wire:change="updateUserRole(<?php echo e($u->id); ?>, $event.target.value)" class="rounded-xl border border-slate-200 bg-transparent px-2.5 py-1 text-xs font-semibold outline-none dark:border-slate-700 dark:bg-slate-800">
+                                                    <option value="" <?php echo e(!$u->role_id ? 'selected' : ''); ?>>No Role</option>
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                                        <option value="<?php echo e($r->id); ?>" <?php echo e($u->role_id === $r->id ? 'selected' : ''); ?>><?php echo e($r->name); ?></option>
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                                </select>
+                                            </td>
+                                            <td class="px-4 py-3.5">
+                                                <button type="button" wire:click="toggleUserSuperAdmin(<?php echo e($u->id); ?>)" class="rounded-full px-3 py-1 text-xs font-bold transition <?php echo e($u->is_super_admin ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'); ?>">
+                                                    <?php echo e($u->is_super_admin ? '★ Super Admin' : 'Standard User'); ?>
+
+                                                </button>
+                                            </td>
+                                            <td class="px-4 py-3.5 text-right">
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->id() !== $u->id): ?>
+                                                    <button type="button" wire:click="deleteUserAccount(<?php echo e($u->id); ?>)" class="text-xs font-bold text-slate-400 hover:text-rose-500">
+                                                        <i class="fa-light fa-trash-can"></i>
+                                                    </button>
+                                                <?php else: ?>
+                                                    <span class="text-[10px] font-bold text-slate-400">Signed In</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                 </div>
             </div>
-        </section>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Interactive Full-Page Dedicated Workspace Creation Interface -->
@@ -2338,12 +3909,17 @@
                     </div>
                 <?php elseif($modalType === 'pos_receipt' && $modalData): ?>
                     <div class="text-center border-b pb-4 dark:border-slate-800">
-                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500">
-                            <i class="fa-light fa-circle-check text-4xl"></i>
+                        <div class="mx-auto inline-flex items-center gap-2 rounded-2xl bg-orange-600 px-3 py-1.5 text-xs font-black text-white shadow-sm mb-2">
+                            <span>▲</span> ASCEND AI POS STATION
                         </div>
-                        <h3 class="mt-3 text-xl font-bold text-slate-950 dark:text-white">Ascend Systems POS Receipt</h3>
-                        <p class="text-xs text-slate-400 mt-1">Receipt #: <?php echo e($modalData['receipt_no']); ?> · <?php echo e($modalData['date']); ?></p>
-                        <p class="text-xs font-bold text-emerald-600 mt-0.5">Method: <?php echo e($modalData['payment_method']); ?> · Customer: <?php echo e($modalData['customer'] ?? 'Walk-in Retail Client'); ?></p>
+                        <h3 class="text-xl font-black text-slate-950 dark:text-white">Ascend Systems Nigeria Limited</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</p>
+                        <p class="text-[11px] font-semibold text-slate-400">Call: +234 811 763 3020 &nbsp;|&nbsp; Mail: info@ascendsystems.ng</p>
+                        <div class="mt-3 rounded-xl bg-slate-100 p-2 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                            Receipt #: <span class="font-mono text-orange-600"><?php echo e($modalData['receipt_no']); ?></span> &nbsp;·&nbsp; <?php echo e($modalData['date']); ?>
+
+                        </div>
+                        <p class="text-xs font-bold text-emerald-600 mt-1.5">Method: <?php echo e($modalData['payment_method']); ?> &nbsp;·&nbsp; Customer: <?php echo e($modalData['customer'] ?? 'Walk-in Retail Client'); ?></p>
                     </div>
 
                     <div class="mt-4 space-y-2.5 text-sm border-b pb-4 dark:border-slate-800">
@@ -2394,10 +3970,13 @@
                     </div>
 
                     <div class="mt-4 space-y-4">
-                        <!-- Barcode Scanner Quick Input -->
+                        <!-- Barcode Scanner Quick Input & Add Custom Line -->
                         <form wire:submit.prevent="scanBarcode" class="flex items-center gap-2">
                             <input type="text" wire:model="barcodeScannerInput" placeholder="Scan SKU barcode (e.g. POS-HDW-004)..." class="w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             <button type="submit" class="shrink-0 rounded-2xl bg-orange-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-orange-700">Scan</button>
+                            <button type="button" wire:click="addToPosCart('CUSTOM-ITEM', 'Custom Line Item', 35000)" class="shrink-0 rounded-2xl border border-orange-600/30 bg-orange-500/10 px-3.5 py-2 text-xs font-bold text-orange-600 hover:bg-orange-500/20 transition">
+                                <i class="fa-light fa-plus mr-1"></i>+ Add Line Item
+                            </button>
                         </form>
 
                         <!-- Customer Details -->
@@ -2465,51 +4044,156 @@
                         </button>
                     </div>
 
-                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-3.5">
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <!-- Invoice Header Info -->
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Invoice Number</label>
                                 <div class="relative mt-1">
-                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                                     <button type="button" wire:click="autoGenerateInvoiceNumber" class="absolute right-2 top-2 text-[10px] font-bold text-emerald-600 hover:underline">Auto</button>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Customer Name</label>
-                                <input type="text" wire:model="form.client_name" required placeholder="Northbridge Media Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Apex Technology Solutions Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <!-- Customer Detailed Information -->
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider"><?php echo e(__('Detailed Customer Contact & Shipping Info')); ?></div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Phone Number</label>
+                                    <input type="text" wire:model="form.client_phone" placeholder="+234 803 111 2233" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Email Address</label>
+                                    <input type="email" wire:model="form.client_email" placeholder="billing@clientcompany.ng" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Delivery / Shipping Address</label>
+                                    <input type="text" wire:model="form.client_address" placeholder="Suite 402, Victoria Island, Lagos" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax ID / TIN</label>
+                                    <input type="text" wire:model="form.client_tin" placeholder="TIN-98491029-001" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
                             </div>
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Issue Date</label>
-                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Due Date</label>
-                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
+                        <!-- Dynamic Invoice Line Items Section with Inventory Dropdown -->
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider"><?php echo e(__('Invoice Product & Service Line Items')); ?></span>
+                                <button type="button" wire:click="addInvoiceLine" class="rounded-xl bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                    <i class="fa-light fa-plus mr-1"></i><?php echo e(__('Add New Line Item')); ?>
+
+                                </button>
+                            </div>
+
+                            <div class="space-y-3">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $invoiceItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <div class="rounded-xl border border-slate-200 p-3 dark:border-slate-800 bg-white dark:bg-slate-800 space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <!-- Product Selection Dropdown from Inventory Stock -->
+                                            <select wire:change="selectProductForInvoiceLine(<?php echo e($index); ?>, $event.target.value)" class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                <option value="">-- Custom Line Item / Free Text --</option>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $dbProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prod): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                                    <option value="<?php echo e($prod->id); ?>" <?php echo e(($item['product_id'] ?? '') == $prod->id ? 'selected' : ''); ?>>
+                                                        [<?php echo e($prod->sku); ?>] <?php echo e($prod->name); ?> — ₦<?php echo e(number_format($prod->unit_price, 2)); ?> (Stock: <?php echo e($prod->stock_quantity); ?>)
+                                                    </option>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                            </select>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($invoiceItems) > 1): ?>
+                                                <button type="button" wire:click="removeInvoiceLine(<?php echo e($index); ?>)" class="p-2 text-slate-400 hover:text-rose-500 text-xs shrink-0" title="Remove Line">
+                                                    <i class="fa-light fa-trash-can"></i>
+                                                </button>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </div>
+
+                                        <div class="grid gap-2 sm:grid-cols-4">
+                                            <div class="sm:col-span-2">
+                                                <input type="text" wire:model.live="invoiceItems.<?php echo e($index); ?>.description" wire:change="updateInvoiceLineItem(<?php echo e($index); ?>, 'description', $event.target.value)" placeholder="Item Description..." class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-1">
+                                                    <span class="text-[10px] text-slate-400 font-bold">Qty:</span>
+                                                    <input type="number" min="1" wire:model.live="invoiceItems.<?php echo e($index); ?>.quantity" wire:change="updateInvoiceLineItem(<?php echo e($index); ?>, 'quantity', $event.target.value)" placeholder="1" class="w-full rounded-xl border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-1">
+                                                    <span class="text-[10px] text-slate-400 font-bold">Price:</span>
+                                                    <input type="number" step="0.01" wire:model.live="invoiceItems.<?php echo e($index); ?>.unit_price" wire:change="updateInvoiceLineItem(<?php echo e($index); ?>, 'unit_price', $event.target.value)" placeholder="₦0.00" class="w-full rounded-xl border border-slate-200 p-1.5 text-xs font-bold outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Custom Promo & Global Discount Section -->
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-emerald-50/30 dark:bg-emerald-950/20 space-y-3">
+                            <div class="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider"><?php echo e(__('Custom Promo Code & Discount Override')); ?></div>
+                            <div class="grid gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Promo Code</label>
+                                    <input type="text" wire:model="form.promo_code" placeholder="e.g. PROMO2026" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-bold uppercase outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Discount Type</label>
+                                    <select wire:model.live="form.discount_type" wire:change="recalculateInvoiceTotals" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="fixed">Fixed NGN Amount (₦)</option>
+                                        <option value="percent">Percentage (%)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Discount Value</label>
+                                    <input type="number" step="0.01" wire:model.live="form.discount_value" wire:change="recalculateInvoiceTotals" placeholder="0" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculation Breakdown -->
+                        <div class="grid gap-3 sm:grid-cols-3">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Subtotal Amount (NGN)</label>
-                                <input type="text" wire:model="form.subtotal" required placeholder="250000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Gross Line Subtotal (NGN)</label>
+                                <input type="text" wire:model="form.subtotal" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Applied Discount (NGN)</label>
+                                <input type="text" wire:model="form.discount_amount" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-blue-600 bg-slate-100 dark:bg-slate-800 dark:text-blue-400">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">VAT (7.5% Auto)</label>
-                                <input type="text" wire:model="form.tax" placeholder="18750" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <input type="text" wire:model="form.tax" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Payment Notes / Bank Details</label>
-                            <textarea wire:model="form.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Payment Notes / Bank Transfer Instructions</label>
+                            <textarea wire:model="form.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white" placeholder="Payment due within 14 days to Access Bank Account 0129481029"></textarea>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
                             <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
-                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Invoice</button>
+                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Commercial Invoice</button>
                         </div>
                     </form>
                 <?php elseif($modalType === 'product'): ?>
@@ -2846,6 +4530,212 @@
                             <button type="submit" class="rounded-2xl bg-amber-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-700 transition">
                                 <i class="fa-light fa-floppy-disk mr-1.5"></i>Save Automation Rule
                             </button>
+                        </div>
+                    </form>
+                <?php elseif($modalType === 'task'): ?>
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Assign New Project Task')); ?></h3>
+                            <p class="text-xs text-slate-400">Assign task responsibilities, set target due dates, priority and link to project</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Task Headline / Title</label>
+                            <input type="text" wire:model="form.title" required placeholder="e.g. Implement POS Thermal Printer Integration" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Project</label>
+                                <select wire:model="form.project_id" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="">-- General Task / Select Project --</option>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $dbProjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                        <option value="<?php echo e($p->id); ?>"><?php echo e($p->name); ?></option>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Priority SLA Level</label>
+                                <select wire:model="form.priority" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Critical">Critical (Immediate SLA)</option>
+                                    <option value="High" selected>High Priority</option>
+                                    <option value="Normal">Normal Priority</option>
+                                    <option value="Low">Low Priority</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Assigned Team Member</label>
+                                <select wire:model="form.assignee" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Babatunde Adeleke">Babatunde Adeleke (Lead Developer)</option>
+                                    <option value="Fatima Bello">Fatima Bello (UI/UX Designer)</option>
+                                    <option value="Emeka Nwosu">Emeka Nwosu (Systems Architect)</option>
+                                    <option value="Sola Adeyemi">Sola Adeyemi (QA Engineer)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Due Date</label>
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Task Notes & Instructions</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Task requirements and scope details..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700">Assign Task</button>
+                        </div>
+                    </form>
+                <?php elseif($modalType === 'project'): ?>
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Create New Project Milestone')); ?></h3>
+                            <p class="text-xs text-slate-400">Set project scope, lead assignee, target completion date and milestones</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Project Title / Name</label>
+                            <input type="text" wire:model="form.title" required placeholder="e.g. POS Hardware & ERP Integration Q3" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Project Lead / Assignee</label>
+                                <input type="text" wire:model="form.assignee" placeholder="e.g. Babatunde Adeleke" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Target Completion Date</label>
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Project Scope & Deliverable Notes</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Key objectives and deliverables..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-sky-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700">Create Project</button>
+                        </div>
+                    </form>
+                <?php elseif($modalType === 'employee'): ?>
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Add New Employee Profile Studio')); ?></h3>
+                            <p class="text-xs text-slate-400">Register staff profile, department, job role, basic salary, bank info & TIN</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Full Staff Name</label>
+                            <input type="text" wire:model="form.name" required placeholder="e.g. Babatunde Adeleke" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Job Title / Designation</label>
+                                <input type="text" wire:model="form.category" required placeholder="e.g. Senior Software Engineer" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Department</label>
+                                <select wire:model="form.location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Engineering & Operations">Engineering & Operations</option>
+                                    <option value="Product & Design">Product & Design</option>
+                                    <option value="Quality Assurance">Quality Assurance</option>
+                                    <option value="Finance & Accounting">Finance & Accounting</option>
+                                    <option value="Sales & Marketing">Sales & Marketing</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Email</label>
+                                <input type="email" wire:model="form.client_email" placeholder="e.g. babatunde@ascendsystems.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number</label>
+                                <input type="text" wire:model="form.client_phone" placeholder="+234 803 111 2233" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Basic Monthly Salary (NGN)</label>
+                                <input type="number" wire:model="form.subtotal" required placeholder="650000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Tax TIN Number</label>
+                                <input type="text" wire:model="form.client_tin" placeholder="TIN-NG-94810291" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700">Add Staff Member</button>
+                        </div>
+                    </form>
+                <?php elseif($modalType === 'leave_request'): ?>
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Submit Leave Request Studio')); ?></h3>
+                            <p class="text-xs text-slate-400">Apply for annual leave, medical sick days or casual time-off</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Staff Member Name</label>
+                            <input type="text" wire:model="form.name" required placeholder="e.g. Fatima Bello" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Leave Category</label>
+                                <select wire:model="form.category" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Annual Leave">Annual Leave</option>
+                                    <option value="Medical / Sick Leave">Medical / Sick Leave</option>
+                                    <option value="Casual Leave">Casual Leave</option>
+                                    <option value="Maternity / Paternity">Maternity / Paternity</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Start Date</label>
+                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Leave Reason & Details</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Details regarding leave request..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700">Submit Request</button>
                         </div>
                     </form>
                 <?php else: ?>

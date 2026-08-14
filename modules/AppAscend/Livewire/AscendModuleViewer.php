@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\PosReceipt;
 use App\Models\Project;
 use App\Models\ProjectTask;
+use App\Models\RetailerOrder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
@@ -195,6 +196,13 @@ class AscendModuleViewer extends Component
     public array $notifications = [];
     public int $unreadCount = 0;
     public string $notificationFilter = 'all';
+
+    // === RETAILER B2B PORTAL STATE ===
+    public array $retailerCart = [];
+    public string $retailerCategoryFilter = 'All';
+    public string $retailerSearch = '';
+    public string $orderShippingAddress = '';
+    public string $orderNotes = '';
 
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
@@ -1245,6 +1253,182 @@ class AscendModuleViewer extends Component
         if ($proj) {
             $proj->update(['progress_percent' => min(100, max(0, $percent))]);
             session()->flash('status', __('Project ":name" progress updated to :percent%.', ['name' => $proj->name, 'percent' => $percent]));
+        }
+    }
+
+    // === RETAILER B2B PORTAL METHODS ===
+    public function addToRetailerCart(int $productId, int $quantity = 1): void
+    {
+        $quantity = max(1, $quantity);
+        if (isset($this->retailerCart[$productId])) {
+            $this->retailerCart[$productId] += $quantity;
+        } else {
+            $this->retailerCart[$productId] = $quantity;
+        }
+        session()->flash('status', __('Item added to B2B bulk cart!'));
+    }
+
+    public function updateRetailerCartQty(int $productId, int $quantity): void
+    {
+        if ($quantity <= 0) {
+            unset($this->retailerCart[$productId]);
+        } else {
+            $this->retailerCart[$productId] = $quantity;
+        }
+    }
+
+    public function removeFromRetailerCart(int $productId): void
+    {
+        unset($this->retailerCart[$productId]);
+        session()->flash('status', __('Item removed from cart.'));
+    }
+
+    public function clearRetailerCart(): void
+    {
+        $this->retailerCart = [];
+    }
+
+    public function submitRetailerOrder(string $orderType = 'pending_approval'): void
+    {
+        if (empty($this->retailerCart)) {
+            session()->flash('warning', __('Your cart is empty! Please select products from the catalog before submitting your order.'));
+            return;
+        }
+
+        $user = auth()->user();
+        $items = [];
+        $subtotal = 0.00;
+
+        foreach ($this->retailerCart as $productId => $qty) {
+            $product = InventoryProduct::find($productId);
+            if ($product) {
+                // Wholesale/Distributor B2B price if set, else standard unit price
+                $price = $product->wholesale_price > 0 ? (float) $product->wholesale_price : (float) $product->unit_price;
+                $lineTotal = $price * $qty;
+                $subtotal += $lineTotal;
+
+                $items[] = [
+                    'product_id' => $product->id,
+                    'sku' => $product->sku,
+                    'name' => $product->name,
+                    'category' => $product->category,
+                    'quantity' => $qty,
+                    'unit_price' => $price,
+                    'line_total' => $lineTotal,
+                    'image_path' => $product->image_path,
+                ];
+            }
+        }
+
+        if (empty($items)) {
+            session()->flash('warning', __('Selected products could not be found.'));
+            return;
+        }
+
+        $tax = $subtotal * 0.075;
+        $totalAmount = $subtotal + $tax;
+        $orderNumber = 'B2B-ORD-' . now()->format('Ymd') . '-' . rand(100, 999);
+        $companyName = $user?->name ?: 'Retailer Client';
+
+        $status = ($orderType === 'instant_invoice') ? 'invoiced' : 'pending_approval';
+
+        $invoiceId = null;
+        if ($orderType === 'instant_invoice') {
+            $invoice = Invoice::create([
+                'invoice_number' => 'INV-B2B-' . rand(10000, 99999),
+                'client_name' => $companyName,
+                'issue_date' => now(),
+                'due_date' => now()->addDays(7),
+                'subtotal' => $subtotal,
+                'tax' => $tax,
+                'total' => $totalAmount,
+                'status' => 'pending',
+                'notes' => 'B2B Instant Retailer Order: ' . $orderNumber,
+                'items' => [
+                    'client_email' => $user?->email ?: '',
+                    'client_address' => $this->orderShippingAddress ?: 'Suite FF002, Area 3 Garki Abuja HQ',
+                    'line_items' => array_map(fn($item) => [
+                        'sku' => $item['sku'],
+                        'description' => $item['name'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                        'amount' => $item['line_total'],
+                    ], $items),
+                ],
+            ]);
+            $invoiceId = $invoice->id;
+        }
+
+        RetailerOrder::create([
+            'order_number' => $orderNumber,
+            'retailer_user_id' => $user?->id,
+            'retailer_company_name' => $companyName,
+            'retailer_email' => $user?->email ?: 'retailer@ascendsystems.ng',
+            'retailer_phone' => '+234 811 763 3020',
+            'items' => $items,
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'total_amount' => $totalAmount,
+            'order_type' => $orderType,
+            'status' => $status,
+            'shipping_address' => $this->orderShippingAddress ?: 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.',
+            'notes' => $this->orderNotes,
+            'invoice_id' => $invoiceId,
+        ]);
+
+        $this->retailerCart = [];
+        $this->orderNotes = '';
+
+        if ($orderType === 'instant_invoice') {
+            session()->flash('status', __("Instant B2B Order :num placed! Official Invoice generated.", ['num' => $orderNumber]));
+        } else {
+            session()->flash('status', __("B2B Purchase Order :num submitted to Ascend Sales team for approval!", ['num' => $orderNumber]));
+        }
+    }
+
+    public function approveRetailerOrder(int $orderId): void
+    {
+        $order = RetailerOrder::find($orderId);
+        if ($order && $order->status === 'pending_approval') {
+            $invoice = Invoice::create([
+                'invoice_number' => 'INV-B2B-' . rand(10000, 99999),
+                'client_name' => $order->retailer_company_name,
+                'issue_date' => now(),
+                'due_date' => now()->addDays(14),
+                'subtotal' => $order->subtotal,
+                'tax' => $order->tax,
+                'total' => $order->total_amount,
+                'status' => 'pending',
+                'notes' => 'Approved B2B Retailer Order: ' . $order->order_number,
+                'items' => [
+                    'client_email' => $order->retailer_email,
+                    'client_address' => $order->shipping_address,
+                    'line_items' => array_map(fn($item) => [
+                        'sku' => $item['sku'] ?? 'SKU',
+                        'description' => $item['name'] ?? 'Product',
+                        'quantity' => $item['quantity'] ?? 1,
+                        'unit_price' => $item['unit_price'] ?? 0,
+                        'amount' => $item['line_total'] ?? 0,
+                    ], $order->items ?? []),
+                ],
+            ]);
+
+            $order->update([
+                'status' => 'approved',
+                'invoice_id' => $invoice->id,
+                'approved_by_user_id' => auth()->id(),
+            ]);
+
+            session()->flash('status', __("B2B Order :num Approved! Generated Invoice INV-B2B.", ['num' => $order->order_number]));
+        }
+    }
+
+    public function updateRetailerOrderStatus(int $orderId, string $newStatus): void
+    {
+        $order = RetailerOrder::find($orderId);
+        if ($order) {
+            $order->update(['status' => $newStatus]);
+            session()->flash('status', __("B2B Order :num status updated to: :status", ['num' => $order->order_number, 'status' => ucfirst($newStatus)]));
         }
     }
 
@@ -2412,6 +2596,7 @@ class AscendModuleViewer extends Component
             'dbProjectTasks' => $dbTasks,
             'dbProducts' => InventoryProduct::query()->orderBy('name')->get(),
             'dbPosReceipts' => PosReceipt::query()->latest()->get(),
+            'dbRetailerOrders' => RetailerOrder::query()->latest()->get(),
             'users' => User::query()->with('role')->orderBy('name')->get(),
             'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
             'logs' => AuditLog::query()->latest()->take(20)->get(),

@@ -112,6 +112,10 @@ class LoginPage extends Component
             request()->session()->regenerate();
         }
 
+        if ($user->role?->slug === 'retailer' || $user->hasPermission('retailer.*')) {
+            return redirect()->to('/portal/ascend/retailer');
+        }
+
         return redirect()->to(Fortify::redirects('login') ?? config('fortify.home'));
     }
 
