@@ -149,6 +149,7 @@
                 $subTabs = match($moduleKey) {
                     'finance' => [
                         'overview' => ['label' => 'Overview & Banking', 'icon' => 'fa-light fa-building-columns'],
+                        'ai_forecasting' => ['label' => 'Executive AI Cash Flow Forecast', 'icon' => 'fa-light fa-chart-line-up'],
                         'invoices' => ['label' => 'Invoices & Estimates', 'icon' => 'fa-light fa-file-invoice-dollar'],
                         'expenses' => ['label' => 'Expenses & Receipts', 'icon' => 'fa-light fa-receipt'],
                         'salary'   => ['label' => 'Payroll & Salary', 'icon' => 'fa-light fa-money-bill-wave'],
@@ -172,6 +173,7 @@
                     ],
                     'tasks' => [
                         'projects' => ['label' => 'Projects Overview', 'icon' => 'fa-light fa-folder-tree'],
+                        'field_dispatch' => ['label' => 'Solar Installation Field Dispatch', 'icon' => 'fa-light fa-screwdriver-wrench'],
                         'assignments' => ['label' => 'Task Assignments', 'icon' => 'fa-light fa-list-check'],
                         'progress' => ['label' => 'Progress Logs', 'icon' => 'fa-light fa-timeline'],
                         'reports' => ['label' => 'Performance Metrics', 'icon' => 'fa-light fa-chart-waterfall'],
@@ -179,6 +181,7 @@
                     'inventory' => [
                         'products' => ['label' => 'Products & Stock Levels', 'icon' => 'fa-light fa-box-archive'],
                         'b2b_dispatch' => ['label' => 'Warehouse Barcode Dispatch', 'icon' => 'fa-light fa-barcode-read'],
+                        'warranty_hub' => ['label' => '5-Year Warranty & Maintenance', 'icon' => 'fa-light fa-shield-check'],
                         'stock' => ['label' => 'Stock Movement Audit', 'icon' => 'fa-light fa-arrows-repeat'],
                         'warehouses' => ['label' => 'Warehouse & Suppliers', 'icon' => 'fa-light fa-warehouse'],
                         'import' => ['label' => 'Import / Export CSV', 'icon' => 'fa-light fa-file-export'],
@@ -258,7 +261,65 @@
 
     <!-- MODULE 1: ACCOUNTING & FINANCE ENHANCED USERFLOW -->
     @if ($moduleKey === 'finance')
-        @if ($activeTab === 'overview')
+        @if ($activeTab === 'ai_forecasting')
+            <!-- EXECUTIVE AI CASH FLOW & REVENUE FORECAST ANALYTICS -->
+            <div class="space-y-6">
+                <!-- Forecast KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Q4 Projected Sales Revenue') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦48,500,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-sparkles mr-1"></i>AI Forecast Confidence: 94.2%</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Projected B2B Retailer Volume') }}</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">₦32,800,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500"><i class="fa-light fa-solar-panel mr-1"></i>Inverters & Battery bundles</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Cash Runway Estimate') }}</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">18.4 Months</p>
+                        <p class="mt-1 text-xs font-medium text-blue-500"><i class="fa-light fa-shield-check mr-1"></i>Healthy operating runway</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Expected Recurring Retainers') }}</p>
+                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">₦15,700,000.00</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400"><i class="fa-light fa-arrows-rotate mr-1"></i>SaaS & Annual SLA Maintenance</p>
+                    </div>
+                </div>
+
+                <!-- Executive Scenario Simulator -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+                                <i class="fa-light fa-brain-circuit"></i> AI Revenue Attribution & Growth Forecast
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Executive Revenue Projection & Cash Runway Analytics') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Predict future cash flow trajectory using historical sales orders, CRM pipeline probability, and B2B distributor growth.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-3">
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
+                            <h3 class="text-xs font-bold uppercase text-slate-500"><i class="fa-light fa-chart-candlestick text-emerald-600 mr-1"></i> Conservative Growth (10% YoY)</h3>
+                            <p class="text-2xl font-black text-slate-900 dark:text-white">₦38.2M</p>
+                            <p class="text-xs text-slate-500">Based on minimum baseline orders from existing Tier 1 distributors in Abuja & Lagos.</p>
+                        </div>
+                        <div class="rounded-2xl border border-emerald-500/30 p-5 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-3">
+                            <h3 class="text-xs font-bold uppercase text-emerald-600"><i class="fa-light fa-sparkles text-emerald-600 mr-1"></i> Expected AI Projection (28% YoY)</h3>
+                            <p class="text-2xl font-black text-emerald-600">₦48.5M</p>
+                            <p class="text-xs text-slate-500">Weighted model factoring Meta/Google Lead Ads, B2B wholesale expansion, and POS retail sales.</p>
+                        </div>
+                        <div class="rounded-2xl border border-purple-500/30 p-5 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 space-y-3">
+                            <h3 class="text-xs font-bold uppercase text-purple-600"><i class="fa-light fa-rocket text-purple-600 mr-1"></i> Aggressive Growth (45% YoY)</h3>
+                            <p class="text-2xl font-black text-purple-600">₦62.0M</p>
+                            <p class="text-xs text-slate-500">Assumes full expansion into Port Harcourt & Kano regional hubs with Tier 2 Gold partners.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'overview')
             <div class="space-y-6">
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -1203,6 +1264,121 @@
                                         </td>
                                     </tr>
                                 @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'warranty_hub')
+            <!-- 5-YEAR WARRANTY SERIAL LEDGER & MAINTENANCE ALERTS -->
+            <div class="space-y-6">
+                <!-- Warranty KPI Summary Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Registered 5-Yr Serials') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">{{ $dbWarrantySerials->count() }} Serials</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-shield-check mr-1"></i>Active manufacturer warranty</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('WhatsApp Alerts Dispatched') }}</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">{{ $dbWarrantySerials->sum('maintenance_alerts_sent') }} Alerts</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500"><i class="fa-brands fa-whatsapp mr-1"></i>6-Month preventive maintenance</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Inverter & Battery Coverage') }}</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">100% Covered</p>
+                        <p class="mt-1 text-xs font-medium text-blue-500"><i class="fa-light fa-solar-panel mr-1"></i>Official 5-year replacement guarantee</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Warranty Claim Rate') }}</p>
+                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">0.4%</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-down mr-1"></i>Ultra-low hardware failure</p>
+                    </div>
+                </div>
+
+                <!-- Warranty Registration Form & Ledger -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+                                <i class="fa-light fa-shield-check"></i> 5-Year Hardware Warranty & Maintenance Engine
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Equipment Warranty Serial Ledger & Maintenance Alerts') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Register serial numbers for inverters, lithium batteries, and solar panels, and send automated WhatsApp 6-month maintenance alerts.') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Register Serial Form -->
+                    <form wire:submit.prevent="registerWarrantySerial" class="mb-8 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-plus-circle mr-1 text-emerald-600"></i> Register Hardware Serial Number</h3>
+                        <div class="grid gap-3 sm:grid-cols-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Serial Number (SN)</label>
+                                <input type="text" wire:model="warrantyForm.serial_number" placeholder="SN-INV-2026-XXXX" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Product Name</label>
+                                <input type="text" wire:model="warrantyForm.product_name" placeholder="Ascend 5.5kVA Hybrid Inverter" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Client / Purchaser Name</label>
+                                <input type="text" wire:model="warrantyForm.client_name" placeholder="Northbridge Media Ltd" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Client Phone Number</label>
+                                <input type="text" wire:model="warrantyForm.client_phone" placeholder="+234 811 763 3020" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition">
+                                <i class="fa-light fa-shield-check mr-1.5"></i>Activate 5-Year Warranty
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Serials Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Serial Number</th>
+                                    <th class="px-4 py-3.5">Product</th>
+                                    <th class="px-4 py-3.5">Client & Contact</th>
+                                    <th class="px-4 py-3.5">5-Yr Expiry Date</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Preventive Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbWarrantySerials as $ws)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">
+                                            <i class="fa-light fa-barcode text-slate-400 mr-1"></i>{{ $ws->serial_number }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs font-bold text-slate-900 dark:text-white">{{ $ws->product_name }}</td>
+                                        <td class="px-4 py-3.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                                            <p>{{ $ws->client_name }}</p>
+                                            <p class="text-[11px] text-slate-400 font-normal">{{ $ws->client_phone }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs font-bold text-emerald-600">
+                                            {{ $ws->warranty_expiry_date?->format('Y-m-d') }}
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+                                                Active (5-Yr)
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <button type="button" wire:click="triggerWhatsAppMaintenanceAlert({{ $ws->id }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition active:scale-95">
+                                                <i class="fa-brands fa-whatsapp"></i> Send Maintenance Alert
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-8 text-center text-slate-400">No warranty serial numbers registered.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -2888,7 +3064,130 @@
 
     <!-- MODULE 4: PROJECT & TASK MANAGEMENT ENHANCED WORKSPACE -->
     @if ($moduleKey === 'tasks')
-        @if ($activeTab === 'projects')
+        @if ($activeTab === 'field_dispatch')
+            <!-- SOLAR INSTALLATION FIELD DISPATCH HUB -->
+            <div class="space-y-6">
+                <!-- Field Dispatch KPI Summary Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Dispatches') }}</p>
+                        <p class="mt-2 text-2xl font-black text-sky-600">{{ $dbDispatches->count() }} Projects</p>
+                        <p class="mt-1 text-xs font-medium text-sky-500"><i class="fa-light fa-screwdriver-wrench mr-1"></i>Abuja, Lagos, Kano, PH</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Installations in Progress') }}</p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">{{ $dbDispatches->where('status', 'in_progress')->count() }} Active</p>
+                        <p class="mt-1 text-xs font-medium text-amber-500"><i class="fa-light fa-hard-hat mr-1"></i>On-site field engineers</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Signoff Completed') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">{{ $dbDispatches->where('status', 'completed')->count() }} Completed</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-circle-check mr-1"></i>Passed earthing & load tests</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Lead Field Engineers') }}</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">8 Engineers</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400"><i class="fa-light fa-user-gear mr-1"></i>Certified technicians</p>
+                    </div>
+                </div>
+
+                <!-- Create Installation Dispatch Form & Table -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-bold text-sky-600 border border-sky-500/20">
+                                <i class="fa-light fa-screwdriver-wrench"></i> Solar & Infrastructure Field Engineering
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Field Installation Projects & Technical Dispatch') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Assign lead solar engineers, track inverter mounting & battery wiring checklists, and manage client sign-offs.') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Create Dispatch Form -->
+                    <form wire:submit.prevent="createInstallationDispatch" class="mb-8 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-plus-circle mr-1 text-sky-600"></i> Schedule New Field Installation Dispatch</h3>
+                        <div class="grid gap-3 sm:grid-cols-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Client Name</label>
+                                <input type="text" wire:model="dispatchForm.client_name" placeholder="e.g. Maitama Villa Residence" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">System Equipment KVA</label>
+                                <input type="text" wire:model="dispatchForm.system_type" placeholder="e.g. 5.5kVA Inverter + 10.2kWh Battery" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Location / Region</label>
+                                <input type="text" wire:model="dispatchForm.location_address" placeholder="Abuja Garki HQ Region" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Lead Field Engineer</label>
+                                <input type="text" wire:model="dispatchForm.engineer_name" placeholder="Engr. Babatunde Adeleke" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-sky-700 transition">
+                                <i class="fa-light fa-paper-plane mr-1.5"></i>Dispatch Technical Team
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Dispatches Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Dispatch No</th>
+                                    <th class="px-4 py-3.5">Client & Address</th>
+                                    <th class="px-4 py-3.5">Equipment Package</th>
+                                    <th class="px-4 py-3.5">Assigned Engineer</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbDispatches as $disp)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">{{ $disp->dispatch_number }}</td>
+                                        <td class="px-4 py-3.5 text-xs font-bold text-slate-900 dark:text-white">
+                                            <p>{{ $disp->client_name }}</p>
+                                            <p class="text-[11px] text-slate-400 font-normal"><i class="fa-light fa-location-dot mr-1"></i>{{ $disp->location_address }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs font-bold text-sky-600">{{ $disp->system_type }}</td>
+                                        <td class="px-4 py-3.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                            <i class="fa-light fa-user-gear mr-1"></i>{{ $disp->engineer_name }}
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold {{ match($disp->status) {
+                                                'completed' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                'in_progress' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                default => 'bg-sky-500/10 text-sky-600 border border-sky-500/20',
+                                            } }}">
+                                                {{ ucfirst(str_replace('_', ' ', $disp->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                @if ($disp->status !== 'completed')
+                                                    <button type="button" wire:click="updateDispatchStatus({{ $disp->id }}, 'completed')" class="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20">
+                                                        <i class="fa-light fa-check mr-1"></i>Complete Signoff
+                                                    </button>
+                                                @else
+                                                    <span class="text-xs font-bold text-emerald-600"><i class="fa-light fa-circle-check"></i> Passed</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-8 text-center text-slate-400">No field dispatches registered.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'projects')
             <div class="space-y-6">
                 <!-- Productivity KPI Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

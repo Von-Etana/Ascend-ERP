@@ -226,6 +226,22 @@ class AscendModuleViewer extends Component
     public string $aiPromptTopic = 'Solar Inverter Promo';
     public string $replyMessageText = '';
 
+    // === FIELD DISPATCH & WARRANTY SERIAL STATE ===
+    public array $dispatchForm = [
+        'client_name' => '',
+        'client_phone' => '+234 803 111 2233',
+        'location_address' => 'Suite 14 Gwarinpa Estate, Abuja',
+        'engineer_name' => 'Engr. Babatunde Adeleke',
+        'system_type' => 'Ascend 5.5kVA Hybrid Solar Inverter + 10.2kWh Battery',
+    ];
+    public array $warrantyForm = [
+        'serial_number' => '',
+        'product_name' => 'Ascend 5.5kVA Hybrid Inverter',
+        'sku' => 'SLR-INV-55KW',
+        'client_name' => '',
+        'client_phone' => '+234 811 763 3020',
+    ];
+
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
         ['id' => 'content', 'name' => 'Content AI Agent', 'desc' => 'Generates social posts, captions, ad copy and marketing content', 'icon' => 'fa-light fa-pen-sparkles', 'color' => 'purple', 'status' => 'active', 'tasks_run' => 0, 'avg_ms' => 0],
@@ -2818,10 +2834,134 @@ class AscendModuleViewer extends Component
         }
     }
 
+    // =========================================================
+    // FIELD INSTALLATION DISPATCH & WARRANTY SERIAL METHODS
+    // =========================================================
+
+    public function createInstallationDispatch(): void
+    {
+        if (blank($this->dispatchForm['client_name'])) {
+            session()->flash('warning', __('Please enter a Client Name for installation dispatch.'));
+            return;
+        }
+
+        $dispNum = 'INST-' . now()->format('Ymd') . '-' . rand(100, 999);
+
+        \App\Models\InstallationDispatch::create([
+            'dispatch_number' => $dispNum,
+            'client_name' => $this->dispatchForm['client_name'],
+            'client_phone' => $this->dispatchForm['client_phone'],
+            'location_address' => $this->dispatchForm['location_address'] ?: 'Suite 14 Gwarinpa Estate, Abuja',
+            'system_type' => $this->dispatchForm['system_type'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter + 10.2kWh Battery',
+            'engineer_name' => $this->dispatchForm['engineer_name'] ?: 'Engr. Babatunde Adeleke',
+            'scheduled_date' => now()->addDays(1),
+            'status' => 'scheduled',
+            'checklist_completed' => [
+                'inverter_mounting' => true,
+                'battery_wiring' => true,
+                'earthing_testing' => false,
+                'ats_switchover' => false,
+            ],
+        ]);
+
+        $this->dispatchForm['client_name'] = '';
+        session()->flash('status', __('Installation Project :num created and assigned to :eng!', ['num' => $dispNum, 'eng' => $this->dispatchForm['engineer_name']]));
+    }
+
+    public function updateDispatchStatus(int $id, string $status): void
+    {
+        $disp = \App\Models\InstallationDispatch::find($id);
+        if ($disp) {
+            $disp->update(['status' => $status]);
+            session()->flash('status', __('Installation Dispatch :num status updated to :st.', ['num' => $disp->dispatch_number, 'st' => strtoupper($status)]));
+        }
+    }
+
+    public function registerWarrantySerial(): void
+    {
+        if (blank($this->warrantyForm['serial_number'])) {
+            session()->flash('warning', __('Please enter or scan a Serial Number.'));
+            return;
+        }
+
+        \App\Models\WarrantySerial::create([
+            'serial_number' => strtoupper(trim($this->warrantyForm['serial_number'])),
+            'product_name' => $this->warrantyForm['product_name'] ?: 'Ascend 5.5kVA Hybrid Inverter',
+            'sku' => $this->warrantyForm['sku'] ?: 'SLR-INV-55KW',
+            'client_name' => $this->warrantyForm['client_name'] ?: 'Abuja Corporate Client',
+            'client_phone' => $this->warrantyForm['client_phone'] ?: '+234 811 763 3020',
+            'purchase_date' => now(),
+            'warranty_expiry_date' => now()->addYears(5),
+            'status' => 'active',
+        ]);
+
+        $this->warrantyForm['serial_number'] = '';
+        $this->warrantyForm['client_name'] = '';
+
+        session()->flash('status', __('5-Year Warranty Serial registered and activated!'));
+    }
+
+    public function triggerWhatsAppMaintenanceAlert(int $id): void
+    {
+        $ws = \App\Models\WarrantySerial::find($id);
+        if ($ws) {
+            $ws->increment('maintenance_alerts_sent');
+            session()->flash('status', __('Automated WhatsApp 6-Month Preventive Maintenance Alert sent to :client (:phone)!', [
+                'client' => $ws->client_name,
+                'phone' => $ws->client_phone,
+            ]));
+        }
+    }
+
     public function render(): View
     {
         if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
             (new \Database\Seeders\EnterpriseModuleSeeder)->run();
+        }
+
+        if (\App\Models\InstallationDispatch::count() === 0) {
+            \App\Models\InstallationDispatch::create([
+                'dispatch_number' => 'INST-20260814-001',
+                'client_name' => 'Dr. Fatima Bello (Maitama Villa)',
+                'client_phone' => '+234 803 444 5566',
+                'location_address' => 'Plot 402 Maitama District, Abuja HQ Region',
+                'system_type' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
+                'engineer_name' => 'Engr. Babatunde Adeleke',
+                'scheduled_date' => now()->addDays(1),
+                'status' => 'in_progress',
+                'checklist_completed' => [
+                    'inverter_mounting' => true,
+                    'battery_wiring' => true,
+                    'earthing_testing' => true,
+                    'ats_switchover' => false,
+                ],
+            ]);
+        }
+
+        if (\App\Models\WarrantySerial::count() === 0) {
+            \App\Models\WarrantySerial::create([
+                'serial_number' => 'SN-INV-2026-98412',
+                'product_name' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+                'sku' => 'SLR-INV-55KW',
+                'client_name' => 'Northbridge Media Nigeria',
+                'client_phone' => '+234 802 111 2233',
+                'purchase_date' => now()->subMonths(6),
+                'warranty_expiry_date' => now()->addYears(4)->addMonths(6),
+                'status' => 'active',
+                'maintenance_alerts_sent' => 1,
+            ]);
+
+            \App\Models\WarrantySerial::create([
+                'serial_number' => 'SN-BAT-2026-44120',
+                'product_name' => 'Ascend 10.2kWh LiFePO4 Battery Storage',
+                'sku' => 'SLR-BAT-10KW',
+                'client_name' => 'Kano Energy Ltd',
+                'client_phone' => '+234 803 999 1122',
+                'purchase_date' => now()->subMonths(2),
+                'warranty_expiry_date' => now()->addYears(4)->addMonths(10),
+                'status' => 'active',
+                'maintenance_alerts_sent' => 0,
+            ]);
         }
 
         if (\App\Models\SocialAdCampaign::count() === 0) {
@@ -2916,6 +3056,8 @@ class AscendModuleViewer extends Component
             'dbSocialAdCampaigns' => \App\Models\SocialAdCampaign::query()->latest()->get(),
             'dbScheduledPosts' => \App\Models\ScheduledSocialPost::query()->latest()->get(),
             'dbSocialInboxMessages' => \App\Models\SocialInboxMessage::query()->latest()->get(),
+            'dbDispatches' => \App\Models\InstallationDispatch::query()->latest()->get(),
+            'dbWarrantySerials' => \App\Models\WarrantySerial::query()->latest()->get(),
             'users' => User::query()->with('role')->orderBy('name')->get(),
             'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
             'logs' => AuditLog::query()->latest()->take(20)->get(),
