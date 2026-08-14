@@ -9,6 +9,7 @@
         'automation' => '#d97706',
         'reports' => '#0d9488',
         'administration' => '#1e293b',
+        'retailer' => '#16a34a',
         default => '#2563eb',
     };
 
@@ -22,6 +23,7 @@
         'automation' => 'linear-gradient(135deg, rgba(217,119,6,0.12) 0%, rgba(245,158,11,0.04) 100%)',
         'reports' => 'linear-gradient(135deg, rgba(13,148,136,0.12) 0%, rgba(20,184,166,0.04) 100%)',
         'administration' => 'linear-gradient(135deg, rgba(30,41,59,0.12) 0%, rgba(71,85,105,0.04) 100%)',
+        'retailer' => 'linear-gradient(135deg, rgba(22,163,74,0.14) 0%, rgba(34,197,94,0.04) 100%)',
         default => 'linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(59,130,246,0.04) 100%)',
     };
 ?>
@@ -46,6 +48,7 @@
                         'automation' => 'fa-light fa-bolt',
                         'reports' => 'fa-light fa-chart-mixed',
                         'administration' => 'fa-light fa-user-shield',
+                        'retailer' => 'fa-light fa-solar-panel',
                         default => 'fa-light fa-layer-group',
                     }); ?>"></i>
                 </span>
@@ -67,6 +70,7 @@
                             'automation' => __('Workflow Automation & Triggers'),
                             'reports' => __('Executive Business Intelligence'),
                             'administration' => __('User Management & Access Controls'),
+                            'retailer' => __('Retailers B2B Portal (Solar & Renewable Distribution)'),
                             default => __(ucfirst($moduleKey)),
                         }); ?>
 
@@ -82,9 +86,10 @@
                             'marketing' => __('Multi-channel marketing campaigns, social account management, audience blasts, and ROAS analytics.'),
                             'ai-agents' => __('Specialist AI agents for copy generation, multi-platform repurposing, scheduling, and market strategy.'),
                             'automation' => __('Automate background tasks across CRM, Finance, POS, and Notifications with rule triggers.'),
-                            'reports' => __('Unified business intelligence reporting across sales, finance, inventory valuation, and marketing.'),
-                            'administration' => __('Control access, assign roles, set permissions for modules and security audit tracking.'),
-                            default => __('Operational workspace capabilities.'),
+                            'reports' => __('Executive profit & loss insights, financial statements, and regional revenue analytics.'),
+                            'administration' => __('Configure organization profile, system user roles, access matrices, and security audit logs.'),
+                            'retailer' => __('Wholesale ordering portal for renewable energy products, inverters, lithium batteries, solar panels, and hardware.'),
+                            default => __('Manage enterprise workspace settings and operational data.'),
                         }); ?>
 
                     </p>
@@ -221,6 +226,12 @@
                         'organization' => ['label' => 'Corporate HQ & Branches', 'icon' => 'fa-light fa-building-user'],
                         'security' => ['label' => 'Security & Audit Logs', 'icon' => 'fa-light fa-shield-check'],
                         'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
+                    ],
+                    'retailer' => [
+                        'catalog'  => ['label' => 'Solar & Renewable Catalog', 'icon' => 'fa-light fa-solar-panel'],
+                        'cart'     => ['label' => 'B2B Bulk Order Cart', 'icon' => 'fa-light fa-cart-shopping'],
+                        'orders'   => ['label' => 'Order Tracking & Status', 'icon' => 'fa-light fa-truck-ramp-box'],
+                        'invoices' => ['label' => 'B2B Invoices & PDF Statements', 'icon' => 'fa-light fa-file-invoice-dollar'],
                     ],
                     default => ['overview' => ['label' => 'Overview', 'icon' => 'fa-light fa-border-all']],
                 };
@@ -3813,6 +3824,374 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
+    <!-- MODULE 12: RETAILERS B2B PORTAL (RENEWABLE ENERGY & HARDWARE DISTRIBUTION) -->
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($moduleKey === 'retailer'): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'catalog'): ?>
+            <div class="space-y-6">
+                <!-- Retailer Header Welcome Card -->
+                <div class="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 p-6 text-white shadow-xl md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3.5 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
+                                <i class="fa-light fa-solar-panel"></i> <?php echo e(__('Official B2B Renewable Energy & Hardware Distribution')); ?>
+
+                            </span>
+                            <h2 class="mt-3 text-2xl font-black md:text-3xl text-white"><?php echo e(__('Wholesale Products & Partner Catalog')); ?></h2>
+                            <p class="mt-1 text-sm text-slate-300 max-w-2xl">
+                                <?php echo e(__('Supply your retail outlets with Ascend high-efficiency solar panels, lithium batteries, hybrid inverters, automation relays, security PTZ cameras, and fiber network switches.')); ?>
+
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <button type="button" wire:click="$set('activeTab', 'cart')" class="relative rounded-2xl bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-emerald-700 transition active:scale-95">
+                                <i class="fa-light fa-cart-shopping mr-2"></i> <?php echo e(__('View Bulk Cart')); ?>
+
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($retailerCart) > 0): ?>
+                                    <span class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-xs font-black text-slate-950 shadow-md">
+                                        <?php echo e(array_sum($retailerCart)); ?>
+
+                                    </span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category Filter Tabs -->
+                    <div class="mt-6 flex flex-wrap items-center gap-2 border-t border-slate-800 pt-5">
+                        <?php
+                            $categories = ['All', 'Inverters', 'Batteries', 'Solar Panels', 'Automation', 'Security', 'Network Infrastructure'];
+                        ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                            <button type="button" wire:click="$set('retailerCategoryFilter', '<?php echo e($cat); ?>')" class="rounded-xl px-4 py-2 text-xs font-bold transition <?php echo e($retailerCategoryFilter === $cat ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'); ?>">
+                                <?php echo e($cat); ?>
+
+                            </button>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <?php
+                        $filteredProducts = $dbProducts->where('is_b2b_visible', true);
+                        if ($retailerCategoryFilter !== 'All') {
+                            $filteredProducts = $filteredProducts->where('category', $retailerCategoryFilter);
+                        }
+                    ?>
+
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $filteredProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                        <div class="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-emerald-500/40 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                            <div>
+                                <!-- Image Thumbnail -->
+                                <div class="relative h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($product->image_path): ?>
+                                        <img src="<?php echo e($product->image_path); ?>" alt="<?php echo e($product->name); ?>" class="h-full w-full object-cover transition-transform duration-300 hover:scale-105">
+                                    <?php else: ?>
+                                        <div class="flex h-full w-full items-center justify-center bg-slate-800 text-slate-600">
+                                            <i class="fa-light fa-solar-panel text-5xl"></i>
+                                        </div>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <span class="absolute left-3 top-3 rounded-full bg-slate-950/80 px-2.5 py-1 font-mono text-[10px] font-bold text-emerald-400 backdrop-blur-md">
+                                        <?php echo e($product->sku); ?>
+
+                                    </span>
+                                    <!-- Stock Status Badge (Exact Numbers Hidden for B2B Retailers) -->
+                                    <span class="absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase shadow-sm <?php echo e($product->stock_quantity > 0 ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'); ?>">
+                                        <?php echo e($product->stock_quantity > 0 ? __('In Stock') : __('Out of Stock')); ?>
+
+                                    </span>
+                                </div>
+
+                                <!-- Product Details -->
+                                <div class="p-5">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"><?php echo e($product->category); ?></span>
+                                    <h3 class="mt-1 text-base font-bold text-slate-900 dark:text-white line-clamp-2"><?php echo e($product->name); ?></h3>
+
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($product->specifications): ?>
+                                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400 line-clamp-2"><i class="fa-light fa-microchip mr-1 text-emerald-500"></i><?php echo e($product->specifications); ?></p>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                                    <!-- Price Block -->
+                                    <div class="mt-4 flex items-baseline justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+                                        <div>
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400"><?php echo e(__('B2B Wholesale Price')); ?></p>
+                                            <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                                                ₦<?php echo e(number_format($product->wholesale_price > 0 ? $product->wholesale_price : $product->unit_price, 2)); ?>
+
+                                            </p>
+                                        </div>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($product->wholesale_price > 0 && $product->wholesale_price < $product->unit_price): ?>
+                                            <div class="text-right">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 line-through">₦<?php echo e(number_format($product->unit_price, 2)); ?></p>
+                                                <span class="text-[10px] font-bold text-amber-500">B2B Wholesale</span>
+                                            </div>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cart Action Footer -->
+                            <div class="border-t border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($product->stock_quantity > 0): ?>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" wire:click="addToRetailerCart(<?php echo e($product->id); ?>, 1)" class="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition active:scale-95">
+                                            <i class="fa-light fa-plus mr-1.5"></i><?php echo e(__('Add to Bulk Order')); ?>
+
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <button type="button" disabled class="w-full cursor-not-allowed rounded-xl bg-slate-200 px-4 py-2.5 text-xs font-bold text-slate-400 dark:bg-slate-800 dark:text-slate-600">
+                                        <?php echo e(__('Out of Stock')); ?>
+
+                                    </button>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </div>
+                        </div>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        <div class="col-span-full rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <i class="fa-light fa-solar-panel text-5xl text-slate-300"></i>
+                            <h3 class="mt-4 text-base font-bold text-slate-900 dark:text-white"><?php echo e(__('No products in this category yet')); ?></h3>
+                            <p class="mt-1 text-xs text-slate-400"><?php echo e(__('Check back soon or select another product category.')); ?></p>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+            </div>
+        <?php elseif($activeTab === 'cart'): ?>
+            <!-- Retailer Bulk Cart View -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('Retailer B2B Bulk Order Cart')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Review selected products, quantities, shipping address, and submit your wholesale order.')); ?></p>
+                        </div>
+                        <button type="button" wire:click="clearRetailerCart" class="text-xs font-bold text-rose-500 hover:underline">
+                            <i class="fa-light fa-trash mr-1"></i>Clear Cart
+                        </button>
+                    </div>
+
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($retailerCart)): ?>
+                        <div class="py-16 text-center">
+                            <i class="fa-light fa-cart-shopping text-5xl text-slate-300"></i>
+                            <h3 class="mt-4 text-base font-bold text-slate-900 dark:text-white"><?php echo e(__('Your B2B Cart is empty')); ?></h3>
+                            <p class="mt-1 text-xs text-slate-400"><?php echo e(__('Browse our solar and energy distribution catalog to add items.')); ?></p>
+                            <button type="button" wire:click="$set('activeTab', 'catalog')" class="mt-5 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">
+                                <?php echo e(__('Browse Product Catalog')); ?>
+
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <?php
+                            $cartItems = [];
+                            $cartSubtotal = 0;
+                            foreach ($retailerCart as $pId => $q) {
+                                $p = $dbProducts->firstWhere('id', $pId);
+                                if ($p) {
+                                    $pr = $p->wholesale_price > 0 ? (float)$p->wholesale_price : (float)$p->unit_price;
+                                    $lt = $pr * $q;
+                                    $cartSubtotal += $lt;
+                                    $cartItems[] = ['product' => $p, 'qty' => $q, 'price' => $pr, 'total' => $lt];
+                                }
+                            }
+                            $cartTax = $cartSubtotal * 0.075;
+                            $cartTotal = $cartSubtotal + $cartTax;
+                        ?>
+
+                        <div class="mt-5 space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $cartItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($item['product']->image_path): ?>
+                                                <img src="<?php echo e($item['product']->image_path); ?>" class="h-full w-full object-cover">
+                                            <?php else: ?>
+                                                <div class="flex h-full w-full items-center justify-center text-slate-500"><i class="fa-light fa-solar-panel text-xl"></i></div>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-900 dark:text-white"><?php echo e($item['product']->name); ?></h4>
+                                            <p class="text-xs font-mono text-emerald-600"><?php echo e($item['product']->sku); ?> · ₦<?php echo e(number_format($item['price'], 2)); ?> / unit</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-6">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" wire:click="updateRetailerCartQty(<?php echo e($item['product']->id); ?>, <?php echo e($item['qty'] - 1); ?>)" class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-xs font-bold dark:border-slate-700">-</button>
+                                            <span class="w-8 text-center text-xs font-bold text-slate-900 dark:text-white"><?php echo e($item['qty']); ?></span>
+                                            <button type="button" wire:click="updateRetailerCartQty(<?php echo e($item['product']->id); ?>, <?php echo e($item['qty'] + 1); ?>)" class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-xs font-bold dark:border-slate-700">+</button>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-black text-slate-900 dark:text-white">₦<?php echo e(number_format($item['total'], 2)); ?></p>
+                                            <button type="button" wire:click="removeFromRetailerCart(<?php echo e($item['product']->id); ?>)" class="text-[10px] font-bold text-rose-500 hover:underline">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                        </div>
+
+                        <!-- Order Options Form -->
+                        <div class="mt-8 rounded-2xl bg-slate-50 p-6 dark:bg-slate-800/40 space-y-4">
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white"><?php echo e(__('Fulfillment & Order Details')); ?></h3>
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500">Delivery / Shipping Address</label>
+                                    <textarea wire:model="orderShippingAddress" rows="2" placeholder="Suite FF002, Area 3 Garki Abuja HQ or Kano Branch..." class="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500">Order Notes / Instructions</label>
+                                    <textarea wire:model="orderNotes" rows="2" placeholder="e.g. Please deliver by Friday morning..." class="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Totals Summary & Submit Buttons -->
+                            <div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-200 pt-6 dark:border-slate-700 gap-4">
+                                <div>
+                                    <p class="text-xs text-slate-500">Subtotal: <span class="font-bold text-slate-900 dark:text-white">₦<?php echo e(number_format($cartSubtotal, 2)); ?></span> | 7.5% VAT: <span class="font-bold text-slate-900 dark:text-white">₦<?php echo e(number_format($cartTax, 2)); ?></span></p>
+                                    <p class="text-xl font-black text-emerald-600 dark:text-emerald-400">Total: ₦<?php echo e(number_format($cartTotal, 2)); ?></p>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <button type="button" wire:click="submitRetailerOrder('pending_approval')" class="rounded-xl bg-amber-600 px-5 py-3 text-xs font-bold text-white shadow-md hover:bg-amber-700 transition">
+                                        <i class="fa-light fa-clock mr-1.5"></i><?php echo e(__('Submit for Sales Rep Approval')); ?>
+
+                                    </button>
+                                    <button type="button" wire:click="submitRetailerOrder('instant_invoice')" class="rounded-xl bg-emerald-600 px-6 py-3 text-xs font-bold text-white shadow-lg hover:bg-emerald-700 transition">
+                                        <i class="fa-light fa-bolt mr-1.5"></i><?php echo e(__('Instant Invoice & Checkout')); ?>
+
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'orders'): ?>
+            <!-- Retailer Order Tracking & History -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('B2B Order Status & Delivery Tracking')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Track active orders, approval statuses, delivery dispatches, and download invoices.')); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Order No</th>
+                                    <th class="px-4 py-3.5">Date & Type</th>
+                                    <th class="px-4 py-3.5">Total Amount (NGN)</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <?php
+                                    $myOrders = $dbRetailerOrders->where('retailer_user_id', auth()->id());
+                                    if ($myOrders->isEmpty()) {
+                                        $myOrders = $dbRetailerOrders;
+                                    }
+                                ?>
+
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $myOrders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ord): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white"><?php echo e($ord->order_number); ?></td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-bold text-slate-700 dark:text-slate-300"><?php echo e($ord->created_at?->format('Y-m-d H:i')); ?></p>
+                                            <span class="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                                <?php echo e($ord->order_type === 'instant_invoice' ? 'Instant Invoice' : 'Pending Approval'); ?>
+
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600 dark:text-emerald-400">₦<?php echo e(number_format($ord->total_amount, 2)); ?></td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-3 py-1 text-xs font-bold <?php echo e(match($ord->status) {
+                                                'pending_approval' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                'approved' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                'invoiced' => 'bg-indigo-500/10 text-indigo-600 border border-indigo-500/20',
+                                                'dispatched' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+                                                'delivered' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                default => 'bg-slate-100 text-slate-600',
+                                            }); ?>">
+                                                <?php echo e(ucfirst(str_replace('_', ' ', $ord->status))); ?>
+
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($ord->invoice_id): ?>
+                                                <a href="<?php echo e(route('portal.invoice.pdf', ['invoice' => $ord->invoice_id])); ?>" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20">
+                                                    <i class="fa-light fa-file-pdf"></i> Download Invoice
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-xs text-slate-400">Awaiting Invoice</span>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-12 text-center text-slate-400">
+                                            <i class="fa-light fa-box-open text-4xl mb-2"></i>
+                                            <p><?php echo e(__('No orders placed yet. Visit the catalog to create your first bulk order.')); ?></p>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php elseif($activeTab === 'invoices'): ?>
+            <!-- Retailer Invoices View -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white"><?php echo e(__('B2B Official Invoices & Billing Statements')); ?></h2>
+                            <p class="text-sm text-slate-500"><?php echo e(__('Download official A4 PDF invoices with Abuja HQ corporate details.')); ?></p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Invoice No</th>
+                                    <th class="px-4 py-3.5">Issue Date</th>
+                                    <th class="px-4 py-3.5">Amount (NGN)</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">PDF Download</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $dbInvoices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $inv): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white"><?php echo e($inv->invoice_number); ?></td>
+                                        <td class="px-4 py-3.5 text-xs text-slate-500"><?php echo e($inv->issue_date?->format('Y-m-d')); ?></td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦<?php echo e(number_format($inv->total, 2)); ?></td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-3 py-1 text-xs font-bold <?php echo e($inv->status === 'paid' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'); ?>">
+                                                <?php echo e(ucfirst($inv->status)); ?>
+
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <a href="<?php echo e(route('portal.invoice.pdf', ['invoice' => $inv->id])); ?>" class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">
+                                                <i class="fa-light fa-file-pdf"></i> Download PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    <tr><td colspan="5" class="p-8 text-center text-slate-400">No invoices available.</td></tr>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
     <!-- Interactive Full-Page Dedicated Workspace Creation Interface -->
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showModal): ?>
         <div class="fixed inset-0 z-[160] overflow-y-auto bg-slate-100/95 p-4 md:p-8 backdrop-blur-md dark:bg-slate-950/95">
@@ -4219,27 +4598,46 @@
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Product Category</label>
                                 <select wire:model="form.category" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Inverters">Solar Inverters & Chargers</option>
+                                    <option value="Batteries">Lithium & Gel Batteries</option>
+                                    <option value="Solar Panels">Mono/Poly Solar Panels</option>
+                                    <option value="Automation">Smart Automation & Relays</option>
+                                    <option value="Security">Security & PTZ Cameras</option>
+                                    <option value="Network Infrastructure">Network Switches & Fiber</option>
                                     <option value="Hardware">POS Hardware & Electronics</option>
                                     <option value="Software">Software & SaaS Licenses</option>
-                                    <option value="Consumables">Paper Rolls & Consumables</option>
-                                    <option value="Accessories">Office Accessories</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Product Name</label>
-                            <input type="text" wire:model="form.name" required placeholder="e.g. Wireless Thermal Receipt Printer 80mm" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            <input type="text" wire:model="form.name" required placeholder="e.g. Ascend Hybrid Solar Inverter 5.5kVA / 48V" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Standard Selling Price (NGN)</label>
+                                <input type="text" wire:model="form.unit_price" required placeholder="580000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">B2B Wholesale Price (NGN)</label>
+                                <input type="text" wire:model="form.wholesale_price" placeholder="495000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold text-emerald-600 outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-emerald-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Cost Price (NGN)</label>
+                                <input type="text" wire:model="form.cost_price" placeholder="410000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Selling Price (NGN)</label>
-                                <input type="text" wire:model="form.unit_price" required placeholder="120000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Product Image URL / Photo Path</label>
+                                <input type="text" wire:model="form.image_path" placeholder="https://images.unsplash.com/... or /storage/products/inv.png" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-medium outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Cost Price (NGN)</label>
-                                <input type="text" wire:model="form.cost_price" placeholder="85000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Technical Specifications</label>
+                                <input type="text" wire:model="form.specifications" placeholder="Dual MPPT 100A, Parallel Support up to 9 units" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-medium outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 

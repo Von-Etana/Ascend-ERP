@@ -3,8 +3,12 @@
 use App\Models\InventoryProduct;
 use App\Models\Invoice;
 use App\Models\RetailerOrder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Modules\AdminUser\Models\AdminRole;
 use Modules\AdminUser\Models\User;
+
+uses(Tests\TestCase::class, RefreshDatabase::class);
 
 test('retailer user is redirected to retailer portal upon login', function () {
     $role = AdminRole::firstOrCreate(['slug' => 'retailer'], ['name' => 'Retailer', 'permissions' => ['retailer.*']]);

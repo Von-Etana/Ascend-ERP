@@ -112,7 +112,7 @@ class LoginPage extends Component
             request()->session()->regenerate();
         }
 
-        if ($user->role?->slug === 'retailer' || $user->hasPermission('retailer.*')) {
+        if (! $user->isSuperAdmin() && $user->role?->slug === 'retailer') {
             return redirect()->to('/portal/ascend/retailer');
         }
 
