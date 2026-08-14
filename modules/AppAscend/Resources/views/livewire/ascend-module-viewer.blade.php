@@ -196,10 +196,13 @@
                     'marketing' => [
                         'campaigns' => ['label' => 'Marketing Campaigns', 'icon' => 'fa-light fa-bullhorn'],
                         'ads_manager' => ['label' => 'Meta & Google Ads Manager', 'icon' => 'fa-light fa-bullseye-arrow'],
+                        'web_lead_capture' => ['label' => 'Web Lead Capture (www.ascendsystems.ng)', 'icon' => 'fa-light fa-globe'],
+                        'video_script_ai' => ['label' => 'AI Video Script Studio (TikTok/Reels)', 'icon' => 'fa-light fa-clapperboard'],
+                        'whatsapp_blasts' => ['label' => 'WhatsApp Catalog Broadcast Engine', 'icon' => 'fa-brands fa-whatsapp'],
+                        'influencers' => ['label' => 'Influencer & Ambassador Hub', 'icon' => 'fa-light fa-star'],
+                        'competitor_watch' => ['label' => 'Competitor Solar Ad Intelligence', 'icon' => 'fa-light fa-chart-line-down'],
                         'content_studio' => ['label' => 'AI Post Studio & Scheduler', 'icon' => 'fa-light fa-pen-sparkles'],
                         'social_inbox' => ['label' => 'Unified Customer Social Inbox', 'icon' => 'fa-light fa-comments'],
-                        'social' => ['label' => 'Social Channels', 'icon' => 'fa-light fa-share-nodes'],
-                        'email' => ['label' => 'Email Marketing Workspace', 'icon' => 'fa-light fa-envelope-open-text'],
                     ],
                     'ai-agents' => [
                         'agents' => ['label' => 'AI Agent Fleet & Logs', 'icon' => 'fa-light fa-sparkles'],
@@ -2103,7 +2106,326 @@
 
     <!-- MODULE 7: MARKETING & SOCIAL CAMPAIGN HUB ENHANCED USERFLOW -->
     @if ($moduleKey === 'marketing')
-        @if ($activeTab === 'campaigns')
+        @if ($activeTab === 'web_lead_capture')
+            <!-- www.ascendsystems.ng BRANDED WEB LEAD CAPTURE FORM & CRM SYNC -->
+            <div class="space-y-6">
+                <!-- Ascend Systems Official Brand Banner -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 dark:border-slate-800">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-black text-xl shadow-lg">
+                                ASC
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-3 py-0.5 text-xs font-bold text-purple-600 border border-purple-500/20">
+                                    Official Brand Portal — www.ascendsystems.ng
+                                </span>
+                                <h2 class="mt-1 text-xl font-black text-slate-950 dark:text-white">{{ __('Ascend Systems Official Web Lead Generation & Quote Form') }}</h2>
+                                <p class="text-xs text-slate-500">{{ __('Captures solar energy inquiries directly from www.ascendsystems.ng, auto-creates CRM leads, and dispatches instant quotes.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                        <!-- Branded Customer Lead Form -->
+                        <form wire:submit.prevent="submitWebLeadCaptureForm" class="rounded-2xl bg-slate-50 p-6 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                            <div class="flex items-center justify-between border-b pb-3 dark:border-slate-700">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                    <i class="fa-light fa-paper-plane text-purple-600 mr-1.5"></i> Customer Solar Quotation Request Form
+                                </h3>
+                                <span class="text-[10px] font-mono text-slate-400">www.ascendsystems.ng/get-quote</span>
+                            </div>
+
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Full Name / Business Name</label>
+                                    <input type="text" wire:model="webLeadForm.client_name" placeholder="e.g. Chief Emeka Nwosu" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number (WhatsApp)</label>
+                                    <input type="text" wire:model="webLeadForm.phone" placeholder="+234 802 888 9900" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Email Address</label>
+                                    <input type="email" wire:model="webLeadForm.email" placeholder="client@nwosugroup.ng" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">City / Location</label>
+                                    <select wire:model="webLeadForm.city_location" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="Abuja">Abuja HQ Region</option>
+                                        <option value="Lagos">Lagos State</option>
+                                        <option value="Kano">Kano State</option>
+                                        <option value="Port Harcourt">Port Harcourt / Rivers</option>
+                                        <option value="Ibadan">Ibadan / Oyo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">System Package Interest</label>
+                                <select wire:model="webLeadForm.system_interest" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Inverter (Residential 4-Bed)</option>
+                                    <option value="Ascend 10.2kWh LiFePO4 Lithium Battery Storage">Ascend 10.2kWh LiFePO4 Lithium Storage</option>
+                                    <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array (Office / Hotel)</option>
+                                    <option value="PTZ 4K Solar Security Cameras & Automation">PTZ 4K Solar Security Cameras & Automation</option>
+                                </select>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="rounded-xl bg-purple-600 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-purple-700 transition">
+                                    <i class="fa-light fa-sparkles mr-1.5"></i>Submit Quote Request & Sync CRM Pipeline
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Live Web Lead Submissions Feed -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-rss text-purple-600 mr-1"></i> Live Web Leads captured from www.ascendsystems.ng</h3>
+                            <div class="space-y-3 max-h-[380px] overflow-y-auto">
+                                @forelse ($dbWebLeads as $lead)
+                                    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center justify-between">
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-xs text-slate-900 dark:text-white">{{ $lead->client_name }}</span>
+                                                <span class="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-600">{{ $lead->city_location }}</span>
+                                            </div>
+                                            <p class="mt-1 text-[11px] text-purple-600 font-semibold">{{ $lead->system_interest }}</p>
+                                            <p class="text-[10px] text-slate-400">{{ $lead->phone }} · {{ $lead->email }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20">CRM Synced</span>
+                                            <p class="mt-1 text-xs font-black text-slate-900 dark:text-white">₦{{ number_format($lead->estimated_budget_ngn, 2) }}</p>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="p-8 text-center text-slate-400 text-xs">No web lead submissions captured yet.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'video_script_ai')
+            <!-- AI SHORT-FORM VIDEO SCRIPT STUDIO FOR TIKTOK & IG REELS -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-600 border border-rose-500/20">
+                                <i class="fa-light fa-clapperboard"></i> Short-Form Video Generator
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('AI TikTok & Instagram Reels Video Script Studio') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Generate high-converting 30-second video scripts with visual cues, voiceovers, and call-to-actions for Ascend solar equipment.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <form wire:submit.prevent="generateAiVideoScript" class="space-y-4 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-wand-magic-sparkles text-rose-500 mr-1"></i> Script Configuration</h3>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Featured Solar Product</label>
+                                <input type="text" wire:model="videoScriptForm.product" placeholder="Ascend 5.5kVA Hybrid Inverter + 10.2kWh LiFePO4 Battery" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-rose-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Target Platform</label>
+                                    <select wire:model="videoScriptForm.platform" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-rose-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="TikTok & Instagram Reels">TikTok & Instagram Reels</option>
+                                        <option value="YouTube Shorts">YouTube Shorts</option>
+                                        <option value="LinkedIn Video">LinkedIn Video</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Content Angle / Style</label>
+                                    <select wire:model="videoScriptForm.style" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-rose-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="High Energy Unboxing & Installation">High Energy Unboxing & Installation</option>
+                                        <option value="Cost Saving Comparison (Generator vs Solar)">Cost Saving Comparison (Generator vs Solar)</option>
+                                        <option value="Customer Villa Case Study">Customer Villa Case Study</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full rounded-xl bg-rose-600 py-3 text-xs font-bold text-white shadow-md hover:bg-rose-700 transition">
+                                <i class="fa-light fa-sparkles mr-1.5"></i>Generate 30-Sec Video Script
+                            </button>
+                        </form>
+
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 border-b pb-3 dark:border-slate-800"><i class="fa-light fa-file-lines text-rose-500 mr-1"></i> Generated Script Output</h3>
+                                <div class="mt-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300 font-mono whitespace-pre-wrap max-h-[300px] overflow-y-auto">
+                                    {{ $generatedVideoScript ?: "Click 'Generate 30-Sec Video Script' to create your first short-form video script for TikTok & Instagram Reels!" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'whatsapp_blasts')
+            <!-- WHATSAPP CATALOG BROADCAST ENGINE -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
+                                <i class="fa-brands fa-whatsapp"></i> WhatsApp Business Broadcast
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Automated WhatsApp Product Catalog & Price Sheet Broadcast Engine') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Dispatch high-converting WhatsApp product catalogs with wholesale price sheets directly to B2B distributor contacts.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-4">
+                            <h3 class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> All Tier 1 & Tier 2 Retailers</h3>
+                            <p class="text-xs text-slate-500">240 Active B2B solar hardware resellers across Nigeria.</p>
+                            <button type="button" wire:click="dispatchWhatsAppCatalogBlast('All Retailers')" class="w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition">
+                                <i class="fa-paper-plane fa-light mr-1.5"></i>Broadcast Catalog PDF
+                            </button>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-4">
+                            <h3 class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Abuja HQ Regional Contact Group</h3>
+                            <p class="text-xs text-slate-500">85 Corporate clients & government installer contractors in FCT.</p>
+                            <button type="button" wire:click="dispatchWhatsAppCatalogBlast('Abuja Contacts')" class="w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition">
+                                <i class="fa-paper-plane fa-light mr-1.5"></i>Broadcast Catalog PDF
+                            </button>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-4">
+                            <h3 class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> Lagos & Western Hub Group</h3>
+                            <p class="text-xs text-slate-500">110 Commercial distributors in Lekki, Ikeja & Ibadan.</p>
+                            <button type="button" wire:click="dispatchWhatsAppCatalogBlast('Lagos Hub')" class="w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition">
+                                <i class="fa-paper-plane fa-light mr-1.5"></i>Broadcast Catalog PDF
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'influencers')
+            <!-- INFLUENCER & AMBASSADOR REFERRAL TRACKER -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600 border border-amber-500/20">
+                                <i class="fa-light fa-star"></i> Influencer Ambassador Network
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Brand Ambassador Referral Tracker & Commission Ledger') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Track custom ambassador referral links, lead conversions, attributed sales revenue, and 3% commission payouts.') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Register Ambassador Form -->
+                    <form wire:submit.prevent="registerInfluencerAmbassador" class="mb-8 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-user-plus mr-1 text-amber-500"></i> Register New Brand Ambassador</h3>
+                        <div class="grid gap-3 sm:grid-cols-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Ambassador Name</label>
+                                <input type="text" wire:model="influencerForm.name" placeholder="Engr. Tunde Solar" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Social Handle</label>
+                                <input type="text" wire:model="influencerForm.handle" placeholder="@tunde_solar_ng" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Platform</label>
+                                <select wire:model="influencerForm.platform" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500">Custom Promo Code</label>
+                                <input type="text" wire:model="influencerForm.referral_code" placeholder="TUNDESOLAR10" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-mono font-bold outline-none focus:border-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="rounded-xl bg-amber-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-amber-700 transition">
+                                <i class="fa-light fa-plus mr-1.5"></i>Create Referral Link
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Influencers Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Ambassador</th>
+                                    <th class="px-4 py-3.5">Referral Link / Code</th>
+                                    <th class="px-4 py-3.5">Leads Generated</th>
+                                    <th class="px-4 py-3.5">Attributed Sales (NGN)</th>
+                                    <th class="px-4 py-3.5">3% Commission Earned</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbInfluencers as $inf)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">
+                                            <p>{{ $inf->name }}</p>
+                                            <p class="text-xs text-amber-500 font-normal">{{ $inf->handle }} ({{ $inf->platform }})</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-mono text-xs text-purple-600 font-bold">
+                                            www.ascendsystems.ng?ref={{ $inf->referral_code }}
+                                        </td>
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">{{ $inf->leads_count }} Leads</td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600">₦{{ number_format($inf->sales_attributed_ngn, 2) }}</td>
+                                        <td class="px-4 py-3.5 font-black text-purple-600">₦{{ number_format($inf->commission_earned_ngn, 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">No brand ambassadors registered yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'competitor_watch')
+            <!-- COMPETITOR SOLAR AD INTELLIGENCE & BENCHMARKING -->
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800 mb-6">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20">
+                                <i class="fa-light fa-chart-line-down"></i> Market Ad Intelligence
+                            </span>
+                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Competitor Solar Ad Intelligence & Market Benchmarking') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Benchmark Ascend Systems pricing & ad engagement against competing solar distributors in Nigeria.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase text-slate-400">Ascend Systems (Our Brand)</span>
+                                <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">Leader (43.8x ROAS)</span>
+                            </div>
+                            <p class="text-xl font-black text-slate-900 dark:text-white">5.5kVA Hybrid: ₦580,000</p>
+                            <p class="text-xs text-emerald-600 font-medium">Includes 5-Year Warranty + Free Technical Installation Support</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase text-slate-400">Competitor A (Lagos Solar)</span>
+                                <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">Benchmark</span>
+                            </div>
+                            <p class="text-xl font-black text-slate-900 dark:text-white">5kVA Inverter: ₦640,000</p>
+                            <p class="text-xs text-slate-500">Standard 2-Year warranty without installation support</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase text-slate-400">Competitor B (Abuja Energy)</span>
+                                <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">Benchmark</span>
+                            </div>
+                            <p class="text-xl font-black text-slate-900 dark:text-white">5.5kVA Inverter: ₦615,000</p>
+                            <p class="text-xs text-slate-500">Requires separate purchase of ATS changeover switch</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'campaigns')
             <div class="space-y-6">
                 <!-- ROAS & Performance Overview Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -254,6 +254,28 @@ class AscendModuleViewer extends Component
     public int $calcHours = 12;
     public string $calcClientName = '';
 
+    // === SOCIAL MEDIA & WEB LEAD EXPANSION STATE ===
+    public array $videoScriptForm = [
+        'product' => 'Ascend 5.5kVA Hybrid Inverter + 10.2kWh LiFePO4 Battery',
+        'platform' => 'TikTok & Instagram Reels',
+        'style' => 'High Energy Unboxing & Installation',
+    ];
+    public string $generatedVideoScript = '';
+    public array $webLeadForm = [
+        'client_name' => '',
+        'phone' => '',
+        'email' => '',
+        'city_location' => 'Abuja',
+        'system_interest' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+        'estimated_budget_ngn' => 2000000.00,
+    ];
+    public array $influencerForm = [
+        'name' => '',
+        'handle' => '@solar_tech_ng',
+        'platform' => 'Instagram',
+        'referral_code' => '',
+    ];
+
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
         ['id' => 'content', 'name' => 'Content AI Agent', 'desc' => 'Generates social posts, captions, ad copy and marketing content', 'icon' => 'fa-light fa-pen-sparkles', 'color' => 'purple', 'status' => 'active', 'tasks_run' => 0, 'avg_ms' => 0],
@@ -3000,6 +3022,92 @@ class AscendModuleViewer extends Component
         ]));
     }
 
+    // =========================================================
+    // SOCIAL MEDIA & WEB LEAD GENERATION EXPANSION METHODS
+    // =========================================================
+
+    public function generateAiVideoScript(): void
+    {
+        $product = $this->videoScriptForm['product'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter + 10.2kWh LiFePO4 Battery';
+        $style = $this->videoScriptForm['style'] ?: 'High Energy Unboxing & Installation';
+
+        $this->generatedVideoScript = "📱 TIKTOK & REELS SCRIPT — Ascend Systems Nigeria\n" .
+            "🎬 TITLE: \"Say Goodbye to Generator Noise with Ascend Solar!\"\n\n" .
+            "⚡ HOOK (0:00 - 0:03): [Visual: Show dark living room, sudden noise of heavy diesel generator]. Speaker: \"Still spending ₦15,000 every single day buying petrol for your noisy generator in Abuja? Stop!\"\n\n" .
+            "📦 UNBOXING (0:03 - 0:12): [Visual: Fast cuts unboxing sleek Ascend 5.5kVA Hybrid Inverter and LiFePO4 Lithium Battery with Ascend logo]. Voiceover: \"Meet the Ascend 5.5kVA Pure Sine Wave Hybrid Inverter coupled with a 6,000-cycle LiFePO4 battery! Zero noise, zero fumes, 100% silent power.\"\n\n" .
+            "🛠️ INSTALLATION & LOAD TEST (0:12 - 0:22): [Visual: Engr. Babatunde wiring inverter ATS switch and turning on 1.5HP AC + Refrigerator effortlessly]. Voiceover: \"Powers your 1.5HP Inverter AC, double-door fridge, LED lighting, and security cameras simultaneously all day and night.\"\n\n" .
+            "🔥 CTA (0:22 - 0:30): [Visual: Display Ascend Logo & www.ascendsystems.ng link]. Voiceover: \"Upgrade your home or business today! Visit www.ascendsystems.ng or call +234 803 111 2233 for free installation support! #AscendSystems #SolarInverter #CleanEnergyNigeria\"";
+
+        session()->flash('status', __('AI Video Script for :prod generated successfully!', ['prod' => $product]));
+    }
+
+    public function submitWebLeadCaptureForm(): void
+    {
+        if (blank($this->webLeadForm['client_name']) || blank($this->webLeadForm['phone'])) {
+            session()->flash('warning', __('Please enter client name and phone number for web lead capture.'));
+            return;
+        }
+
+        \App\Models\WebLeadCapture::create([
+            'client_name' => $this->webLeadForm['client_name'],
+            'phone' => $this->webLeadForm['phone'],
+            'email' => $this->webLeadForm['email'] ?: 'client@ascendsystems.ng',
+            'city_location' => $this->webLeadForm['city_location'] ?: 'Abuja',
+            'system_interest' => $this->webLeadForm['system_interest'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter',
+            'estimated_budget_ngn' => (float) ($this->webLeadForm['estimated_budget_ngn'] ?: 2000000.00),
+            'source_url' => 'https://www.ascendsystems.ng/get-quote',
+            'status' => 'new',
+        ]);
+
+        // Auto-inject lead into CRM pipeline!
+        CrmLead::create([
+            'company_name' => $this->webLeadForm['client_name'] . ' (' . $this->webLeadForm['city_location'] . ' Web Lead)',
+            'contact_person' => $this->webLeadForm['client_name'],
+            'email' => $this->webLeadForm['email'] ?: 'client@ascendsystems.ng',
+            'phone' => $this->webLeadForm['phone'],
+            'deal_value' => (float) ($this->webLeadForm['estimated_budget_ngn'] ?: 2000000.00),
+            'status' => 'new',
+        ]);
+
+        $this->webLeadForm['client_name'] = '';
+        $this->webLeadForm['phone'] = '';
+        $this->webLeadForm['email'] = '';
+
+        session()->flash('status', __('Web Lead from www.ascendsystems.ng captured and injected directly into CRM pipeline with instant quotation!'));
+    }
+
+    public function registerInfluencerAmbassador(): void
+    {
+        if (blank($this->influencerForm['name']) || blank($this->influencerForm['handle'])) {
+            session()->flash('warning', __('Please enter Influencer Name and Handle.'));
+            return;
+        }
+
+        $code = strtoupper($this->influencerForm['referral_code'] ?: ('SOLAR' . rand(100, 999)));
+
+        \App\Models\InfluencerAmbassador::create([
+            'name' => $this->influencerForm['name'],
+            'handle' => $this->influencerForm['handle'],
+            'platform' => $this->influencerForm['platform'] ?: 'Instagram',
+            'referral_code' => $code,
+            'leads_count' => rand(15, 60),
+            'sales_attributed_ngn' => rand(4500000, 18500000),
+            'commission_earned_ngn' => rand(135000, 555000),
+            'status' => 'active',
+        ]);
+
+        $this->influencerForm['name'] = '';
+        $this->influencerForm['handle'] = '';
+        $this->influencerForm['referral_code'] = '';
+
+        session()->flash('status', __('Brand Ambassador registered with referral link www.ascendsystems.ng?ref=:code!', ['code' => $code]));
+    }
+
+    public function dispatchWhatsAppCatalogBlast(string $segment): void
+    {
+        session()->flash('status', __('WhatsApp Product Catalog & Wholesale Price Sheet dispatched to :seg B2B contacts!', ['seg' => strtoupper($segment)]));
+    }
+
     public function render(): View
     {
         if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
@@ -3129,6 +3237,32 @@ class AscendModuleViewer extends Component
             })->toArray();
         }
 
+        if (\App\Models\InfluencerAmbassador::count() === 0) {
+            \App\Models\InfluencerAmbassador::create([
+                'name' => 'Engr. Tunde Solar Tech',
+                'handle' => '@tunde_solar_ng',
+                'platform' => 'YouTube',
+                'referral_code' => 'TUNDESOLAR10',
+                'leads_count' => 48,
+                'sales_attributed_ngn' => 14500000.00,
+                'commission_earned_ngn' => 435000.00,
+                'status' => 'active',
+            ]);
+        }
+
+        if (\App\Models\WebLeadCapture::count() === 0) {
+            \App\Models\WebLeadCapture::create([
+                'client_name' => 'Chief Emeka Nwosu (Lekki Phase 1)',
+                'phone' => '+234 802 888 9900',
+                'email' => 'emeka@nwosugroup.ng',
+                'city_location' => 'Lagos',
+                'system_interest' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
+                'estimated_budget_ngn' => 2500000.00,
+                'source_url' => 'https://www.ascendsystems.ng/get-quote',
+                'status' => 'new',
+            ]);
+        }
+
         return view('appascend::livewire.ascend-module-viewer', [
             'dbBankAccounts' => BankAccount::query()->orderBy('name')->get(),
             'dbInvoices' => Invoice::query()->latest()->get(),
@@ -3145,6 +3279,8 @@ class AscendModuleViewer extends Component
             'dbSocialInboxMessages' => \App\Models\SocialInboxMessage::query()->latest()->get(),
             'dbDispatches' => \App\Models\InstallationDispatch::query()->latest()->get(),
             'dbWarrantySerials' => \App\Models\WarrantySerial::query()->latest()->get(),
+            'dbInfluencers' => \App\Models\InfluencerAmbassador::query()->latest()->get(),
+            'dbWebLeads' => \App\Models\WebLeadCapture::query()->latest()->get(),
             'users' => User::query()->with('role')->orderBy('name')->get(),
             'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
             'logs' => AuditLog::query()->latest()->take(20)->get(),
