@@ -26,7 +26,7 @@ use Modules\AppAffiliate\Models\AffiliateProfile;
 use Modules\AppAffiliate\Models\AffiliateWithdrawal;
 use Modules\AppCredits\Support\CreditService;
 
-#[Fillable(['name', 'username', 'email', 'referral_code', 'referred_by_user_id', 'avatar_path', 'avatar_disk', 'locale', 'timezone', 'role_id', 'is_super_admin', 'plan_id', 'next_plan_id', 'plan_started_at', 'plan_expires_at', 'password'])]
+#[Fillable(['name', 'username', 'email', 'referral_code', 'referred_by_user_id', 'avatar_path', 'avatar_disk', 'locale', 'timezone', 'role_id', 'is_super_admin', 'plan_id', 'next_plan_id', 'plan_started_at', 'plan_expires_at', 'password', 'distributor_tier', 'credit_limit', 'credit_balance'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
@@ -47,6 +47,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'plan_started_at' => 'datetime',
             'plan_expires_at' => 'datetime',
             'next_plan_id' => 'integer',
+            'credit_limit' => 'decimal:2',
+            'credit_balance' => 'decimal:2',
         ];
     }
 

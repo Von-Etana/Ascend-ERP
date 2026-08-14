@@ -23,15 +23,22 @@ class RetailerOrder extends Model
         'notes',
         'invoice_id',
         'approved_by_user_id',
+        'paystack_reference',
+        'paystack_status',
+        'scanned_items',
+        'warehouse_location',
+        'dispatched_at',
     ];
 
     protected function casts(): array
     {
         return [
             'items' => 'array',
+            'scanned_items' => 'array',
             'subtotal' => 'decimal:2',
             'tax' => 'decimal:2',
             'total_amount' => 'decimal:2',
+            'dispatched_at' => 'datetime',
         ];
     }
 

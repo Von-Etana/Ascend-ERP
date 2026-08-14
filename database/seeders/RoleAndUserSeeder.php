@@ -51,10 +51,19 @@ class RoleAndUserSeeder extends Seeder
                     'role_id' => $role->id,
                     'is_super_admin' => false,
                     'email_verified_at' => now(),
+                    'distributor_tier' => $slug === 'retailer' ? 'tier1_platinum' : 'standard',
+                    'credit_limit' => $slug === 'retailer' ? 5000000.00 : 0.00,
+                    'credit_balance' => $slug === 'retailer' ? 3500000.00 : 0.00,
                 ]
             );
             
-            $user->update(['role_id' => $role->id, 'password' => Hash::make($uniquePassword)]);
+            $user->update([
+                'role_id' => $role->id,
+                'password' => Hash::make($uniquePassword),
+                'distributor_tier' => $slug === 'retailer' ? 'tier1_platinum' : 'standard',
+                'credit_limit' => $slug === 'retailer' ? 5000000.00 : 0.00,
+                'credit_balance' => $slug === 'retailer' ? 3500000.00 : 0.00,
+            ]);
 
             $users[] = [
                 'role' => $roleName,

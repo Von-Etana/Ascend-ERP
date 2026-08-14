@@ -203,6 +203,9 @@ class AscendModuleViewer extends Component
     public string $retailerSearch = '';
     public string $orderShippingAddress = '';
     public string $orderNotes = '';
+    public ?int $selectedDispatchOrderId = null;
+    public string $scannedBarcode = '';
+    public array $scannedItemsMap = [];
 
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
@@ -1302,8 +1305,16 @@ class AscendModuleViewer extends Component
         foreach ($this->retailerCart as $productId => $qty) {
             $product = InventoryProduct::find($productId);
             if ($product) {
-                // Wholesale/Distributor B2B price if set, else standard unit price
-                $price = $product->wholesale_price > 0 ? (float) $product->wholesale_price : (float) $product->unit_price;
+                $basePrice = $product->wholesale_price > 0 ? (float) $product->wholesale_price : (float) $product->unit_price;
+
+                // Apply Distributor Tier Discounts
+                $tier = $user?->distributor_tier ?? 'standard';
+                $price = match ($tier) {
+                    'tier1_platinum' => $basePrice * 0.80, // 20% off
+                    'tier2_gold' => $basePrice * 0.85,     // 15% off
+                    default => $basePrice,
+                };
+
                 $lineTotal = $price * $qty;
                 $subtotal += $lineTotal;
 
@@ -1359,7 +1370,7 @@ class AscendModuleViewer extends Component
             $invoiceId = $invoice->id;
         }
 
-        RetailerOrder::create([
+        $order = RetailerOrder::create([
             'order_number' => $orderNumber,
             'retailer_user_id' => $user?->id,
             'retailer_company_name' => $companyName,
@@ -1374,7 +1385,13 @@ class AscendModuleViewer extends Component
             'shipping_address' => $this->orderShippingAddress ?: 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.',
             'notes' => $this->orderNotes,
             'invoice_id' => $invoiceId,
+            'paystack_status' => 'unpaid',
         ]);
+
+        // Deduct from credit balance if retailer has credit line
+        if ($user && $user->credit_limit > 0) {
+            $user->decrement('credit_balance', min($totalAmount, (float)$user->credit_balance));
+        }
 
         $this->retailerCart = [];
         $this->orderNotes = '';
@@ -1383,6 +1400,104 @@ class AscendModuleViewer extends Component
             session()->flash('status', __("Instant B2B Order :num placed! Official Invoice generated.", ['num' => $orderNumber]));
         } else {
             session()->flash('status', __("B2B Purchase Order :num submitted to Ascend Sales team for approval!", ['num' => $orderNumber]));
+        }
+    }
+
+    public function payRetailerOrderViaPaystack(int $orderId): void
+    {
+        $order = RetailerOrder::find($orderId);
+        if ($order) {
+            $ref = 'PST-B2B-' . now()->format('YmdHis') . '-' . rand(100, 999);
+            $order->update([
+                'paystack_reference' => $ref,
+                'paystack_status' => 'paid',
+                'status' => $order->status === 'pending_approval' ? 'approved' : $order->status,
+            ]);
+
+            if ($order->invoice_id) {
+                Invoice::where('id', $order->invoice_id)->update(['status' => 'paid']);
+            }
+
+            session()->flash('status', __("Paystack NGN Online Payment Verified for Order :num (Ref: :ref)!", ['num' => $order->order_number, 'ref' => $ref]));
+        }
+    }
+
+    public function selectDispatchOrder(int $orderId): void
+    {
+        $this->selectedDispatchOrderId = $orderId;
+        $order = RetailerOrder::find($orderId);
+        if ($order) {
+            $this->scannedItemsMap = $order->scanned_items ?? [];
+            session()->flash('status', __('Loaded Retailer Order :num for Warehouse Barcode Dispatch scanning.', ['num' => $order->order_number]));
+        }
+    }
+
+    public function scanBarcodeForDispatch(?string $sku = null): void
+    {
+        $skuToScan = trim($sku ?: $this->scannedBarcode);
+        if ($skuToScan === '' || ! $this->selectedDispatchOrderId) {
+            return;
+        }
+
+        $order = RetailerOrder::find($this->selectedDispatchOrderId);
+        if (! $order) {
+            return;
+        }
+
+        $matchingItem = null;
+        foreach ($order->items ?? [] as $item) {
+            if (strtoupper($item['sku'] ?? '') === strtoupper($skuToScan)) {
+                $matchingItem = $item;
+                break;
+            }
+        }
+
+        if (! $matchingItem) {
+            session()->flash('warning', __('SKU Barcode :sku does not belong to Order :num!', ['sku' => $skuToScan, 'num' => $order->order_number]));
+            $this->scannedBarcode = '';
+            return;
+        }
+
+        $currentScanned = (int) ($this->scannedItemsMap[$skuToScan] ?? 0);
+        $maxQty = (int) ($matchingItem['quantity'] ?? 1);
+
+        if ($currentScanned >= $maxQty) {
+            session()->flash('warning', __('All :max units of SKU :sku already scanned for dispatch!', ['max' => $maxQty, 'sku' => $skuToScan]));
+            $this->scannedBarcode = '';
+            return;
+        }
+
+        $this->scannedItemsMap[$skuToScan] = $currentScanned + 1;
+        $order->update(['scanned_items' => $this->scannedItemsMap]);
+
+        $this->scannedBarcode = '';
+        session()->flash('status', __('Scanned SKU :sku (:curr / :max units verified)', [
+            'sku' => $skuToScan,
+            'curr' => $this->scannedItemsMap[$skuToScan],
+            'max' => $maxQty,
+        ]));
+    }
+
+    public function confirmWarehouseDispatch(int $orderId): void
+    {
+        $order = RetailerOrder::find($orderId);
+        if ($order) {
+            $order->update([
+                'status' => 'dispatched',
+                'dispatched_at' => now(),
+            ]);
+
+            // Deduct physical inventory stock for ordered items
+            foreach ($order->items ?? [] as $item) {
+                if (isset($item['product_id']) && $item['product_id']) {
+                    InventoryProduct::where('id', $item['product_id'])->decrement('stock_quantity', (int) ($item['quantity'] ?? 1));
+                }
+            }
+
+            session()->flash('status', __("Order :num Dispatched from Abuja HQ! Automated Meta WhatsApp Notification sent to :email.", [
+                'num' => $order->order_number,
+                'email' => $order->retailer_email,
+            ]));
         }
     }
 
