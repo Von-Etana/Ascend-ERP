@@ -255,12 +255,39 @@ class AscendModuleViewer extends Component
 
     // === SOLAR CALCULATOR STATE ===
     public array $calcQty = [
+        // Cooling & Air Conditioning
+        'ac_1hp' => 0,
+        'ac_15hp' => 1,
+        'ac_2hp' => 0,
+        'fans' => 4,
         'fridge' => 1,
-        'ac' => 1,
-        'lights' => 8,
-        'tv' => 2,
-        'pump' => 1,
+        'freezer' => 1,
+
+        // Kitchen & Heavy Duty Appliances
+        'microwave' => 1,
+        'electric_kettle' => 0,
+        'blender' => 1,
+        'water_heater' => 0,
+        'iron' => 1,
+        'washing_machine' => 0,
+
+        // Lighting, TV & Entertainment
+        'lights' => 12,
+        'tv_55' => 2,
+        'tv_large' => 0,
+        'decoder_sound' => 1,
+
+        // Water Pumps & Facility
+        'pump_1hp' => 1,
+        'pump_2hp' => 0,
+        'pressure_pump' => 0,
+
+        // Computing, Starlink, CCTV & Office
         'laptops' => 3,
+        'desktop' => 1,
+        'wifi_starlink' => 1,
+        'cctv_system' => 1,
+        'server_rack' => 0,
     ];
     public int $calcHours = 12;
     public string $calcClientName = '';
@@ -3235,43 +3262,201 @@ class AscendModuleViewer extends Component
 
     public function calculateSolarRequirement(): array
     {
-        $fridge = ((int) ($this->calcQty['fridge'] ?? 0)) * 300;
-        $ac = ((int) ($this->calcQty['ac'] ?? 0)) * 1200;
-        $lights = ((int) ($this->calcQty['lights'] ?? 0)) * 15;
-        $tv = ((int) ($this->calcQty['tv'] ?? 0)) * 150;
-        $pump = ((int) ($this->calcQty['pump'] ?? 0)) * 750;
-        $laptops = ((int) ($this->calcQty['laptops'] ?? 0)) * 60;
+        // 1. Cooling & Air Conditioning
+        $coolingWatts = (((int) ($this->calcQty['ac_1hp'] ?? 0)) * 800)
+            + (((int) ($this->calcQty['ac_15hp'] ?? 0)) * 1200)
+            + (((int) ($this->calcQty['ac_2hp'] ?? 0)) * 1800)
+            + (((int) ($this->calcQty['fans'] ?? 0)) * 75)
+            + (((int) ($this->calcQty['fridge'] ?? 0)) * 250)
+            + (((int) ($this->calcQty['freezer'] ?? 0)) * 350);
 
-        $totalWatts = $fridge + $ac + $lights + $tv + $pump + $laptops;
+        // 2. Kitchen & Heating Appliances
+        $kitchenWatts = (((int) ($this->calcQty['microwave'] ?? 0)) * 1200)
+            + (((int) ($this->calcQty['electric_kettle'] ?? 0)) * 1500)
+            + (((int) ($this->calcQty['blender'] ?? 0)) * 400)
+            + (((int) ($this->calcQty['water_heater'] ?? 0)) * 2000)
+            + (((int) ($this->calcQty['iron'] ?? 0)) * 1000)
+            + (((int) ($this->calcQty['washing_machine'] ?? 0)) * 500);
+
+        // 3. Lighting & Entertainment
+        $lightingTvWatts = (((int) ($this->calcQty['lights'] ?? 0)) * 15)
+            + (((int) ($this->calcQty['tv_55'] ?? 0)) * 150)
+            + (((int) ($this->calcQty['tv_large'] ?? 0)) * 280)
+            + (((int) ($this->calcQty['decoder_sound'] ?? 0)) * 120);
+
+        // 4. Water Pumps & Facility
+        $pumpWatts = (((int) ($this->calcQty['pump_1hp'] ?? 0)) * 750)
+            + (((int) ($this->calcQty['pump_2hp'] ?? 0)) * 1500)
+            + (((int) ($this->calcQty['pressure_pump'] ?? 0)) * 370);
+
+        // 5. Computing, Starlink, CCTV & Office
+        $ictWatts = (((int) ($this->calcQty['laptops'] ?? 0)) * 65)
+            + (((int) ($this->calcQty['desktop'] ?? 0)) * 250)
+            + (((int) ($this->calcQty['wifi_starlink'] ?? 0)) * 75)
+            + (((int) ($this->calcQty['cctv_system'] ?? 0)) * 100)
+            + (((int) ($this->calcQty['server_rack'] ?? 0)) * 600);
+
+        $totalWatts = $coolingWatts + $kitchenWatts + $lightingTvWatts + $pumpWatts + $ictWatts;
         if ($totalWatts === 0) {
             $totalWatts = 2850;
         }
 
-        $dailyKwh = round(($totalWatts * $this->calcHours) / 1000, 2);
+        $surgeWatts = (int) ($totalWatts + ((((int) ($this->calcQty['ac_1hp'] ?? 0)) + ((int) ($this->calcQty['ac_15hp'] ?? 0)) + ((int) ($this->calcQty['ac_2hp'] ?? 0))) * 800) + ((((int) ($this->calcQty['pump_1hp'] ?? 0)) + ((int) ($this->calcQty['pump_2hp'] ?? 0))) * 1000));
+        $calculatedKva = round(($totalWatts / 0.85) / 1000, 1);
+        $dailyKwh = round(($totalWatts * 0.65 * max(1, $this->calcHours)) / 1000, 2);
+        $monthlyFuelSavingsNgn = (float) round(($dailyKwh * 0.45 * 30) * 1200, 0);
 
-        $inverter = $totalWatts > 4000 ? 'Ascend 10.2kVA Commercial Hybrid Solar Inverter' : 'Ascend 5.5kVA Hybrid Solar Inverter';
-        $battery = $dailyKwh > 20 ? 'Ascend 14.3kWh High-Capacity LiFePO4 Lithium Storage' : 'Ascend 10.2kWh LiFePO4 Lithium Battery Storage';
-        $panels = $totalWatts > 4000 ? '12x Ascend 550W Mono Solar Panels' : '8x Ascend 550W Mono Solar Panels';
-        $estTotal = $totalWatts > 4000 ? 3850000.00 : 2510000.00;
+        if ($totalWatts <= 3000) {
+            $inverter = 'Ascend 3.5kVA / 24V Pure Sine Wave Hybrid Solar Inverter';
+            $inverterSku = 'SLR-INV-35KW';
+            $inverterPrice = 850000.00;
+            $battery = 'Ascend 5.12kWh / 100Ah LiFePO4 Lithium Battery Storage';
+            $batterySku = 'BAT-LFP-05KW';
+            $batteryPrice = 1100000.00;
+            $panels = '4x Ascend 550W Tier-1 Mono Solar Panels (2.2kW Array)';
+            $panelsSku = 'SLR-PNL-550W';
+            $panelQty = 4;
+            $panelPrice = 125000.00;
+            $estTotal = 2450000.00;
+        } elseif ($totalWatts <= 5500) {
+            $inverter = 'Ascend 5.5kVA / 48V Pure Sine Wave Hybrid Solar Inverter';
+            $inverterSku = 'SLR-INV-55KW';
+            $inverterPrice = 1350000.00;
+            $battery = 'Ascend 10.2kWh / 200Ah LiFePO4 Lithium Battery Storage';
+            $batterySku = 'BAT-LFP-10KW';
+            $batteryPrice = 2200000.00;
+            $panels = '8x Ascend 550W Tier-1 Mono Solar Panels (4.4kW Array)';
+            $panelsSku = 'SLR-PNL-550W';
+            $panelQty = 8;
+            $panelPrice = 125000.00;
+            $estTotal = 3850000.00;
+        } elseif ($totalWatts <= 10000) {
+            $inverter = 'Ascend 10.2kVA / 48V Commercial Dual MPPT Hybrid Solar Inverter';
+            $inverterSku = 'SLR-INV-10KW';
+            $inverterPrice = 3850000.00;
+            $battery = 'Ascend 14.3kWh / 280Ah High-Capacity LiFePO4 Battery Bank';
+            $batterySku = 'BAT-LFP-14KW';
+            $batteryPrice = 3200000.00;
+            $panels = '14x Ascend 550W Tier-1 Mono Solar Panels (7.7kW Array)';
+            $panelsSku = 'SLR-PNL-550W';
+            $panelQty = 14;
+            $panelPrice = 125000.00;
+            $estTotal = 5850000.00;
+        } elseif ($totalWatts <= 15000) {
+            $inverter = 'Ascend 15kVA Three-Phase Commercial Hybrid Power Inverter System';
+            $inverterSku = 'SLR-INV-15KW';
+            $inverterPrice = 5200000.00;
+            $battery = 'Ascend 20.4kWh Server Rack Dual LiFePO4 Storage Module';
+            $batterySku = 'BAT-LFP-20KW';
+            $batteryPrice = 4500000.00;
+            $panels = '20x Ascend 550W Tier-1 Mono Solar Panels (11.0kW Array)';
+            $panelsSku = 'SLR-PNL-550W';
+            $panelQty = 20;
+            $panelPrice = 125000.00;
+            $estTotal = 8500000.00;
+        } else {
+            $inverter = 'Ascend 20kVA+ Industrial Hybrid Solar Microgrid System';
+            $inverterSku = 'SLR-INV-20KW';
+            $inverterPrice = 7500000.00;
+            $battery = 'Ascend 30.7kWh+ Industrial Scalable LiFePO4 Array';
+            $batterySku = 'BAT-LFP-30KW';
+            $batteryPrice = 6800000.00;
+            $panels = '30x Ascend 550W Tier-1 Mono Solar Panels (16.5kW Array)';
+            $panelsSku = 'SLR-PNL-550W';
+            $panelQty = 30;
+            $panelPrice = 125000.00;
+            $estTotal = 14500000.00;
+        }
 
-        \App\Models\SolarCalculatorLog::create([
-            'client_name' => $this->calcClientName ?: 'Abuja Client Sizing',
-            'total_wattage' => $totalWatts,
-            'daily_kwh' => $dailyKwh,
-            'recommended_inverter' => $inverter,
-            'recommended_battery' => $battery,
-            'recommended_panels' => $panels,
-            'estimated_total_ngn' => $estTotal,
-        ]);
+        try {
+            \App\Models\SolarCalculatorLog::create([
+                'client_name' => $this->calcClientName ?: 'Abuja Client Sizing',
+                'total_wattage' => $totalWatts,
+                'daily_kwh' => $dailyKwh,
+                'recommended_inverter' => $inverter,
+                'recommended_battery' => $battery,
+                'recommended_panels' => $panels,
+                'estimated_total_ngn' => $estTotal,
+            ]);
+        } catch (\Throwable) {}
 
         return [
             'total_wattage' => $totalWatts,
+            'surge_wattage' => $surgeWatts,
+            'calculated_kva' => $calculatedKva,
             'daily_kwh' => $dailyKwh,
+            'cooling_watts' => $coolingWatts,
+            'kitchen_watts' => $kitchenWatts,
+            'lighting_tv_watts' => $lightingTvWatts,
+            'pump_watts' => $pumpWatts,
+            'ict_watts' => $ictWatts,
             'recommended_inverter' => $inverter,
+            'inverter_sku' => $inverterSku,
+            'inverter_price' => $inverterPrice,
             'recommended_battery' => $battery,
+            'battery_sku' => $batterySku,
+            'battery_price' => $batteryPrice,
             'recommended_panels' => $panels,
+            'panels_sku' => $panelsSku,
+            'panel_qty' => $panelQty,
+            'panel_price' => $panelPrice,
             'estimated_total_ngn' => $estTotal,
+            'monthly_fuel_savings_ngn' => $monthlyFuelSavingsNgn,
         ];
+    }
+
+    public function convertCalculatedSolarToQuote(): void
+    {
+        $calc = $this->calculateSolarRequirement();
+
+        $this->openCreateModal('price_quote');
+        $this->form['client_name'] = $this->calcClientName ?: 'Solar Installation Client';
+        $this->form['notes'] = "• Tailored Solar Package based on {$calc['total_wattage']}W Peak Load & {$calc['daily_kwh']} kWh Daily Consumption.\n• Includes {$calc['recommended_inverter']}, {$calc['recommended_battery']}, and {$calc['recommended_panels']}.\n• 5-Year Comprehensive Warranty, Turnkey Cabling, DC Combiner & Surge Protection.";
+
+        $this->invoiceItems = [
+            [
+                'product_id' => '',
+                'sku' => $calc['inverter_sku'],
+                'description' => $calc['recommended_inverter'],
+                'quantity' => 1,
+                'unit_price' => $calc['inverter_price'],
+                'discount_percent' => 0,
+                'amount' => $calc['inverter_price'],
+            ],
+            [
+                'product_id' => '',
+                'sku' => $calc['battery_sku'],
+                'description' => $calc['recommended_battery'],
+                'quantity' => 1,
+                'unit_price' => $calc['battery_price'],
+                'discount_percent' => 0,
+                'amount' => $calc['battery_price'],
+            ],
+            [
+                'product_id' => '',
+                'sku' => $calc['panels_sku'],
+                'description' => $calc['recommended_panels'],
+                'quantity' => $calc['panel_qty'],
+                'unit_price' => $calc['panel_price'],
+                'discount_percent' => 0,
+                'amount' => $calc['panel_qty'] * $calc['panel_price'],
+            ],
+            [
+                'product_id' => '',
+                'sku' => 'SRV-SOLAR-INST',
+                'description' => 'Turnkey Solar Installation, Rail Mounting, DC Combiner Box, Cabling & Commissioning',
+                'quantity' => 1,
+                'unit_price' => 350000.00,
+                'discount_percent' => 0,
+                'amount' => 350000.00,
+            ],
+        ];
+
+        $this->recalculateInvoiceTotals();
+        session()->flash('status', __('Solar Sizing (:watts W / :kva kVA) successfully transferred to Quotation Studio!', [
+            'watts' => number_format($calc['total_wattage']),
+            'kva' => $calc['calculated_kva'],
+        ]));
     }
 
     public function addCalculatedBundleToCart(): void

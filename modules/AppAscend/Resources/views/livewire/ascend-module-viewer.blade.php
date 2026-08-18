@@ -1661,7 +1661,7 @@
     <!-- MODULE 3: SALES ORDERS & REVENUE ENHANCED -->
     @if ($moduleKey === 'sales')
         @if ($activeTab === 'solar_calculator')
-            <!-- SOLAR CAPACITY & BATTERY SIZING CALCULATOR ENGINE -->
+            <!-- SOLAR CAPACITY, APPLIANCE AUDIT & BATTERY SIZING CALCULATOR ENGINE -->
             @php $calcRes = $this->calculateSolarRequirement(); @endphp
             <div class="space-y-6">
                 <!-- Calculator Header Banner -->
@@ -1669,102 +1669,352 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800 mb-6">
                         <div>
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20">
-                                <i class="fa-light fa-calculator-simple"></i> Solar System Sizing Engine
+                                <i class="fa-light fa-calculator-simple"></i> Solar Engineering Sizing Studio
                             </span>
-                            <h2 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Interactive Solar Inverter & Battery Capacity Calculator') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Select household or commercial appliances to instantly compute peak load (Watts), daily energy requirement (kWh), and get auto-recommended Ascend inverter & battery packages.') }}</p>
+                            <h2 class="mt-2 text-xl font-extrabold text-slate-950 dark:text-white">{{ __('Comprehensive Solar Inverter, Battery & Appliance Load Calculator') }}</h2>
+                            <p class="text-xs font-medium text-slate-500">{{ __('Audit residential or commercial appliance loads across cooling, kitchen, pumping, lighting, and ICT equipment. Automatically calculates surge demands and matches with Ascend solar bundles.') }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" wire:click="convertCalculatedSolarToQuote" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition active:scale-95">
+                                <i class="fa-light fa-file-signature"></i>{{ __('Transfer to Quotation Studio') }}
+                            </button>
                         </div>
                     </div>
 
-                    <div class="grid gap-6 lg:grid-cols-2">
-                        <!-- Appliance Selection Form -->
-                        <div class="space-y-4 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-plug-circle-bolt text-amber-500 mr-1"></i> Appliance Count & Operating Hours</h3>
-                            
-                            <div class="grid gap-3 sm:grid-cols-2">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Refrigerators / Deep Freezers (300W)</label>
-                                    <input type="number" min="0" wire:model.live="calcQty.fridge" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <!-- Client Sizing Header & Backup Hours -->
+                    <div class="mb-6 grid gap-4 sm:grid-cols-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+                        <div class="sm:col-span-2">
+                            <label class="block text-[10px] font-bold uppercase text-slate-400">Client / Site Project Name</label>
+                            <input type="text" wire:model.live="calcClientName" placeholder="e.g. Alhaji Mustapha Residential Villa (Maitama, Abuja)" class="mt-1 w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400">Desired Daily Backup Hours</label>
+                            <div class="flex items-center gap-2 mt-1">
+                                <input type="number" min="1" max="24" wire:model.live="calcHours" class="w-24 rounded-xl border border-slate-200 p-2 text-xs font-black text-center outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                <span class="text-xs font-bold text-slate-500">Hours / Day</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 lg:grid-cols-12">
+                        <!-- Left Column: Categorized Detailed Appliances -->
+                        <div class="lg:col-span-7 space-y-5">
+                            <!-- Category 1: Cooling, ACs & Refrigeration -->
+                            <div class="rounded-2xl border border-blue-500/20 bg-blue-50/20 p-4 dark:bg-blue-950/10 space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2 dark:border-slate-800">
+                                    <span class="text-xs font-extrabold text-blue-800 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-light fa-snowflake text-blue-500"></i>{{ __('1. Cooling, Air Conditioning & Refrigeration') }}
+                                    </span>
+                                    <span class="text-[11px] font-bold text-blue-600 dark:text-blue-400 font-mono">{{ number_format($calcRes['cooling_watts']) }} W</span>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">1.5HP Inverter Air Conditioners (1200W)</label>
-                                    <input type="number" min="0" wire:model.live="calcQty.ac" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">LED Lighting Points (15W)</label>
-                                    <input type="number" min="0" wire:model.live="calcQty.lights" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Smart TVs & Decoders (150W)</label>
-                                    <input type="number" min="0" wire:model.live="calcQty.tv" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Water Pumping Machine (750W)</label>
-                                    <input type="number" min="0" wire:model.live="calcQty.pump" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Laptops, WiFi & Network Racks (60W)</label>
-                                    <input type="number" min="0" wire:model.live="calcQty.laptops" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">1.0 HP Inverter AC</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">800 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.ac_1hp" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">1.5 HP Inverter AC</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">1,200 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.ac_15hp" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">2.0 HP Inverter AC</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">1,800 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.ac_2hp" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Standing & Ceiling Fans</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">75 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.fans" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Double-Door Refrigerator</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">250 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.fridge" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Chest Deep Freezer</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">350 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.freezer" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Desired Daily Backup Hours</label>
-                                <input type="number" min="1" max="24" wire:model.live="calcHours" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-bold outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            <!-- Category 2: Kitchen & Heavy Draw Appliances -->
+                            <div class="rounded-2xl border border-amber-500/20 bg-amber-50/20 p-4 dark:bg-amber-950/10 space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2 dark:border-slate-800">
+                                    <span class="text-xs font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-light fa-kitchen-set text-amber-500"></i>{{ __('2. Kitchen, Laundry & Heating Appliances') }}
+                                    </span>
+                                    <span class="text-[11px] font-bold text-amber-600 dark:text-amber-400 font-mono">{{ number_format($calcRes['kitchen_watts']) }} W</span>
+                                </div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Microwave Oven</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">1,200 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.microwave" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-amber-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Electric Kettle / Dispenser</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">1,500 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.electric_kettle" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-amber-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Food Blender / Processor</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">400 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.blender" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-amber-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Electric Steam Iron</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">1,000 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.iron" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-amber-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Washing Machine</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">500 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.washing_machine" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-amber-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Instant Water Heater</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">2,000 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.water_heater" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-amber-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category 3: Lighting & Entertainment -->
+                            <div class="rounded-2xl border border-purple-500/20 bg-purple-50/20 p-4 dark:bg-purple-950/10 space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2 dark:border-slate-800">
+                                    <span class="text-xs font-extrabold text-purple-800 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-light fa-tv text-purple-500"></i>{{ __('3. Lighting, TV & Entertainment') }}
+                                    </span>
+                                    <span class="text-[11px] font-bold text-purple-600 dark:text-purple-400 font-mono">{{ number_format($calcRes['lighting_tv_watts']) }} W</span>
+                                </div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">LED Lighting Points</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">15 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.lights" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-purple-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Smart TV 50"-65"</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">150 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.tv_55" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-purple-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Large Screen TV 75"+ / Cinema</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">280 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.tv_large" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-purple-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Soundbar, Decoder & Console</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">120 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.decoder_sound" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-purple-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category 4: Water Pumps & Boreholes -->
+                            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-50/20 p-4 dark:bg-cyan-950/10 space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2 dark:border-slate-800">
+                                    <span class="text-xs font-extrabold text-cyan-800 dark:text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-light fa-faucet-drip text-cyan-500"></i>{{ __('4. Water Pumps & Borehole Facilities') }}
+                                    </span>
+                                    <span class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 font-mono">{{ number_format($calcRes['pump_watts']) }} W</span>
+                                </div>
+                                <div class="grid gap-3 sm:grid-cols-3">
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">1.0 HP Water Pump</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">750 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.pump_1hp" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-cyan-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">2.0 HP Borehole Pump</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">1,500 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.pump_2hp" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-cyan-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Pressure Booster</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">370 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.pressure_pump" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-cyan-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category 5: Computing, Starlink, CCTV & Office -->
+                            <div class="rounded-2xl border border-emerald-500/20 bg-emerald-50/20 p-4 dark:bg-emerald-950/10 space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2 dark:border-slate-800">
+                                    <span class="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-light fa-network-wired text-emerald-500"></i>{{ __('5. Computing, Starlink, CCTV & Network Racks') }}
+                                    </span>
+                                    <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 font-mono">{{ number_format($calcRes['ict_watts']) }} W</span>
+                                </div>
+                                <div class="grid gap-3 sm:grid-cols-3">
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Laptops / Macs</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">65 Watts each</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.laptops" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Desktop PC & Screens</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">250 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.desktop" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Starlink & WiFi Routers</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">75 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.wifi_starlink" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">CCTV DVR + Cameras</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">100 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.cctv_system" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                    <div class="sm:col-span-2 rounded-xl bg-white p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Server Rack & Network Switch</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold">600 Watts</p>
+                                        </div>
+                                        <input type="number" min="0" wire:model.live="calcQty.server_rack" class="w-16 rounded-lg border border-slate-200 p-1.5 text-xs font-bold text-center outline-none focus:border-emerald-500 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Auto-Recommendation Card -->
-                        <div class="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-6 dark:border-emerald-800 dark:bg-emerald-950/20 flex flex-col justify-between space-y-6">
-                            <div>
-                                <span class="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white uppercase tracking-wider">
-                                    AI Recommended Package
-                                </span>
+                        <!-- Right Column: Engineering Load Analysis & Sizing Recommendation Panel -->
+                        <div class="lg:col-span-5 space-y-5">
+                            <div class="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-6 dark:border-emerald-800 dark:bg-emerald-950/20 space-y-6 shadow-sm">
+                                <div class="flex items-center justify-between border-b pb-3 dark:border-emerald-800/40">
+                                    <span class="rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-black text-white uppercase tracking-wider shadow-sm">
+                                        <i class="fa-light fa-brain mr-1"></i>AI Sizing Engine
+                                    </span>
+                                    <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                                        Required: ~{{ $calcRes['calculated_kva'] }} kVA
+                                    </span>
+                                </div>
 
-                                <div class="mt-4 grid grid-cols-2 gap-4 border-b pb-4 dark:border-emerald-800/40">
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-400 uppercase">Calculated Peak Load</p>
-                                        <p class="text-2xl font-black text-slate-900 dark:text-white">{{ number_format($calcRes['total_wattage']) }} Watts</p>
+                                <!-- Key Load Metrics -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="rounded-xl bg-white p-3.5 dark:bg-slate-900 shadow-xs border border-emerald-500/10">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase">Continuous Load</p>
+                                        <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">{{ number_format($calcRes['total_wattage']) }} <span class="text-xs text-slate-400 font-semibold">W</span></p>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-400 uppercase">Daily Energy Needed</p>
-                                        <p class="text-2xl font-black text-emerald-600">{{ number_format($calcRes['daily_kwh'], 1) }} kWh</p>
+                                    <div class="rounded-xl bg-white p-3.5 dark:bg-slate-900 shadow-xs border border-emerald-500/10">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase">Peak Surge (Motors)</p>
+                                        <p class="mt-1 text-2xl font-black text-amber-600">{{ number_format($calcRes['surge_wattage']) }} <span class="text-xs text-slate-400 font-semibold">W</span></p>
+                                    </div>
+                                    <div class="rounded-xl bg-white p-3.5 dark:bg-slate-900 shadow-xs border border-emerald-500/10">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase">Daily Energy Needed</p>
+                                        <p class="mt-1 text-2xl font-black text-emerald-600">{{ number_format($calcRes['daily_kwh'], 1) }} <span class="text-xs text-slate-400 font-semibold">kWh</span></p>
+                                    </div>
+                                    <div class="rounded-xl bg-white p-3.5 dark:bg-slate-900 shadow-xs border border-emerald-500/10">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase">Est. Monthly Fuel Saved</p>
+                                        <p class="mt-1 text-xl font-black text-purple-600">₦{{ number_format($calcRes['monthly_fuel_savings_ngn']) }}</p>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 space-y-3">
-                                    <div class="flex items-center gap-3">
-                                        <i class="fa-light fa-bolt-lightning text-lg text-emerald-600"></i>
+                                <!-- Recommended Ascend Hardware Package -->
+                                <div class="space-y-3 rounded-2xl bg-white p-4 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                    <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                                        <i class="fa-light fa-boxes-stacked text-emerald-600"></i> Recommended Turnkey Solar Package
+                                    </p>
+                                    
+                                    <div class="flex items-start gap-3 border-b pb-3 dark:border-slate-800">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
+                                            <i class="fa-light fa-bolt-lightning text-lg"></i>
+                                        </div>
                                         <div>
-                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $calcRes['recommended_inverter'] }}</p>
-                                            <p class="text-[11px] text-slate-500">Pure Sine Wave Hybrid Inverter with MPPT Controller</p>
+                                            <p class="text-xs font-bold text-slate-950 dark:text-white">{{ $calcRes['recommended_inverter'] }}</p>
+                                            <p class="text-[10px] text-slate-500">Pure Sine Wave Hybrid with 0ms transfer & Dual MPPT</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <i class="fa-light fa-battery-bolt text-lg text-purple-600"></i>
-                                        <div>
-                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $calcRes['recommended_battery'] }}</p>
-                                            <p class="text-[11px] text-slate-500">6,000+ Deep Cycle Lifespan LiFePO4 Lithium Battery</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <i class="fa-light fa-solar-panel text-lg text-sky-600"></i>
-                                        <div>
-                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $calcRes['recommended_panels'] }}</p>
-                                            <p class="text-[11px] text-slate-500">High-Efficiency Monocrystalline Solar Array</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="pt-4 border-t dark:border-emerald-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <p class="text-xs text-slate-400 font-bold uppercase">Estimated Wholesale Price</p>
-                                    <p class="text-2xl font-black text-slate-900 dark:text-white">₦{{ number_format($calcRes['estimated_total_ngn'], 2) }}</p>
+                                    <div class="flex items-start gap-3 border-b pb-3 dark:border-slate-800">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600">
+                                            <i class="fa-light fa-battery-bolt text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-950 dark:text-white">{{ $calcRes['recommended_battery'] }}</p>
+                                            <p class="text-[10px] text-slate-500">6,000+ Deep Cycles Lifespan & Smart BMS Protection</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                                            <i class="fa-light fa-solar-panel text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-950 dark:text-white">{{ $calcRes['recommended_panels'] }}</p>
+                                            <p class="text-[10px] text-slate-500">High-efficiency Tier-1 Monocrystalline Solar Array</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button type="button" wire:click="addCalculatedBundleToCart" class="rounded-xl bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-emerald-700 transition active:scale-95">
-                                    <i class="fa-light fa-cart-circle-plus mr-1.5"></i>Add Package to Order
-                                </button>
+
+                                <!-- Financial Total & Conversion Buttons -->
+                                <div class="pt-2 space-y-3">
+                                    <div class="flex items-center justify-between rounded-xl bg-emerald-600/10 p-3.5 border border-emerald-500/20">
+                                        <div>
+                                            <p class="text-[10px] text-emerald-800 dark:text-emerald-300 font-bold uppercase">Estimated Turnkey Package Price</p>
+                                            <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400">₦{{ number_format($calcRes['estimated_total_ngn'], 2) }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid gap-2 sm:grid-cols-2">
+                                        <button type="button" wire:click="convertCalculatedSolarToQuote" class="rounded-xl bg-blue-600 py-3 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition active:scale-95 text-center flex items-center justify-center gap-1.5">
+                                            <i class="fa-light fa-file-signature"></i>Create Quote
+                                        </button>
+                                        <button type="button" wire:click="addCalculatedBundleToCart" class="rounded-xl bg-emerald-600 py-3 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition active:scale-95 text-center flex items-center justify-center gap-1.5">
+                                            <i class="fa-light fa-cart-circle-plus"></i>Add to Order Cart
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
