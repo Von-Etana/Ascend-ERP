@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CsvExportController;
+use App\Http\Controllers\FieldOperationsController;
 use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\PublicQuoteController;
 use App\Livewire\Portal\Dashboard;
@@ -17,6 +18,9 @@ Route::get('/', function () {
 Route::get('portal/quote/view', [PublicQuoteController::class, 'showQuote'])->name('portal.quote.public-view');
 Route::get('portal/quote/warranty/pdf', [PdfExportController::class, 'downloadWarrantyCertificate'])->name('portal.quote.warranty.pdf');
 Route::get('portal/quote/job-card/pdf', [PdfExportController::class, 'downloadJobCard'])->name('portal.quote.job-card.pdf');
+Route::get('portal/quote/inspection/pdf', [PdfExportController::class, 'downloadSiteInspection'])->name('portal.quote.inspection.pdf');
+Route::get('portal/quote/waybill/pdf', [PdfExportController::class, 'downloadWaybill'])->name('portal.quote.waybill.pdf');
+Route::get('portal/field/inspection-commissioning', [FieldOperationsController::class, 'showPortal'])->name('portal.field.portal');
 
 Route::middleware('guest')->prefix('auth/login')->group(function (): void {
     Route::get('/{provider}', [SocialLoginController::class, 'redirect'])

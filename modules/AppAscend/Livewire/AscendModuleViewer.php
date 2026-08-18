@@ -1511,6 +1511,43 @@ class AscendModuleViewer extends Component
         }
     }
 
+    public function sendQuoteDripSequence(int $index, int $day): void
+    {
+        if (isset($this->priceQuotes[$index])) {
+            $quote = $this->priceQuotes[$index];
+            $dataParam = base64_encode(json_encode($quote));
+            $viewUrl = url('portal/quote/view?data='.$dataParam);
+            $inspectionUrl = url('portal/field/inspection-commissioning?data='.$dataParam);
+
+            $msg = match ($day) {
+                2 => "👋 *Hi {$quote['client_name']}*,\n\n"
+                    ."Just following up regarding your Ascend Solar proposal (*#{$quote['id']}*) for ₦".number_format($quote['total'], 2).".\n\n"
+                    ."Have you had a chance to review the hardware specifications?\n\n"
+                    ."🔗 *Review & Sign Online:* {$viewUrl}\n\n"
+                    ."Feel free to reply if you'd like to adjust any appliance loads.",
+                5 => "🔍 *Complimentary Pre-Installation Site Inspection*\n\n"
+                    ."Dear {$quote['client_name']},\n\n"
+                    ."To ensure 100% accurate roof mounting and cable pathway design for Quote *#{$quote['id']}*, our field engineering unit is available for a complimentary site audit.\n\n"
+                    ."📋 *Inspection Portal:* {$inspectionUrl}\n"
+                    ."🔗 *View Proposal:* {$viewUrl}\n\n"
+                    ."Would you like us to schedule a site visit this week?",
+                default => "⏳ *Proposal Pricing Expiration Alert (24 Hours)*\n\n"
+                    ."Dear {$quote['client_name']},\n\n"
+                    ."This is a courtesy notice that proposal pricing for Quote *#{$quote['id']}* (₦".number_format($quote['total'], 2).") expires soon.\n\n"
+                    ."Lock in your hardware allocation and 5-Year Comprehensive Warranty today:\n"
+                    ."🔗 *Review & Accept Online:* {$viewUrl}\n\n"
+                    ."Ascend Systems Nigeria Ltd.",
+            };
+
+            try {
+                $ws = app(\Modules\AppAscend\Services\WhatsAppNotificationService::class);
+                $ws->sendMessage($quote['phone'], $msg);
+            } catch (\Throwable) {}
+
+            session()->flash('status', __('Day :day automated WhatsApp drip dispatched to :client (:phone)!', ['day' => $day, 'client' => $quote['client_name'], 'phone' => $quote['phone']]));
+        }
+    }
+
     public function createSalesOrderFromModal(): void
     {
         $customer = $this->form['client_name'] ?: ($this->form['title'] ?: 'Enterprise Client');

@@ -172,4 +172,40 @@ class PdfExportController
 
         return $pdf->download('Field-JobCard-'.($quote['id'] ?? 'Site').'.pdf');
     }
+
+    public function downloadSiteInspection(): Response
+    {
+        $dataStr = request()->query('data');
+        if (!$dataStr) {
+            abort(400, 'Missing inspection quote data');
+        }
+        $quote = json_decode(base64_decode($dataStr), true);
+        if (!$quote) {
+            abort(400, 'Invalid inspection quote data');
+        }
+
+        $pdf = Pdf::loadView('pdf.site_inspection', array_merge([
+            'quote' => $quote,
+        ], $this->getCompanyInfo()));
+
+        return $pdf->download('Site-Inspection-Report-'.($quote['id'] ?? 'Audit').'.pdf');
+    }
+
+    public function downloadWaybill(): Response
+    {
+        $dataStr = request()->query('data');
+        if (!$dataStr) {
+            abort(400, 'Missing dispatch quote data');
+        }
+        $quote = json_decode(base64_decode($dataStr), true);
+        if (!$quote) {
+            abort(400, 'Invalid dispatch quote data');
+        }
+
+        $pdf = Pdf::loadView('pdf.waybill', array_merge([
+            'quote' => $quote,
+        ], $this->getCompanyInfo()));
+
+        return $pdf->download('Delivery-Waybill-'.($quote['id'] ?? 'Dispatch').'.pdf');
+    }
 }

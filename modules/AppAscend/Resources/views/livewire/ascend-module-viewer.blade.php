@@ -2125,13 +2125,22 @@
                                             <a href="{{ route('portal.quote.public-view', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Open Client Public Approval Portal">
                                                 <i class="fa-light fa-arrow-up-right-from-square"></i>Portal
                                             </a>
+                                            <a href="{{ route('portal.field.portal', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-indigo-500/10 px-2 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-500/20 transition" title="Open Field Site Inspection & Commissioning Portal">
+                                                <i class="fa-light fa-helmet-safety"></i>Field
+                                            </a>
                                             <a href="{{ route('portal.quote.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-500/20 transition dark:text-slate-200" title="Download Official PDF Quote">
                                                 <i class="fa-light fa-file-pdf"></i>PDF
+                                            </a>
+                                            <a href="{{ route('portal.quote.inspection.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-cyan-500/10 px-2 py-1 text-xs font-bold text-cyan-600 hover:bg-cyan-500/20 transition" title="Download Site Inspection Report (PDF)">
+                                                <i class="fa-light fa-clipboard-check"></i>Site Audit
+                                            </a>
+                                            <a href="{{ route('portal.quote.waybill.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Download Warehouse Delivery Waybill & Gate Pass (PDF)">
+                                                <i class="fa-light fa-truck-ramp-box"></i>Waybill
                                             </a>
                                             <a href="{{ route('portal.quote.warranty.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Download 5-Year Warranty Certificate">
                                                 <i class="fa-light fa-award"></i>Warranty
                                             </a>
-                                            <a href="{{ route('portal.quote.job-card.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Download Field Technician Job Card">
+                                            <a href="{{ route('portal.quote.job-card.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2 py-1 text-xs font-bold text-slate-600 hover:bg-slate-500/20 transition dark:text-slate-300" title="Download Field Technician Job Card">
                                                 <i class="fa-light fa-clipboard-list-check"></i>Job Card
                                             </a>
                                             @if ($qt['status'] !== 'Converted')
@@ -2141,8 +2150,8 @@
                                                 <button type="button" wire:click="sendQuoteWhatsApp({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Dispatch quote with link via WhatsApp">
                                                     <i class="fa-brands fa-whatsapp"></i>
                                                 </button>
-                                                <button type="button" wire:click="sendQuoteEmail({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Dispatch quote via Email">
-                                                    <i class="fa-light fa-envelope"></i>
+                                                <button type="button" wire:click="sendQuoteDripSequence({{ $index }}, 5)" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-1.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Dispatch Day 5 Site Inspection Offer via WhatsApp">
+                                                    <i class="fa-light fa-calendar-clock"></i>Drip
                                                 </button>
                                             @else
                                                 <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
