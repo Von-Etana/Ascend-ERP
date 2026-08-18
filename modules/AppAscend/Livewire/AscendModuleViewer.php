@@ -1501,11 +1501,12 @@ class AscendModuleViewer extends Component
                 ['product_id' => '', 'sku' => 'SLR-PNL-550W', 'description' => 'Tier 1 Monocrystalline Solar Panels 550W Array (16 Panels)', 'quantity' => 16, 'unit_price' => 125000.00, 'discount_percent' => 0, 'amount' => 2000000.00],
                 ['product_id' => '', 'sku' => 'SRV-COMM-002', 'description' => 'Commercial Three-Phase Balancing, Automatic Transfer Switch (ATS) & Certification', 'quantity' => 1, 'unit_price' => 500000.00, 'discount_percent' => 0, 'amount' => 500000.00],
             ];
-        } elseif ($preset === 'software_erp') {
+        } elseif ($preset === 'solar_maintenance' || $preset === 'maintenance') {
             $this->invoiceItems = [
-                ['product_id' => '', 'sku' => 'SFT-ERP-ENT', 'description' => 'Ascend ERP Enterprise Core Suite (Unlimited Staff, Multi-Branch & Live Inventory)', 'quantity' => 1, 'unit_price' => 1500000.00, 'discount_percent' => 0, 'amount' => 1500000.00],
-                ['product_id' => '', 'sku' => 'SFT-BOT-WA', 'description' => 'Ascend AI WhatsApp Hybrid Bot & Omnichannel CRM Automation Engine', 'quantity' => 1, 'unit_price' => 450000.00, 'discount_percent' => 0, 'amount' => 450000.00],
-                ['product_id' => '', 'sku' => 'SRV-TRN-001', 'description' => 'Staff Onboarding, Data Migration & 12-Month Priority SLA Maintenance', 'quantity' => 1, 'unit_price' => 350000.00, 'discount_percent' => 0, 'amount' => 350000.00],
+                ['product_id' => '', 'sku' => 'SRV-MNT-001', 'description' => 'Solar PV Array Deep Cleaning, Angle Re-alignment & Thermal Hotspot Inspection', 'quantity' => 1, 'unit_price' => 75000.00, 'discount_percent' => 0, 'amount' => 75000.00],
+                ['product_id' => '', 'sku' => 'SRV-MNT-002', 'description' => 'LiFePO4 Lithium Battery Health Audit, Cell Balancing & BMS Firmware Optimization', 'quantity' => 1, 'unit_price' => 120000.00, 'discount_percent' => 0, 'amount' => 120000.00],
+                ['product_id' => '', 'sku' => 'SRV-MNT-003', 'description' => 'Hybrid Inverter Dust Evacuation, MPPT Calibration & DC Breaker/Surge Testing', 'quantity' => 1, 'unit_price' => 95000.00, 'discount_percent' => 0, 'amount' => 95000.00],
+                ['product_id' => '', 'sku' => 'SRV-SLA-12M', 'description' => '12-Month Priority SLA Preventive Maintenance Contract (Quarterly Routine Audits)', 'quantity' => 1, 'unit_price' => 250000.00, 'discount_percent' => 0, 'amount' => 250000.00],
             ];
         }
         $this->recalculateInvoiceTotals();
@@ -1522,6 +1523,8 @@ class AscendModuleViewer extends Component
         $phone = $this->form['client_phone'] ?: ($this->form['phone'] ?: '+234 811 763 3020');
         $email = $this->form['client_email'] ?: ($this->form['email'] ?: 'client@ascendsystems.ng');
 
+        $isSent = in_array($dispatchAction, ['email', 'whatsapp', 'both']);
+
         $newQuote = [
             'id' => $qtId,
             'client_name' => $client,
@@ -1533,7 +1536,7 @@ class AscendModuleViewer extends Component
             'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
             'tax' => (float) ($this->form['tax'] ?? 0),
             'total' => $amount,
-            'status' => ($dispatchAction === 'whatsapp' || $dispatchAction === 'email') ? 'Sent' : 'Draft',
+            'status' => $isSent ? 'Sent' : 'Draft',
             'created_at' => now()->format('Y-m-d'),
             'notes' => $this->form['notes'] ?: 'Standard commercial quotation',
             'items' => array_map(fn($item) => [
@@ -1549,7 +1552,7 @@ class AscendModuleViewer extends Component
 
         array_unshift($this->priceQuotes, $newQuote);
 
-        if ($dispatchAction === 'whatsapp') {
+        if ($dispatchAction === 'whatsapp' || $dispatchAction === 'both') {
             try {
                 $ws = app(\Modules\AppAscend\Services\WhatsAppNotificationService::class);
                 $msg = "📄 *Ascend Systems Official Price Quote*\n"
@@ -1557,17 +1560,32 @@ class AscendModuleViewer extends Component
                     . "Client: {$client}\n"
                     . "Total Amount: ₦" . number_format($amount, 2) . "\n"
                     . "Valid Until: " . ($this->form['due_date'] ?: now()->addDays(14)->format('Y-m-d')) . "\n\n"
-                    . "Thank you for choosing Ascend Systems Nigeria.";
+                    . "Official PDF Proposal has been generated. Thank you for choosing Ascend Systems Nigeria.";
                 $ws->sendMessage($phone, $msg);
             } catch (\Throwable) {}
         }
 
         $this->showModal = false;
-        session()->flash('status', __('Official Price Quote :id generated successfully for :client! Total: ₦:total', [
-            'id' => $qtId,
-            'client' => $client,
-            'total' => number_format($amount, 2),
-        ]));
+
+        if ($dispatchAction === 'email') {
+            session()->flash('status', __('Official Price Quote :id generated and dispatched via Email to :email! Total: ₦:total', [
+                'id' => $qtId,
+                'email' => $email,
+                'total' => number_format($amount, 2),
+            ]));
+        } elseif ($dispatchAction === 'whatsapp') {
+            session()->flash('status', __('Official Price Quote :id generated and dispatched via WhatsApp to :phone! Total: ₦:total', [
+                'id' => $qtId,
+                'phone' => $phone,
+                'total' => number_format($amount, 2),
+            ]));
+        } else {
+            session()->flash('status', __('Price Quote :id saved successfully for :client! Total: ₦:total', [
+                'id' => $qtId,
+                'client' => $client,
+                'total' => number_format($amount, 2),
+            ]));
+        }
     }
 
     // Finance Invoice Payment

@@ -6121,8 +6121,8 @@
                         <button type="button" wire:click="loadQuotePreset('commercial_10kw')" class="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition">
                             <i class="fa-light fa-bolt-lightning text-purple-500 mr-1"></i>10kVA Commercial Inverter System
                         </button>
-                        <button type="button" wire:click="loadQuotePreset('software_erp')" class="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition">
-                            <i class="fa-light fa-brain-circuit text-blue-500 mr-1"></i>Ascend ERP & Bot Automation Suite
+                        <button type="button" wire:click="loadQuotePreset('solar_maintenance')" class="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs border border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition">
+                            <i class="fa-light fa-wrench text-emerald-500 mr-1"></i>Annual Solar Preventive Maintenance & Audit
                         </button>
                     </div>
 
@@ -6310,11 +6310,11 @@
                                 <button type="button" wire:click="createPriceQuoteFromModal('draft')" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 transition">
                                     <i class="fa-light fa-floppy-disk mr-1.5"></i>{{ __('Save Draft') }}
                                 </button>
-                                <button type="button" wire:click="createPriceQuoteFromModal('whatsapp')" class="rounded-2xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition active:scale-95">
-                                    <i class="fa-brands fa-whatsapp mr-1.5"></i>{{ __('Save & Send WhatsApp') }}
+                                <button type="button" wire:click="createPriceQuoteFromModal('whatsapp')" class="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 dark:bg-emerald-950/40 dark:border-emerald-700 dark:text-emerald-400 transition active:scale-95">
+                                    <i class="fa-brands fa-whatsapp mr-1.5"></i>{{ __('Send WhatsApp (Optional)') }}
                                 </button>
-                                <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition active:scale-95">
-                                    <i class="fa-light fa-file-signature mr-1.5"></i>{{ __('Save & Issue Official Quote') }}
+                                <button type="button" wire:click="createPriceQuoteFromModal('email')" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition active:scale-95">
+                                    <i class="fa-light fa-paper-plane mr-1.5"></i>{{ __('Dispatch Quote via Email') }}
                                 </button>
                             </div>
                         </div>
