@@ -33,10 +33,16 @@
 </head>
 <body>
     @php
-        $lineItems = $quote['items'] ?? [];
-        $clientPhone = $quote['phone'] ?? '';
-        $clientEmail = $quote['email'] ?? '';
-        $clientAddress = $quote['address'] ?? '';
+        $rawItems = $quote['items'] ?? ($quote['line_items'] ?? []);
+        if (isset($rawItems['line_items']) && is_array($rawItems['line_items'])) {
+            $lineItems = $rawItems['line_items'];
+        } else {
+            $lineItems = is_array($rawItems) ? $rawItems : [];
+        }
+
+        $clientPhone = $quote['phone'] ?? ($quote['client_phone'] ?? '');
+        $clientEmail = $quote['email'] ?? ($quote['client_email'] ?? '');
+        $clientAddress = $quote['address'] ?? ($quote['client_address'] ?? '');
         $subtotal = (float) ($quote['subtotal'] ?? 0);
         $discountAmount = (float) ($quote['discount_amount'] ?? 0);
         $tax = (float) ($quote['tax'] ?? 0);
@@ -58,7 +64,7 @@
                 </td>
                 <td style="width: 45%; text-align: right; vertical-align: top;">
                     <div class="quote-title">QUOTE</div>
-                    <div class="quote-num">#{{ $quote['id'] ?? 'Draft' }}</div>
+                    <div class="quote-num">#{{ $quote['id'] ?? ($quote['invoice_number'] ?? 'Draft') }}</div>
                     <div style="margin-top: 6px;">
                         <span class="badge badge-pending">
                             STATUS: {{ strtoupper($quote['status'] ?? 'Draft') }}
@@ -107,17 +113,19 @@
             </tr>
         </thead>
         <tbody>
-            @if (!empty($lineItems) && is_array($lineItems))
+            @if (!empty($lineItems) && count($lineItems) > 0)
                 @foreach ($lineItems as $item)
                     @php
                         $qty = (int) ($item['qty'] ?? ($item['quantity'] ?? 1));
                         $price = (float) ($item['unit_price'] ?? 0);
                         $amt = (float) ($item['amount'] ?? ($qty * $price));
+                        $desc = !empty($item['description']) ? $item['description'] : (!empty($item['name']) ? $item['name'] : 'Line Item');
+                        $sku = !empty($item['sku']) ? $item['sku'] : 'GEN-ITEM';
                     @endphp
                     <tr>
-                        <td style="font-family: monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $item['sku'] ?? 'GEN-ITEM' }}</td>
+                        <td style="font-family: monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $sku }}</td>
                         <td>
-                            <div style="font-weight: bold; color: #0f172a;">{{ $item['description'] ?? 'Line Item' }}</div>
+                            <div style="font-weight: bold; color: #0f172a;">{{ $desc }}</div>
                         </td>
                         <td style="text-align: center; font-weight: bold;">{{ $qty }}</td>
                         <td style="text-align: right;">&#8358;{{ number_format($price, 2) }}</td>
