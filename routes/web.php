@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CsvExportController;
 use App\Http\Controllers\PdfExportController;
+use App\Http\Controllers\PublicQuoteController;
 use App\Livewire\Portal\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -11,6 +12,11 @@ Route::get('/', function () {
         ? redirect()->route('portal.dashboard')
         : redirect()->route('login');
 })->name('home');
+
+// Public Client Quotation Review & E-Signature Portal
+Route::get('portal/quote/view', [PublicQuoteController::class, 'showQuote'])->name('portal.quote.public-view');
+Route::get('portal/quote/warranty/pdf', [PdfExportController::class, 'downloadWarrantyCertificate'])->name('portal.quote.warranty.pdf');
+Route::get('portal/quote/job-card/pdf', [PdfExportController::class, 'downloadJobCard'])->name('portal.quote.job-card.pdf');
 
 Route::middleware('guest')->prefix('auth/login')->group(function (): void {
     Route::get('/{provider}', [SocialLoginController::class, 'redirect'])

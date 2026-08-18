@@ -2120,26 +2120,33 @@
                                                 {{ $qt['status'] }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3.5 text-right space-x-1.5">
-                                            <a href="{{ route('portal.quote.pdf', ['data' => base64_encode(json_encode($qt))]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-500/20 transition dark:text-slate-200" title="Download PDF Quote">
+                                        <td class="px-4 py-3.5 text-right space-x-1">
+                                            @php $qtEncoded = base64_encode(json_encode($qt)); @endphp
+                                            <a href="{{ route('portal.quote.public-view', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Open Client Public Approval Portal">
+                                                <i class="fa-light fa-arrow-up-right-from-square"></i>Portal
+                                            </a>
+                                            <a href="{{ route('portal.quote.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-500/20 transition dark:text-slate-200" title="Download Official PDF Quote">
                                                 <i class="fa-light fa-file-pdf"></i>PDF
                                             </a>
+                                            <a href="{{ route('portal.quote.warranty.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Download 5-Year Warranty Certificate">
+                                                <i class="fa-light fa-award"></i>Warranty
+                                            </a>
+                                            <a href="{{ route('portal.quote.job-card.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Download Field Technician Job Card">
+                                                <i class="fa-light fa-clipboard-list-check"></i>Job Card
+                                            </a>
                                             @if ($qt['status'] !== 'Converted')
-                                                <button type="button" wire:click="convertQuoteToSalesOrder({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Convert quote to Confirmed Sales Order">
-                                                    <i class="fa-light fa-cart-circle-check"></i>To Sales Order
+                                                <button type="button" wire:click="convertQuoteToSalesOrder({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-purple-500/10 px-2 py-1 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition" title="Convert quote to Confirmed Sales Order (Auto-Decrements Stock)">
+                                                    <i class="fa-light fa-cart-circle-check"></i>To Order
                                                 </button>
-                                                <button type="button" wire:click="convertQuoteToInvoice({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-purple-500/10 px-2.5 py-1 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition" title="Convert quote directly to Billing Invoice">
-                                                    <i class="fa-light fa-file-invoice-dollar"></i>To Invoice
+                                                <button type="button" wire:click="sendQuoteWhatsApp({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Dispatch quote with link via WhatsApp">
+                                                    <i class="fa-brands fa-whatsapp"></i>
                                                 </button>
-                                                <button type="button" wire:click="sendQuoteWhatsApp({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Dispatch quote via WhatsApp">
-                                                    <i class="fa-brands fa-whatsapp"></i>WhatsApp
-                                                </button>
-                                                <button type="button" wire:click="sendQuoteEmail({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Dispatch quote via Email">
-                                                    <i class="fa-light fa-envelope"></i>Email
+                                                <button type="button" wire:click="sendQuoteEmail({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Dispatch quote via Email">
+                                                    <i class="fa-light fa-envelope"></i>
                                                 </button>
                                             @else
-                                                <span class="inline-flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
-                                                    <i class="fa-light fa-circle-check"></i> Converted & Fulfilled
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                                                    <i class="fa-light fa-circle-check"></i> Converted
                                                 </span>
                                             @endif
                                         </td>

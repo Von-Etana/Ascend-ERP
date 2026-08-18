@@ -136,4 +136,40 @@ class PdfExportController
 
         return $pdf->download('Quote-'.($quote['id'] ?? 'Draft').'.pdf');
     }
+
+    public function downloadWarrantyCertificate(): Response
+    {
+        $dataStr = request()->query('data');
+        if (!$dataStr) {
+            abort(400, 'Missing quote data');
+        }
+        $quote = json_decode(base64_decode($dataStr), true);
+        if (!$quote) {
+            abort(400, 'Invalid quote data');
+        }
+
+        $pdf = Pdf::loadView('pdf.warranty_certificate', array_merge([
+            'quote' => $quote,
+        ], $this->getCompanyInfo()));
+
+        return $pdf->download('Warranty-Certificate-'.($quote['id'] ?? 'Solar').'.pdf');
+    }
+
+    public function downloadJobCard(): Response
+    {
+        $dataStr = request()->query('data');
+        if (!$dataStr) {
+            abort(400, 'Missing quote data');
+        }
+        $quote = json_decode(base64_decode($dataStr), true);
+        if (!$quote) {
+            abort(400, 'Invalid quote data');
+        }
+
+        $pdf = Pdf::loadView('pdf.job_card', array_merge([
+            'quote' => $quote,
+        ], $this->getCompanyInfo()));
+
+        return $pdf->download('Field-JobCard-'.($quote['id'] ?? 'Site').'.pdf');
+    }
 }

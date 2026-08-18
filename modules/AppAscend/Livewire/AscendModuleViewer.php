@@ -1409,7 +1409,26 @@ class AscendModuleViewer extends Component
                 'amount' => $quote['total'],
                 'status' => 'Confirmed',
             ];
-            session()->flash('status', __('Price Quote :id successfully converted to Confirmed Sales Order :so!', ['id' => $quote['id'], 'so' => $soId]));
+
+            // Auto-decrement physical inventory stock
+            $rawItems = $quote['items'] ?? [];
+            $items = isset($rawItems['line_items']) ? $rawItems['line_items'] : (is_array($rawItems) ? $rawItems : []);
+            foreach ($items as $it) {
+                $qty = (int) ($it['qty'] ?? ($it['quantity'] ?? 1));
+                if (!empty($it['product_id'])) {
+                    $prod = InventoryProduct::find($it['product_id']);
+                    if ($prod) {
+                        $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+                    }
+                } elseif (!empty($it['sku'])) {
+                    $prod = InventoryProduct::where('sku', $it['sku'])->first();
+                    if ($prod) {
+                        $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+                    }
+                }
+            }
+
+            session()->flash('status', __('Price Quote :id converted to Confirmed Sales Order :so & inventory stock allocated!', ['id' => $quote['id'], 'so' => $soId]));
         }
     }
 
@@ -1428,7 +1447,31 @@ class AscendModuleViewer extends Component
                 'tax' => $quote['total'] - ($quote['total'] / 1.075),
                 'total' => $quote['total'],
                 'status' => 'unpaid',
+                'items' => [
+                    'client_phone' => $quote['phone'] ?? '',
+                    'client_email' => $quote['email'] ?? '',
+                    'client_address' => $quote['address'] ?? '',
+                    'line_items' => $quote['items'] ?? [],
+                ],
             ]);
+
+            // Auto-decrement inventory stock
+            $rawItems = $quote['items'] ?? [];
+            $items = isset($rawItems['line_items']) ? $rawItems['line_items'] : (is_array($rawItems) ? $rawItems : []);
+            foreach ($items as $it) {
+                $qty = (int) ($it['qty'] ?? ($it['quantity'] ?? 1));
+                if (!empty($it['product_id'])) {
+                    $prod = InventoryProduct::find($it['product_id']);
+                    if ($prod) {
+                        $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+                    }
+                } elseif (!empty($it['sku'])) {
+                    $prod = InventoryProduct::where('sku', $it['sku'])->first();
+                    if ($prod) {
+                        $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+                    }
+                }
+            }
 
             session()->flash('status', __('Price Quote :id successfully converted to Billing Invoice :num!', ['id' => $quote['id'], 'num' => $inv->invoice_number]));
         }
@@ -1440,16 +1483,22 @@ class AscendModuleViewer extends Component
             $quote = $this->priceQuotes[$index];
             $this->priceQuotes[$index]['status'] = 'Sent';
             try {
+                $dataParam = base64_encode(json_encode($quote));
+                $viewUrl = url('portal/quote/view?data='.$dataParam);
+                $pdfUrl = url('portal/quote/pdf?data='.$dataParam);
+
                 $ws = app(\Modules\AppAscend\Services\WhatsAppNotificationService::class);
-                $msg = "📄 *Ascend Systems Official Price Quote*\n"
-                    . "Quote ID: *{$quote['id']}*\n"
-                    . "Client: {$quote['client_name']}\n"
-                    . "Total Amount: ₦" . number_format($quote['total'], 2) . "\n"
-                    . "Valid Until: {$quote['valid_until']}\n\n"
-                    . "Thank you for choosing Ascend Systems Nigeria.";
+                $msg = "📄 *Ascend Systems Official Quote*\n\n"
+                    ."• *Quote ID:* {$quote['id']}\n"
+                    ."• *Client:* {$quote['client_name']}\n"
+                    ."• *Total Amount:* ₦".number_format($quote['total'], 2)."\n"
+                    ."• *Validity:* {$quote['valid_until']}\n\n"
+                    ."🔗 *Review & Sign Online:*\n{$viewUrl}\n\n"
+                    ."📥 *Download PDF:* {$pdfUrl}\n\n"
+                    ."Thank you for choosing Ascend Systems Nigeria.";
                 $ws->sendMessage($quote['phone'], $msg);
             } catch (\Throwable) {}
-            session()->flash('status', __('Price Quote :id dispatched via WhatsApp to :phone!', ['id' => $quote['id'], 'phone' => $quote['phone']]));
+            session()->flash('status', __('Price Quote :id dispatched via WhatsApp with online approval link to :phone!', ['id' => $quote['id'], 'phone' => $quote['phone']]));
         }
     }
 
