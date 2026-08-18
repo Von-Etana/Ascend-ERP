@@ -108,6 +108,17 @@ class AscendModuleViewer extends Component
 
     public array $salesOrders = [];
 
+    public array $priceQuotes = [];
+
+    public array $salesOrderForm = [
+        'customer' => '',
+        'email' => '',
+        'phone' => '',
+        'address' => '',
+        'payment_terms' => 'Net 30',
+        'notes' => '',
+    ];
+
     public array $marketingCampaigns = [];
 
     public array $socialChannels = [];
@@ -790,6 +801,53 @@ class AscendModuleViewer extends Component
             $this->salesOrders = [];
         }
 
+        // --- Price Quotes & Proposals ---
+        if (empty($this->priceQuotes)) {
+            $this->priceQuotes = [
+                [
+                    'id' => 'QT-2026-001',
+                    'client_name' => 'Konga Logistics Distribution Center',
+                    'email' => 'procurement@konga.ng',
+                    'phone' => '+234 803 999 1122',
+                    'valid_until' => now()->addDays(14)->format('Y-m-d'),
+                    'total' => 12850000.00,
+                    'status' => 'Sent',
+                    'created_at' => now()->subDays(2)->format('Y-m-d'),
+                    'items' => [
+                        ['description' => 'Ascend 10.2kWh LiFePO4 Battery Bank', 'qty' => 4, 'unit_price' => 2200000.00, 'amount' => 8800000.00],
+                        ['description' => 'Ascend 5.5kVA Pure Sine Wave Inverter', 'qty' => 3, 'unit_price' => 1350000.00, 'amount' => 4050000.00],
+                    ],
+                ],
+                [
+                    'id' => 'QT-2026-002',
+                    'client_name' => 'Dangote Refinery Field Office Abuja',
+                    'email' => 'facilities@dangote.com',
+                    'phone' => '+234 802 888 3344',
+                    'valid_until' => now()->addDays(21)->format('Y-m-d'),
+                    'total' => 24500000.00,
+                    'status' => 'Accepted',
+                    'created_at' => now()->subDays(5)->format('Y-m-d'),
+                    'items' => [
+                        ['description' => 'Industrial Solar Arrays (550W Monocrystalline)', 'qty' => 40, 'unit_price' => 250000.00, 'amount' => 10000000.00],
+                        ['description' => '15kVA Commercial Hybrid Power Inverter Unit', 'qty' => 2, 'unit_price' => 7250000.00, 'amount' => 14500000.00],
+                    ],
+                ],
+                [
+                    'id' => 'QT-2026-003',
+                    'client_name' => 'Transcorp Hilton Suite 402 Project',
+                    'email' => 'engineering@transcorphilton.ng',
+                    'phone' => '+234 805 777 9900',
+                    'valid_until' => now()->addDays(7)->format('Y-m-d'),
+                    'total' => 6400000.00,
+                    'status' => 'Draft',
+                    'created_at' => now()->format('Y-m-d'),
+                    'items' => [
+                        ['description' => '5.5kVA Inverter + 10.2kWh Battery Residential Bundle', 'qty' => 2, 'unit_price' => 3200000.00, 'amount' => 6400000.00],
+                    ],
+                ],
+            ];
+        }
+
         // --- General Ledger (Bank Accounts) ---
         try {
             $this->generalLedger = BankAccount::query()
@@ -1300,6 +1358,126 @@ class AscendModuleViewer extends Component
             $this->salesOrders[$index]['status'] = $status;
             session()->flash('status', __('Sales Order :id status updated to :status.', ['id' => $this->salesOrders[$index]['id'], 'status' => $status]));
         }
+    }
+
+    // === PRICE QUOTE & PROPOSAL MANAGEMENT METHODS ===
+    public function updateQuoteStatus(int $index, string $status): void
+    {
+        if (isset($this->priceQuotes[$index])) {
+            $this->priceQuotes[$index]['status'] = $status;
+            session()->flash('status', __('Price Quote :id status updated to :status.', ['id' => $this->priceQuotes[$index]['id'], 'status' => $status]));
+        }
+    }
+
+    public function convertQuoteToSalesOrder(int $index): void
+    {
+        if (isset($this->priceQuotes[$index])) {
+            $quote = $this->priceQuotes[$index];
+            $this->priceQuotes[$index]['status'] = 'Converted';
+            $soId = 'SO-'.rand(20000, 29999);
+            $this->salesOrders[] = [
+                'id' => $soId,
+                'customer' => $quote['client_name'],
+                'date' => now()->format('Y-m-d'),
+                'amount' => $quote['total'],
+                'status' => 'Confirmed',
+            ];
+            session()->flash('status', __('Price Quote :id successfully converted to Confirmed Sales Order :so!', ['id' => $quote['id'], 'so' => $soId]));
+        }
+    }
+
+    public function convertQuoteToInvoice(int $index): void
+    {
+        if (isset($this->priceQuotes[$index])) {
+            $quote = $this->priceQuotes[$index];
+            $this->priceQuotes[$index]['status'] = 'Converted';
+
+            $inv = Invoice::create([
+                'invoice_number' => 'INV-'.rand(30000, 39999),
+                'client_name' => $quote['client_name'],
+                'issue_date' => now(),
+                'due_date' => now()->addDays(14),
+                'subtotal' => $quote['total'] / 1.075,
+                'tax' => $quote['total'] - ($quote['total'] / 1.075),
+                'total' => $quote['total'],
+                'status' => 'unpaid',
+            ]);
+
+            session()->flash('status', __('Price Quote :id successfully converted to Billing Invoice :num!', ['id' => $quote['id'], 'num' => $inv->invoice_number]));
+        }
+    }
+
+    public function sendQuoteWhatsApp(int $index): void
+    {
+        if (isset($this->priceQuotes[$index])) {
+            $quote = $this->priceQuotes[$index];
+            $this->priceQuotes[$index]['status'] = 'Sent';
+            try {
+                $ws = app(\Modules\AppAscend\Services\WhatsAppNotificationService::class);
+                $msg = "📄 *Ascend Systems Official Price Quote*\n"
+                    . "Quote ID: *{$quote['id']}*\n"
+                    . "Client: {$quote['client_name']}\n"
+                    . "Total Amount: ₦" . number_format($quote['total'], 2) . "\n"
+                    . "Valid Until: {$quote['valid_until']}\n\n"
+                    . "Thank you for choosing Ascend Systems Nigeria.";
+                $ws->sendMessage($quote['phone'], $msg);
+            } catch (\Throwable) {}
+            session()->flash('status', __('Price Quote :id dispatched via WhatsApp to :phone!', ['id' => $quote['id'], 'phone' => $quote['phone']]));
+        }
+    }
+
+    public function sendQuoteEmail(int $index): void
+    {
+        if (isset($this->priceQuotes[$index])) {
+            $quote = $this->priceQuotes[$index];
+            $this->priceQuotes[$index]['status'] = 'Sent';
+            session()->flash('status', __('Price Quote :id emailed to :email!', ['id' => $quote['id'], 'email' => $quote['email']]));
+        }
+    }
+
+    public function createSalesOrderFromModal(): void
+    {
+        $customer = $this->form['client_name'] ?: ($this->form['title'] ?: 'Enterprise Client');
+        $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3200000.00));
+
+        $soId = 'SO-'.rand(10000, 19999);
+        $this->salesOrders[] = [
+            'id' => $soId,
+            'customer' => $customer,
+            'date' => now()->format('Y-m-d'),
+            'amount' => $amount,
+            'status' => 'Confirmed',
+        ];
+
+        $this->showModal = false;
+        session()->flash('status', __('New Sales Order :id created successfully!', ['id' => $soId]));
+    }
+
+    public function createPriceQuoteFromModal(): void
+    {
+        $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
+        $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3500000.00));
+
+        $qtId = 'QT-2026-'.rand(100, 999);
+        $this->priceQuotes[] = [
+            'id' => $qtId,
+            'client_name' => $client,
+            'email' => $this->form['email'] ?: 'client@ascendsystems.ng',
+            'phone' => $this->form['phone'] ?: '+234 811 763 3020',
+            'valid_until' => now()->addDays(14)->format('Y-m-d'),
+            'total' => $amount,
+            'status' => 'Draft',
+            'created_at' => now()->format('Y-m-d'),
+            'items' => array_map(fn($item) => [
+                'description' => $item['description'] ?? 'Custom Solar Product Item',
+                'qty' => (int) ($item['quantity'] ?? 1),
+                'unit_price' => (float) ($item['unit_price'] ?? $amount),
+                'amount' => (float) ($item['amount'] ?? $amount),
+            ], $this->invoiceItems),
+        ];
+
+        $this->showModal = false;
+        session()->flash('status', __('New Price Quote :id created successfully!', ['id' => $qtId]));
     }
 
     // Finance Invoice Payment
@@ -2393,6 +2571,21 @@ class AscendModuleViewer extends Component
         $this->modalType = $type;
         $this->showModal = true;
 
+        if ($type === 'quote' || $type === 'price_quote') {
+            $this->modalType = 'price_quote';
+            $this->form['client_name'] = '';
+            $this->form['email'] = '';
+            $this->form['phone'] = '';
+            $this->form['notes'] = 'Valid for 14 calendar days from date of issue.';
+        }
+
+        if ($type === 'sales_order') {
+            $this->modalType = 'sales_order';
+            $this->form['client_name'] = '';
+            $this->form['title'] = '';
+            $this->form['amount'] = '';
+        }
+
         if ($type === 'pos') {
             $this->modalType = 'pos_sale';
             $this->activeTab = 'checkout';
@@ -2535,13 +2728,8 @@ class AscendModuleViewer extends Component
                 ]),
             },
             'sales' => match ($this->modalType) {
-                'sales_order' => $this->salesOrders[] = [
-                    'id' => 'SO-'.rand(10500, 19999),
-                    'customer' => $title,
-                    'date' => now()->format('Y-m-d'),
-                    'amount' => $subtotal ?: 3200000.00,
-                    'status' => 'Confirmed',
-                ],
+                'price_quote', 'quote' => $this->createPriceQuoteFromModal(),
+                'sales_order' => $this->createSalesOrderFromModal(),
                 default => CrmDeal::create([
                     'deal_name' => 'Sales Deal — '.$title,
                     'stage' => 'negotiation',

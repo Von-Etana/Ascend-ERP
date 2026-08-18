@@ -13,4 +13,9 @@ return [
         'confidence_threshold' => (float) env('INBOX_AI_CONFIDENCE_THRESHOLD', 0.80),
         'handoff_keywords' => ['human', 'agent', 'refund', 'complaint', 'cancel', 'manager'],
     ],
+    'whatsapp_bot' => [
+        'enabled' => (bool) env('WHATSAPP_BOT_ENABLED', true),
+        'verify_token' => env('WHATSAPP_VERIFY_TOKEN', env('INBOX_WHATSAPP_VERIFY_TOKEN', 'ascend_webhook_secret')),
+        'sales_phone' => env('SALES_TEAM_WHATSAPP_NUMBER', ''),
+    ],
 ];

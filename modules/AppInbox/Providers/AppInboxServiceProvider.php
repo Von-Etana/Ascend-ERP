@@ -17,6 +17,7 @@ class AppInboxServiceProvider extends ServiceProvider
         $this->app->singleton(InboxService::class);
         $this->app->singleton(InboxResponsePolicy::class);
         $this->app->singleton(InboxAiResponder::class);
+        $this->app->singleton(\Modules\AppInbox\Support\WhatsAppMenuFlowService::class);
     }
 
     public function boot(): void

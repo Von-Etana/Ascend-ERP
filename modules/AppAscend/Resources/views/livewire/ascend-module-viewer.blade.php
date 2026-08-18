@@ -100,12 +100,17 @@
                         {{ __('Export CSV') }}
                     </a>
                 @endif
-                <button type="button" wire:click="openCreateModal('{{ $moduleKey === 'finance' ? 'invoice' : ($moduleKey === 'inventory' ? 'product' : $moduleKey) }}')" class="inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] hover:brightness-105 active:scale-95" style="background: {{ $accent }};">
+                <button type="button" wire:click="openCreateModal('{{ $moduleKey === 'sales' && $activeTab === 'quotes' ? 'quote' : ($moduleKey === 'sales' && $activeTab === 'orders' ? 'sales_order' : ($moduleKey === 'finance' ? 'invoice' : ($moduleKey === 'inventory' ? 'product' : $moduleKey))) }}')" class="inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] hover:brightness-105 active:scale-95" style="background: {{ $accent }};">
                     <i class="fa-light fa-plus text-base"></i>
                     {{ match($moduleKey) {
                         'finance' => __('New Invoice / Expense'),
                         'crm' => __('Add Lead / Deal'),
-                        'sales' => __('New Sales Order'),
+                        'sales' => match($activeTab) {
+                            'quotes' => __('New Price Quote'),
+                            'orders' => __('New Sales Order'),
+                            'solar_calculator' => __('Size New Solar Package'),
+                            default => __('New Quote / Sales Order'),
+                        },
                         'tasks' => __('Create Project'),
                         'inventory' => __('Add New Product SKU'),
                         'pos' => __('New POS Sale'),
@@ -1765,54 +1770,301 @@
                     </div>
                 </section>
             </div>
-        @elseif ($activeTab === 'orders')
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Confirmed Sales Orders & Fulfilment') }}</h2>
-                        <p class="text-sm text-slate-500">{{ __('Track confirmed customer sales orders, fulfilment status, and status updates.') }}</p>
+        @elseif ($activeTab === 'quotes')
+            <!-- PRICE QUOTES & PROPOSALS MANAGEMENT HUB -->
+            <div class="space-y-6">
+                <!-- Quotes KPI Metric Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Active Proposals') }}</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">{{ count($priceQuotes) }} Quotes</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">Total pipeline quotes</p>
                     </div>
-                    <button type="button" wire:click="openCreateModal('sales_order')" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700">
-                        <i class="fa-light fa-plus mr-2"></i>{{ __('Create Sales Order') }}
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Quoted Revenue Value') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format(array_reduce($priceQuotes, fn($acc, $q) => $acc + $q['total'], 0), 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-sparkles mr-1"></i>Active proposal value</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Accepted Quotes') }}</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">{{ count(array_filter($priceQuotes, fn($q) => in_array($q['status'], ['Accepted', 'Converted']))) }}</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500">Ready for conversion</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Proposal Win Rate') }}</p>
+                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">78.5%</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">Conversion to order rate</p>
+                    </div>
+                </div>
+
+                <!-- Price Quotes & Proposals Section -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20 mb-1">
+                                <i class="fa-light fa-file-signature"></i> Official Proposals Engine
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Price Quotes & Commercial Proposals') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Generate professional solar & software price quotes, track validity, dispatch via WhatsApp/Email, and convert to Sales Orders or Invoices in one click.') }}</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" wire:click="openCreateModal('quote')" class="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition active:scale-95">
+                                <i class="fa-light fa-plus mr-1.5"></i>{{ __('Create Price Quote') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Quote #</th>
+                                    <th class="px-4 py-3.5">Client & Organization</th>
+                                    <th class="px-4 py-3.5">Contact</th>
+                                    <th class="px-4 py-3.5">Valid Until</th>
+                                    <th class="px-4 py-3.5">Total Amount (NGN)</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions & Conversion</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach ($priceQuotes as $index => $qt)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">
+                                            <i class="fa-light fa-file-signature mr-1.5"></i>{{ $qt['id'] }}
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <p class="font-bold text-slate-900 dark:text-white">{{ $qt['client_name'] }}</p>
+                                            <p class="text-xs text-slate-400">Created: {{ $qt['created_at'] }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-medium text-slate-700 dark:text-slate-300">{{ $qt['email'] }}</p>
+                                            <p class="text-slate-400">{{ $qt['phone'] }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-slate-500 text-xs font-semibold">
+                                            <i class="fa-light fa-calendar mr-1 text-slate-400"></i>{{ $qt['valid_until'] }}
+                                        </td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">
+                                            ₦{{ number_format($qt['total'], 2) }}
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-3 py-1 text-xs font-bold {{ match($qt['status']) {
+                                                'Converted' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+                                                'Accepted' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                'Sent' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                'Expired' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                                default => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+                                            } }}">
+                                                {{ $qt['status'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right space-x-1.5">
+                                            @if ($qt['status'] !== 'Converted')
+                                                <button type="button" wire:click="convertQuoteToSalesOrder({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Convert quote to Confirmed Sales Order">
+                                                    <i class="fa-light fa-cart-circle-check"></i>To Sales Order
+                                                </button>
+                                                <button type="button" wire:click="convertQuoteToInvoice({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-purple-500/10 px-2.5 py-1 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition" title="Convert quote directly to Billing Invoice">
+                                                    <i class="fa-light fa-file-invoice-dollar"></i>To Invoice
+                                                </button>
+                                                <button type="button" wire:click="sendQuoteWhatsApp({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Dispatch quote via WhatsApp">
+                                                    <i class="fa-brands fa-whatsapp"></i>WhatsApp
+                                                </button>
+                                                <button type="button" wire:click="sendQuoteEmail({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Dispatch quote via Email">
+                                                    <i class="fa-light fa-envelope"></i>Email
+                                                </button>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
+                                                    <i class="fa-light fa-circle-check"></i> Converted & Fulfilled
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'orders')
+            <!-- SALES ORDERS & FULFILMENT HUB -->
+            <div class="space-y-6">
+                <!-- Orders KPI Cards -->
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Confirmed Orders') }}</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">{{ count($salesOrders) }} Orders</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">Total processed sales orders</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Sales Revenue Total') }}</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format(array_reduce($salesOrders, fn($acc, $o) => $acc + $o['amount'], 0), 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-chart-line-up mr-1"></i>Confirmed customer orders</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Pending Fulfilment') }}</p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">{{ count(array_filter($salesOrders, fn($o) => $o['status'] !== 'Fulfilled')) }}</p>
+                        <p class="mt-1 text-xs font-medium text-amber-500">Awaiting dispatch</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Fulfilled Orders') }}</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">{{ count(array_filter($salesOrders, fn($o) => $o['status'] === 'Fulfilled')) }}</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500">Dispatched & delivered</p>
+                    </div>
+                </div>
+
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-500/20 mb-1">
+                                <i class="fa-light fa-cart-shopping"></i> Customer Fulfilment
+                            </span>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Confirmed Sales Orders & Warehouse Dispatch') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Track customer purchases, manage warehouse dispatch status, and log order execution.') }}</p>
+                        </div>
+                        <button type="button" wire:click="openCreateModal('sales_order')" class="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition active:scale-95">
+                            <i class="fa-light fa-plus mr-1.5"></i>{{ __('Create Sales Order') }}
+                        </button>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Order #</th>
+                                    <th class="px-4 py-3.5">Customer Name</th>
+                                    <th class="px-4 py-3.5">Order Date</th>
+                                    <th class="px-4 py-3.5">Total Amount (NGN)</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Update Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach ($salesOrders as $index => $so)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">{{ $so['id'] }}</td>
+                                        <td class="px-4 py-3.5 font-bold">{{ $so['customer'] }}</td>
+                                        <td class="px-4 py-3.5 text-slate-500 text-xs">{{ $so['date'] }}</td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($so['amount'], 2) }}</td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-3 py-1 text-xs font-bold {{ $so['status'] === 'Confirmed' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : ($so['status'] === 'Fulfilled' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' : 'bg-slate-100 text-slate-600') }}">
+                                                {{ $so['status'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right space-x-2">
+                                            @if ($so['status'] !== 'Fulfilled')
+                                                <button type="button" wire:click="updateOrderStatus({{ $index }}, 'Fulfilled')" class="rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition">
+                                                    <i class="fa-light fa-truck mr-1"></i>Mark Fulfilled
+                                                </button>
+                                            @else
+                                                <span class="text-xs font-bold text-slate-400"><i class="fa-light fa-circle-check text-emerald-500 mr-1"></i>Delivered</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'pipeline')
+            <!-- DEALS PIPELINE KANBAN BOARD -->
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20 mb-1">
+                            <i class="fa-light fa-chart-kanban"></i> Visual Sales Funnel
+                        </span>
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('CRM & Deals Pipeline Matrix') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Track deal stages from lead prospecting to contract signature.') }}</p>
+                    </div>
+                    <button type="button" wire:click="openCreateModal('deal')" class="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                        <i class="fa-light fa-plus mr-1.5"></i>{{ __('Add New Deal') }}
                     </button>
                 </div>
-                <div class="mt-5 overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
-                            <tr>
-                                <th class="px-4 py-3.5">Order #</th>
-                                <th class="px-4 py-3.5">Customer Name</th>
-                                <th class="px-4 py-3.5">Order Date</th>
-                                <th class="px-4 py-3.5">Total Amount (NGN)</th>
-                                <th class="px-4 py-3.5">Status</th>
-                                <th class="px-4 py-3.5 text-right">Update Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            @foreach ($salesOrders as $index => $so)
-                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                                    <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">{{ $so['id'] }}</td>
-                                    <td class="px-4 py-3.5 font-bold">{{ $so['customer'] }}</td>
-                                    <td class="px-4 py-3.5 text-slate-500">{{ $so['date'] }}</td>
-                                    <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($so['amount'], 2) }}</td>
-                                    <td class="px-4 py-3.5">
-                                        <span class="rounded-full px-3 py-1 text-xs font-bold {{ $so['status'] === 'Confirmed' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : ($so['status'] === 'Fulfilled' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' : 'bg-slate-100 text-slate-600') }}">
-                                            {{ $so['status'] }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3.5 text-right space-x-2">
-                                        @if ($so['status'] !== 'Fulfilled')
-                                            <button type="button" wire:click="updateOrderStatus({{ $index }}, 'Fulfilled')" class="text-xs font-bold text-emerald-600 hover:underline">
-                                                Mark Fulfilled
-                                            </button>
-                                        @else
-                                            <span class="text-xs font-bold text-slate-400">Complete</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+
+                <div class="grid gap-4 md:grid-cols-4">
+                    <!-- Column 1: Prospecting -->
+                    <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2 dark:border-slate-700">
+                            <span class="text-xs font-bold uppercase text-slate-500">1. Prospecting</span>
+                            <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600">2 Deals</span>
+                        </div>
+                        <div class="rounded-xl bg-white p-4 shadow-xs dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                            <p class="text-xs font-bold text-slate-900 dark:text-white">Abuja Tech Hub Inverter Upgrade</p>
+                            <p class="text-sm font-black text-emerald-600">₦4,500,000.00</p>
+                            <p class="text-[11px] text-slate-400">Client: TechHub Ltd</p>
+                        </div>
+                    </div>
+                    <!-- Column 2: Proposal Sent -->
+                    <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2 dark:border-slate-700">
+                            <span class="text-xs font-bold uppercase text-slate-500">2. Proposal Sent</span>
+                            <span class="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-600">3 Deals</span>
+                        </div>
+                        <div class="rounded-xl bg-white p-4 shadow-xs dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                            <p class="text-xs font-bold text-slate-900 dark:text-white">Konga Central Warehouse Solar</p>
+                            <p class="text-sm font-black text-emerald-600">₦12,850,000.00</p>
+                            <p class="text-[11px] text-slate-400">Quote #QT-2026-001 Sent</p>
+                        </div>
+                    </div>
+                    <!-- Column 3: Negotiation -->
+                    <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2 dark:border-slate-700">
+                            <span class="text-xs font-bold uppercase text-slate-500">3. Negotiation</span>
+                            <span class="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600">1 Deal</span>
+                        </div>
+                        <div class="rounded-xl bg-white p-4 shadow-xs dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                            <p class="text-xs font-bold text-slate-900 dark:text-white">Dangote Refinery Abuja Solar</p>
+                            <p class="text-sm font-black text-emerald-600">₦24,500,000.00</p>
+                            <p class="text-[11px] text-slate-400">SLA Contract Review</p>
+                        </div>
+                    </div>
+                    <!-- Column 4: Closed Won -->
+                    <div class="rounded-2xl bg-emerald-50/50 p-4 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-3">
+                        <div class="flex items-center justify-between border-b pb-2 dark:border-emerald-800">
+                            <span class="text-xs font-bold uppercase text-emerald-600">4. Closed Won</span>
+                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">5 Deals</span>
+                        </div>
+                        <div class="rounded-xl bg-white p-4 shadow-xs dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                            <p class="text-xs font-bold text-slate-900 dark:text-white">Transcorp Hilton Suite 402</p>
+                            <p class="text-sm font-black text-emerald-600">₦6,400,000.00</p>
+                            <p class="text-[11px] text-emerald-500 font-bold">Confirmed Sales Order</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @elseif ($activeTab === 'analytics')
+            <!-- SALES LEADERBOARD & REGIONAL METRICS -->
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
+                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600 border border-amber-500/20 mb-1">
+                            <i class="fa-light fa-trophy"></i> Sales Performance
+                        </span>
+                        <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Commercial Sales Leaderboard & Regional Branch Revenue') }}</h2>
+                        <p class="text-sm text-slate-500">{{ __('Rankings across Abuja HQ, Lagos VI, Port Harcourt, and Kano regional sales reps.') }}</p>
+                    </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                        <p class="text-xs font-bold uppercase text-slate-400">🥇 Top Sales Rep (Abuja HQ)</p>
+                        <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">Engr. Babatunde Adeleke</p>
+                        <p class="mt-1 text-2xl font-black text-emerald-600">₦34,200,000.00</p>
+                        <p class="text-xs text-slate-500 mt-1">12 Closed Deals · 94% Customer Rating</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                        <p class="text-xs font-bold uppercase text-slate-400">🥈 Second Place (Lagos VI)</p>
+                        <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">Fatima Bello</p>
+                        <p class="mt-1 text-2xl font-black text-purple-600">₦28,500,000.00</p>
+                        <p class="text-xs text-slate-500 mt-1">9 Closed Deals · B2B Inverter Packages</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                        <p class="text-xs font-bold uppercase text-slate-400">🥉 Third Place (Port Harcourt)</p>
+                        <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">Emeka Nwosu</p>
+                        <p class="mt-1 text-2xl font-black text-blue-600">₦19,800,000.00</p>
+                        <p class="text-xs text-slate-500 mt-1">7 Closed Deals · Commercial Solar Arrays</p>
+                    </div>
                 </div>
             </section>
         @else
@@ -5226,6 +5478,8 @@
                         <div>
                             <h1 class="text-xl font-extrabold text-slate-950 dark:text-white">
                                 @if ($modalType === 'invoice') {{ __('New Enterprise Invoice Studio') }}
+                                @elseif ($modalType === 'price_quote') {{ __('New Price Quote & Proposal Studio') }}
+                                @elseif ($modalType === 'sales_order') {{ __('New Confirmed Sales Order Studio') }}
                                 @elseif ($modalType === 'expense') {{ __('Record Expense Transaction Studio') }}
                                 @elseif ($modalType === 'pos_sale') {{ __('New POS Quick Sale & Terminal Checkout') }}
                                 @elseif ($modalType === 'product') {{ __('Add New Product SKU Inventory Studio') }}
@@ -5244,7 +5498,7 @@
                         <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">
                             {{ __('Cancel & Discard') }}
                         </button>
-                        @if (in_array($modalType, ['invoice', 'expense', 'product', 'campaign', 'rule', 'pos_sale', 'deal', 'lead', 'sales_order', 'project']))
+                        @if (in_array($modalType, ['invoice', 'price_quote', 'sales_order', 'expense', 'product', 'campaign', 'rule', 'pos_sale', 'deal', 'lead', 'project']))
                             <button type="button" wire:click="submitModalForm" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition">
                                 <i class="fa-light fa-cloud-arrow-up mr-2"></i>{{ __('Save & Persist Record') }}
                             </button>
@@ -5573,6 +5827,89 @@
                         <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
                             <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
                             <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Commercial Invoice</button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'price_quote')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Create New Official Price Quote & Proposal') }}</h3>
+                            <p class="text-xs text-slate-400">Generate commercial quote with line items, validity date, and instant PDF/WhatsApp dispatch</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="createPriceQuoteFromModal" class="mt-5 space-y-4">
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Organization Name</label>
+                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Konga Logistics Distribution Center" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Total Proposal Value (NGN)</label>
+                                <input type="number" step="0.01" wire:model="form.total" placeholder="e.g. 12850000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold font-mono outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client Email Address</label>
+                                <input type="email" wire:model="form.email" placeholder="procurement@client.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number (WhatsApp Dispatch)</label>
+                                <input type="text" wire:model="form.phone" placeholder="+234 803 000 0000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Proposal Terms & Notes</label>
+                            <textarea wire:model="form.notes" rows="3" placeholder="Proposal valid for 14 days. Includes 5-year warranty on inverter units." class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700">Save & Generate Official Quote</button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'sales_order')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Create Confirmed Sales Order') }}</h3>
+                            <p class="text-xs text-slate-400">Record customer purchase order for warehouse fulfilment</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="createSalesOrderFromModal" class="mt-5 space-y-4">
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Customer / Business Name</label>
+                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Transcorp Hilton Suites" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Total Order Amount (NGN)</label>
+                                <input type="number" step="0.01" wire:model="form.total" placeholder="e.g. 6400000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold font-mono outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Customer Phone Number</label>
+                                <input type="text" wire:model="form.phone" placeholder="+234 800 000 0000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Delivery / Fulfilment Location</label>
+                                <input type="text" wire:model="form.location" placeholder="Abuja Central Warehouse / Client Address" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Confirm & Process Sales Order</button>
                         </div>
                     </form>
                 @elseif ($modalType === 'product')

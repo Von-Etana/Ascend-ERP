@@ -57,7 +57,17 @@ class WhatsAppNotificationService
         return $this->dispatchMessage($cleanPhone, $messageBody);
     }
 
-    protected function dispatchMessage(string $toPhone, string $body): array
+    public function sendMessage(string $recipientPhone, string $body): array
+    {
+        $cleanPhone = preg_replace('/[^0-9]/', '', $recipientPhone);
+        if (!str_starts_with($cleanPhone, '234') && str_starts_with($cleanPhone, '0')) {
+            $cleanPhone = '234' . substr($cleanPhone, 1);
+        }
+
+        return $this->dispatchMessage($cleanPhone, $body);
+    }
+
+    public function dispatchMessage(string $toPhone, string $body): array
     {
         if (empty($this->token) || empty($this->phoneNumberId)) {
             Log::info("WhatsApp API payload prepared for {$toPhone}: {$body}");

@@ -18,5 +18,5 @@ Route::middleware(['api'])
         Route::get('/conversations/{conversation}/events', [InboxApiController::class, 'events'])->name('conversations.events');
         Route::get('/settings', [InboxApiController::class, 'settings'])->name('settings.show');
         Route::put('/settings', [InboxApiController::class, 'updateSettings'])->name('settings.update');
-        Route::post('/webhooks/{provider}', InboxWebhookController::class)->withoutMiddleware('api')->name('webhooks.receive');
+        Route::match(['get', 'post'], '/webhooks/{provider}', InboxWebhookController::class)->withoutMiddleware('api')->name('webhooks.receive');
     });
