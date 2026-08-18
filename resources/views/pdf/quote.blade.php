@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quote {{ $quote['id'] ?? 'Draft' }} — Ascend Systems</title>
+    <title>Quote {{ $quote['id'] ?? ($quote['invoice_number'] ?? 'Draft') }} — Ascend Systems</title>
     <style>
-        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
+        * { font-family: 'DejaVu Sans', sans-serif !important; }
+        body { font-family: 'DejaVu Sans', sans-serif !important; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
         .header { border-bottom: 2px solid #2563eb; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
@@ -28,7 +29,6 @@
         .badge-pending { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
         .terms-box { width: 48%; float: left; margin-top: 15px; padding: 12px; border: 1px dashed #cbd5e1; border-radius: 6px; background-color: #fafafa; font-size: 10px; }
         .footer { margin-top: 90px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 10px; text-align: center; color: #64748b; line-height: 1.6; }
-        .curr-sym { font-family: 'DejaVu Sans', sans-serif; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -105,11 +105,11 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 15%;">SKU / Code</th>
-                <th style="width: 45%;">Item & Scope Description</th>
-                <th style="text-align: center; width: 10%;">Qty</th>
-                <th style="text-align: right; width: 15%;">Unit Price (&#8358;)</th>
-                <th style="text-align: right; width: 18%;">Amount (&#8358;)</th>
+                <th style="width: 15%;">SKU / CODE</th>
+                <th style="width: 45%;">ITEM DESCRIPTION</th>
+                <th style="text-align: center; width: 10%;">QTY</th>
+                <th style="text-align: right; width: 15%;">UNIT PRICE (&#8358;)</th>
+                <th style="text-align: right; width: 18%;">AMOUNT (&#8358;)</th>
             </tr>
         </thead>
         <tbody>
@@ -123,7 +123,7 @@
                         $sku = !empty($item['sku']) ? $item['sku'] : 'GEN-ITEM';
                     @endphp
                     <tr>
-                        <td style="font-family: monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $sku }}</td>
+                        <td style="font-family: 'DejaVu Sans', monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $sku }}</td>
                         <td>
                             <div style="font-weight: bold; color: #0f172a;">{{ $desc }}</div>
                         </td>
@@ -134,9 +134,9 @@
                 @endforeach
             @else
                 <tr>
-                    <td style="font-family: monospace; font-size: 10px;">SRV-SOLAR</td>
+                    <td style="font-family: 'DejaVu Sans', monospace; font-size: 10px;">SRV-SOLAR</td>
                     <td>
-                        <div style="font-weight: bold; color: #0f172a;">Turnkey Solar Solution Bundle Sizing</div>
+                        <div style="font-weight: bold; color: #0f172a;">Solar Power Solution & Systems Package</div>
                     </td>
                     <td style="text-align: center; font-weight: bold;">1</td>
                     <td style="text-align: right;">&#8358;{{ number_format($total, 2) }}</td>
@@ -155,7 +155,7 @@
 
         <table class="totals-table">
             <tr>
-                <td style="color: #64748b;">Subtotal:</td>
+                <td style="color: #64748b;">Gross Line Subtotal:</td>
                 <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($subtotal, 2) }}</td>
             </tr>
             @if ($discountAmount > 0)
@@ -169,7 +169,7 @@
                 <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($tax, 2) }}</td>
             </tr>
             <tr style="font-size: 14px; font-weight: bold; border-top: 2px solid #2563eb;">
-                <td style="color: #2563eb; padding-top: 6px;">Total:</td>
+                <td style="color: #2563eb; padding-top: 6px;">Total Amount Due:</td>
                 <td style="text-align: right; color: #2563eb; padding-top: 6px;">&#8358;{{ number_format($total, 2) }}</td>
             </tr>
         </table>

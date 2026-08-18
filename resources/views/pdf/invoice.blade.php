@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice {{ $invoice->invoice_number }} — Ascend Systems</title>
+    <title>Quote {{ $invoice->invoice_number }} — Ascend Systems</title>
     <style>
-        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
+        * { font-family: 'DejaVu Sans', sans-serif !important; }
+        body { font-family: 'DejaVu Sans', sans-serif !important; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
         .header { border-bottom: 2px solid #2563eb; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
         .address { font-size: 11px; color: #475569; margin-top: 3px; }
         .contact-info { font-size: 11px; color: #475569; margin-top: 2px; font-weight: 500; }
-        .invoice-title { font-size: 26px; font-weight: 900; text-align: right; color: #0f172a; letter-spacing: 1px; }
+        .invoice-title { font-size: 28px; font-weight: 900; text-align: right; color: #0f172a; letter-spacing: 1px; }
         .invoice-num { font-size: 13px; font-weight: bold; text-align: right; color: #2563eb; margin-top: 2px; }
         .details-box { width: 100%; margin-top: 15px; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background-color: #f8fafc; }
         .details-table { width: 100%; }
@@ -57,7 +58,7 @@
                     <div class="contact-info"><strong>Call:</strong> {{ $companyPhone }} &nbsp;|&nbsp; <strong>Email:</strong> {{ $companyEmail }}</div>
                 </td>
                 <td style="width: 45%; text-align: right; vertical-align: top;">
-                    <div class="invoice-title">COMMERCIAL INVOICE</div>
+                    <div class="invoice-title">QUOTE</div>
                     <div class="invoice-num">#{{ $invoice->invoice_number }}</div>
                     <div style="margin-top: 6px;">
                         <span class="badge {{ $invoice->status === 'paid' ? 'badge-paid' : 'badge-pending' }}">
@@ -90,8 +91,8 @@
                     @endif
                 </td>
                 <td style="width: 45%; text-align: right;">
-                    <div class="customer-detail"><strong>Invoice Date:</strong> {{ $invoice->issue_date?->format('F d, Y') ?: date('F d, Y') }}</div>
-                    <div class="customer-detail"><strong>Payment Due:</strong> {{ $invoice->due_date?->format('F d, Y') ?: 'Upon Receipt' }}</div>
+                    <div class="customer-detail"><strong>Quote Date:</strong> {{ $invoice->issue_date?->format('F d, Y') ?: date('F d, Y') }}</div>
+                    <div class="customer-detail"><strong>Valid Until:</strong> {{ $invoice->due_date?->format('F d, Y') ?: 'Upon Receipt' }}</div>
                     <div class="customer-detail"><strong>Currency:</strong> Nigerian Naira (&#8358;)</div>
                     @if (!empty($promoCode))
                         <div class="customer-detail" style="color: #2563eb; font-weight: bold; margin-top: 4px;">
@@ -107,44 +108,46 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 12%;">SKU / Code</th>
-                <th style="width: 45%;">Item Description</th>
-                <th style="text-align: center; width: 10%;">Qty</th>
-                <th style="text-align: right; width: 15%;">Unit Price (&#8358;)</th>
-                <th style="text-align: right; width: 18%;">Amount (&#8358;)</th>
+                <th style="width: 15%;">SKU / CODE</th>
+                <th style="width: 45%;">ITEM DESCRIPTION</th>
+                <th style="text-align: center; width: 10%;">QTY</th>
+                <th style="text-align: right; width: 15%;">UNIT PRICE (&#8358;)</th>
+                <th style="text-align: right; width: 18%;">AMOUNT (&#8358;)</th>
             </tr>
         </thead>
         <tbody>
             @if (!empty($lineItems) && is_array($lineItems))
                 @foreach ($lineItems as $item)
                     @php
-                        $qty = (float) ($item['quantity'] ?? 1);
+                        $qty = (float) ($item['quantity'] ?? ($item['qty'] ?? 1));
                         $price = (float) ($item['unit_price'] ?? 0);
                         $discPct = (float) ($item['discount_percent'] ?? 0);
                         $amt = isset($item['amount']) ? (float) $item['amount'] : ($qty * $price * (1 - $discPct / 100));
+                        $desc = !empty($item['description']) ? $item['description'] : (!empty($item['name']) ? $item['name'] : 'Line Item');
+                        $sku = !empty($item['sku']) ? $item['sku'] : 'GEN-ITEM';
                     @endphp
                     <tr>
-                        <td style="font-family: monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $item['sku'] ?? 'GEN-ITEM' }}</td>
+                        <td style="font-family: 'DejaVu Sans', monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $sku }}</td>
                         <td>
-                            <div style="font-weight: bold; color: #0f172a;">{{ $item['description'] ?? 'Line Item' }}</div>
+                            <div style="font-weight: bold; color: #0f172a;">{{ $desc }}</div>
                             @if ($discPct > 0)
                                 <div style="font-size: 10px; color: #16a34a;">Line Discount Applied: {{ $discPct }}% off</div>
                             @endif
                         </td>
-                        <td style="text-align: center; font-weight: bold;">{{ $qty }}</td>
-                        <td style="text-align: right;">₦{{ number_format($price, 2) }}</td>
-                        <td style="text-align: right; font-weight: bold; color: #0f172a;">₦{{ number_format($amt, 2) }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ (int) $qty }}</td>
+                        <td style="text-align: right;">&#8358;{{ number_format($price, 2) }}</td>
+                        <td style="text-align: right; font-weight: bold; color: #0f172a;">&#8358;{{ number_format($amt, 2) }}</td>
                     </tr>
                 @endforeach
             @else
                 <tr>
-                    <td style="font-family: monospace; font-size: 10px;">SRV-001</td>
+                    <td style="font-family: 'DejaVu Sans', monospace; font-size: 10px;">SRV-SOLAR</td>
                     <td>
-                        <div style="font-weight: bold; color: #0f172a;">{{ $invoice->notes ?: 'Enterprise Software & ERP Services Package' }}</div>
+                        <div style="font-weight: bold; color: #0f172a;">{{ $invoice->notes ?: 'Solar Power Solution & Systems Package' }}</div>
                     </td>
                     <td style="text-align: center; font-weight: bold;">1</td>
-                    <td style="text-align: right;">₦{{ number_format($invoice->subtotal, 2) }}</td>
-                    <td style="text-align: right; font-weight: bold; color: #0f172a;">₦{{ number_format($invoice->subtotal, 2) }}</td>
+                    <td style="text-align: right;">&#8358;{{ number_format($invoice->subtotal, 2) }}</td>
+                    <td style="text-align: right; font-weight: bold; color: #0f172a;">&#8358;{{ number_format($invoice->subtotal, 2) }}</td>
                 </tr>
             @endif
         </tbody>
@@ -157,27 +160,27 @@
             <div><strong>Bank Name:</strong> Access Bank Nigeria</div>
             <div><strong>Account Name:</strong> Ascend Systems Nigeria Ltd</div>
             <div><strong>Account Number:</strong> 0129481029</div>
-            <div style="margin-top: 4px; color: #64748b;">Please use Invoice Reference <strong>#{{ $invoice->invoice_number }}</strong> in payment description.</div>
+            <div style="margin-top: 4px; color: #64748b;">Please use Reference <strong>#{{ $invoice->invoice_number }}</strong> in payment description.</div>
         </div>
 
         <table class="totals-table">
             <tr>
                 <td style="color: #64748b;">Gross Line Subtotal:</td>
-                <td style="text-align: right; font-weight: 600;">₦{{ number_format($invoice->subtotal, 2) }}</td>
+                <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($invoice->subtotal, 2) }}</td>
             </tr>
             @if ($discountAmount > 0)
                 <tr style="color: #2563eb;">
                     <td>Custom Discount / Promo:</td>
-                    <td style="text-align: right; font-weight: 600;">- ₦{{ number_format($discountAmount, 2) }}</td>
+                    <td style="text-align: right; font-weight: 600;">- &#8358;{{ number_format($discountAmount, 2) }}</td>
                 </tr>
             @endif
             <tr>
                 <td style="color: #64748b;">VAT (7.5%):</td>
-                <td style="text-align: right; font-weight: 600;">₦{{ number_format($invoice->tax, 2) }}</td>
+                <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($invoice->tax, 2) }}</td>
             </tr>
             <tr style="font-size: 14px; font-weight: bold; border-top: 2px solid #2563eb;">
                 <td style="color: #2563eb; padding-top: 6px;">Total Amount Due:</td>
-                <td style="text-align: right; color: #2563eb; padding-top: 6px;">₦{{ number_format($invoice->total, 2) }}</td>
+                <td style="text-align: right; color: #2563eb; padding-top: 6px;">&#8358;{{ number_format($invoice->total, 2) }}</td>
             </tr>
         </table>
     </div>
@@ -185,7 +188,7 @@
     <div style="clear: both;"></div>
 
     <div class="footer">
-        <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Commercial Billing Invoice<br>
+        <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Quote<br>
         Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.<br>
         Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
     </div>
