@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>POS Receipt {{ $receipt->receipt_number }} — Ascend Systems</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; color: #000; font-size: 11px; line-height: 1.4; margin: 0; padding: 15px; width: 300px; }
+        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; line-height: 1.4; color: #000; margin: 0; padding: 10px; }
         .text-center { text-align: center; }
         .company-logo-img { max-height: 40px; width: auto; margin: 0 auto 6px auto; display: block; }
         .logo-badge { background-color: #000; color: #fff; padding: 3px 6px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 4px; }

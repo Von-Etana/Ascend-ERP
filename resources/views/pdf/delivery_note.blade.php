@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Delivery Note {{ $invoice->invoice_number }} — Ascend Systems</title>
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0f172a; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
-        .header { border-bottom: 2px solid #0284c7; padding-bottom: 18px; margin-bottom: 20px; }
+        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
+        .header { border-bottom: 2px solid #059669; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #0284c7; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
         .address { font-size: 11px; color: #475569; margin-top: 3px; }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Invoice {{ $invoice->invoice_number }} — Ascend Systems</title>
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
+        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
         .header { border-bottom: 2px solid #2563eb; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
@@ -92,7 +92,7 @@
                 <td style="width: 45%; text-align: right;">
                     <div class="customer-detail"><strong>Invoice Date:</strong> {{ $invoice->issue_date?->format('F d, Y') ?: date('F d, Y') }}</div>
                     <div class="customer-detail"><strong>Payment Due:</strong> {{ $invoice->due_date?->format('F d, Y') ?: 'Upon Receipt' }}</div>
-                    <div class="customer-detail"><strong>Currency:</strong> Nigerian Naira (NGN ₦)</div>
+                    <div class="customer-detail"><strong>Currency:</strong> Nigerian Naira (&#8358;)</div>
                     @if (!empty($promoCode))
                         <div class="customer-detail" style="color: #2563eb; font-weight: bold; margin-top: 4px;">
                             Promo Code Applied: {{ strtoupper($promoCode) }}
@@ -110,8 +110,8 @@
                 <th style="width: 12%;">SKU / Code</th>
                 <th style="width: 45%;">Item Description</th>
                 <th style="text-align: center; width: 10%;">Qty</th>
-                <th style="text-align: right; width: 15%;">Unit Price</th>
-                <th style="text-align: right; width: 18%;">Amount (NGN)</th>
+                <th style="text-align: right; width: 15%;">Unit Price (&#8358;)</th>
+                <th style="text-align: right; width: 18%;">Amount (&#8358;)</th>
             </tr>
         </thead>
         <tbody>

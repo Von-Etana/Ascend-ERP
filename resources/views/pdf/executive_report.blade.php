@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Executive Financial & Performance Report — {{ $companyName }}</title>
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
-        .header { border-bottom: 2px solid #0d9488; padding-bottom: 18px; margin-bottom: 20px; }
+        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 11px; line-height: 1.5; margin: 0; padding: 25px; }
+        .header { border-bottom: 2px solid #0f172a; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #0d9488; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
         .address { font-size: 11px; color: #475569; margin-top: 3px; }
@@ -78,25 +78,24 @@
                     <div class="section-label">Audit & Governance</div>
                     <div class="customer-detail"><strong>Audit Status:</strong> Verified & Signed</div>
                     <div class="customer-detail"><strong>Generated Date:</strong> {{ date('F d, Y') }}</div>
-                    <div class="customer-detail"><strong>Currency:</strong> Nigerian Naira (NGN / ₦)</div>
+                    <div class="customer-detail"><strong>Currency:</strong> Nigerian Naira (&#8358;)</div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <!-- Master Profit & Loss Table -->
-    <div class="section-label" style="font-size: 11px; margin-top: 15px;">Master Profit & Loss (P&L) Financial Statement</div>
+    <!-- Summary Executive Table -->
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 55%;">Financial Item / Category</th>
-                <th style="width: 45%; text-align: right;">Amount (NGN)</th>
+                <th style="width: 55%;">Metric / Financial KPI Dimension</th>
+                <th style="width: 45%; text-align: right;">Amount (&#8358;)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td><strong>Gross Operating Revenue (Sales, POS & Subscriptions)</strong></td>
-                <td style="text-align: right; font-weight: bold; color: #0f172a;">₦{{ number_format($grossRevenue, 2) }}</td>
+                <td style="text-align: right; font-weight: bold; color: #0f172a;">&#8358;{{ number_format($grossRevenue, 2) }}</td>
             </tr>
             <tr>
                 <td>Cost of Goods Sold (COGS & Hardware Procurement)</td>
