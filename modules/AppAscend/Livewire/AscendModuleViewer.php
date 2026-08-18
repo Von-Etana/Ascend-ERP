@@ -1513,8 +1513,38 @@ class AscendModuleViewer extends Component
         session()->flash('status', __('Loaded :preset quote line items preset into quotation form.', ['preset' => ucfirst(str_replace('_', ' ', $preset))]));
     }
 
+    protected function persistNewInventoryProducts(): void
+    {
+        foreach ($this->invoiceItems as $i => $item) {
+            if (!empty($item['save_to_inventory']) && empty($item['product_id'])) {
+                $sku = !empty($item['sku']) ? $item['sku'] : ('SKU-' . rand(1000, 9999));
+                $name = !empty($item['description']) ? $item['description'] : 'Custom Product';
+                $price = (float) ($item['unit_price'] ?? 0);
+                $stock = (int) ($item['stock'] ?? 10);
+
+                // Create the product in database
+                $newProduct = \App\Models\InventoryProduct::create([
+                    'sku' => $sku,
+                    'name' => $name,
+                    'unit_price' => $price,
+                    'cost_price' => $price * 0.7,
+                    'wholesale_price' => $price * 0.85,
+                    'stock_quantity' => $stock,
+                    'category' => 'Solar Hardware',
+                    'reorder_level' => 2,
+                    'is_b2b_visible' => true,
+                ]);
+
+                // Update the line item state with the newly created product ID and SKU
+                $this->invoiceItems[$i]['product_id'] = $newProduct->id;
+                $this->invoiceItems[$i]['sku'] = $newProduct->sku;
+            }
+        }
+    }
+
     public function createPriceQuoteFromModal(?string $dispatchAction = null): void
     {
+        $this->persistNewInventoryProducts();
         $this->recalculateInvoiceTotals();
 
         $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
@@ -2811,6 +2841,7 @@ class AscendModuleViewer extends Component
 
     public function submitModalForm(): void
     {
+        $this->persistNewInventoryProducts();
         $title = $this->form['client_name'] ?: $this->form['title'] ?: $this->form['name'] ?: 'New Record';
         $subtotal = (float) ($this->form['subtotal'] ?: $this->form['amount'] ?: $this->form['unit_price'] ?: 250000.00);
         $tax = (float) ($this->form['tax'] ?: ($subtotal * 0.075));
