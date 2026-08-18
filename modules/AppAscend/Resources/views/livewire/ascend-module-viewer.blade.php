@@ -2121,6 +2121,9 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3.5 text-right space-x-1.5">
+                                            <a href="{{ route('portal.quote.pdf', ['data' => base64_encode(json_encode($qt))]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-500/20 transition dark:text-slate-200" title="Download PDF Quote">
+                                                <i class="fa-light fa-file-pdf"></i>PDF
+                                            </a>
                                             @if ($qt['status'] !== 'Converted')
                                                 <button type="button" wire:click="convertQuoteToSalesOrder({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Convert quote to Confirmed Sales Order">
                                                     <i class="fa-light fa-cart-circle-check"></i>To Sales Order

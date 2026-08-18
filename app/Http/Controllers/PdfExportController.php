@@ -118,4 +118,22 @@ class PdfExportController
 
         return $pdf->download('Executive-Financial-Report-'.date('Y-Q').'.pdf');
     }
+
+    public function downloadQuote(): Response
+    {
+        $dataStr = request()->query('data');
+        if (!$dataStr) {
+            abort(400, 'Missing quote data');
+        }
+        $quote = json_decode(base64_decode($dataStr), true);
+        if (!$quote) {
+            abort(400, 'Invalid quote data');
+        }
+
+        $pdf = Pdf::loadView('pdf.quote', array_merge([
+            'quote' => $quote,
+        ], $this->getCompanyInfo()));
+
+        return $pdf->download('Quote-'.($quote['id'] ?? 'Draft').'.pdf');
+    }
 }
