@@ -1834,8 +1834,20 @@
                                             <i class="fa-light fa-file-signature mr-1.5"></i>{{ $qt['id'] }}
                                         </td>
                                         <td class="px-4 py-3.5">
-                                            <p class="font-bold text-slate-900 dark:text-white">{{ $qt['client_name'] }}</p>
-                                            <p class="text-xs text-slate-400">Created: {{ $qt['created_at'] }}</p>
+                                            <p class="font-bold text-slate-950 dark:text-white">{{ $qt['client_name'] }}</p>
+                                            @if (!empty($qt['items']))
+                                                <div class="mt-1 flex flex-wrap gap-1">
+                                                    @foreach (array_slice($qt['items'], 0, 2) as $it)
+                                                        <span class="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-slate-800 dark:text-slate-300 border border-blue-100 dark:border-slate-700">
+                                                            <strong class="font-bold mr-1">{{ $it['qty'] ?? 1 }}x</strong> {{ \Illuminate\Support\Str::limit($it['description'] ?? 'Product', 28) }}
+                                                        </span>
+                                                    @endforeach
+                                                    @if (count($qt['items']) > 2)
+                                                        <span class="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">+{{ count($qt['items']) - 2 }} more</span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                            <p class="mt-1 text-[10px] text-slate-400">Issued: {{ $qt['created_at'] }}</p>
                                         </td>
                                         <td class="px-4 py-3.5 text-xs">
                                             <p class="font-medium text-slate-700 dark:text-slate-300">{{ $qt['email'] }}</p>
@@ -5830,47 +5842,231 @@
                         </div>
                     </form>
                 @elseif ($modalType === 'price_quote')
-                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-4 dark:border-slate-800">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Create New Official Price Quote & Proposal') }}</h3>
-                            <p class="text-xs text-slate-400">Generate commercial quote with line items, validity date, and instant PDF/WhatsApp dispatch</p>
+                            <div class="flex items-center gap-2">
+                                <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600 border border-blue-500/20">
+                                    <i class="fa-light fa-file-signature mr-1"></i>Official Commercial Proposal
+                                </span>
+                                <span class="text-xs text-slate-400 font-mono">{{ $form['invoice_number'] ?? 'QT-2026-001' }}</span>
+                            </div>
+                            <h3 class="mt-1 text-xl font-extrabold text-slate-950 dark:text-white">{{ __('New Price Quote & Commercial Proposal Studio') }}</h3>
+                            <p class="text-xs font-medium text-slate-500">{{ __('Generate itemized solar & enterprise solution proposals with real-time inventory pricing, tax calculations, and instant multi-channel dispatch.') }}</p>
                         </div>
-                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
-                            <i class="fa-light fa-xmark text-lg"></i>
+                        <div class="flex items-center gap-2">
+                            <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 transition">
+                                <i class="fa-light fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Solution Package Presets Bar -->
+                    <div class="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-blue-500/20 bg-blue-50/40 p-3 dark:border-blue-900/40 dark:bg-blue-950/20">
+                        <span class="text-[11px] font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-light fa-wand-magic-sparkles"></i>{{ __('Quick Package Presets:') }}
+                        </span>
+                        <button type="button" wire:click="loadQuotePreset('residential_55kw')" class="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition">
+                            <i class="fa-light fa-solar-panel text-amber-500 mr-1"></i>5.5kVA Residential Solar Package
+                        </button>
+                        <button type="button" wire:click="loadQuotePreset('commercial_10kw')" class="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition">
+                            <i class="fa-light fa-bolt-lightning text-purple-500 mr-1"></i>10kVA Commercial Inverter System
+                        </button>
+                        <button type="button" wire:click="loadQuotePreset('software_erp')" class="rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition">
+                            <i class="fa-light fa-brain-circuit text-blue-500 mr-1"></i>Ascend ERP & Bot Automation Suite
                         </button>
                     </div>
 
-                    <form wire:submit.prevent="createPriceQuoteFromModal" class="mt-5 space-y-4">
+                    <form wire:submit.prevent="createPriceQuoteFromModal" class="mt-5 space-y-6">
+                        <!-- 1. Quote Reference & Timeline -->
                         <div class="grid gap-3 sm:grid-cols-3">
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Organization Name</label>
-                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Konga Logistics Distribution Center" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Quote Reference Number</label>
+                                <div class="relative mt-1">
+                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-mono font-bold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <button type="button" wire:click="autoGenerateQuoteNumber" class="absolute right-2.5 top-2.5 text-[10px] font-bold text-blue-600 hover:underline">
+                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Auto
+                                    </button>
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Total Proposal Value (NGN)</label>
-                                <input type="number" step="0.01" wire:model="form.total" placeholder="e.g. 12850000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold font-mono outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Issue Date</label>
+                                <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Proposal Valid Until</label>
+                                <input type="date" wire:model="form.due_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client Email Address</label>
-                                <input type="email" wire:model="form.email" placeholder="procurement@client.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                        <!-- 2. Customer & Organization Details Card -->
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-light fa-building-user text-blue-600"></i>{{ __('Customer & Organization Information') }}
+                                </span>
+                                <span class="text-[10px] font-bold text-slate-400">Required for official dispatch</span>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number (WhatsApp Dispatch)</label>
-                                <input type="text" wire:model="form.phone" placeholder="+234 803 000 0000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Client / Company Name *</label>
+                                    <input type="text" wire:model="form.client_name" required placeholder="e.g. Konga Logistics Distribution Center" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Contact Person Name</label>
+                                    <input type="text" wire:model="form.name" placeholder="e.g. Engr. Adekunle Johnson" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Email Address (for PDF Proposal Delivery)</label>
+                                    <input type="email" wire:model="form.client_email" placeholder="procurement@client.ng" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Phone Number (for WhatsApp Dispatch)</label>
+                                    <input type="text" wire:model="form.client_phone" placeholder="+234 803 999 1122" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Site / Delivery Location Address</label>
+                                    <input type="text" wire:model="form.client_address" placeholder="e.g. Plot 14 Industrial Layout, Idu, Abuja" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax Identification (TIN)</label>
+                                    <input type="text" wire:model="form.client_tin" placeholder="TIN-NG-84910291" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-mono font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
                             </div>
                         </div>
 
+                        <!-- 3. Dynamic Products, Quantities & Pricing Line Items -->
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/50 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 dark:border-slate-800">
+                                <div>
+                                    <span class="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-light fa-boxes-stacked text-blue-600"></i>{{ __('Quotation Products & Service Line Items') }}
+                                    </span>
+                                    <p class="text-[11px] text-slate-400">{{ __('Select from available warehouse stock inventory or customize descriptions, quantities, and pricing.') }}</p>
+                                </div>
+                                <button type="button" wire:click="addInvoiceLine" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition active:scale-95">
+                                    <i class="fa-light fa-plus"></i>{{ __('Add Line Item') }}
+                                </button>
+                            </div>
+
+                            <div class="space-y-3">
+                                @foreach ($invoiceItems as $index => $item)
+                                    <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-xs space-y-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[11px] font-black text-blue-600 dark:bg-slate-900">
+                                                #{{ $index + 1 }}
+                                            </span>
+                                            <!-- Product Picker from Inventory Stock -->
+                                            <select wire:change="selectProductForInvoiceLine({{ $index }}, $event.target.value)" class="w-full rounded-xl border border-slate-200 p-2 text-xs font-bold outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                                <option value="">-- Select Product from Inventory Catalog / Custom Entry --</option>
+                                                @foreach ($dbProducts as $prod)
+                                                    <option value="{{ $prod->id }}" {{ ($item['product_id'] ?? '') == $prod->id ? 'selected' : '' }}>
+                                                        [{{ $prod->sku }}] {{ $prod->name }} — ₦{{ number_format($prod->unit_price, 2) }} (In Stock: {{ $prod->stock_quantity }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @if (count($invoiceItems) > 1)
+                                                <button type="button" wire:click="removeInvoiceLine({{ $index }})" class="p-2 text-slate-400 hover:text-rose-600 text-xs shrink-0 transition" title="Remove Item">
+                                                    <i class="fa-light fa-trash-can"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        <div class="grid gap-2 sm:grid-cols-12 items-center">
+                                            <div class="sm:col-span-5">
+                                                <label class="block text-[10px] font-bold uppercase text-slate-400">Item Description / Model</label>
+                                                <input type="text" wire:model.live="invoiceItems.{{ $index }}.description" wire:change="updateInvoiceLineItem({{ $index }}, 'description', $event.target.value)" placeholder="e.g. 5.5kVA Hybrid Solar Inverter..." class="mt-0.5 w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-[10px] font-bold uppercase text-slate-400">Quantity</label>
+                                                <input type="number" min="1" wire:model.live="invoiceItems.{{ $index }}.quantity" wire:change="updateInvoiceLineItem({{ $index }}, 'quantity', $event.target.value)" placeholder="1" class="mt-0.5 w-full rounded-xl border border-slate-200 p-2 text-xs font-bold text-center outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                            </div>
+                                            <div class="sm:col-span-3">
+                                                <label class="block text-[10px] font-bold uppercase text-slate-400">Unit Price (NGN)</label>
+                                                <input type="number" step="0.01" wire:model.live="invoiceItems.{{ $index }}.unit_price" wire:change="updateInvoiceLineItem({{ $index }}, 'unit_price', $event.target.value)" placeholder="0.00" class="mt-0.5 w-full rounded-xl border border-slate-200 p-2 text-xs font-bold outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-700 dark:text-white">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-[10px] font-bold uppercase text-slate-400 text-right">Line Total</label>
+                                                <div class="mt-0.5 py-2 text-right font-mono font-black text-xs text-slate-900 dark:text-white">
+                                                    ₦{{ number_format((float) ($item['amount'] ?? (($item['quantity'] ?? 1) * ($item['unit_price'] ?? 0))), 2) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- 4. Commercial Discount & Promo Override -->
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-blue-50/30 dark:bg-blue-950/20 space-y-3">
+                            <div class="text-[11px] font-extrabold text-blue-800 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-light fa-tag"></i>{{ __('Commercial Discount & Promotional Offer') }}
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Promo Code / Reference</label>
+                                    <input type="text" wire:model="form.promo_code" placeholder="e.g. SOLARPROMO-Q3" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-bold uppercase outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Discount Mode</label>
+                                    <select wire:model.live="form.discount_type" wire:change="recalculateInvoiceTotals" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="fixed">Fixed Amount Discount (₦)</option>
+                                        <option value="percent">Percentage Discount (%)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Discount Amount / Value</label>
+                                    <input type="number" step="0.01" wire:model.live="form.discount_value" wire:change="recalculateInvoiceTotals" placeholder="0" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Commercial Pricing Summary Cards -->
+                        <div class="grid gap-4 sm:grid-cols-4">
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                                <p class="text-[10px] font-bold uppercase text-slate-400">Gross Line Subtotal</p>
+                                <p class="mt-1 text-lg font-black text-slate-900 dark:text-white">₦{{ number_format((float) ($form['subtotal'] ?? 0), 2) }}</p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                                <p class="text-[10px] font-bold uppercase text-slate-400">Applied Discount</p>
+                                <p class="mt-1 text-lg font-black text-blue-600 dark:text-blue-400">-₦{{ number_format((float) ($form['discount_amount'] ?? 0), 2) }}</p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                                <p class="text-[10px] font-bold uppercase text-slate-400">VAT (7.5% Standard)</p>
+                                <p class="mt-1 text-lg font-black text-slate-700 dark:text-slate-300">₦{{ number_format((float) ($form['tax'] ?? 0), 2) }}</p>
+                            </div>
+                            <div class="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-4 dark:border-emerald-800 dark:bg-emerald-950/20">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Total Quoted Amount</p>
+                                <p class="mt-1 text-2xl font-black text-emerald-600 dark:text-emerald-400">₦{{ number_format((float) ($form['total'] ?? 0), 2) }}</p>
+                            </div>
+                        </div>
+
+                        <!-- 6. Commercial Terms, Warranty & SLA Notes -->
                         <div>
-                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Proposal Terms & Notes</label>
-                            <textarea wire:model="form.notes" rows="3" placeholder="Proposal valid for 14 days. Includes 5-year warranty on inverter units." class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Proposal Terms, Warranty & Payment Milestones</label>
+                            <textarea wire:model="form.notes" rows="3" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white" placeholder="Terms of supply, warranty, and commissioning notes..."></textarea>
                         </div>
 
-                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
-                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
-                            <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700">Save & Generate Official Quote</button>
+                        <!-- 7. Action Buttons -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 transition">
+                                {{ __('Cancel & Discard') }}
+                            </button>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" wire:click="createPriceQuoteFromModal('draft')" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 transition">
+                                    <i class="fa-light fa-floppy-disk mr-1.5"></i>{{ __('Save Draft') }}
+                                </button>
+                                <button type="button" wire:click="createPriceQuoteFromModal('whatsapp')" class="rounded-2xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition active:scale-95">
+                                    <i class="fa-brands fa-whatsapp mr-1.5"></i>{{ __('Save & Send WhatsApp') }}
+                                </button>
+                                <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition active:scale-95">
+                                    <i class="fa-light fa-file-signature mr-1.5"></i>{{ __('Save & Issue Official Quote') }}
+                                </button>
+                            </div>
                         </div>
                     </form>
                 @elseif ($modalType === 'sales_order')

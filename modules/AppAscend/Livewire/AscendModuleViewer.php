@@ -1453,31 +1453,94 @@ class AscendModuleViewer extends Component
         session()->flash('status', __('New Sales Order :id created successfully!', ['id' => $soId]));
     }
 
-    public function createPriceQuoteFromModal(): void
+    public function autoGenerateQuoteNumber(): void
     {
-        $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
-        $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3500000.00));
+        $this->form['invoice_number'] = 'QT-2026-'.str_pad((string) rand(100, 999), 3, '0', STR_PAD_LEFT);
+    }
 
-        $qtId = 'QT-2026-'.rand(100, 999);
-        $this->priceQuotes[] = [
+    public function loadQuotePreset(string $preset): void
+    {
+        if ($preset === 'residential_55kw') {
+            $this->invoiceItems = [
+                ['product_id' => '', 'sku' => 'SLR-INV-55KW', 'description' => 'Ascend 5.5kVA Pure Sine Wave Hybrid Solar Inverter (Dual MPPT, 0ms Switchover)', 'quantity' => 1, 'unit_price' => 1350000.00, 'discount_percent' => 0, 'amount' => 1350000.00],
+                ['product_id' => '', 'sku' => 'BAT-LFP-10KW', 'description' => 'Ascend 10.2kWh LiFePO4 Lithium Battery Bank (6,000+ Deep Cycles)', 'quantity' => 1, 'unit_price' => 2200000.00, 'discount_percent' => 0, 'amount' => 2200000.00],
+                ['product_id' => '', 'sku' => 'SLR-PNL-550W', 'description' => 'Tier 1 Monocrystalline Solar Panels 550W Array (6 Panels)', 'quantity' => 6, 'unit_price' => 125000.00, 'discount_percent' => 0, 'amount' => 750000.00],
+                ['product_id' => '', 'sku' => 'SRV-INST-001', 'description' => 'Complete Turnkey Solar Installation, Cabling, DC Breakers & Surge Protection', 'quantity' => 1, 'unit_price' => 250000.00, 'discount_percent' => 0, 'amount' => 250000.00],
+            ];
+        } elseif ($preset === 'commercial_10kw') {
+            $this->invoiceItems = [
+                ['product_id' => '', 'sku' => 'SLR-INV-10KW', 'description' => 'Ascend 10kVA Three-Phase Commercial Hybrid Solar Inverter System', 'quantity' => 1, 'unit_price' => 3850000.00, 'discount_percent' => 0, 'amount' => 3850000.00],
+                ['product_id' => '', 'sku' => 'BAT-LFP-20KW', 'description' => 'Ascend 20.4kWh High-Capacity LiFePO4 Rack-Mounted Battery Bank', 'quantity' => 1, 'unit_price' => 4500000.00, 'discount_percent' => 0, 'amount' => 4500000.00],
+                ['product_id' => '', 'sku' => 'SLR-PNL-550W', 'description' => 'Tier 1 Monocrystalline Solar Panels 550W Array (16 Panels)', 'quantity' => 16, 'unit_price' => 125000.00, 'discount_percent' => 0, 'amount' => 2000000.00],
+                ['product_id' => '', 'sku' => 'SRV-COMM-002', 'description' => 'Commercial Three-Phase Balancing, Automatic Transfer Switch (ATS) & Certification', 'quantity' => 1, 'unit_price' => 500000.00, 'discount_percent' => 0, 'amount' => 500000.00],
+            ];
+        } elseif ($preset === 'software_erp') {
+            $this->invoiceItems = [
+                ['product_id' => '', 'sku' => 'SFT-ERP-ENT', 'description' => 'Ascend ERP Enterprise Core Suite (Unlimited Staff, Multi-Branch & Live Inventory)', 'quantity' => 1, 'unit_price' => 1500000.00, 'discount_percent' => 0, 'amount' => 1500000.00],
+                ['product_id' => '', 'sku' => 'SFT-BOT-WA', 'description' => 'Ascend AI WhatsApp Hybrid Bot & Omnichannel CRM Automation Engine', 'quantity' => 1, 'unit_price' => 450000.00, 'discount_percent' => 0, 'amount' => 450000.00],
+                ['product_id' => '', 'sku' => 'SRV-TRN-001', 'description' => 'Staff Onboarding, Data Migration & 12-Month Priority SLA Maintenance', 'quantity' => 1, 'unit_price' => 350000.00, 'discount_percent' => 0, 'amount' => 350000.00],
+            ];
+        }
+        $this->recalculateInvoiceTotals();
+        session()->flash('status', __('Loaded :preset quote line items preset into quotation form.', ['preset' => ucfirst(str_replace('_', ' ', $preset))]));
+    }
+
+    public function createPriceQuoteFromModal(?string $dispatchAction = null): void
+    {
+        $this->recalculateInvoiceTotals();
+
+        $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
+        $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3550000.00));
+        $qtId = $this->form['invoice_number'] ?: ('QT-2026-'.str_pad((string) rand(100, 999), 3, '0', STR_PAD_LEFT));
+        $phone = $this->form['client_phone'] ?: ($this->form['phone'] ?: '+234 811 763 3020');
+        $email = $this->form['client_email'] ?: ($this->form['email'] ?: 'client@ascendsystems.ng');
+
+        $newQuote = [
             'id' => $qtId,
             'client_name' => $client,
-            'email' => $this->form['email'] ?: 'client@ascendsystems.ng',
-            'phone' => $this->form['phone'] ?: '+234 811 763 3020',
-            'valid_until' => now()->addDays(14)->format('Y-m-d'),
+            'email' => $email,
+            'phone' => $phone,
+            'address' => $this->form['client_address'] ?? '',
+            'valid_until' => $this->form['due_date'] ?: now()->addDays(14)->format('Y-m-d'),
+            'subtotal' => (float) ($this->form['subtotal'] ?? $amount),
+            'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
+            'tax' => (float) ($this->form['tax'] ?? 0),
             'total' => $amount,
-            'status' => 'Draft',
+            'status' => ($dispatchAction === 'whatsapp' || $dispatchAction === 'email') ? 'Sent' : 'Draft',
             'created_at' => now()->format('Y-m-d'),
+            'notes' => $this->form['notes'] ?: 'Standard commercial quotation',
             'items' => array_map(fn($item) => [
+                'product_id' => $item['product_id'] ?? null,
+                'sku' => $item['sku'] ?? '',
                 'description' => $item['description'] ?? 'Custom Solar Product Item',
                 'qty' => (int) ($item['quantity'] ?? 1),
-                'unit_price' => (float) ($item['unit_price'] ?? $amount),
-                'amount' => (float) ($item['amount'] ?? $amount),
+                'unit_price' => (float) ($item['unit_price'] ?? 0),
+                'discount_percent' => (float) ($item['discount_percent'] ?? 0),
+                'amount' => (float) ($item['amount'] ?? 0),
             ], $this->invoiceItems),
         ];
 
+        array_unshift($this->priceQuotes, $newQuote);
+
+        if ($dispatchAction === 'whatsapp') {
+            try {
+                $ws = app(\Modules\AppAscend\Services\WhatsAppNotificationService::class);
+                $msg = "📄 *Ascend Systems Official Price Quote*\n"
+                    . "Quote ID: *{$qtId}*\n"
+                    . "Client: {$client}\n"
+                    . "Total Amount: ₦" . number_format($amount, 2) . "\n"
+                    . "Valid Until: " . ($this->form['due_date'] ?: now()->addDays(14)->format('Y-m-d')) . "\n\n"
+                    . "Thank you for choosing Ascend Systems Nigeria.";
+                $ws->sendMessage($phone, $msg);
+            } catch (\Throwable) {}
+        }
+
         $this->showModal = false;
-        session()->flash('status', __('New Price Quote :id created successfully!', ['id' => $qtId]));
+        session()->flash('status', __('Official Price Quote :id generated successfully for :client! Total: ₦:total', [
+            'id' => $qtId,
+            'client' => $client,
+            'total' => number_format($amount, 2),
+        ]));
     }
 
     // Finance Invoice Payment
@@ -2573,10 +2636,41 @@ class AscendModuleViewer extends Component
 
         if ($type === 'quote' || $type === 'price_quote') {
             $this->modalType = 'price_quote';
+            $this->autoGenerateQuoteNumber();
             $this->form['client_name'] = '';
-            $this->form['email'] = '';
-            $this->form['phone'] = '';
-            $this->form['notes'] = 'Valid for 14 calendar days from date of issue.';
+            $this->form['client_phone'] = '';
+            $this->form['client_email'] = '';
+            $this->form['client_address'] = '';
+            $this->form['client_tin'] = '';
+            $this->form['issue_date'] = now()->format('Y-m-d');
+            $this->form['due_date'] = now()->addDays(14)->format('Y-m-d');
+            $this->form['discount_type'] = 'fixed';
+            $this->form['discount_value'] = 0;
+            $this->form['discount_amount'] = 0;
+            $this->form['promo_code'] = '';
+            $this->form['notes'] = "• Validity: This quotation is valid for 14 calendar days from date of issuance.\n• Warranty: 5-Year Comprehensive Manufacturer Warranty on Inverters & LiFePO4 Lithium Batteries.\n• Deployment: Professional on-site delivery, mounting, and testing included.\n• Payment Milestones: 70% advance on PO confirmation, 30% balance upon site commissioning.";
+
+            $this->invoiceItems = [
+                [
+                    'product_id' => '',
+                    'sku' => 'SLR-INV-55KW',
+                    'description' => 'Ascend 5.5kVA Pure Sine Wave Hybrid Solar Inverter (Dual MPPT, 0ms Switchover)',
+                    'quantity' => 1,
+                    'unit_price' => 1350000.00,
+                    'discount_percent' => 0,
+                    'amount' => 1350000.00,
+                ],
+                [
+                    'product_id' => '',
+                    'sku' => 'BAT-LFP-10KW',
+                    'description' => 'Ascend 10.2kWh LiFePO4 Lithium Battery Bank (6,000+ Deep Cycles Lifespan)',
+                    'quantity' => 1,
+                    'unit_price' => 2200000.00,
+                    'discount_percent' => 0,
+                    'amount' => 2200000.00,
+                ],
+            ];
+            $this->recalculateInvoiceTotals();
         }
 
         if ($type === 'sales_order') {
