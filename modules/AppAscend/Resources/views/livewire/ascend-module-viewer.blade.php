@@ -2659,79 +2659,202 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 grid gap-6 lg:grid-cols-2">
-                        <!-- Branded Customer Lead Form -->
-                        <form wire:submit.prevent="submitWebLeadCaptureForm" class="rounded-2xl bg-slate-50 p-6 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="mt-6 grid gap-6 lg:grid-cols-12">
+                        <!-- Comprehensive Enterprise Customer Lead Form -->
+                        <form wire:submit.prevent="submitWebLeadCaptureForm" class="lg:col-span-7 rounded-2xl bg-slate-50 p-6 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-6">
                             <div class="flex items-center justify-between border-b pb-3 dark:border-slate-700">
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                                    <i class="fa-light fa-paper-plane text-purple-600 mr-1.5"></i> Customer Solar Quotation Request Form
-                                </h3>
-                                <span class="text-[10px] font-mono text-slate-400">www.ascendsystems.ng/get-quote</span>
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
+                                        <i class="fa-light fa-sparkles text-purple-600"></i> Comprehensive Solar & Power Lead Intake Form
+                                    </h3>
+                                    <p class="text-[11px] text-slate-500">Auto-scores lead quality & syncs directly into CRM Pipeline & Deal Stages.</p>
+                                </div>
+                                <span class="rounded-full bg-purple-500/10 px-2.5 py-1 text-[10px] font-mono font-bold text-purple-600 border border-purple-500/20">www.ascendsystems.ng</span>
                             </div>
 
-                            <div class="grid gap-3 sm:grid-cols-2">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Full Name / Business Name</label>
-                                    <input type="text" wire:model="webLeadForm.client_name" placeholder="e.g. Chief Emeka Nwosu" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number (WhatsApp)</label>
-                                    <input type="text" wire:model="webLeadForm.phone" placeholder="+234 802 888 9900" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">Email Address</label>
-                                    <input type="email" wire:model="webLeadForm.email" placeholder="client@nwosugroup.ng" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">City / Location</label>
-                                    <select wire:model="webLeadForm.city_location" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                        <option value="Abuja">Abuja HQ Region</option>
-                                        <option value="Lagos">Lagos State</option>
-                                        <option value="Kano">Kano State</option>
-                                        <option value="Port Harcourt">Port Harcourt / Rivers</option>
-                                        <option value="Ibadan">Ibadan / Oyo</option>
-                                    </select>
+                            <!-- Section 1: Client & Organization Details -->
+                            <div class="space-y-3">
+                                <h4 class="text-[11px] font-black uppercase text-purple-700 dark:text-purple-400 tracking-wider flex items-center gap-1">
+                                    <i class="fa-light fa-user-tie"></i> 1. Client & Organization Profile
+                                </h4>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Client / Contact Name <span class="text-rose-500">*</span></label>
+                                        <input type="text" wire:model="webLeadForm.client_name" placeholder="e.g. Chief Emeka Nwosu" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Company / Organization</label>
+                                        <input type="text" wire:model="webLeadForm.company_name" placeholder="e.g. Nwosu Energy & Logistics Ltd" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Phone Number (WhatsApp) <span class="text-rose-500">*</span></label>
+                                        <input type="text" wire:model="webLeadForm.phone" placeholder="+234 802 888 9900" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+                                        <input type="email" wire:model="webLeadForm.email" placeholder="client@nwosugroup.ng" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">System Package Interest</label>
-                                <select wire:model="webLeadForm.system_interest" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Inverter (Residential 4-Bed)</option>
-                                    <option value="Ascend 10.2kWh LiFePO4 Lithium Battery Storage">Ascend 10.2kWh LiFePO4 Lithium Storage</option>
-                                    <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array (Office / Hotel)</option>
-                                    <option value="PTZ 4K Solar Security Cameras & Automation">PTZ 4K Solar Security Cameras & Automation</option>
-                                </select>
+                            <!-- Section 2: Property & Site Location -->
+                            <div class="space-y-3 pt-2 border-t dark:border-slate-700">
+                                <h4 class="text-[11px] font-black uppercase text-purple-700 dark:text-purple-400 tracking-wider flex items-center gap-1">
+                                    <i class="fa-light fa-location-dot"></i> 2. Location & Facility Profile
+                                </h4>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Region / City <span class="text-rose-500">*</span></label>
+                                        <select wire:model="webLeadForm.city_location" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="Abuja">Abuja FCT (Central & Suburbs)</option>
+                                            <option value="Lagos">Lagos State (Island & Mainland)</option>
+                                            <option value="Port Harcourt">Port Harcourt / Rivers</option>
+                                            <option value="Kano">Kano State</option>
+                                            <option value="Ibadan">Ibadan / Oyo</option>
+                                            <option value="Enugu">Enugu / South East</option>
+                                            <option value="Kaduna">Kaduna / North Central</option>
+                                            <option value="Benin City">Benin City / Edo</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Property / Facility Type</label>
+                                        <select wire:model="webLeadForm.property_type" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="Residential Villa / Duplex">Residential Villa / 4-5 Bed Duplex</option>
+                                            <option value="Residential Apartment / Flat">Residential Apartment / 2-3 Bed Flat</option>
+                                            <option value="Commercial Office / Plaza">Commercial Office / Business Plaza</option>
+                                            <option value="Industrial / Factory / Warehouse">Industrial / Factory / Warehouse</option>
+                                            <option value="Hospital / Healthcare Clinic">Hospital / Healthcare Clinic</option>
+                                            <option value="Hotel / Hospitality Complex">Hotel / Hospitality Complex</option>
+                                            <option value="School / Educational Campus">School / Educational Campus</option>
+                                            <option value="Borehole / Agricultural Farm">Borehole / Agricultural Farm</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Street Address & Landmark</label>
+                                        <input type="text" wire:model="webLeadForm.installation_address" placeholder="e.g. Plot 402 Maitama District, near Farmers Market" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="flex justify-end pt-2">
-                                <button type="submit" class="rounded-xl bg-purple-600 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-purple-700 transition">
-                                    <i class="fa-light fa-sparkles mr-1.5"></i>Submit Quote Request & Sync CRM Pipeline
+                            <!-- Section 3: Energy Requirements, Sizing & Budget -->
+                            <div class="space-y-3 pt-2 border-t dark:border-slate-700">
+                                <h4 class="text-[11px] font-black uppercase text-purple-700 dark:text-purple-400 tracking-wider flex items-center gap-1">
+                                    <i class="fa-light fa-bolt"></i> 3. System Sizing, Budget & Financing
+                                </h4>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">System Package Interest</label>
+                                        <select wire:model="webLeadForm.system_interest" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="Ascend 3.5kVA / 24V Pure Sine Wave Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter (Starter / 2-Bed Flat)</option>
+                                            <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (Residential 4-Bed Duplex)</option>
+                                            <option value="Ascend 10.2kVA / 48V Commercial Dual MPPT Inverter">Ascend 10.2kVA / 48V Commercial Dual MPPT Inverter (Duplex / SME Office)</option>
+                                            <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array (Office / Hotel / Mini-Mart)</option>
+                                            <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid (Factory / Hospital)</option>
+                                            <option value="Ascend 10.2kWh LiFePO4 Lithium Battery Storage">Ascend 10.2kWh LiFePO4 Lithium Storage Module</option>
+                                            <option value="PTZ 4K Solar Security Cameras & Automation">PTZ 4K Solar Security Cameras & Automation Suite</option>
+                                            <option value="Solar Water Borehole Pumping Solution">Solar Water Borehole Pumping Solution (Submersible)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Daily Generator Run Hours</label>
+                                        <input type="number" min="0" max="24" wire:model="webLeadForm.daily_generator_hours" placeholder="e.g. 6" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Monthly Fuel Spend (₦)</label>
+                                        <input type="number" min="0" wire:model="webLeadForm.monthly_fuel_spend_ngn" placeholder="e.g. 150000" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Estimated Budget (₦)</label>
+                                        <input type="number" min="0" wire:model="webLeadForm.estimated_budget_ngn" placeholder="2500000" required class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Purchasing Timeline</label>
+                                        <select wire:model="webLeadForm.purchasing_timeline" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="immediate">Immediate (Ready to install in &lt; 7 days)</option>
+                                            <option value="within_30_days">Within 30 Days (Active consideration)</option>
+                                            <option value="planning_q4">Budgeting / Next Quarter Planning</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Payment / Financing Mode</label>
+                                        <select wire:model="webLeadForm.financing_preference" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="outright">100% Outright Purchase</option>
+                                            <option value="milestone_70_30">70/30 Milestone Deployment</option>
+                                            <option value="solar_lease">Solar Financing / Bank Lease</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Referral / Promo Code</label>
+                                        <input type="text" wire:model="webLeadForm.referral_code" placeholder="e.g. TUNDESOLAR10" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold uppercase outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Special Load Requirements / Notes</label>
+                                        <textarea rows="2" wire:model="webLeadForm.special_notes" placeholder="e.g. 2x 1.5HP Inverter ACs, deep freezer, borehole pump and Starlink wifi" class="mt-1 w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-3 border-t dark:border-slate-700">
+                                <div class="text-[11px] text-slate-500">
+                                    <i class="fa-light fa-shield-check text-emerald-500 mr-1"></i> Instant AI Qualification & Pipeline Sync
+                                </div>
+                                <button type="submit" class="rounded-xl bg-purple-600 px-6 py-3 text-xs font-bold text-white shadow-lg hover:bg-purple-700 transition flex items-center gap-2">
+                                    <i class="fa-light fa-paper-plane"></i> Submit Comprehensive Lead
                                 </button>
                             </div>
                         </form>
 
-                        <!-- Live Web Lead Submissions Feed -->
-                        <div class="space-y-4">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500"><i class="fa-light fa-rss text-purple-600 mr-1"></i> Live Web Leads captured from www.ascendsystems.ng</h3>
-                            <div class="space-y-3 max-h-[380px] overflow-y-auto">
+                        <!-- Live Web Lead Submissions Feed with AI Score Badges -->
+                        <div class="lg:col-span-5 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <i class="fa-light fa-rss text-purple-600"></i> Qualified Web Leads Feed
+                                </h3>
+                                <span class="text-[11px] font-bold text-purple-600">{{ count($dbWebLeads) }} captured</span>
+                            </div>
+
+                            <div class="space-y-3 max-h-[640px] overflow-y-auto pr-1">
                                 @forelse ($dbWebLeads as $lead)
-                                    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex items-center justify-between">
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-bold text-xs text-slate-900 dark:text-white">{{ $lead->client_name }}</span>
-                                                <span class="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-600">{{ $lead->city_location }}</span>
+                                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-2.5 transition hover:border-purple-500/40">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-bold text-xs text-slate-900 dark:text-white">{{ $lead->client_name }}</span>
+                                                    <span class="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px] font-bold text-purple-600">{{ $lead->city_location }}</span>
+                                                </div>
+                                                @if ($lead->company_name)
+                                                    <p class="text-[11px] font-medium text-slate-500">{{ $lead->company_name }}</p>
+                                                @endif
                                             </div>
-                                            <p class="mt-1 text-[11px] text-purple-600 font-semibold">{{ $lead->system_interest }}</p>
-                                            <p class="text-[10px] text-slate-400">{{ $lead->phone }} · {{ $lead->email }}</p>
+                                            <div class="text-right shrink-0">
+                                                <span class="rounded-full px-2 py-0.5 text-[10px] font-black {{ ($lead->ai_lead_score ?? 80) >= 88 ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' }}">
+                                                    ★ Score: {{ $lead->ai_lead_score ?? 80 }}/100
+                                                </span>
+                                                <p class="mt-1 text-xs font-black text-slate-900 dark:text-white">₦{{ number_format($lead->estimated_budget_ngn, 2) }}</p>
+                                            </div>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20">CRM Synced</span>
-                                            <p class="mt-1 text-xs font-black text-slate-900 dark:text-white">₦{{ number_format($lead->estimated_budget_ngn, 2) }}</p>
+
+                                        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-2.5 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
+                                            <p class="font-semibold text-purple-600 flex items-center gap-1">
+                                                <i class="fa-light fa-solar-panel"></i> {{ $lead->system_interest }}
+                                            </p>
+                                            <p class="text-[10px] text-slate-400">
+                                                <i class="fa-light fa-phone text-slate-400 mr-1"></i>{{ $lead->phone }}
+                                                @if ($lead->email) · <i class="fa-light fa-envelope text-slate-400 mr-0.5"></i>{{ $lead->email }}@endif
+                                                @if ($lead->property_type) · <i class="fa-light fa-building text-slate-400 mr-0.5"></i>{{ $lead->property_type }}@endif
+                                            </p>
+                                        </div>
+
+                                        <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t dark:border-slate-800">
+                                            <span>Timeline: <strong class="text-slate-700 dark:text-slate-200 capitalize">{{ str_replace('_', ' ', $lead->purchasing_timeline ?? 'immediate') }}</strong></span>
+                                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-600"><i class="fa-light fa-circle-check mr-1"></i>CRM Synced</span>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="p-8 text-center text-slate-400 text-xs">No web lead submissions captured yet.</div>
+                                    <div class="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-400 text-xs dark:border-slate-800">
+                                        <i class="fa-light fa-inbox text-2xl mb-2 text-slate-300"></i>
+                                        <p>No web lead submissions captured yet.</p>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
@@ -6966,6 +7089,97 @@
                         <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
                             <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
                             <button type="submit" class="rounded-2xl bg-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-teal-700">Submit Request</button>
+                        </div>
+                    </form>
+                @elseif ($modalType === 'lead')
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20">
+                                <i class="fa-light fa-user-plus"></i> CRM Lead Intake Studio
+                            </span>
+                            <h3 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Create Comprehensive Enterprise Lead') }}</h3>
+                            <p class="text-xs text-slate-500">Capture contact, sizing, property type, budget & auto-sync into pipeline</p>
+                        </div>
+                        <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <i class="fa-light fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Contact Name <span class="text-rose-500">*</span></label>
+                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Chief Emeka Nwosu" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Company / Organization</label>
+                                <input type="text" wire:model="form.company_name" placeholder="e.g. Nwosu Logistics Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number (WhatsApp) <span class="text-rose-500">*</span></label>
+                                <input type="text" wire:model="form.phone" required placeholder="+234 802 888 9900" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Email Address</label>
+                                <input type="email" wire:model="form.email" placeholder="client@nwosugroup.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Region / City</label>
+                                <select wire:model="form.city_location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Abuja">Abuja FCT</option>
+                                    <option value="Lagos">Lagos State</option>
+                                    <option value="Port Harcourt">Port Harcourt / Rivers</option>
+                                    <option value="Kano">Kano State</option>
+                                    <option value="Ibadan">Ibadan / Oyo</option>
+                                    <option value="Enugu">Enugu State</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Property / Facility Type</label>
+                                <select wire:model="form.property_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Residential Villa / Duplex">Residential Villa / 4-5 Bed Duplex</option>
+                                    <option value="Residential Apartment">Residential Flat</option>
+                                    <option value="Commercial Office / Plaza">Commercial Office / Plaza</option>
+                                    <option value="Industrial / Factory">Industrial / Factory</option>
+                                    <option value="Hospital / Healthcare">Hospital / Healthcare</option>
+                                    <option value="Borehole / Solar Farm">Borehole / Solar Farm</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">System Package Interest</label>
+                                <select wire:model="form.system_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Ascend 3.5kVA / 24V Pure Sine Wave Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter (Starter)</option>
+                                    <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (Residential 4-Bed)</option>
+                                    <option value="Ascend 10.2kVA / 48V Commercial Dual MPPT Inverter">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
+                                    <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array (Office / Hotel)</option>
+                                    <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid (Factory / Hospital)</option>
+                                    <option value="Ascend 10.2kWh LiFePO4 Lithium Battery Storage">Ascend 10.2kWh LiFePO4 Lithium Battery Bank</option>
+                                    <option value="PTZ 4K Solar Security Cameras & Automation">PTZ 4K Solar Security Cameras & Automation Suite</option>
+                                    <option value="Solar Water Borehole Pumping Solution">Solar Water Borehole Pumping Solution</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Estimated Deal Value (NGN)</label>
+                                <input type="number" min="0" wire:model="form.amount" placeholder="2500000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Purchasing Timeline</label>
+                                <select wire:model="form.purchasing_timeline" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="immediate">Immediate (&lt; 7 Days)</option>
+                                    <option value="within_30_days">Within 30 Days</option>
+                                    <option value="planning_q4">Budgeting / Next Quarter</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Lead Sizing Notes & Requirements</label>
+                            <textarea wire:model="form.notes" rows="2" placeholder="Appliance load details, roof type, power requirements..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                            <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700">Save & Inject into CRM</button>
                         </div>
                     </form>
                 @else

@@ -19,19 +19,5 @@ class DatabaseSeeder extends Seeder
             AITemplateSeeder::class,
             AscendWorkspaceSeeder::class,
         ]);
-
-        foreach (range(1, 50) as $number) {
-            User::query()->updateOrCreate(
-                ['username' => 'user'.$number],
-                [
-                    'name' => 'User '.$number,
-                    'username' => 'user'.$number,
-                    'email' => 'user'.$number.'@example.com',
-                    'locale' => 'en',
-                    'email_verified_at' => now(),
-                    'password' => Hash::make('123456'),
-                ]
-            );
-        }
     }
 }

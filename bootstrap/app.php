@@ -28,11 +28,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'livewire/upload-file',
             'livewire-*/upload-file',
+            'api/leads/capture',
+            'api/inbox/v1/webhooks/*',
         ]);
 
         $middleware->web(prepend: [
             PrepareInstallation::class,
         ], append: [
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
             SetLocale::class,
             SetThemeContext::class,
             CaptureAffiliateReferral::class,

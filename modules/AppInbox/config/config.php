@@ -1,12 +1,14 @@
 <?php
 
 return [
-    'providers' => ['whatsapp', 'instagram', 'messenger', 'telegram', 'email'],
+    'providers' => ['whatsapp', 'instagram', 'messenger', 'telegram', 'email', 'linkedin', 'tiktok'],
     'webhook_secrets' => [
         'whatsapp' => env('INBOX_WHATSAPP_WEBHOOK_SECRET'),
         'instagram' => env('INBOX_INSTAGRAM_WEBHOOK_SECRET'),
         'messenger' => env('INBOX_MESSENGER_WEBHOOK_SECRET'),
         'telegram' => env('INBOX_TELEGRAM_WEBHOOK_SECRET'),
+        'linkedin' => env('INBOX_LINKEDIN_WEBHOOK_SECRET'),
+        'tiktok' => env('INBOX_TIKTOK_WEBHOOK_SECRET'),
     ],
     'ai' => [
         'enabled' => (bool) env('INBOX_AI_ENABLED', true),

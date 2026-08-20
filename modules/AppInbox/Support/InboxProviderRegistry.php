@@ -6,8 +6,10 @@ use InvalidArgumentException;
 use Modules\AppInbox\Contracts\InboxProvider;
 use Modules\AppInbox\Providers\EmailProvider;
 use Modules\AppInbox\Providers\InstagramProvider;
+use Modules\AppInbox\Providers\LinkedInProvider;
 use Modules\AppInbox\Providers\MessengerProvider;
 use Modules\AppInbox\Providers\TelegramProvider;
+use Modules\AppInbox\Providers\TiktokProvider;
 use Modules\AppInbox\Providers\WhatsAppProvider;
 
 class InboxProviderRegistry
@@ -22,7 +24,15 @@ class InboxProviderRegistry
 
     public function registerDefaults(): void
     {
-        foreach ([new WhatsAppProvider, new InstagramProvider, new MessengerProvider, new TelegramProvider, new EmailProvider] as $provider) {
+        foreach ([
+            new WhatsAppProvider,
+            new InstagramProvider,
+            new MessengerProvider,
+            new TelegramProvider,
+            new EmailProvider,
+            new LinkedInProvider,
+            new TiktokProvider,
+        ] as $provider) {
             $this->register($provider);
         }
     }

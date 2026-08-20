@@ -257,36 +257,36 @@ class AscendModuleViewer extends Component
     public array $calcQty = [
         // Cooling & Air Conditioning
         'ac_1hp' => 0,
-        'ac_15hp' => 1,
+        'ac_15hp' => 0,
         'ac_2hp' => 0,
-        'fans' => 4,
+        'fans' => 2,
         'fridge' => 1,
-        'freezer' => 1,
+        'freezer' => 0,
 
         // Kitchen & Heavy Duty Appliances
-        'microwave' => 1,
+        'microwave' => 0,
         'electric_kettle' => 0,
-        'blender' => 1,
+        'blender' => 0,
         'water_heater' => 0,
-        'iron' => 1,
+        'iron' => 0,
         'washing_machine' => 0,
 
         // Lighting, TV & Entertainment
-        'lights' => 12,
-        'tv_55' => 2,
+        'lights' => 6,
+        'tv_55' => 1,
         'tv_large' => 0,
-        'decoder_sound' => 1,
+        'decoder_sound' => 0,
 
         // Water Pumps & Facility
-        'pump_1hp' => 1,
+        'pump_1hp' => 0,
         'pump_2hp' => 0,
         'pressure_pump' => 0,
 
         // Computing, Starlink, CCTV & Office
-        'laptops' => 3,
-        'desktop' => 1,
-        'wifi_starlink' => 1,
-        'cctv_system' => 1,
+        'laptops' => 1,
+        'desktop' => 0,
+        'wifi_starlink' => 0,
+        'cctv_system' => 0,
         'server_rack' => 0,
     ];
     public int $calcHours = 12;
@@ -301,12 +301,24 @@ class AscendModuleViewer extends Component
     public string $generatedVideoScript = '';
     public array $webLeadForm = [
         'client_name' => '',
+        'company_name' => '',
         'phone' => '',
         'email' => '',
+        'preferred_contact_method' => 'whatsapp',
         'city_location' => 'Abuja',
+        'property_type' => 'Residential Villa / Duplex',
+        'installation_address' => '',
         'system_interest' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+        'daily_generator_hours' => 6,
+        'monthly_fuel_spend_ngn' => 150000.00,
+        'roof_mounting_type' => 'Aluminum / Stone Coated Roof',
         'estimated_budget_ngn' => 2000000.00,
+        'purchasing_timeline' => 'immediate',
+        'financing_preference' => 'outright',
+        'referral_code' => '',
+        'special_notes' => '',
     ];
+    public bool $showLeadEmbedModal = false;
     public array $influencerForm = [
         'name' => '',
         'handle' => '@solar_tech_ng',
@@ -2856,6 +2868,20 @@ class AscendModuleViewer extends Component
             $this->form['subtotal'] = '1500000';
         }
 
+        if ($type === 'lead') {
+            $this->modalType = 'lead';
+            $this->form['client_name'] = '';
+            $this->form['company_name'] = '';
+            $this->form['phone'] = '';
+            $this->form['email'] = '';
+            $this->form['city_location'] = 'Abuja';
+            $this->form['property_type'] = 'Residential Villa / Duplex';
+            $this->form['system_interest'] = 'Ascend 5.5kVA Hybrid Solar Inverter';
+            $this->form['amount'] = '2500000';
+            $this->form['purchasing_timeline'] = 'immediate';
+            $this->form['notes'] = '';
+        }
+
         if ($type === 'automation' || $type === 'rule') {
             $this->modalType = 'rule';
             $this->form['title'] = 'Auto-generate NGN Invoice on CRM Deal Closed-Won';
@@ -2975,12 +3001,17 @@ class AscendModuleViewer extends Component
                     'expected_close' => now()->addDays(30),
                 ]),
                 default => CrmLead::create([
-                    'company_name' => $title,
-                    'contact_person' => $this->form['name'] ?: $title,
+                    'company_name' => $this->form['company_name'] ?? ($title ?: 'New Corporate Lead'),
+                    'contact_person' => $this->form['client_name'] ?? ($this->form['name'] ?: $title),
                     'email' => $this->form['email'] ?: 'lead@ascendsystems.ng',
                     'phone' => $this->form['phone'] ?: '+234 800 000 0000',
-                    'deal_value' => $subtotal ?: 4500000.00,
+                    'city_location' => $this->form['city_location'] ?? 'Abuja',
+                    'system_interest' => $this->form['system_interest'] ?? 'Ascend 5.5kVA Hybrid Solar Inverter',
+                    'deal_value' => $subtotal ?: 2500000.00,
+                    'ai_lead_score' => 85,
+                    'purchasing_timeline' => $this->form['purchasing_timeline'] ?? 'immediate',
                     'status' => 'new',
+                    'notes' => $this->form['notes'] ?: 'Created via CRM lead intake studio',
                 ]),
             },
             'sales' => match ($this->modalType) {
@@ -3398,9 +3429,12 @@ class AscendModuleViewer extends Component
     public function calculateSolarRequirement(): array
     {
         // 1. Cooling & Air Conditioning
-        $coolingWatts = (((int) ($this->calcQty['ac_1hp'] ?? 0)) * 800)
+        $acWatts = (((int) ($this->calcQty['ac_1hp'] ?? 0)) * 800)
             + (((int) ($this->calcQty['ac_15hp'] ?? 0)) * 1200)
             + (((int) ($this->calcQty['ac_2hp'] ?? 0)) * 1800)
+            + (((int) ($this->calcQty['ac'] ?? 0)) * 1200);
+
+        $coolingWatts = $acWatts
             + (((int) ($this->calcQty['fans'] ?? 0)) * 75)
             + (((int) ($this->calcQty['fridge'] ?? 0)) * 250)
             + (((int) ($this->calcQty['freezer'] ?? 0)) * 350);
@@ -3414,15 +3448,19 @@ class AscendModuleViewer extends Component
             + (((int) ($this->calcQty['washing_machine'] ?? 0)) * 500);
 
         // 3. Lighting & Entertainment
-        $lightingTvWatts = (((int) ($this->calcQty['lights'] ?? 0)) * 15)
-            + (((int) ($this->calcQty['tv_55'] ?? 0)) * 150)
+        $tvWatts = (((int) ($this->calcQty['tv_55'] ?? 0)) * 150)
             + (((int) ($this->calcQty['tv_large'] ?? 0)) * 280)
+            + (((int) ($this->calcQty['tv'] ?? 0)) * 150);
+
+        $lightingTvWatts = (((int) ($this->calcQty['lights'] ?? 0)) * 15)
+            + $tvWatts
             + (((int) ($this->calcQty['decoder_sound'] ?? 0)) * 120);
 
         // 4. Water Pumps & Facility
         $pumpWatts = (((int) ($this->calcQty['pump_1hp'] ?? 0)) * 750)
             + (((int) ($this->calcQty['pump_2hp'] ?? 0)) * 1500)
-            + (((int) ($this->calcQty['pressure_pump'] ?? 0)) * 370);
+            + (((int) ($this->calcQty['pressure_pump'] ?? 0)) * 370)
+            + (((int) ($this->calcQty['pump'] ?? 0)) * 750);
 
         // 5. Computing, Starlink, CCTV & Office
         $ictWatts = (((int) ($this->calcQty['laptops'] ?? 0)) * 65)
@@ -3436,12 +3474,12 @@ class AscendModuleViewer extends Component
             $totalWatts = 2850;
         }
 
-        $surgeWatts = (int) ($totalWatts + ((((int) ($this->calcQty['ac_1hp'] ?? 0)) + ((int) ($this->calcQty['ac_15hp'] ?? 0)) + ((int) ($this->calcQty['ac_2hp'] ?? 0))) * 800) + ((((int) ($this->calcQty['pump_1hp'] ?? 0)) + ((int) ($this->calcQty['pump_2hp'] ?? 0))) * 1000));
+        $surgeWatts = (int) ($totalWatts + ((((int) ($this->calcQty['ac_1hp'] ?? 0)) + ((int) ($this->calcQty['ac_15hp'] ?? 0)) + ((int) ($this->calcQty['ac_2hp'] ?? 0)) + ((int) ($this->calcQty['ac'] ?? 0))) * 800) + ((((int) ($this->calcQty['pump_1hp'] ?? 0)) + ((int) ($this->calcQty['pump_2hp'] ?? 0)) + ((int) ($this->calcQty['pump'] ?? 0))) * 1000));
         $calculatedKva = round(($totalWatts / 0.85) / 1000, 1);
         $dailyKwh = round(($totalWatts * 0.65 * max(1, $this->calcHours)) / 1000, 2);
         $monthlyFuelSavingsNgn = (float) round(($dailyKwh * 0.45 * 30) * 1200, 0);
 
-        if ($totalWatts <= 3000) {
+        if ($totalWatts <= 2000) {
             $inverter = 'Ascend 3.5kVA / 24V Pure Sine Wave Hybrid Solar Inverter';
             $inverterSku = 'SLR-INV-35KW';
             $inverterPrice = 850000.00;
@@ -3454,7 +3492,7 @@ class AscendModuleViewer extends Component
             $panelPrice = 125000.00;
             $estTotal = 2450000.00;
         } elseif ($totalWatts <= 5500) {
-            $inverter = 'Ascend 5.5kVA / 48V Pure Sine Wave Hybrid Solar Inverter';
+            $inverter = 'Ascend 5.5kVA Hybrid Solar Inverter / 48V Pure Sine Wave';
             $inverterSku = 'SLR-INV-55KW';
             $inverterPrice = 1350000.00;
             $battery = 'Ascend 10.2kWh / 200Ah LiFePO4 Lithium Battery Storage';
@@ -3650,32 +3688,128 @@ class AscendModuleViewer extends Component
             return;
         }
 
-        \App\Models\WebLeadCapture::create([
+        $budget = (float) ($this->webLeadForm['estimated_budget_ngn'] ?: 2000000.00);
+        $timeline = (string) ($this->webLeadForm['purchasing_timeline'] ?: 'immediate');
+        $genSpend = (float) ($this->webLeadForm['monthly_fuel_spend_ngn'] ?: 0);
+        $system = (string) ($this->webLeadForm['system_interest'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter');
+        $city = (string) ($this->webLeadForm['city_location'] ?: 'Abuja');
+        $company = (string) ($this->webLeadForm['company_name'] ?: ($this->webLeadForm['client_name'] . ' (' . $city . ' Web Lead)'));
+        $preferredContact = (string) ($this->webLeadForm['preferred_contact_method'] ?: 'whatsapp');
+        $property = (string) ($this->webLeadForm['property_type'] ?: 'Residential Villa / Duplex');
+        $address = (string) ($this->webLeadForm['installation_address'] ?: ($city . ' Installation Site'));
+        $roof = (string) ($this->webLeadForm['roof_mounting_type'] ?: 'Aluminum / Stone Coated Roof');
+        $financing = (string) ($this->webLeadForm['financing_preference'] ?: 'outright');
+        $refCode = (string) ($this->webLeadForm['referral_code'] ?? '');
+        $specialNotes = (string) ($this->webLeadForm['special_notes'] ?? '');
+
+        // 1. Compute AI Lead Score (1 - 100)
+        $aiScore = 70;
+        if ($budget >= 5000000) {
+            $aiScore += 18;
+        } elseif ($budget >= 2000000) {
+            $aiScore += 10;
+        }
+
+        if ($timeline === 'immediate' || $timeline === '< 7 days') {
+            $aiScore += 10;
+        } elseif ($timeline === 'within_30_days') {
+            $aiScore += 5;
+        }
+
+        if ($genSpend >= 100000) {
+            $aiScore += 5;
+        }
+
+        $aiScore = min(99, $aiScore);
+
+        // 2. Generate AI Qualification Summary
+        $aiSummary = "🎯 Lead Score: {$aiScore}/100 (" . ($aiScore >= 88 ? 'HOT PRIORITY' : 'WARM QUALIFIED') . ")\n" .
+            "• Solution: {$system} (Budget: ₦" . number_format($budget, 2) . ")\n" .
+            "• Site: {$property} in {$city} ({$address})\n" .
+            "• Energy Context: Runs generator {$this->webLeadForm['daily_generator_hours']}h/day with ₦" . number_format($genSpend, 2) . "/mo fuel spend.\n" .
+            "• Roof & Power: {$roof} | Purchase Timeline: {$timeline} | Payment: {$financing}\n" .
+            "• Preferred Channel: " . strtoupper($preferredContact) . ($refCode ? " | Ref Code: {$refCode}" : "");
+
+        $webLead = \App\Models\WebLeadCapture::create([
             'client_name' => $this->webLeadForm['client_name'],
+            'company_name' => $company,
             'phone' => $this->webLeadForm['phone'],
             'email' => $this->webLeadForm['email'] ?: 'client@ascendsystems.ng',
-            'city_location' => $this->webLeadForm['city_location'] ?: 'Abuja',
-            'system_interest' => $this->webLeadForm['system_interest'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter',
-            'estimated_budget_ngn' => (float) ($this->webLeadForm['estimated_budget_ngn'] ?: 2000000.00),
+            'preferred_contact_method' => $preferredContact,
+            'city_location' => $city,
+            'property_type' => $property,
+            'installation_address' => $address,
+            'system_interest' => $system,
+            'daily_generator_hours' => (int) ($this->webLeadForm['daily_generator_hours'] ?: 0),
+            'monthly_fuel_spend_ngn' => $genSpend,
+            'roof_mounting_type' => $roof,
+            'estimated_budget_ngn' => $budget,
+            'purchasing_timeline' => $timeline,
+            'financing_preference' => $financing,
+            'referral_code' => $refCode,
+            'ai_lead_score' => $aiScore,
+            'ai_qualification_summary' => $aiSummary,
+            'special_notes' => $specialNotes,
             'source_url' => 'https://www.ascendsystems.ng/get-quote',
             'status' => 'new',
         ]);
 
-        // Auto-inject lead into CRM pipeline!
-        CrmLead::create([
-            'company_name' => $this->webLeadForm['client_name'] . ' (' . $this->webLeadForm['city_location'] . ' Web Lead)',
+        // 3. Auto-inject lead into CRM pipeline with rich details
+        $crmLead = CrmLead::create([
+            'company_name' => $company,
             'contact_person' => $this->webLeadForm['client_name'],
             'email' => $this->webLeadForm['email'] ?: 'client@ascendsystems.ng',
             'phone' => $this->webLeadForm['phone'],
-            'deal_value' => (float) ($this->webLeadForm['estimated_budget_ngn'] ?: 2000000.00),
+            'city_location' => $city,
+            'system_interest' => $system,
+            'deal_value' => $budget,
+            'ai_lead_score' => $aiScore,
+            'purchasing_timeline' => $timeline,
             'status' => 'new',
+            'notes' => $aiSummary . ($specialNotes ? "\n\nClient Notes: {$specialNotes}" : ""),
         ]);
 
-        $this->webLeadForm['client_name'] = '';
-        $this->webLeadForm['phone'] = '';
-        $this->webLeadForm['email'] = '';
+        // 4. Auto-create Deal Opportunity
+        try {
+            CrmDeal::create([
+                'crm_lead_id' => $crmLead->id,
+                'deal_name' => "{$this->webLeadForm['client_name']} — {$system}",
+                'stage' => 'qualified',
+                'value' => $budget,
+                'expected_close' => now()->addDays($timeline === 'immediate' ? 7 : 21),
+            ]);
+        } catch (\Throwable) {}
 
-        session()->flash('status', __('Web Lead from www.ascendsystems.ng captured and injected directly into CRM pipeline with instant quotation!'));
+        // 5. Attribute Referral if code exists
+        if (! empty($refCode)) {
+            $ambassador = \App\Models\InfluencerAmbassador::where('referral_code', strtoupper($refCode))->first();
+            if ($ambassador) {
+                $ambassador->increment('leads_count');
+            }
+        }
+
+        // Reset form to clean ready state
+        $this->webLeadForm = [
+            'client_name' => '',
+            'company_name' => '',
+            'phone' => '',
+            'email' => '',
+            'preferred_contact_method' => 'whatsapp',
+            'city_location' => 'Abuja',
+            'property_type' => 'Residential Villa / Duplex',
+            'installation_address' => '',
+            'system_interest' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+            'daily_generator_hours' => 6,
+            'monthly_fuel_spend_ngn' => 150000.00,
+            'roof_mounting_type' => 'Aluminum / Stone Coated Roof',
+            'estimated_budget_ngn' => 2000000.00,
+            'purchasing_timeline' => 'immediate',
+            'financing_preference' => 'outright',
+            'referral_code' => '',
+            'special_notes' => '',
+        ];
+
+        session()->flash('status', __('Comprehensive Lead captured, AI-scored (:score/100) & synchronized directly into CRM pipeline!', ['score' => $aiScore]));
     }
 
     public function registerInfluencerAmbassador(): void
@@ -3712,116 +3846,144 @@ class AscendModuleViewer extends Component
 
     public function render(): View
     {
-        if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
-            (new \Database\Seeders\EnterpriseModuleSeeder)->run();
-        }
+        if (app()->environment(['local', 'testing']) && config('app.demo_mode', false)) {
+            if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
+                (new \Database\Seeders\EnterpriseModuleSeeder)->run();
+            }
 
-        if (\App\Models\InstallationDispatch::count() === 0) {
-            \App\Models\InstallationDispatch::create([
-                'dispatch_number' => 'INST-20260814-001',
-                'client_name' => 'Dr. Fatima Bello (Maitama Villa)',
-                'client_phone' => '+234 803 444 5566',
-                'location_address' => 'Plot 402 Maitama District, Abuja HQ Region',
-                'system_type' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
-                'engineer_name' => 'Engr. Babatunde Adeleke',
-                'scheduled_date' => now()->addDays(1),
-                'status' => 'in_progress',
-                'checklist_completed' => [
-                    'inverter_mounting' => true,
-                    'battery_wiring' => true,
-                    'earthing_testing' => true,
-                    'ats_switchover' => false,
-                ],
-            ]);
-        }
+            if (\App\Models\InstallationDispatch::count() === 0) {
+                \App\Models\InstallationDispatch::create([
+                    'dispatch_number' => 'INST-20260814-001',
+                    'client_name' => 'Dr. Fatima Bello (Maitama Villa)',
+                    'client_phone' => '+234 803 444 5566',
+                    'location_address' => 'Plot 402 Maitama District, Abuja HQ Region',
+                    'system_type' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
+                    'engineer_name' => 'Engr. Babatunde Adeleke',
+                    'scheduled_date' => now()->addDays(1),
+                    'status' => 'in_progress',
+                    'checklist_completed' => [
+                        'inverter_mounting' => true,
+                        'battery_wiring' => true,
+                        'earthing_testing' => true,
+                        'ats_switchover' => false,
+                    ],
+                ]);
+            }
 
-        if (\App\Models\WarrantySerial::count() === 0) {
-            \App\Models\WarrantySerial::create([
-                'serial_number' => 'SN-INV-2026-98412',
-                'product_name' => 'Ascend 5.5kVA Hybrid Solar Inverter',
-                'sku' => 'SLR-INV-55KW',
-                'client_name' => 'Northbridge Media Nigeria',
-                'client_phone' => '+234 802 111 2233',
-                'purchase_date' => now()->subMonths(6),
-                'warranty_expiry_date' => now()->addYears(4)->addMonths(6),
-                'status' => 'active',
-                'maintenance_alerts_sent' => 1,
-            ]);
+            if (\App\Models\WarrantySerial::count() === 0) {
+                \App\Models\WarrantySerial::create([
+                    'serial_number' => 'SN-INV-2026-98412',
+                    'product_name' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+                    'sku' => 'SLR-INV-55KW',
+                    'client_name' => 'Northbridge Media Nigeria',
+                    'client_phone' => '+234 802 111 2233',
+                    'purchase_date' => now()->subMonths(6),
+                    'warranty_expiry_date' => now()->addYears(4)->addMonths(6),
+                    'status' => 'active',
+                    'maintenance_alerts_sent' => 1,
+                ]);
 
-            \App\Models\WarrantySerial::create([
-                'serial_number' => 'SN-BAT-2026-44120',
-                'product_name' => 'Ascend 10.2kWh LiFePO4 Battery Storage',
-                'sku' => 'SLR-BAT-10KW',
-                'client_name' => 'Kano Energy Ltd',
-                'client_phone' => '+234 803 999 1122',
-                'purchase_date' => now()->subMonths(2),
-                'warranty_expiry_date' => now()->addYears(4)->addMonths(10),
-                'status' => 'active',
-                'maintenance_alerts_sent' => 0,
-            ]);
-        }
+                \App\Models\WarrantySerial::create([
+                    'serial_number' => 'SN-BAT-2026-44120',
+                    'product_name' => 'Ascend 10.2kWh LiFePO4 Battery Storage',
+                    'sku' => 'SLR-BAT-10KW',
+                    'client_name' => 'Kano Energy Ltd',
+                    'client_phone' => '+234 803 999 1122',
+                    'purchase_date' => now()->subMonths(2),
+                    'warranty_expiry_date' => now()->addYears(4)->addMonths(10),
+                    'status' => 'active',
+                    'maintenance_alerts_sent' => 0,
+                ]);
+            }
 
-        if (\App\Models\SocialAdCampaign::count() === 0) {
-            \App\Models\SocialAdCampaign::create([
-                'campaign_name' => 'Q3 Solar Inverter Meta Lead Ads (Abuja & Lagos)',
-                'platform' => 'Meta Ads (Facebook & IG)',
-                'objective' => 'Lead Generation',
-                'target_product' => 'Ascend 5.5kVA Hybrid Inverter',
-                'budget_ngn' => 500000.00,
-                'spend_ngn' => 285000.00,
-                'impressions' => 68400,
-                'clicks' => 3420,
-                'leads_generated' => 142,
-                'revenue_generated' => 12500000.00,
-                'status' => 'active',
-                'ad_creative_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
-            ]);
+            if (\App\Models\SocialAdCampaign::count() === 0) {
+                \App\Models\SocialAdCampaign::create([
+                    'campaign_name' => 'Q3 Solar Inverter Meta Lead Ads (Abuja & Lagos)',
+                    'platform' => 'Meta Ads (Facebook & IG)',
+                    'objective' => 'Lead Generation',
+                    'target_product' => 'Ascend 5.5kVA Hybrid Inverter',
+                    'budget_ngn' => 500000.00,
+                    'spend_ngn' => 285000.00,
+                    'impressions' => 68400,
+                    'clicks' => 3420,
+                    'leads_generated' => 142,
+                    'revenue_generated' => 12500000.00,
+                    'status' => 'active',
+                    'ad_creative_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
+                ]);
 
-            \App\Models\SocialAdCampaign::create([
-                'campaign_name' => 'Lithium LiFePO4 Battery Google Search Ads',
-                'platform' => 'Google Search Ads',
-                'objective' => 'Sales Conversion',
-                'target_product' => 'Ascend 10.2kWh LiFePO4 Battery',
-                'budget_ngn' => 400000.00,
-                'spend_ngn' => 190000.00,
-                'impressions' => 42000,
-                'clicks' => 2100,
-                'leads_generated' => 88,
-                'revenue_generated' => 9800000.00,
-                'status' => 'active',
-                'ad_creative_url' => 'https://images.unsplash.com/photo-1508873696983-2df515122519?w=600',
-            ]);
-        }
+                \App\Models\SocialAdCampaign::create([
+                    'campaign_name' => 'Lithium LiFePO4 Battery Google Search Ads',
+                    'platform' => 'Google Search Ads',
+                    'objective' => 'Sales Conversion',
+                    'target_product' => 'Ascend 10.2kWh LiFePO4 Battery',
+                    'budget_ngn' => 400000.00,
+                    'spend_ngn' => 190000.00,
+                    'impressions' => 42000,
+                    'clicks' => 2100,
+                    'leads_generated' => 88,
+                    'revenue_generated' => 9800000.00,
+                    'status' => 'active',
+                    'ad_creative_url' => 'https://images.unsplash.com/photo-1508873696983-2df515122519?w=600',
+                ]);
+            }
 
-        if (\App\Models\ScheduledSocialPost::count() === 0) {
-            \App\Models\ScheduledSocialPost::create([
-                'platform' => 'Instagram',
-                'caption' => '⚡ Say goodbye to dark nights! Upgrade your home with Ascend 5.5kVA Hybrid Solar Inverter and silent lithium power.',
-                'hashtags' => '#AscendSystems #SolarInverter #CleanEnergyNigeria',
-                'image_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
-                'scheduled_at' => now()->addHours(2),
-                'status' => 'scheduled',
-            ]);
-        }
+            if (\App\Models\ScheduledSocialPost::count() === 0) {
+                \App\Models\ScheduledSocialPost::create([
+                    'platform' => 'Instagram',
+                    'caption' => '⚡ Say goodbye to dark nights! Upgrade your home with Ascend 5.5kVA Hybrid Solar Inverter and silent lithium power.',
+                    'hashtags' => '#AscendSystems #SolarInverter #CleanEnergyNigeria',
+                    'image_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
+                    'scheduled_at' => now()->addHours(2),
+                    'status' => 'scheduled',
+                ]);
+            }
 
-        if (\App\Models\SocialInboxMessage::count() === 0) {
-            \App\Models\SocialInboxMessage::create([
-                'sender_name' => 'Chidi Okonkwo',
-                'sender_handle' => '@chidi_solar',
-                'channel' => 'Instagram DM',
-                'message_body' => 'Hello Ascend team! How much is your 5.5kVA hybrid solar inverter and 10kWh battery bundle for a 4-bedroom house in Gwarinpa Abuja?',
-                'ai_suggested_reply' => 'Hello Chidi! Our Ascend 5.5kVA Hybrid Inverter is ₦580,000 retail (₦495,000 wholesale) and 10.2kWh LiFePO4 battery is ₦1,450,000. Total bundle is ₦2,030,000 with free installation support in Abuja. Shall our sales engineer call you?',
-                'received_at' => now()->subMinutes(15),
-            ]);
+            if (\App\Models\SocialInboxMessage::count() === 0) {
+                \App\Models\SocialInboxMessage::create([
+                    'sender_name' => 'Chidi Okonkwo',
+                    'sender_handle' => '@chidi_solar',
+                    'channel' => 'Instagram DM',
+                    'message_body' => 'Hello Ascend team! How much is your 5.5kVA hybrid solar inverter and 10kWh battery bundle for a 4-bedroom house in Gwarinpa Abuja?',
+                    'ai_suggested_reply' => 'Hello Chidi! Our Ascend 5.5kVA Hybrid Inverter is ₦580,000 retail (₦495,000 wholesale) and 10.2kWh LiFePO4 battery is ₦1,450,000. Total bundle is ₦2,030,000 with free installation support in Abuja. Shall our sales engineer call you?',
+                    'received_at' => now()->subMinutes(15),
+                ]);
 
-            \App\Models\SocialInboxMessage::create([
-                'sender_name' => 'Amina Bello (Kano Solar)',
-                'sender_handle' => '+234 803 999 1122',
-                'channel' => 'WhatsApp Inquiry',
-                'message_body' => 'Good morning, please send me the distributor wholesale pricing for 550W Mono Solar Panels and PTZ 4K security cameras.',
-                'ai_suggested_reply' => 'Good morning Amina! Wholesale price for 550W Mono Panels is ₦82,000/panel (min order 10 units) and PTZ 4K Solar Camera is ₦135,000. Log into your Retailer Portal at app.ascendsystems.ng to place your order!',
-                'received_at' => now()->subMinutes(42),
-            ]);
+                \App\Models\SocialInboxMessage::create([
+                    'sender_name' => 'Amina Bello (Kano Solar)',
+                    'sender_handle' => '+234 803 999 1122',
+                    'channel' => 'WhatsApp Inquiry',
+                    'message_body' => 'Good morning, please send me the distributor wholesale pricing for 550W Mono Solar Panels and PTZ 4K security cameras.',
+                    'ai_suggested_reply' => 'Good morning Amina! Wholesale price for 550W Mono Panels is ₦82,000/panel (min order 10 units) and PTZ 4K Solar Camera is ₦135,000. Log into your Retailer Portal at app.ascendsystems.ng to place your order!',
+                    'received_at' => now()->subMinutes(42),
+                ]);
+            }
+
+            if (\App\Models\InfluencerAmbassador::count() === 0) {
+                \App\Models\InfluencerAmbassador::create([
+                    'name' => 'Engr. Tunde Solar Tech',
+                    'handle' => '@tunde_solar_ng',
+                    'platform' => 'YouTube',
+                    'referral_code' => 'TUNDESOLAR10',
+                    'leads_count' => 48,
+                    'sales_attributed_ngn' => 14500000.00,
+                    'commission_earned_ngn' => 435000.00,
+                    'status' => 'active',
+                ]);
+            }
+
+            if (\App\Models\WebLeadCapture::count() === 0) {
+                \App\Models\WebLeadCapture::create([
+                    'client_name' => 'Chief Emeka Nwosu (Lekki Phase 1)',
+                    'phone' => '+234 802 888 9900',
+                    'email' => 'emeka@nwosugroup.ng',
+                    'city_location' => 'Lagos',
+                    'system_interest' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
+                    'estimated_budget_ngn' => 2500000.00,
+                    'source_url' => 'https://www.ascendsystems.ng/get-quote',
+                    'status' => 'new',
+                ]);
+            }
         }
 
         $dbTasks = ProjectTask::query()->latest()->get();
@@ -3837,32 +3999,6 @@ class AscendModuleViewer extends Component
                     'due' => $t->due_date?->format('Y-m-d') ?: now()->format('Y-m-d'),
                 ];
             })->toArray();
-        }
-
-        if (\App\Models\InfluencerAmbassador::count() === 0) {
-            \App\Models\InfluencerAmbassador::create([
-                'name' => 'Engr. Tunde Solar Tech',
-                'handle' => '@tunde_solar_ng',
-                'platform' => 'YouTube',
-                'referral_code' => 'TUNDESOLAR10',
-                'leads_count' => 48,
-                'sales_attributed_ngn' => 14500000.00,
-                'commission_earned_ngn' => 435000.00,
-                'status' => 'active',
-            ]);
-        }
-
-        if (\App\Models\WebLeadCapture::count() === 0) {
-            \App\Models\WebLeadCapture::create([
-                'client_name' => 'Chief Emeka Nwosu (Lekki Phase 1)',
-                'phone' => '+234 802 888 9900',
-                'email' => 'emeka@nwosugroup.ng',
-                'city_location' => 'Lagos',
-                'system_interest' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
-                'estimated_budget_ngn' => 2500000.00,
-                'source_url' => 'https://www.ascendsystems.ng/get-quote',
-                'status' => 'new',
-            ]);
         }
 
         return view('appascend::livewire.ascend-module-viewer', [

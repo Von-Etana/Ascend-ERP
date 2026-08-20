@@ -12,7 +12,11 @@ class CrmLead extends Model
         'contact_person',
         'email',
         'phone',
+        'city_location',
+        'system_interest',
         'deal_value',
+        'ai_lead_score',
+        'purchasing_timeline',
         'status',
         'notes',
     ];
@@ -21,6 +25,7 @@ class CrmLead extends Model
     {
         return [
             'deal_value' => 'decimal:2',
+            'ai_lead_score' => 'integer',
         ];
     }
 
