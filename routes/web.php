@@ -113,6 +113,98 @@ Route::post('api/leads/capture', function (\Illuminate\Http\Request $request) {
     ], 201);
 })->name('api.leads.capture');
 
+// Public B2B Partner, Wholesaler & Distributor Intake Endpoint
+Route::post('api/leads/partner-capture', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'client_name' => 'required|string|max:255',
+        'job_title' => 'nullable|string|max:255',
+        'company_name' => 'required|string|max:255',
+        'country' => 'nullable|string|max:100',
+        'website' => 'nullable|string|max:255',
+        'phone' => 'required|string|max:50',
+        'email' => 'required|email|max:255',
+        'monthly_sales_volume' => 'nullable|string|max:255',
+        'product_interest' => 'nullable|string|max:255',
+        'customer_type' => 'nullable|string|max:255',
+        'estimated_budget_ngn' => 'nullable|numeric',
+        'special_notes' => 'nullable|string',
+    ]);
+
+    $monthlyVolume = (string) ($validated['monthly_sales_volume'] ?? '₦20,000,000 - ₦50,000,000 / Month');
+    $product = (string) ($validated['product_interest'] ?? 'Ascend Pure Sine Wave Hybrid Solar Inverters');
+    $customerType = (string) ($validated['customer_type'] ?? 'Renewable Energy Installer / EPC Contractor');
+    $country = (string) ($validated['country'] ?? 'Nigeria');
+    $budget = (float) ($validated['estimated_budget_ngn'] ?? 15000000.00);
+
+    $aiScore = 80;
+    if (str_contains($monthlyVolume, '50,000,000') || str_contains($monthlyVolume, '100,000,000')) $aiScore += 15;
+    elseif (str_contains($monthlyVolume, '20,000,000')) $aiScore += 10;
+    if (str_contains(strtolower($customerType), 'distributor') || str_contains(strtolower($customerType), 'epc')) $aiScore += 5;
+    $aiScore = min(99, $aiScore);
+
+    $lead = \App\Models\WebLeadCapture::create([
+        'lead_type' => 'partner',
+        'client_name' => $validated['client_name'],
+        'job_title' => $validated['job_title'] ?? 'Procurement / Managing Director',
+        'company_name' => $validated['company_name'],
+        'country' => $country,
+        'website' => $validated['website'] ?? null,
+        'phone' => $validated['phone'],
+        'email' => $validated['email'],
+        'city_location' => $country,
+        'property_type' => $customerType,
+        'product_interest' => $product,
+        'system_interest' => $product,
+        'monthly_sales_volume' => $monthlyVolume,
+        'customer_type' => $customerType,
+        'estimated_budget_ngn' => $budget,
+        'purchasing_timeline' => 'immediate',
+        'ai_lead_score' => $aiScore,
+        'special_notes' => $validated['special_notes'] ?? "Partner Application: {$customerType} in {$country}. Monthly Volume: {$monthlyVolume}",
+        'source_url' => $request->header('referer', 'https://www.ascendsystems.ng/partners'),
+        'status' => 'new',
+    ]);
+
+    $crmLead = \App\Models\CrmLead::create([
+        'lead_type' => 'partner',
+        'company_name' => $validated['company_name'],
+        'contact_person' => $validated['client_name'],
+        'job_title' => $validated['job_title'] ?? 'Procurement / Managing Director',
+        'email' => $validated['email'],
+        'phone' => $validated['phone'],
+        'website' => $validated['website'] ?? null,
+        'city_location' => $country,
+        'country' => $country,
+        'system_interest' => $product,
+        'product_interest' => $product,
+        'deal_value' => $budget,
+        'monthly_sales_volume' => $monthlyVolume,
+        'customer_type' => $customerType,
+        'ai_lead_score' => $aiScore,
+        'purchasing_timeline' => 'immediate',
+        'status' => 'new',
+        'notes' => "B2B Partner Intake: {$customerType} ({$country}). Monthly Volume: {$monthlyVolume}. Product Interest: {$product}.",
+    ]);
+
+    // High scoring partner leads auto-generate high-priority wholesale distribution deal
+    if ($aiScore >= 80) {
+        \App\Models\CrmDeal::create([
+            'crm_lead_id' => $crmLead->id,
+            'deal_name' => 'Wholesale Partnership — ' . $validated['company_name'],
+            'stage' => 'proposal',
+            'value' => $budget,
+            'expected_close' => now()->addDays(14),
+        ]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Partner application received and assigned to Wholesale Accounts Director.',
+        'lead_id' => $lead->id,
+        'ai_lead_score' => $aiScore,
+    ], 201);
+})->name('api.leads.partner-capture');
+
 // Public Client Quotation Review & E-Signature Portal
 Route::get('portal/quote/view', [PublicQuoteController::class, 'showQuote'])->name('portal.quote.public-view');
 Route::get('portal/quote/warranty/pdf', [PdfExportController::class, 'downloadWarrantyCertificate'])->name('portal.quote.warranty.pdf');

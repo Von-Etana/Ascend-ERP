@@ -916,8 +916,21 @@
                                 @forelse ($dbLeads as $lead)
                                     <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                                         <td class="px-4 py-3.5">
-                                            <p class="font-bold text-slate-900 dark:text-white">{{ $lead->company_name }}</p>
-                                            <p class="text-xs text-slate-400">{{ $lead->contact_person }}</p>
+                                            <div class="flex items-center gap-2">
+                                                <p class="font-bold text-slate-900 dark:text-white">{{ $lead->company_name }}</p>
+                                                @if (($lead->lead_type ?? 'customer') === 'partner')
+                                                    <span class="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-black text-purple-600">B2B Partner</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-xs text-slate-400">
+                                                {{ $lead->contact_person }}
+                                                @if ($lead->job_title)
+                                                    <span class="text-slate-400">({{ $lead->job_title }})</span>
+                                                @endif
+                                                @if ($lead->customer_type)
+                                                    <span class="ml-1 text-[10px] text-purple-500 font-semibold">• {{ $lead->customer_type }}</span>
+                                                @endif
+                                            </p>
                                         </td>
                                         <td class="px-4 py-3.5 text-xs">
                                             <p class="font-semibold text-slate-600 dark:text-slate-300">{{ $lead->email }}</p>
@@ -1203,151 +1216,318 @@
 
                 <!-- SUB-TAB 1: LEAD CAPTURE FIELDS & SCHEMA BUILDER -->
                 @if ($crmBuilderTab === 'fields')
-                    <div class="grid gap-6 lg:grid-cols-3">
-                        <!-- Fields Management Table (Left 2 Cols) -->
-                        <div class="lg:col-span-2 space-y-6">
-                            <!-- Metrics Cards -->
-                            <div class="grid gap-4 sm:grid-cols-3">
-                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Form Fields</p>
-                                    <p class="mt-1 text-2xl font-black text-blue-600">{{ count($crmCustomFields) }}</p>
-                                    <p class="text-xs text-slate-500">Configured in schema</p>
-                                </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mandatory Fields</p>
-                                    <p class="mt-1 text-2xl font-black text-amber-600">{{ count(array_filter($crmCustomFields, fn($f) => !empty($f['required']))) }}</p>
-                                    <p class="text-xs text-amber-500">Required on submit</p>
-                                </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Public Web Enabled</p>
-                                    <p class="mt-1 text-2xl font-black text-emerald-600">{{ count(array_filter($crmCustomFields, fn($f) => !empty($f['enabled']))) }}</p>
-                                    <p class="text-xs text-emerald-500">Visible on portal</p>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                                    <div>
-                                        <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Lead Capture Schema Fields') }}</h3>
-                                        <p class="text-xs text-slate-500">Toggle requirements, visibility, or remove custom attributes.</p>
-                                    </div>
-                                    <span class="text-xs font-semibold text-slate-400"><i class="fa-light fa-circle-info mr-1 text-blue-500"></i>Live synced with intake modal</span>
-                                </div>
-
-                                <div class="mt-4 overflow-x-auto">
-                                    <table class="w-full text-left text-xs">
-                                        <thead class="bg-slate-50 text-[11px] uppercase text-slate-400 dark:bg-slate-800">
-                                            <tr>
-                                                <th class="px-4 py-3">Field Label & Variable Key</th>
-                                                <th class="px-4 py-3">Input Type</th>
-                                                <th class="px-4 py-3 text-center">Mandatory</th>
-                                                <th class="px-4 py-3 text-center">Active</th>
-                                                <th class="px-4 py-3 text-right">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                            @foreach ($crmCustomFields as $index => $field)
-                                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                                                    <td class="px-4 py-3">
-                                                        <div class="flex items-center gap-2">
-                                                            <div>
-                                                                <p class="font-bold text-slate-900 dark:text-white">{{ $field['label'] }}</p>
-                                                                <p class="font-mono text-[10px] text-slate-400">{{ $field['key'] }} @if(!empty($field['system'])) <span class="ml-1 text-blue-500 font-semibold">(System)</span> @endif</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-4 py-3">
-                                                        <span class="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                                            {{ $field['type'] }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-4 py-3 text-center">
-                                                        <button type="button" wire:click="toggleCustomField({{ $index }}, 'required')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['required']) ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
-                                                            {{ !empty($field['required']) ? 'Required' : 'Optional' }}
-                                                        </button>
-                                                    </td>
-                                                    <td class="px-4 py-3 text-center">
-                                                        <button type="button" wire:click="toggleCustomField({{ $index }}, 'enabled')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['enabled']) ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
-                                                            {{ !empty($field['enabled']) ? 'Visible' : 'Hidden' }}
-                                                        </button>
-                                                    </td>
-                                                    <td class="px-4 py-3 text-right">
-                                                        @if (empty($field['system']))
-                                                            <button type="button" wire:click="removeCustomField({{ $index }})" class="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 transition" title="Delete custom field">
-                                                                <i class="fa-light fa-trash-can"></i>
-                                                            </button>
-                                                        @else
-                                                            <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600" title="Core system field">Core</span>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                    <div class="space-y-6">
+                        <!-- Schema Type Switcher Selector -->
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-3">{{ __('Form Schema:') }}</span>
+                            <button type="button" wire:click="setActiveFormSchema('customer')" class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition {{ $activeFormSchema === 'customer' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300' }}">
+                                <i class="fa-light fa-user"></i>
+                                <span>{{ __('Customer Solar Quote Lead Form') }}</span>
+                                <span class="rounded-full {{ $activeFormSchema === 'customer' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' }} px-2 py-0.5 text-[10px] font-black">{{ count($crmCustomFields) }} fields</span>
+                            </button>
+                            <button type="button" wire:click="setActiveFormSchema('partner')" class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition {{ $activeFormSchema === 'partner' ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300' }}">
+                                <i class="fa-light fa-handshake"></i>
+                                <span>{{ __('B2B Partner & Distributor Lead Form') }}</span>
+                                <span class="rounded-full {{ $activeFormSchema === 'partner' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' }} px-2 py-0.5 text-[10px] font-black">{{ count($partnerCustomFields) }} fields</span>
+                            </button>
                         </div>
 
-                        <!-- Right Column: Add Custom Field & Integration Widget -->
-                        <div class="space-y-6">
-                            <!-- Add New Custom Field Form -->
-                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                                <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2">
-                                    <i class="fa-light fa-plus-circle text-blue-600"></i>
-                                    {{ __('Add Custom Capture Field') }}
-                                </h3>
-                                <p class="text-xs text-slate-500 mt-1">Add energy consumption metrics, roof parameters, or enterprise metadata.</p>
+                        @if ($activeFormSchema === 'customer')
+                            <!-- CUSTOMER SCHEMA -->
+                            <div class="grid gap-6 lg:grid-cols-3">
+                                <!-- Fields Management Table (Left 2 Cols) -->
+                                <div class="lg:col-span-2 space-y-6">
+                                    <!-- Metrics Cards -->
+                                    <div class="grid gap-4 sm:grid-cols-3">
+                                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Customer Fields</p>
+                                            <p class="mt-1 text-2xl font-black text-blue-600">{{ count($crmCustomFields) }}</p>
+                                            <p class="text-xs text-slate-500">Configured in schema</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mandatory Fields</p>
+                                            <p class="mt-1 text-2xl font-black text-amber-600">{{ count(array_filter($crmCustomFields, fn($f) => !empty($f['required']))) }}</p>
+                                            <p class="text-xs text-amber-500">Required on submit</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Public Web Enabled</p>
+                                            <p class="mt-1 text-2xl font-black text-emerald-600">{{ count(array_filter($crmCustomFields, fn($f) => !empty($f['enabled']))) }}</p>
+                                            <p class="text-xs text-emerald-500">Visible on portal</p>
+                                        </div>
+                                    </div>
 
-                                <form wire:submit.prevent="addCustomField" class="mt-4 space-y-3.5">
-                                    <div>
-                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Field Display Label <span class="text-rose-500">*</span></label>
-                                        <input type="text" wire:model="newCustomField.label" placeholder="e.g. Roof Shading & Orientation" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Variable Key (Optional)</label>
-                                        <input type="text" wire:model="newCustomField.key" placeholder="e.g. roof_shading" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Input Data Type</label>
-                                        <select wire:model="newCustomField.type" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                            <option value="text">Text (Single Line)</option>
-                                            <option value="number">Number / Currency (NGN)</option>
-                                            <option value="select">Dropdown Selection</option>
-                                            <option value="textarea">Textarea (Multi-line Notes)</option>
-                                            <option value="phone">Phone Number</option>
-                                            <option value="email">Email Address</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Dropdown Options (Comma separated)</label>
-                                        <input type="text" wire:model="newCustomField.options" placeholder="Option 1, Option 2, Option 3" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    </div>
-                                    <div class="flex items-center gap-2 pt-1">
-                                        <input type="checkbox" id="fieldReqCheck" wire:model="newCustomField.required" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                        <label for="fieldReqCheck" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Mark field as mandatory</label>
-                                    </div>
-                                    <button type="submit" class="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
-                                        <i class="fa-light fa-plus mr-1.5"></i>{{ __('Add Field to Schema') }}
-                                    </button>
-                                </form>
-                            </div>
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                        <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                                            <div>
+                                                <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Customer Lead Capture Schema Fields') }}</h3>
+                                                <p class="text-xs text-slate-500">Toggle requirements, visibility, or remove custom attributes.</p>
+                                            </div>
+                                            <span class="text-xs font-semibold text-slate-400"><i class="fa-light fa-circle-info mr-1 text-blue-500"></i>Live synced with intake modal</span>
+                                        </div>
 
-                            <!-- Integration & Webhook Snippet Card -->
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
-                                <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                    <i class="fa-light fa-code text-emerald-600"></i>
-                                    {{ __('Public Web Capture Endpoint') }}
-                                </h4>
-                                <p class="text-[11px] text-slate-500 mt-1">Live webhook ingest URL for <span class="font-semibold text-blue-600">www.ascendsystems.ng</span> quote calculator:</p>
-                                <div class="mt-2.5 rounded-xl bg-slate-900 p-3 text-[11px] font-mono text-emerald-400 select-all overflow-x-auto">
-                                    POST https://app.ascendsystems.ng/api/public/lead-capture
+                                        <div class="mt-4 overflow-x-auto">
+                                            <table class="w-full text-left text-xs">
+                                                <thead class="bg-slate-50 text-[11px] uppercase text-slate-400 dark:bg-slate-800">
+                                                    <tr>
+                                                        <th class="px-4 py-3">Field Label & Variable Key</th>
+                                                        <th class="px-4 py-3">Input Type</th>
+                                                        <th class="px-4 py-3 text-center">Mandatory</th>
+                                                        <th class="px-4 py-3 text-center">Active</th>
+                                                        <th class="px-4 py-3 text-right">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                                    @foreach ($crmCustomFields as $index => $field)
+                                                        <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                                            <td class="px-4 py-3">
+                                                                <div class="flex items-center gap-2">
+                                                                    <div>
+                                                                        <p class="font-bold text-slate-900 dark:text-white">{{ $field['label'] }}</p>
+                                                                        <p class="font-mono text-[10px] text-slate-400">{{ $field['key'] }} @if(!empty($field['system'])) <span class="ml-1 text-blue-500 font-semibold">(System)</span> @endif</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <span class="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                                    {{ $field['type'] }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="px-4 py-3 text-center">
+                                                                <button type="button" wire:click="toggleCustomField({{ $index }}, 'required')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['required']) ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                                    {{ !empty($field['required']) ? 'Required' : 'Optional' }}
+                                                                </button>
+                                                            </td>
+                                                            <td class="px-4 py-3 text-center">
+                                                                <button type="button" wire:click="toggleCustomField({{ $index }}, 'enabled')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['enabled']) ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                                    {{ !empty($field['enabled']) ? 'Visible' : 'Hidden' }}
+                                                                </button>
+                                                            </td>
+                                                            <td class="px-4 py-3 text-right">
+                                                                @if (empty($field['system']))
+                                                                    <button type="button" wire:click="removeCustomField({{ $index }})" class="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 transition" title="Delete custom field">
+                                                                        <i class="fa-light fa-trash-can"></i>
+                                                                    </button>
+                                                                @else
+                                                                    <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600" title="Core system field">Core</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mt-3 flex items-center justify-between text-[11px]">
-                                    <span class="text-slate-500"><i class="fa-light fa-shield-check mr-1 text-emerald-500"></i>Auto-AI Scoring Active</span>
-                                    <button type="button" wire:click="setCrmBuilderTab('preview')" class="font-bold text-blue-600 hover:underline">Launch Form Preview &rarr;</button>
+
+                                <!-- Right Column: Add Custom Field & Integration Widget -->
+                                <div class="space-y-6">
+                                    <!-- Add New Custom Field Form -->
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                        <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                            <i class="fa-light fa-plus-circle text-blue-600"></i>
+                                            {{ __('Add Custom Capture Field') }}
+                                        </h3>
+                                        <p class="text-xs text-slate-500 mt-1">Add energy consumption metrics, roof parameters, or enterprise metadata.</p>
+
+                                        <form wire:submit.prevent="addCustomField" class="mt-4 space-y-3.5">
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Field Display Label <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="newCustomField.label" placeholder="e.g. Roof Shading & Orientation" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Variable Key (Optional)</label>
+                                                <input type="text" wire:model="newCustomField.key" placeholder="e.g. roof_shading" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Input Data Type</label>
+                                                <select wire:model="newCustomField.type" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="text">Text (Single Line)</option>
+                                                    <option value="number">Number / Currency (NGN)</option>
+                                                    <option value="select">Dropdown Selection</option>
+                                                    <option value="textarea">Textarea (Multi-line Notes)</option>
+                                                    <option value="phone">Phone Number</option>
+                                                    <option value="email">Email Address</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Dropdown Options (Comma separated)</label>
+                                                <input type="text" wire:model="newCustomField.options" placeholder="Option 1, Option 2, Option 3" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div class="flex items-center gap-2 pt-1">
+                                                <input type="checkbox" id="fieldReqCheck" wire:model="newCustomField.required" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                                <label for="fieldReqCheck" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Mark field as mandatory</label>
+                                            </div>
+                                            <button type="submit" class="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                                <i class="fa-light fa-plus mr-1.5"></i>{{ __('Add Field to Schema') }}
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Integration & Webhook Snippet Card -->
+                                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+                                        <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <i class="fa-light fa-code text-emerald-600"></i>
+                                            {{ __('Public Customer Capture Endpoint') }}
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500 mt-1">Live webhook ingest URL for <span class="font-semibold text-blue-600">www.ascendsystems.ng</span> quote calculator:</p>
+                                        <div class="mt-2.5 rounded-xl bg-slate-900 p-3 text-[11px] font-mono text-emerald-400 select-all overflow-x-auto">
+                                            POST https://app.ascendsystems.ng/api/leads/capture
+                                        </div>
+                                        <div class="mt-3 flex items-center justify-between text-[11px]">
+                                            <span class="text-slate-500"><i class="fa-light fa-shield-check mr-1 text-emerald-500"></i>Auto-AI Scoring Active</span>
+                                            <button type="button" wire:click="setCrmBuilderTab('preview')" class="font-bold text-blue-600 hover:underline">Launch Form Preview &rarr;</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @else
+                            <!-- PARTNER & DISTRIBUTOR SCHEMA -->
+                            <div class="grid gap-6 lg:grid-cols-3">
+                                <!-- Partner Fields Management Table (Left 2 Cols) -->
+                                <div class="lg:col-span-2 space-y-6">
+                                    <!-- Partner Metrics Cards -->
+                                    <div class="grid gap-4 sm:grid-cols-3">
+                                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Partner Fields</p>
+                                            <p class="mt-1 text-2xl font-black text-purple-600">{{ count($partnerCustomFields) }}</p>
+                                            <p class="text-xs text-slate-500">B2B onboarding schema</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mandatory Fields</p>
+                                            <p class="mt-1 text-2xl font-black text-amber-600">{{ count(array_filter($partnerCustomFields, fn($f) => !empty($f['required']))) }}</p>
+                                            <p class="text-xs text-amber-500">Required on application</p>
+                                        </div>
+                                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Partner Web Enabled</p>
+                                            <p class="mt-1 text-2xl font-black text-emerald-600">{{ count(array_filter($partnerCustomFields, fn($f) => !empty($f['enabled']))) }}</p>
+                                            <p class="text-xs text-emerald-500">Dealer portal active</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                        <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                                            <div>
+                                                <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('B2B Partner & Distributor Lead Schema Fields') }}</h3>
+                                                <p class="text-xs text-slate-500">Manage required fields for wholesale dealers, EPC installers, and regional distributors.</p>
+                                            </div>
+                                            <span class="text-xs font-semibold text-purple-600"><i class="fa-light fa-handshake mr-1"></i>B2B Partner Qualification Engine</span>
+                                        </div>
+
+                                        <div class="mt-4 overflow-x-auto">
+                                            <table class="w-full text-left text-xs">
+                                                <thead class="bg-slate-50 text-[11px] uppercase text-slate-400 dark:bg-slate-800">
+                                                    <tr>
+                                                        <th class="px-4 py-3">Partner Field Label & Variable Key</th>
+                                                        <th class="px-4 py-3">Input Type</th>
+                                                        <th class="px-4 py-3 text-center">Mandatory</th>
+                                                        <th class="px-4 py-3 text-center">Active</th>
+                                                        <th class="px-4 py-3 text-right">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                                    @foreach ($partnerCustomFields as $index => $field)
+                                                        <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                                            <td class="px-4 py-3">
+                                                                <div class="flex items-center gap-2">
+                                                                    <div>
+                                                                        <p class="font-bold text-slate-900 dark:text-white">{{ $field['label'] }}</p>
+                                                                        <p class="font-mono text-[10px] text-slate-400">{{ $field['key'] }} @if(!empty($field['system'])) <span class="ml-1 text-purple-500 font-semibold">(System)</span> @endif</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <span class="rounded-lg bg-purple-500/10 text-purple-600 px-2 py-0.5 text-[10px] font-bold uppercase dark:bg-purple-950/40 dark:text-purple-300">
+                                                                    {{ $field['type'] }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="px-4 py-3 text-center">
+                                                                <button type="button" wire:click="togglePartnerCustomField({{ $index }}, 'required')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['required']) ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                                    {{ !empty($field['required']) ? 'Required' : 'Optional' }}
+                                                                </button>
+                                                            </td>
+                                                            <td class="px-4 py-3 text-center">
+                                                                <button type="button" wire:click="togglePartnerCustomField({{ $index }}, 'enabled')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['enabled']) ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                                    {{ !empty($field['enabled']) ? 'Visible' : 'Hidden' }}
+                                                                </button>
+                                                            </td>
+                                                            <td class="px-4 py-3 text-right">
+                                                                @if (empty($field['system']))
+                                                                    <button type="button" wire:click="removePartnerCustomField({{ $index }})" class="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 transition" title="Delete custom field">
+                                                                        <i class="fa-light fa-trash-can"></i>
+                                                                    </button>
+                                                                @else
+                                                                    <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600" title="Core partner system field">Core</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Add Partner Field & Webhook -->
+                                <div class="space-y-6">
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                        <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                            <i class="fa-light fa-plus-circle text-purple-600"></i>
+                                            {{ __('Add Partner Schema Field') }}
+                                        </h3>
+                                        <p class="text-xs text-slate-500 mt-1">Add custom distributor tiering, certifications, or warehouse size requirements.</p>
+
+                                        <form wire:submit.prevent="addPartnerCustomField" class="mt-4 space-y-3.5">
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Partner Field Label <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="newPartnerCustomField.label" placeholder="e.g. Warehouse Square Footage" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Variable Key (Optional)</label>
+                                                <input type="text" wire:model="newPartnerCustomField.key" placeholder="e.g. warehouse_sqft" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Input Data Type</label>
+                                                <select wire:model="newPartnerCustomField.type" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="text">Text (Single Line)</option>
+                                                    <option value="number">Number / Volume (NGN)</option>
+                                                    <option value="select">Dropdown Selection</option>
+                                                    <option value="textarea">Textarea (Multi-line Notes)</option>
+                                                    <option value="phone">Phone Number</option>
+                                                    <option value="email">Email Address</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[11px] font-bold uppercase text-slate-500">Dropdown Options (Comma separated)</label>
+                                                <input type="text" wire:model="newPartnerCustomField.options" placeholder="Option 1, Option 2, Option 3" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div class="flex items-center gap-2 pt-1">
+                                                <input type="checkbox" id="partnerFieldReqCheck" wire:model="newPartnerCustomField.required" class="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500">
+                                                <label for="partnerFieldReqCheck" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Mark partner field as mandatory</label>
+                                            </div>
+                                            <button type="submit" class="w-full rounded-xl bg-purple-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-purple-700 transition">
+                                                <i class="fa-light fa-plus mr-1.5"></i>{{ __('Add Partner Field to Schema') }}
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Partner API Endpoint Card -->
+                                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+                                        <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <i class="fa-light fa-code text-purple-600"></i>
+                                            {{ __('B2B Partner Webhook Intake Endpoint') }}
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500 mt-1">Live webhook ingest URL for <span class="font-semibold text-purple-600">www.ascendsystems.ng/partners</span> distributor portal:</p>
+                                        <div class="mt-2.5 rounded-xl bg-slate-900 p-3 text-[11px] font-mono text-purple-400 select-all overflow-x-auto">
+                                            POST https://app.ascendsystems.ng/api/leads/partner-capture
+                                        </div>
+                                        <div class="mt-3 flex items-center justify-between text-[11px]">
+                                            <span class="text-slate-500"><i class="fa-light fa-shield-check mr-1 text-purple-500"></i>Auto-Routes to Wholesale Desk</span>
+                                            <button type="button" wire:click="setCrmBuilderTab('preview')" class="font-bold text-purple-600 hover:underline">Launch Partner Preview &rarr;</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endif
 
@@ -1582,127 +1762,283 @@
 
                 <!-- SUB-TAB 4: LIVE WEB FORM PREVIEW & TEST RUNNER -->
                 @if ($crmBuilderTab === 'preview')
-                    <div class="grid gap-6 lg:grid-cols-3">
-                        <!-- Live Client Form Simulator (Left 2 Cols) -->
-                        <div class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
-                            <div class="border-b pb-4 dark:border-slate-800">
-                                <div class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow-sm mb-3">
-                                    <i class="fa-light fa-solar-panel"></i> Ascend Systems Lead Capture Simulator
-                                </div>
-                                <h3 class="text-xl font-black text-slate-950 dark:text-white">Commercial & Residential Solar Quote Inquiry</h3>
-                                <p class="text-xs text-slate-500 mt-1">This interactive widget simulates the live form hosted on <span class="font-semibold text-blue-600">www.ascendsystems.ng</span> reflecting active schema fields.</p>
-                            </div>
-
-                            <form wire:submit.prevent="submitTestLead" class="space-y-4">
-                                <div class="grid gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Client / Contact Name <span class="text-rose-500">*</span></label>
-                                        <input type="text" wire:model="testLeadForm.client_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Company / Business Name</label>
-                                        <input type="text" wire:model="testLeadForm.company_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">WhatsApp Phone Number <span class="text-rose-500">*</span></label>
-                                        <input type="text" wire:model="testLeadForm.phone" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Email Address</label>
-                                        <input type="email" wire:model="testLeadForm.email" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">State / Region (Nigeria)</label>
-                                        <select wire:model="testLeadForm.city_location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                            <option value="Abuja">Abuja FCT</option>
-                                            <option value="Lagos">Lagos State</option>
-                                            <option value="Kano">Kano State</option>
-                                            <option value="Port Harcourt">Port Harcourt / Rivers</option>
-                                            <option value="Ibadan">Ibadan / Oyo</option>
-                                            <option value="Enugu">Enugu State</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Facility / Property Type</label>
-                                        <select wire:model="testLeadForm.property_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                            <option value="Industrial / Factory">Industrial / Factory</option>
-                                            <option value="Commercial Office / Plaza">Commercial Office / Plaza</option>
-                                            <option value="Residential Villa / Duplex">Residential Villa / Duplex</option>
-                                            <option value="Residential Flat">Residential Flat</option>
-                                            <option value="Hospital / Healthcare">Hospital / Healthcare</option>
-                                        </select>
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Solar Package Sizing Interest</label>
-                                        <select wire:model="testLeadForm.system_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                            <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid</option>
-                                            <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array</option>
-                                            <option value="Ascend 10.2kVA Commercial Dual MPPT Inverter">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
-                                            <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (4-Bed Duplex)</option>
-                                            <option value="Ascend 3.5kVA Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Estimated Budget (NGN)</label>
-                                        <input type="number" wire:model="testLeadForm.deal_value" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Daily Generator Run Time</label>
-                                        <select wire:model="testLeadForm.daily_generator_hours" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                            <option value="None / Grid Only">None / Grid Only</option>
-                                            <option value="2-4 Hours Daily">2-4 Hours Daily</option>
-                                            <option value="5-8 Hours Daily">5-8 Hours Daily</option>
-                                            <option value="8-16 Hours Daily">8-16 Hours Daily</option>
-                                        </select>
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Load Sizing Scope & Notes</label>
-                                        <textarea wire:model="testLeadForm.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
-                                    <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition flex items-center gap-2">
-                                        <i class="fa-light fa-paper-plane-top"></i>{{ __('Submit Test Lead & Run Qualification') }}
-                                    </button>
-                                </div>
-                            </form>
+                    <div class="space-y-6">
+                        <!-- Preview Form Switcher -->
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 px-3">{{ __('Simulator Mode:') }}</span>
+                            <button type="button" wire:click="setActiveFormSchema('customer')" class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition {{ $activeFormSchema === 'customer' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300' }}">
+                                <i class="fa-light fa-user"></i>
+                                <span>{{ __('Customer Solar Quote Form Preview') }}</span>
+                            </button>
+                            <button type="button" wire:click="setActiveFormSchema('partner')" class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition {{ $activeFormSchema === 'partner' ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300' }}">
+                                <i class="fa-light fa-handshake"></i>
+                                <span>{{ __('B2B Partner & Distributor Form Preview') }}</span>
+                            </button>
                         </div>
 
-                        <!-- Right Column: Schema Diagnostics & AI Scoring Engine Rules -->
-                        <div class="space-y-6">
-                            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
-                                <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center gap-2">
-                                    <i class="fa-light fa-brain-circuit text-purple-600"></i>
-                                    {{ __('AI Lead Scoring Engine Diagnostics') }}
-                                </h4>
-                                <p class="text-xs text-slate-500">Scoring weights applied when leads are ingested into pipeline:</p>
+                        @if ($activeFormSchema === 'customer')
+                            <!-- CUSTOMER FORM SIMULATOR -->
+                            <div class="grid gap-6 lg:grid-cols-3">
+                                <!-- Live Client Form Simulator (Left 2 Cols) -->
+                                <div class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
+                                    <div class="border-b pb-4 dark:border-slate-800">
+                                        <div class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow-sm mb-3">
+                                            <i class="fa-light fa-solar-panel"></i> Ascend Systems Lead Capture Simulator
+                                        </div>
+                                        <h3 class="text-xl font-black text-slate-950 dark:text-white">Commercial & Residential Solar Quote Inquiry</h3>
+                                        <p class="text-xs text-slate-500 mt-1">This interactive widget simulates the live form hosted on <span class="font-semibold text-blue-600">www.ascendsystems.ng</span> reflecting active schema fields.</p>
+                                    </div>
 
-                                <div class="space-y-3 text-xs">
-                                    <div class="flex justify-between border-b pb-2 dark:border-slate-800">
-                                        <span class="text-slate-500">Base Sizing Completeness</span>
-                                        <span class="font-bold text-emerald-600">+85 Pts</span>
-                                    </div>
-                                    <div class="flex justify-between border-b pb-2 dark:border-slate-800">
-                                        <span class="text-slate-500">Commercial / Industrial Facility</span>
-                                        <span class="font-bold text-purple-600">+10 Pts</span>
-                                    </div>
-                                    <div class="flex justify-between border-b pb-2 dark:border-slate-800">
-                                        <span class="text-slate-500">Immediate Timeline (&lt; 7 Days)</span>
-                                        <span class="font-bold text-blue-600">+5 Pts</span>
-                                    </div>
-                                    <div class="flex justify-between pt-1 font-bold">
-                                        <span class="text-slate-900 dark:text-white">Auto-Convert Deal Trigger</span>
-                                        <span class="text-amber-600">&ge; 80 Pts</span>
-                                    </div>
+                                    <form wire:submit.prevent="submitTestLead" class="space-y-4">
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Client / Contact Name <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="testLeadForm.client_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Company / Business Name</label>
+                                                <input type="text" wire:model="testLeadForm.company_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">WhatsApp Phone Number <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="testLeadForm.phone" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Email Address</label>
+                                                <input type="email" wire:model="testLeadForm.email" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">State / Region (Nigeria)</label>
+                                                <select wire:model="testLeadForm.city_location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Abuja">Abuja FCT</option>
+                                                    <option value="Lagos">Lagos State</option>
+                                                    <option value="Kano">Kano State</option>
+                                                    <option value="Port Harcourt">Port Harcourt / Rivers</option>
+                                                    <option value="Ibadan">Ibadan / Oyo</option>
+                                                    <option value="Enugu">Enugu State</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Facility / Property Type</label>
+                                                <select wire:model="testLeadForm.property_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Industrial / Factory">Industrial / Factory</option>
+                                                    <option value="Commercial Office / Plaza">Commercial Office / Plaza</option>
+                                                    <option value="Residential Villa / Duplex">Residential Villa / Duplex</option>
+                                                    <option value="Residential Flat">Residential Flat</option>
+                                                    <option value="Hospital / Healthcare">Hospital / Healthcare</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Solar Package Sizing Interest</label>
+                                                <select wire:model="testLeadForm.system_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid</option>
+                                                    <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array</option>
+                                                    <option value="Ascend 10.2kVA Commercial Dual MPPT Inverter">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
+                                                    <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (4-Bed Duplex)</option>
+                                                    <option value="Ascend 3.5kVA Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Estimated Budget (NGN)</label>
+                                                <input type="number" wire:model="testLeadForm.deal_value" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Daily Generator Run Time</label>
+                                                <select wire:model="testLeadForm.daily_generator_hours" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="None / Grid Only">None / Grid Only</option>
+                                                    <option value="2-4 Hours Daily">2-4 Hours Daily</option>
+                                                    <option value="5-8 Hours Daily">5-8 Hours Daily</option>
+                                                    <option value="8-16 Hours Daily">8-16 Hours Daily</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Load Sizing Scope & Notes</label>
+                                                <textarea wire:model="testLeadForm.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                                            <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition flex items-center gap-2">
+                                                <i class="fa-light fa-paper-plane-top"></i>{{ __('Submit Test Lead & Run Qualification') }}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
 
-                                <div class="rounded-2xl bg-blue-50 p-4 text-xs text-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
-                                    <p class="font-bold"><i class="fa-light fa-check-circle mr-1"></i>Automated Conversion Active</p>
-                                    <p class="text-[11px] text-blue-700 dark:text-blue-300 mt-1">High-scoring leads immediately create active Deals in the pipeline with commercial proposal stage.</p>
+                                <!-- Right Column: Schema Diagnostics & AI Scoring Engine Rules -->
+                                <div class="space-y-6">
+                                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                            <i class="fa-light fa-brain-circuit text-purple-600"></i>
+                                            {{ __('AI Lead Scoring Engine Diagnostics') }}
+                                        </h4>
+                                        <p class="text-xs text-slate-500">Scoring weights applied when leads are ingested into pipeline:</p>
+
+                                        <div class="space-y-3 text-xs">
+                                            <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                                <span class="text-slate-500">Base Sizing Completeness</span>
+                                                <span class="font-bold text-emerald-600">+85 Pts</span>
+                                            </div>
+                                            <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                                <span class="text-slate-500">Commercial / Industrial Facility</span>
+                                                <span class="font-bold text-purple-600">+10 Pts</span>
+                                            </div>
+                                            <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                                <span class="text-slate-500">Immediate Timeline (&lt; 7 Days)</span>
+                                                <span class="font-bold text-blue-600">+5 Pts</span>
+                                            </div>
+                                            <div class="flex justify-between pt-1 font-bold">
+                                                <span class="text-slate-900 dark:text-white">Auto-Convert Deal Trigger</span>
+                                                <span class="text-amber-600">&ge; 80 Pts</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="rounded-2xl bg-blue-50 p-4 text-xs text-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+                                            <p class="font-bold"><i class="fa-light fa-check-circle mr-1"></i>Automated Conversion Active</p>
+                                            <p class="text-[11px] text-blue-700 dark:text-blue-300 mt-1">High-scoring leads immediately create active Deals in the pipeline with commercial proposal stage.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @else
+                            <!-- PARTNER & DISTRIBUTOR FORM SIMULATOR -->
+                            <div class="grid gap-6 lg:grid-cols-3">
+                                <!-- Live Partner Form Simulator (Left 2 Cols) -->
+                                <div class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
+                                    <div class="border-b pb-4 dark:border-slate-800">
+                                        <div class="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-3 py-1 text-xs font-bold text-white shadow-sm mb-3">
+                                            <i class="fa-light fa-handshake"></i> Ascend Systems B2B Partner Intake Simulator
+                                        </div>
+                                        <h3 class="text-xl font-black text-slate-950 dark:text-white">Distributor, Wholesaler & EPC Partner Application</h3>
+                                        <p class="text-xs text-slate-500 mt-1">This interactive widget simulates the live partner intake form hosted on <span class="font-semibold text-purple-600">www.ascendsystems.ng/partners</span>.</p>
+                                    </div>
+
+                                    <form wire:submit.prevent="submitTestPartnerLead" class="space-y-4">
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Authorized Contact Person <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="testPartnerLeadForm.client_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Job Title / Designation <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="testPartnerLeadForm.job_title" placeholder="e.g. Managing Director / Procurement Head" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Company / Business Name <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="testPartnerLeadForm.company_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Company Website / Portfolio</label>
+                                                <input type="text" wire:model="testPartnerLeadForm.website" placeholder="https://company.com" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">WhatsApp / Direct Phone <span class="text-rose-500">*</span></label>
+                                                <input type="text" wire:model="testPartnerLeadForm.phone" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Corporate Email Address <span class="text-rose-500">*</span></label>
+                                                <input type="email" wire:model="testPartnerLeadForm.email" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Country / Operational Region <span class="text-rose-500">*</span></label>
+                                                <select wire:model="testPartnerLeadForm.country" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Nigeria">Nigeria</option>
+                                                    <option value="Ghana">Ghana</option>
+                                                    <option value="Kenya">Kenya</option>
+                                                    <option value="South Africa">South Africa</option>
+                                                    <option value="Egypt">Egypt</option>
+                                                    <option value="United Kingdom">United Kingdom</option>
+                                                    <option value="United States">United States</option>
+                                                    <option value="United Arab Emirates">United Arab Emirates</option>
+                                                    <option value="China">China</option>
+                                                    <option value="Germany">Germany</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">What type of customer are you? <span class="text-rose-500">*</span></label>
+                                                <select wire:model="testPartnerLeadForm.customer_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Renewable Energy Installer / EPC Contractor">Renewable Energy Installer / EPC Contractor</option>
+                                                    <option value="Wholesale Distributor / Regional Reseller">Wholesale Distributor / Regional Reseller</option>
+                                                    <option value="Corporate / Commercial End-User">Corporate / Commercial End-User</option>
+                                                    <option value="Government / NGO Energy Contractor">Government / NGO Energy Contractor</option>
+                                                    <option value="Retail Electrical Equipment Shop / Franchisee">Retail Electrical Equipment Shop / Franchisee</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Which product are you interested in? <span class="text-rose-500">*</span></label>
+                                                <select wire:model="testPartnerLeadForm.product_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Ascend Pure Sine Wave Hybrid Solar Inverters">Ascend Pure Sine Wave Hybrid Solar Inverters</option>
+                                                    <option value="Ascend LiFePO4 Lithium Battery Storage Systems">Ascend LiFePO4 Lithium Battery Storage Systems</option>
+                                                    <option value="Monocrystalline Solar PV Panels & Mounting Racks">Monocrystalline Solar PV Panels & Mounting Racks</option>
+                                                    <option value="Wholesale POS Hardware & Inverter Bundles">Wholesale POS Hardware & Inverter Bundles</option>
+                                                    <option value="Full Microgrid Systems (20kVA-100kVA)">Full Microgrid Systems (20kVA-100kVA)</option>
+                                                    <option value="OEM / White-label Distribution & Local Assembly">OEM / White-label Distribution & Local Assembly</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">What's your average monthly sales volume or purchase amount? <span class="text-rose-500">*</span></label>
+                                                <select wire:model="testPartnerLeadForm.monthly_sales_volume" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                    <option value="Below ₦5,000,000 / Month">Below ₦5,000,000 / Month</option>
+                                                    <option value="₦5,000,000 - ₦20,000,000 / Month">₦5,000,000 - ₦20,000,000 / Month</option>
+                                                    <option value="₦20,000,000 - ₦50,000,000 / Month">₦20,000,000 - ₦50,000,000 / Month</option>
+                                                    <option value="₦50,000,000 - ₦100,000,000 / Month">₦50,000,000 - ₦100,000,000 / Month</option>
+                                                    <option value="Above ₦100,000,000+ / Month ($70k+ USD)">Above ₦100,000,000+ / Month ($70k+ USD)</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Initial Projected PO Value (NGN)</label>
+                                                <input type="number" wire:model="testPartnerLeadForm.deal_value" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Partnership Scope & Distribution Territory Notes</label>
+                                                <textarea wire:model="testPartnerLeadForm.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-purple-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                                            <button type="submit" class="rounded-2xl bg-purple-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-700 transition flex items-center gap-2">
+                                                <i class="fa-light fa-handshake"></i>{{ __('Submit Partner Application & Run AI Qualification') }}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Right Column: Partner Scoring Rules & Wholesale Desk Tiering -->
+                                <div class="space-y-6">
+                                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                                        <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                            <i class="fa-light fa-brain-circuit text-purple-600"></i>
+                                            {{ __('B2B Partner AI Scoring Diagnostics') }}
+                                        </h4>
+                                        <p class="text-xs text-slate-500">Partner priority scoring criteria for fast-track wholesale discounting:</p>
+
+                                        <div class="space-y-3 text-xs">
+                                            <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                                <span class="text-slate-500">Verified Corporate Contact</span>
+                                                <span class="font-bold text-emerald-600">+80 Pts</span>
+                                            </div>
+                                            <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                                <span class="text-slate-500">Monthly Volume &gt; ₦20M</span>
+                                                <span class="font-bold text-purple-600">+10 Pts</span>
+                                            </div>
+                                            <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                                <span class="text-slate-500">Regional Distributor / EPC</span>
+                                                <span class="font-bold text-blue-600">+5 Pts</span>
+                                            </div>
+                                            <div class="flex justify-between pt-1 font-bold">
+                                                <span class="text-slate-900 dark:text-white">Wholesale Deal Creation</span>
+                                                <span class="text-purple-600">&ge; 80 Pts</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="rounded-2xl bg-purple-50 p-4 text-xs text-purple-900 dark:bg-purple-950/30 dark:text-purple-200">
+                                            <p class="font-bold"><i class="fa-light fa-shield-check mr-1"></i>Wholesale Pipeline Sync</p>
+                                            <p class="text-[11px] text-purple-700 dark:text-purple-300 mt-1">High-volume distributors receive immediate wholesale quotation and dedicated Account Director assignment.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -7629,93 +7965,199 @@
                 @elseif ($modalType === 'lead')
                     <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
                         <div>
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold text-blue-600 border border-blue-500/20">
-                                <i class="fa-light fa-user-plus"></i> CRM Lead Intake Studio
+                            <span class="inline-flex items-center gap-1.5 rounded-full {{ ($form['lead_type'] ?? 'customer') === 'partner' ? 'bg-purple-500/10 text-purple-600 border-purple-500/20' : 'bg-blue-500/10 text-blue-600 border-blue-500/20' }} px-3 py-1 text-xs font-bold border">
+                                <i class="fa-light {{ ($form['lead_type'] ?? 'customer') === 'partner' ? 'fa-handshake' : 'fa-user-plus' }}"></i>
+                                {{ ($form['lead_type'] ?? 'customer') === 'partner' ? 'B2B Partner & Distributor Intake' : 'CRM Lead Intake Studio' }}
                             </span>
-                            <h3 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ __('Create Comprehensive Enterprise Lead') }}</h3>
-                            <p class="text-xs text-slate-500">Capture contact, sizing, property type, budget & auto-sync into pipeline</p>
+                            <h3 class="mt-2 text-lg font-bold text-slate-950 dark:text-white">
+                                {{ ($form['lead_type'] ?? 'customer') === 'partner' ? __('Register B2B Partner / Wholesale Dealer') : __('Create Comprehensive Enterprise Lead') }}
+                            </h3>
+                            <p class="text-xs text-slate-500">
+                                {{ ($form['lead_type'] ?? 'customer') === 'partner' ? __('Capture distributor credentials, volume tiers, product catalog focus & auto-route') : __('Capture contact, sizing, property type, budget & auto-sync into pipeline') }}
+                            </p>
                         </div>
                         <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
                             <i class="fa-light fa-xmark text-lg"></i>
                         </button>
                     </div>
 
-                    <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Contact Name <span class="text-rose-500">*</span></label>
-                                <input type="text" wire:model="form.client_name" required placeholder="e.g. Chief Emeka Nwosu" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Company / Organization</label>
-                                <input type="text" wire:model="form.company_name" placeholder="e.g. Nwosu Logistics Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number (WhatsApp) <span class="text-rose-500">*</span></label>
-                                <input type="text" wire:model="form.phone" required placeholder="+234 802 888 9900" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Email Address</label>
-                                <input type="email" wire:model="form.email" placeholder="client@nwosugroup.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Region / City</label>
-                                <select wire:model="form.city_location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <option value="Abuja">Abuja FCT</option>
-                                    <option value="Lagos">Lagos State</option>
-                                    <option value="Port Harcourt">Port Harcourt / Rivers</option>
-                                    <option value="Kano">Kano State</option>
-                                    <option value="Ibadan">Ibadan / Oyo</option>
-                                    <option value="Enugu">Enugu State</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Property / Facility Type</label>
-                                <select wire:model="form.property_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <option value="Residential Villa / Duplex">Residential Villa / 4-5 Bed Duplex</option>
-                                    <option value="Residential Apartment">Residential Flat</option>
-                                    <option value="Commercial Office / Plaza">Commercial Office / Plaza</option>
-                                    <option value="Industrial / Factory">Industrial / Factory</option>
-                                    <option value="Hospital / Healthcare">Hospital / Healthcare</option>
-                                    <option value="Borehole / Solar Farm">Borehole / Solar Farm</option>
-                                </select>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">System Package Interest</label>
-                                <select wire:model="form.system_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <option value="Ascend 3.5kVA / 24V Pure Sine Wave Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter (Starter)</option>
-                                    <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (Residential 4-Bed)</option>
-                                    <option value="Ascend 10.2kVA / 48V Commercial Dual MPPT Inverter">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
-                                    <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array (Office / Hotel)</option>
-                                    <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid (Factory / Hospital)</option>
-                                    <option value="Ascend 10.2kWh LiFePO4 Lithium Battery Storage">Ascend 10.2kWh LiFePO4 Lithium Battery Bank</option>
-                                    <option value="PTZ 4K Solar Security Cameras & Automation">PTZ 4K Solar Security Cameras & Automation Suite</option>
-                                    <option value="Solar Water Borehole Pumping Solution">Solar Water Borehole Pumping Solution</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Estimated Deal Value (NGN)</label>
-                                <input type="number" min="0" wire:model="form.amount" placeholder="2500000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Purchasing Timeline</label>
-                                <select wire:model="form.purchasing_timeline" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <option value="immediate">Immediate (&lt; 7 Days)</option>
-                                    <option value="within_30_days">Within 30 Days</option>
-                                    <option value="planning_q4">Budgeting / Next Quarter</option>
-                                </select>
-                            </div>
-                        </div>
+                    <!-- Lead Type Switcher Segmented Control -->
+                    <div class="mt-4 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800">
+                        <button type="button" wire:click="$set('form.lead_type', 'customer')" class="flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition {{ ($form['lead_type'] ?? 'customer') === 'customer' ? 'bg-white text-blue-600 shadow-sm dark:bg-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400' }}">
+                            <i class="fa-light fa-user"></i>
+                            <span>{{ __('Standard Customer Lead') }}</span>
+                        </button>
+                        <button type="button" wire:click="$set('form.lead_type', 'partner')" class="flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition {{ ($form['lead_type'] ?? 'customer') === 'partner' ? 'bg-white text-purple-600 shadow-sm dark:bg-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400' }}">
+                            <i class="fa-light fa-handshake"></i>
+                            <span>{{ __('B2B Partner / Distributor') }}</span>
+                        </button>
+                    </div>
 
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Lead Sizing Notes & Requirements</label>
-                            <textarea wire:model="form.notes" rows="2" placeholder="Appliance load details, roof type, power requirements..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
-                        </div>
+                    <form wire:submit.prevent="submitModalForm" class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto pr-1">
+                        @if (($form['lead_type'] ?? 'customer') === 'partner')
+                            <!-- B2B PARTNER FORM INPUTS -->
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Authorized Contact Name <span class="text-rose-500">*</span></label>
+                                    <input type="text" wire:model="form.client_name" required placeholder="e.g. Engr. Chukwuemeka Obi" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Job Title / Designation <span class="text-rose-500">*</span></label>
+                                    <input type="text" wire:model="form.job_title" placeholder="e.g. Managing Director / Procurement Head" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Company / Enterprise Name <span class="text-rose-500">*</span></label>
+                                    <input type="text" wire:model="form.company_name" required placeholder="e.g. Obi Renewable Power Systems Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Company Website / Portfolio</label>
+                                    <input type="text" wire:model="form.website" placeholder="https://obipowersystems.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">WhatsApp / Direct Phone <span class="text-rose-500">*</span></label>
+                                    <input type="text" wire:model="form.phone" required placeholder="+234 803 777 9900" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Corporate Email Address <span class="text-rose-500">*</span></label>
+                                    <input type="email" wire:model="form.email" required placeholder="obi@obipowersystems.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Country / Operational Region <span class="text-rose-500">*</span></label>
+                                    <select wire:model="form.country" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Nigeria">Nigeria</option>
+                                        <option value="Ghana">Ghana</option>
+                                        <option value="Kenya">Kenya</option>
+                                        <option value="South Africa">South Africa</option>
+                                        <option value="Egypt">Egypt</option>
+                                        <option value="United Kingdom">United Kingdom</option>
+                                        <option value="United States">United States</option>
+                                        <option value="United Arab Emirates">United Arab Emirates</option>
+                                        <option value="China">China</option>
+                                        <option value="Germany">Germany</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">What type of customer are you? <span class="text-rose-500">*</span></label>
+                                    <select wire:model="form.customer_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Renewable Energy Installer / EPC Contractor">Renewable Energy Installer / EPC Contractor</option>
+                                        <option value="Wholesale Distributor / Regional Reseller">Wholesale Distributor / Regional Reseller</option>
+                                        <option value="Corporate / Commercial End-User">Corporate / Commercial End-User</option>
+                                        <option value="Government / NGO Energy Contractor">Government / NGO Energy Contractor</option>
+                                        <option value="Retail Electrical Equipment Shop / Franchisee">Retail Electrical Equipment Shop / Franchisee</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Which product are you interested in? <span class="text-rose-500">*</span></label>
+                                    <select wire:model="form.product_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Ascend Pure Sine Wave Hybrid Solar Inverters">Ascend Pure Sine Wave Hybrid Solar Inverters</option>
+                                        <option value="Ascend LiFePO4 Lithium Battery Storage Systems">Ascend LiFePO4 Lithium Battery Storage Systems</option>
+                                        <option value="Monocrystalline Solar PV Panels & Mounting Racks">Monocrystalline Solar PV Panels & Mounting Racks</option>
+                                        <option value="Wholesale POS Hardware & Inverter Bundles">Wholesale POS Hardware & Inverter Bundles</option>
+                                        <option value="Full Microgrid Systems (20kVA-100kVA)">Full Microgrid Systems (20kVA-100kVA)</option>
+                                        <option value="OEM / White-label Distribution & Local Assembly">OEM / White-label Distribution & Local Assembly</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Average Monthly Sales Volume or Purchase Amount <span class="text-rose-500">*</span></label>
+                                    <select wire:model="form.monthly_sales_volume" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Below ₦5,000,000 / Month">Below ₦5,000,000 / Month</option>
+                                        <option value="₦5,000,000 - ₦20,000,000 / Month">₦5,000,000 - ₦20,000,000 / Month</option>
+                                        <option value="₦20,000,000 - ₦50,000,000 / Month">₦20,000,000 - ₦50,000,000 / Month</option>
+                                        <option value="₦50,000,000 - ₦100,000,000 / Month">₦50,000,000 - ₦100,000,000 / Month</option>
+                                        <option value="Above ₦100,000,000+ / Month ($70k+ USD)">Above ₦100,000,000+ / Month ($70k+ USD)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Initial Projected PO Value (NGN)</label>
+                                    <input type="number" min="0" wire:model="form.amount" placeholder="25000000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Partnership Scope & Distribution Territory Notes</label>
+                                <textarea wire:model="form.notes" rows="2" placeholder="Territory exclusivity, branch distribution network, credit terms..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                                <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                                <button type="submit" class="rounded-2xl bg-purple-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-purple-700">Register B2B Partner Lead</button>
+                            </div>
+                        @else
+                            <!-- STANDARD CUSTOMER FORM INPUTS -->
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Client / Contact Name <span class="text-rose-500">*</span></label>
+                                    <input type="text" wire:model="form.client_name" required placeholder="e.g. Chief Emeka Nwosu" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Company / Organization</label>
+                                    <input type="text" wire:model="form.company_name" placeholder="e.g. Nwosu Logistics Ltd" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Phone Number (WhatsApp) <span class="text-rose-500">*</span></label>
+                                    <input type="text" wire:model="form.phone" required placeholder="+234 802 888 9900" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Email Address</label>
+                                    <input type="email" wire:model="form.email" placeholder="client@nwosugroup.ng" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Region / City</label>
+                                    <select wire:model="form.city_location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Abuja">Abuja FCT</option>
+                                        <option value="Lagos">Lagos State</option>
+                                        <option value="Port Harcourt">Port Harcourt / Rivers</option>
+                                        <option value="Kano">Kano State</option>
+                                        <option value="Ibadan">Ibadan / Oyo</option>
+                                        <option value="Enugu">Enugu State</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Property / Facility Type</label>
+                                    <select wire:model="form.property_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Residential Villa / Duplex">Residential Villa / 4-5 Bed Duplex</option>
+                                        <option value="Residential Apartment">Residential Flat</option>
+                                        <option value="Commercial Office / Plaza">Commercial Office / Plaza</option>
+                                        <option value="Industrial / Factory">Industrial / Factory</option>
+                                        <option value="Hospital / Healthcare">Hospital / Healthcare</option>
+                                        <option value="Borehole / Solar Farm">Borehole / Solar Farm</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">System Package Interest</label>
+                                    <select wire:model="form.system_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="Ascend 3.5kVA / 24V Pure Sine Wave Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter (Starter)</option>
+                                        <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (Residential 4-Bed)</option>
+                                        <option value="Ascend 10.2kVA / 48V Commercial Dual MPPT Inverter">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
+                                        <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array (Office / Hotel)</option>
+                                        <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid (Factory / Hospital)</option>
+                                        <option value="Ascend 10.2kWh LiFePO4 Lithium Battery Storage">Ascend 10.2kWh LiFePO4 Lithium Battery Bank</option>
+                                        <option value="PTZ 4K Solar Security Cameras & Automation">PTZ 4K Solar Security Cameras & Automation Suite</option>
+                                        <option value="Solar Water Borehole Pumping Solution">Solar Water Borehole Pumping Solution</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Estimated Deal Value (NGN)</label>
+                                    <input type="number" min="0" wire:model="form.amount" placeholder="2500000" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Purchasing Timeline</label>
+                                    <select wire:model="form.purchasing_timeline" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                        <option value="immediate">Immediate (&lt; 7 Days)</option>
+                                        <option value="within_30_days">Within 30 Days</option>
+                                        <option value="planning_q4">Budgeting / Next Quarter</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                        <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
-                            <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
-                            <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700">Save & Inject into CRM</button>
-                        </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Lead Sizing Notes & Requirements</label>
+                                <textarea wire:model="form.notes" rows="2" placeholder="Appliance load details, roof type, power requirements..." class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"></textarea>
+                            </div>
+
+                            <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                                <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
+                                <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700">Save & Inject into CRM</button>
+                            </div>
+                        @endif
                     </form>
                 @else
                     <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">

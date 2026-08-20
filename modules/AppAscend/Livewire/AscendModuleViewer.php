@@ -237,6 +237,48 @@ class AscendModuleViewer extends Component
         'notes' => 'Looking to displace 60kVA diesel generator for agro processing factory & cold storage.',
     ];
 
+    // === PARTNER & DISTRIBUTOR LEAD SCHEMA & BUILDER STATE ===
+    public string $activeFormSchema = 'customer'; // 'customer' or 'partner'
+
+    public array $partnerCustomFields = [
+        ['key' => 'client_name', 'label' => 'Contact Person / Authorized Representative', 'type' => 'text', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => 'e.g. Engr. Chukwuemeka Obi'],
+        ['key' => 'job_title', 'label' => 'Job Title / Executive Designation', 'type' => 'text', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => 'e.g. Managing Director / Procurement Head'],
+        ['key' => 'company_name', 'label' => 'Company / Business Enterprise Name', 'type' => 'text', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => 'e.g. Obi Renewable Power Systems Ltd'],
+        ['key' => 'country', 'label' => 'Country / Primary Operational Region', 'type' => 'select', 'required' => true, 'enabled' => true, 'system' => true, 'options' => 'Nigeria, Ghana, Kenya, South Africa, Egypt, United Kingdom, United States, United Arab Emirates, China, Germany'],
+        ['key' => 'website', 'label' => 'Company Official Website / Portfolio', 'type' => 'text', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => 'https://obipowersystems.ng'],
+        ['key' => 'phone', 'label' => 'WhatsApp / Direct Corporate Phone', 'type' => 'phone', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => '+234 803 777 9900'],
+        ['key' => 'email', 'label' => 'Corporate Email Address', 'type' => 'email', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => 'obi@obipowersystems.ng'],
+        ['key' => 'monthly_sales_volume', 'label' => "What's your average monthly sales volume or purchase amount?", 'type' => 'select', 'required' => true, 'enabled' => true, 'system' => true, 'options' => 'Below ₦5,000,000 / Month, ₦5,000,000 - ₦20,000,000 / Month, ₦20,000,000 - ₦50,000,000 / Month, ₦50,000,000 - ₦100,000,000 / Month, Above ₦100,000,000+ / Month ($70k+ USD)'],
+        ['key' => 'product_interest', 'label' => 'Which product are you interested in?', 'type' => 'select', 'required' => true, 'enabled' => true, 'system' => true, 'options' => 'Ascend Pure Sine Wave Hybrid Solar Inverters, Ascend LiFePO4 Lithium Battery Storage Systems, Monocrystalline Solar PV Panels & Mounting Racks, Wholesale POS Hardware & Inverter Bundles, Full Microgrid Systems (20kVA-100kVA), OEM / White-label Distribution & Local Assembly'],
+        ['key' => 'customer_type', 'label' => 'What type of customer are you?', 'type' => 'select', 'required' => true, 'enabled' => true, 'system' => true, 'options' => 'Renewable Energy Installer / EPC Contractor, Wholesale Distributor / Regional Reseller, Corporate / Commercial End-User, Government / NGO Energy Contractor, Retail Electrical Equipment Shop / Franchisee'],
+        ['key' => 'deal_value', 'label' => 'Initial Projected PO Value (NGN)', 'type' => 'number', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => '25000000'],
+        ['key' => 'notes', 'label' => 'Partnership Scope & Distribution Territory Notes', 'type' => 'textarea', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => 'Territory exclusivity, branch network, credit facilities requirements...'],
+    ];
+
+    public array $newPartnerCustomField = [
+        'label' => '',
+        'key' => '',
+        'type' => 'text',
+        'required' => false,
+        'enabled' => true,
+        'options' => '',
+    ];
+
+    public array $testPartnerLeadForm = [
+        'client_name' => 'Engr. Chukwuemeka Obi',
+        'job_title' => 'Chief Executive Officer',
+        'company_name' => 'Obi Renewable Power Systems Ltd',
+        'country' => 'Nigeria',
+        'website' => 'https://obipowersystems.ng',
+        'phone' => '+234 803 777 9900',
+        'email' => 'obi@obipowersystems.ng',
+        'monthly_sales_volume' => '₦20,000,000 - ₦50,000,000 / Month',
+        'product_interest' => 'Ascend Pure Sine Wave Hybrid Solar Inverters',
+        'customer_type' => 'Renewable Energy Installer / EPC Contractor',
+        'deal_value' => '25000000',
+        'notes' => 'Seeking authorized regional B2B wholesale dealership for South-East Nigeria with volume tier pricing.',
+    ];
+
     // === PRIORITY 1: FINANCIAL SUITE ===
     public array $salaryRecords = [];
     public array $expenseRecords = [];
@@ -2941,6 +2983,115 @@ class AscendModuleViewer extends Component
         ]));
     }
 
+    public function setActiveFormSchema(string $schema): void
+    {
+        $this->activeFormSchema = in_array($schema, ['customer', 'partner'], true) ? $schema : 'customer';
+    }
+
+    public function togglePartnerCustomField(int $index, string $prop): void
+    {
+        if (isset($this->partnerCustomFields[$index]) && isset($this->partnerCustomFields[$index][$prop])) {
+            $this->partnerCustomFields[$index][$prop] = !$this->partnerCustomFields[$index][$prop];
+            session()->flash('status', __('Partner field ":field" :prop updated.', [
+                'field' => $this->partnerCustomFields[$index]['label'],
+                'prop' => $prop === 'required' ? 'requirement' : 'visibility',
+            ]));
+        }
+    }
+
+    public function addPartnerCustomField(): void
+    {
+        if (trim($this->newPartnerCustomField['label']) === '') {
+            session()->flash('warning', __('Please specify a valid partner field label!'));
+            return;
+        }
+
+        $key = trim($this->newPartnerCustomField['key']) ?: \Illuminate\Support\Str::slug($this->newPartnerCustomField['label'], '_');
+        $this->partnerCustomFields[] = [
+            'key' => $key,
+            'label' => $this->newPartnerCustomField['label'],
+            'type' => $this->newPartnerCustomField['type'],
+            'required' => (bool) $this->newPartnerCustomField['required'],
+            'enabled' => true,
+            'system' => false,
+            'options' => $this->newPartnerCustomField['options'],
+            'placeholder' => 'Enter '.$this->newPartnerCustomField['label'],
+        ];
+
+        session()->flash('status', __('Custom field ":label" added to Partner Lead Capture Schema!', ['label' => $this->newPartnerCustomField['label']]));
+
+        $this->newPartnerCustomField = [
+            'label' => '',
+            'key' => '',
+            'type' => 'text',
+            'required' => false,
+            'enabled' => true,
+            'options' => '',
+        ];
+    }
+
+    public function removePartnerCustomField(int $index): void
+    {
+        if (isset($this->partnerCustomFields[$index])) {
+            if (!empty($this->partnerCustomFields[$index]['system'])) {
+                session()->flash('warning', __('Core partner fields cannot be deleted. You can toggle their visibility instead.'));
+                return;
+            }
+            $label = $this->partnerCustomFields[$index]['label'];
+            array_splice($this->partnerCustomFields, $index, 1);
+            session()->flash('status', __('Partner custom field ":label" removed from schema.', ['label' => $label]));
+        }
+    }
+
+    public function submitTestPartnerLead(): void
+    {
+        $score = 85;
+        if (str_contains($this->testPartnerLeadForm['monthly_sales_volume'], '50,000,000') || str_contains($this->testPartnerLeadForm['monthly_sales_volume'], '100,000,000')) {
+            $score += 10;
+        }
+        if (str_contains(strtolower($this->testPartnerLeadForm['customer_type']), 'distributor') || str_contains(strtolower($this->testPartnerLeadForm['customer_type']), 'epc')) {
+            $score += 5;
+        }
+        $score = min(100, $score);
+
+        $lead = CrmLead::create([
+            'lead_type' => 'partner',
+            'company_name' => $this->testPartnerLeadForm['company_name'] ?: 'Test Partner Enterprise Ltd',
+            'contact_person' => $this->testPartnerLeadForm['client_name'] ?: 'Test Partner Representative',
+            'job_title' => $this->testPartnerLeadForm['job_title'] ?: 'Managing Director',
+            'country' => $this->testPartnerLeadForm['country'] ?: 'Nigeria',
+            'city_location' => $this->testPartnerLeadForm['country'] ?: 'Nigeria',
+            'website' => $this->testPartnerLeadForm['website'] ?: 'https://partner-portal.ng',
+            'email' => $this->testPartnerLeadForm['email'] ?: 'partner@ascendsystems.ng',
+            'phone' => $this->testPartnerLeadForm['phone'] ?: '+234 800 000 0000',
+            'monthly_sales_volume' => $this->testPartnerLeadForm['monthly_sales_volume'] ?: '₦20,000,000 - ₦50,000,000 / Month',
+            'product_interest' => $this->testPartnerLeadForm['product_interest'] ?: 'Ascend Pure Sine Wave Hybrid Solar Inverters',
+            'system_interest' => $this->testPartnerLeadForm['product_interest'] ?: 'Ascend Pure Sine Wave Hybrid Solar Inverters',
+            'customer_type' => $this->testPartnerLeadForm['customer_type'] ?: 'Renewable Energy Installer / EPC Contractor',
+            'deal_value' => (float) ($this->testPartnerLeadForm['deal_value'] ?: 25000000),
+            'ai_lead_score' => $score,
+            'purchasing_timeline' => 'immediate',
+            'status' => 'new',
+            'notes' => '[Partner Form Live Test Submission] ' . ($this->testPartnerLeadForm['notes'] ?: ''),
+        ]);
+
+        if ($score >= (int) ($this->crmWorkflowSettings['min_score_for_auto_deal'] ?? 80)) {
+            CrmDeal::create([
+                'crm_lead_id' => $lead->id,
+                'deal_name' => 'Wholesale Deal — ' . $lead->company_name,
+                'stage' => 'proposal',
+                'value' => $lead->deal_value,
+                'expected_close' => now()->addDays(14),
+            ]);
+        }
+
+        session()->flash('status', __('Partner Lead ":name" (:company) captured with AI Score :score/100 and auto-synced to CRM pipeline!', [
+            'name' => $lead->contact_person,
+            'company' => $lead->company_name,
+            'score' => $score,
+        ]));
+    }
+
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -3134,18 +3285,25 @@ class AscendModuleViewer extends Component
             $this->form['subtotal'] = '1500000';
         }
 
-        if ($type === 'lead' || $type === 'crm') {
+        if ($type === 'lead' || $type === 'crm' || $type === 'partner_lead') {
             $this->modalType = 'lead';
             if ($this->moduleKey === 'crm') {
                 $this->activeTab = 'leads';
             }
+            $this->form['lead_type'] = $type === 'partner_lead' ? 'partner' : 'customer';
             $this->form['client_name'] = '';
+            $this->form['job_title'] = '';
             $this->form['company_name'] = '';
             $this->form['phone'] = '';
             $this->form['email'] = '';
+            $this->form['website'] = '';
+            $this->form['country'] = 'Nigeria';
             $this->form['city_location'] = 'Abuja';
             $this->form['property_type'] = 'Residential Villa / Duplex';
             $this->form['system_interest'] = 'Ascend 5.5kVA Hybrid Solar Inverter';
+            $this->form['product_interest'] = 'Ascend Pure Sine Wave Hybrid Solar Inverters';
+            $this->form['monthly_sales_volume'] = '₦20,000,000 - ₦50,000,000 / Month';
+            $this->form['customer_type'] = 'Renewable Energy Installer / EPC Contractor';
             $this->form['amount'] = '2500000';
             $this->form['purchasing_timeline'] = 'immediate';
             $this->form['notes'] = '';
@@ -3270,14 +3428,21 @@ class AscendModuleViewer extends Component
                     'expected_close' => now()->addDays(30),
                 ]),
                 default => CrmLead::create([
+                    'lead_type' => $this->form['lead_type'] ?? 'customer',
                     'company_name' => $this->form['company_name'] ?? ($title ?: 'New Corporate Lead'),
                     'contact_person' => $this->form['client_name'] ?? ($this->form['name'] ?: $title),
+                    'job_title' => $this->form['job_title'] ?? null,
                     'email' => $this->form['email'] ?: 'lead@ascendsystems.ng',
                     'phone' => $this->form['phone'] ?: '+234 800 000 0000',
-                    'city_location' => $this->form['city_location'] ?? 'Abuja',
-                    'system_interest' => $this->form['system_interest'] ?? 'Ascend 5.5kVA Hybrid Solar Inverter',
+                    'website' => $this->form['website'] ?? null,
+                    'country' => $this->form['country'] ?? 'Nigeria',
+                    'city_location' => $this->form['city_location'] ?? ($this->form['country'] ?? 'Abuja'),
+                    'system_interest' => $this->form['system_interest'] ?? ($this->form['product_interest'] ?? 'Ascend 5.5kVA Hybrid Solar Inverter'),
+                    'product_interest' => $this->form['product_interest'] ?? ($this->form['system_interest'] ?? 'Ascend 5.5kVA Hybrid Solar Inverter'),
+                    'monthly_sales_volume' => $this->form['monthly_sales_volume'] ?? null,
+                    'customer_type' => $this->form['customer_type'] ?? ($this->form['property_type'] ?? 'Commercial Partner'),
                     'deal_value' => $subtotal ?: 2500000.00,
-                    'ai_lead_score' => 85,
+                    'ai_lead_score' => ($this->form['lead_type'] ?? 'customer') === 'partner' ? 90 : 85,
                     'purchasing_timeline' => $this->form['purchasing_timeline'] ?? 'immediate',
                     'status' => 'new',
                     'notes' => $this->form['notes'] ?: 'Created via CRM lead intake studio',

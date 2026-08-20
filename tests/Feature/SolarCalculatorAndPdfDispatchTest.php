@@ -20,10 +20,10 @@ test('solar capacity calculator correctly computes peak load and recommends pack
         'activeTab' => 'solar_calculator',
     ])
     ->set('calcQty.fridge', 1)
-    ->set('calcQty.ac', 1)
+    ->set('calcQty.ac_15hp', 1)
     ->set('calcQty.lights', 8)
-    ->set('calcQty.tv', 2)
-    ->set('calcQty.pump', 1)
+    ->set('calcQty.tv_55', 2)
+    ->set('calcQty.pump_1hp', 1)
     ->set('calcQty.laptops', 3)
     ->set('calcHours', 12)
     ->call('addCalculatedBundleToCart');
