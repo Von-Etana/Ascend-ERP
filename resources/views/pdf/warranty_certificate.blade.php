@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Warranty Certificate {{ $quote['id'] ?? 'Draft' }} — Ascend Systems</title>
     <style>
         * { font-family: 'DejaVu Sans', sans-serif !important; }
@@ -114,7 +114,7 @@
         <table class="signature-table">
             <tr>
                 <td class="signature-box">
-                    <div class="sig-line">Chief Technical Officer (CTO)<br><span style="font-weight: normal; color: #64748b;">Ascend Systems Nigeria Ltd</span></div>
+                    <div class="sig-line">Chief Technical Officer (CTO)<br><span style="font-weight: normal; color: #64748b;">Ascend Systems</span></div>
                 </td>
                 <td style="width: 10%;"></td>
                 <td class="signature-box">

@@ -37,7 +37,7 @@
                     <i class="fa-light fa-solar-panel text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-base font-extrabold text-slate-950 tracking-tight">Ascend Systems Nigeria Limited</h1>
+                    <h1 class="text-base font-extrabold text-slate-950 tracking-tight">Ascend Systems</h1>
                     <p class="text-xs text-slate-500 font-medium">Commercial Solar & Automation Proposal Portal</p>
                 </div>
             </div>
@@ -93,7 +93,7 @@
                 </div>
                 <div class="md:text-right">
                     <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Turnkey Provider:</span>
-                    <h3 class="text-base font-bold text-slate-900 mt-1">Ascend Systems Nigeria Ltd</h3>
+                    <h3 class="text-base font-bold text-slate-900 mt-1">Ascend Systems</h3>
                     <p class="text-xs text-slate-600 mt-1">Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja</p>
                     <p class="text-xs text-slate-600 mt-1"><i class="fa-light fa-phone mr-1 text-slate-400"></i>+234 811 763 3020 &nbsp;|&nbsp; info@ascendsystems.ng</p>
                 </div>

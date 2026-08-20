@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Quote {{ $quote['id'] ?? ($quote['invoice_number'] ?? 'Draft') }} — Ascend Systems</title>
     <style>
         * { font-family: 'DejaVu Sans', sans-serif !important; }
@@ -9,8 +9,7 @@
         .header { border-bottom: 2px solid #2563eb; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
-        .address { font-size: 11px; color: #475569; margin-top: 3px; }
-        .contact-info { font-size: 11px; color: #475569; margin-top: 2px; font-weight: 500; }
+        .contact-info { font-size: 11px; color: #475569; margin-top: 4px; font-weight: 500; }
         .quote-title { font-size: 28px; font-weight: 900; text-align: right; color: #0f172a; letter-spacing: 1px; }
         .quote-num { font-size: 13px; font-weight: bold; text-align: right; color: #2563eb; margin-top: 2px; }
         .details-box { width: 100%; margin-top: 15px; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background-color: #f8fafc; }
@@ -58,8 +57,7 @@
                     @else
                         <div class="company-logo-text">{{ $companyName }}</div>
                     @endif
-                    <div style="font-size: 12px; font-weight: bold; color: #0f172a;">{{ $companyName }}</div>
-                    <div class="address"><strong>HQ Address:</strong> {{ $companyAddress }}</div>
+                    <div style="font-size: 13px; font-weight: bold; color: #0f172a;">{{ $companyName }}</div>
                     <div class="contact-info"><strong>Call:</strong> {{ $companyPhone }} &nbsp;|&nbsp; <strong>Email:</strong> {{ $companyEmail }}</div>
                 </td>
                 <td style="width: 45%; text-align: right; vertical-align: top;">

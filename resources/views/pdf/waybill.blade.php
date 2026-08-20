@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Delivery Waybill {{ $quote['id'] ?? 'Dispatch' }} — Ascend Systems</title>
     <style>
         * { font-family: 'DejaVu Sans', sans-serif !important; }
@@ -157,7 +157,7 @@
     </table>
 
     <div class="footer">
-        Ascend Systems Nigeria Ltd &nbsp;|&nbsp; Official Warehouse Delivery Waybill & Gate Pass &nbsp;|&nbsp; Logistics Hotline: +234 811 763 3020
+        Ascend Systems &nbsp;|&nbsp; Official Warehouse Delivery Waybill & Gate Pass &nbsp;|&nbsp; Logistics Hotline: +234 811 763 3020
     </div>
 </body>
 </html>

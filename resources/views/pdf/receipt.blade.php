@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>POS Receipt {{ $receipt->receipt_number }} — Ascend Systems</title>
     <style>
-        body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; line-height: 1.4; color: #000; margin: 0; padding: 10px; }
+        * { font-family: 'DejaVu Sans', sans-serif !important; }
+        body { font-family: 'DejaVu Sans', sans-serif !important; font-size: 11px; line-height: 1.4; color: #000; margin: 0; padding: 10px; }
         .text-center { text-align: center; }
         .company-logo-img { max-height: 40px; width: auto; margin: 0 auto 6px auto; display: block; }
         .logo-badge { background-color: #000; color: #fff; padding: 3px 6px; font-weight: bold; font-size: 12px; display: inline-block; margin-bottom: 4px; }
@@ -33,7 +34,7 @@
         @if (!empty($companyLogo))
             <img src="{{ $companyLogo }}" alt="{{ $companyName }}" class="company-logo-img">
         @else
-            <div class="logo-badge">▲ ASCEND AI</div>
+            <div class="logo-badge">▲ ASCEND SYSTEMS</div>
         @endif
         <div class="company-name">{{ $companyName }}</div>
         <div>{{ $companyAddress }}</div>
@@ -75,14 +76,14 @@
                     <tr>
                         <td>{{ $item['description'] ?? ($item['title'] ?? ($item['name'] ?? 'Product Item')) }}</td>
                         <td class="center">{{ $qty }}</td>
-                        <td class="right">₦{{ number_format($amt, 2) }}</td>
+                        <td class="right">&#8358;{{ number_format($amt, 2) }}</td>
                     </tr>
                 @endforeach
             @else
                 <tr>
                     <td>POS Sale Item</td>
                     <td class="center">1</td>
-                    <td class="right">₦{{ number_format($receipt->subtotal, 2) }}</td>
+                    <td class="right">&#8358;{{ number_format($receipt->subtotal, 2) }}</td>
                 </tr>
             @endif
         </tbody>
@@ -93,21 +94,21 @@
     <table class="table">
         <tr>
             <td>SUBTOTAL:</td>
-            <td class="right">₦{{ number_format($receipt->subtotal, 2) }}</td>
+            <td class="right">&#8358;{{ number_format($receipt->subtotal, 2) }}</td>
         </tr>
         @if ($discountAmount > 0)
             <tr>
                 <td>DISCOUNT @if($promoCode)({{ strtoupper($promoCode) }})@endif:</td>
-                <td class="right">- ₦{{ number_format($discountAmount, 2) }}</td>
+                <td class="right">- &#8358;{{ number_format($discountAmount, 2) }}</td>
             </tr>
         @endif
         <tr>
             <td>VAT (7.5%):</td>
-            <td class="right">₦{{ number_format($receipt->tax, 2) }}</td>
+            <td class="right">&#8358;{{ number_format($receipt->tax, 2) }}</td>
         </tr>
         <tr class="total-row">
             <td>TOTAL PAID:</td>
-            <td class="right">₦{{ number_format($receipt->total, 2) }}</td>
+            <td class="right">&#8358;{{ number_format($receipt->total, 2) }}</td>
         </tr>
     </table>
 

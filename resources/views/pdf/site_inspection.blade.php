@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Site Inspection Report {{ $quote['id'] ?? 'Audit' }} — Ascend Systems</title>
     <style>
         * { font-family: 'DejaVu Sans', sans-serif !important; }
@@ -177,7 +177,7 @@
     </table>
 
     <div class="footer">
-        Ascend Systems Nigeria Ltd &nbsp;|&nbsp; Official Pre-Installation Site Inspection Report &nbsp;|&nbsp; Call: +234 811 763 3020 &nbsp;|&nbsp; info@ascendsystems.ng
+        Ascend Systems &nbsp;|&nbsp; Official Pre-Installation Site Inspection Report &nbsp;|&nbsp; Call: +234 811 763 3020 &nbsp;|&nbsp; info@ascendsystems.ng
     </div>
 </body>
 </html>

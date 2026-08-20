@@ -5956,7 +5956,7 @@
                         <div class="mx-auto inline-flex items-center gap-2 rounded-2xl bg-orange-600 px-3 py-1.5 text-xs font-black text-white shadow-sm mb-2">
                             <span>▲</span> ASCEND AI POS STATION
                         </div>
-                        <h3 class="text-xl font-black text-slate-950 dark:text-white">Ascend Systems Nigeria Limited</h3>
+                        <h3 class="text-xl font-black text-slate-950 dark:text-white">Ascend Systems</h3>
                         <p class="text-xs font-medium text-slate-500 mt-0.5">Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</p>
                         <p class="text-[11px] font-semibold text-slate-400">Call: +234 811 763 3020 &nbsp;|&nbsp; Mail: info@ascendsystems.ng</p>
                         <div class="mt-3 rounded-xl bg-slate-100 p-2 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">

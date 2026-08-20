@@ -281,7 +281,7 @@
         </div>
 
         <div class="text-center text-xs text-slate-500 py-4">
-            Ascend Systems Nigeria Limited &bull; Field Operations Engineering Unit
+            Ascend Systems &bull; Field Operations Engineering Unit
         </div>
     </div>
 

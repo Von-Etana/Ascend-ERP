@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Delivery Note {{ $invoice->invoice_number }} — Ascend Systems</title>
     <style>
         body { font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
         .header { border-bottom: 2px solid #059669; padding-bottom: 18px; margin-bottom: 20px; }
         .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
         .company-logo-text { font-size: 20px; font-weight: 900; color: #0284c7; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
-        .address { font-size: 11px; color: #475569; margin-top: 3px; }
-        .contact-info { font-size: 11px; color: #475569; margin-top: 2px; font-weight: 500; }
+        .contact-info { font-size: 11px; color: #475569; margin-top: 4px; font-weight: 500; }
         .title-main { font-size: 24px; font-weight: 900; text-align: right; color: #0f172a; letter-spacing: 1px; }
         .title-sub { font-size: 13px; font-weight: bold; text-align: right; color: #0284c7; margin-top: 2px; }
         .details-box { width: 100%; margin-top: 15px; margin-bottom: 20px; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; background-color: #f0f9ff; }
@@ -47,8 +46,7 @@
                     @else
                         <div class="company-logo-text">{{ $companyName }}</div>
                     @endif
-                    <div style="font-size: 12px; font-weight: bold; color: #0f172a;">{{ $companyName }}</div>
-                    <div class="address"><strong>Dispatch HQ:</strong> {{ $companyAddress }}</div>
+                    <div style="font-size: 13px; font-weight: bold; color: #0f172a;">{{ $companyName }}</div>
                     <div class="contact-info"><strong>Call:</strong> {{ $companyPhone }} &nbsp;|&nbsp; <strong>Email:</strong> {{ $companyEmail }}</div>
                 </td>
                 <td style="width: 45%; text-align: right; vertical-align: top;">
@@ -134,7 +132,7 @@
             <div style="font-weight: bold; color: #0284c7; text-transform: uppercase;">Dispatched By (Ascend Logistics):</div>
             <div class="sig-line"></div>
             <div>Authorized Logistics Officer Signature & Date</div>
-            <div style="margin-top: 4px; color: #64748b; font-size: 10px;">Ascend Systems Nigeria Limited</div>
+            <div style="margin-top: 4px; color: #64748b; font-size: 10px;">Ascend Systems</div>
         </div>
 
         <div class="sig-box" style="float: right;">
