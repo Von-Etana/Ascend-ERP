@@ -100,7 +100,7 @@
                         {{ __('Export CSV') }}
                     </a>
                 @endif
-                <button type="button" wire:click="openCreateModal('{{ $moduleKey === 'sales' && $activeTab === 'quotes' ? 'quote' : ($moduleKey === 'sales' && $activeTab === 'orders' ? 'sales_order' : ($moduleKey === 'finance' ? 'invoice' : ($moduleKey === 'inventory' ? 'product' : $moduleKey))) }}')" class="inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] hover:brightness-105 active:scale-95" style="background: {{ $accent }};">
+                <button type="button" wire:click="{{ $moduleKey === 'crm' ? 'navigateToAddLead' : 'openCreateModal(\'' . ($moduleKey === 'sales' && $activeTab === 'quotes' ? 'quote' : ($moduleKey === 'sales' && $activeTab === 'orders' ? 'sales_order' : ($moduleKey === 'finance' ? 'invoice' : ($moduleKey === 'inventory' ? 'product' : $moduleKey)))) . '\')' }}" class="inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] hover:brightness-105 active:scale-95" style="background: {{ $accent }};">
                     <i class="fa-light fa-plus text-base"></i>
                     {{ match($moduleKey) {
                         'finance' => __('New Invoice / Expense'),
@@ -1149,28 +1149,563 @@
                 </div>
             </section>
         @else
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <i class="fa-light fa-sliders text-5xl text-blue-400"></i>
-                <h3 class="mt-3 text-lg font-bold text-slate-950 dark:text-white">{{ __('CRM Form Builder & Settings') }}</h3>
-                <p class="mt-1 text-sm text-slate-500">{{ __('Customize lead capture fields, pipeline stages, and CRM workflow preferences.') }}</p>
-                <div class="mt-6 grid gap-4 md:grid-cols-3 max-w-2xl mx-auto">
-                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
-                        <p class="text-xs font-bold uppercase text-slate-400">Lead Stages</p>
-                        <p class="mt-2 text-xl font-black text-blue-600">4 Stages</p>
-                        <p class="mt-1 text-xs text-slate-500">New → Contacted → Qualified → Converted</p>
+            <!-- COMPREHENSIVE CRM FORM BUILDER, PIPELINE STAGES & WORKFLOW SETTINGS STUDIO -->
+            <div class="space-y-6">
+                <!-- Studio Header Card & Navigation Tabs -->
+                <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b pb-6 dark:border-slate-800">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                                <i class="fa-light fa-sliders text-2xl"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-xl font-black text-slate-950 dark:text-white">{{ __('CRM Form Builder & Pipeline Settings Studio') }}</h2>
+                                    <span class="rounded-full bg-blue-500/10 px-3 py-0.5 text-xs font-bold text-blue-600 border border-blue-500/20">Active Schema Engine</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">{{ __('Customize lead capture fields, configure multi-tier pipeline stages, and automate commercial CRM workflow preferences.') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Top Action Buttons -->
+                        <div class="flex items-center gap-2.5">
+                            <button type="button" wire:click="navigateToAddLead" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                <i class="fa-light fa-user-plus"></i>{{ __('Test Add Lead') }}
+                            </button>
+                            <button type="button" wire:click="saveCrmSettings" class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 transition">
+                                <i class="fa-light fa-floppy-disk text-emerald-400"></i>{{ __('Save Settings') }}
+                            </button>
+                        </div>
                     </div>
-                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
-                        <p class="text-xs font-bold uppercase text-slate-400">Deal Stages</p>
-                        <p class="mt-2 text-xl font-black text-purple-600">4 Stages</p>
-                        <p class="mt-1 text-xs text-slate-500">Prospecting → Proposal → Negotiation → Won</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
-                        <p class="text-xs font-bold uppercase text-slate-400">Custom Fields</p>
-                        <p class="mt-2 text-xl font-black text-amber-600">12 Fields</p>
-                        <p class="mt-1 text-xs text-slate-500">Contact, company, value, notes, etc.</p>
+
+                    <!-- Builder Sub-Tabs Pills -->
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <button type="button" wire:click="setCrmBuilderTab('fields')" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition {{ $crmBuilderTab === 'fields' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                            <i class="fa-light fa-table-list"></i>
+                            <span>{{ __('Lead Capture Fields') }}</span>
+                            <span class="ml-1 rounded-full {{ $crmBuilderTab === 'fields' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' }} px-2 py-0.5 text-[10px] font-black">{{ count($crmCustomFields) }}</span>
+                        </button>
+                        <button type="button" wire:click="setCrmBuilderTab('stages')" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition {{ $crmBuilderTab === 'stages' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                            <i class="fa-light fa-chart-kanban"></i>
+                            <span>{{ __('Pipeline Stages & Win Rates') }}</span>
+                            <span class="ml-1 rounded-full {{ $crmBuilderTab === 'stages' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' }} px-2 py-0.5 text-[10px] font-black">{{ count($crmLeadStages) + count($crmDealStages) }}</span>
+                        </button>
+                        <button type="button" wire:click="setCrmBuilderTab('preferences')" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition {{ $crmBuilderTab === 'preferences' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                            <i class="fa-light fa-bolt-auto"></i>
+                            <span>{{ __('Workflow & Automation Rules') }}</span>
+                        </button>
+                        <button type="button" wire:click="setCrmBuilderTab('preview')" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition {{ $crmBuilderTab === 'preview' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                            <i class="fa-light fa-desktop"></i>
+                            <span>{{ __('Live Web Form Preview & Test Simulator') }}</span>
+                        </button>
                     </div>
                 </div>
-            </section>
+
+                <!-- SUB-TAB 1: LEAD CAPTURE FIELDS & SCHEMA BUILDER -->
+                @if ($crmBuilderTab === 'fields')
+                    <div class="grid gap-6 lg:grid-cols-3">
+                        <!-- Fields Management Table (Left 2 Cols) -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Metrics Cards -->
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Form Fields</p>
+                                    <p class="mt-1 text-2xl font-black text-blue-600">{{ count($crmCustomFields) }}</p>
+                                    <p class="text-xs text-slate-500">Configured in schema</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mandatory Fields</p>
+                                    <p class="mt-1 text-2xl font-black text-amber-600">{{ count(array_filter($crmCustomFields, fn($f) => !empty($f['required']))) }}</p>
+                                    <p class="text-xs text-amber-500">Required on submit</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Public Web Enabled</p>
+                                    <p class="mt-1 text-2xl font-black text-emerald-600">{{ count(array_filter($crmCustomFields, fn($f) => !empty($f['enabled']))) }}</p>
+                                    <p class="text-xs text-emerald-500">Visible on portal</p>
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Lead Capture Schema Fields') }}</h3>
+                                        <p class="text-xs text-slate-500">Toggle requirements, visibility, or remove custom attributes.</p>
+                                    </div>
+                                    <span class="text-xs font-semibold text-slate-400"><i class="fa-light fa-circle-info mr-1 text-blue-500"></i>Live synced with intake modal</span>
+                                </div>
+
+                                <div class="mt-4 overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead class="bg-slate-50 text-[11px] uppercase text-slate-400 dark:bg-slate-800">
+                                            <tr>
+                                                <th class="px-4 py-3">Field Label & Variable Key</th>
+                                                <th class="px-4 py-3">Input Type</th>
+                                                <th class="px-4 py-3 text-center">Mandatory</th>
+                                                <th class="px-4 py-3 text-center">Active</th>
+                                                <th class="px-4 py-3 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                            @foreach ($crmCustomFields as $index => $field)
+                                                <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                                    <td class="px-4 py-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <div>
+                                                                <p class="font-bold text-slate-900 dark:text-white">{{ $field['label'] }}</p>
+                                                                <p class="font-mono text-[10px] text-slate-400">{{ $field['key'] }} @if(!empty($field['system'])) <span class="ml-1 text-blue-500 font-semibold">(System)</span> @endif</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        <span class="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                            {{ $field['type'] }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        <button type="button" wire:click="toggleCustomField({{ $index }}, 'required')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['required']) ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                            {{ !empty($field['required']) ? 'Required' : 'Optional' }}
+                                                        </button>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        <button type="button" wire:click="toggleCustomField({{ $index }}, 'enabled')" class="rounded-full px-2.5 py-0.5 text-[10px] font-black transition {{ !empty($field['enabled']) ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
+                                                            {{ !empty($field['enabled']) ? 'Visible' : 'Hidden' }}
+                                                        </button>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-right">
+                                                        @if (empty($field['system']))
+                                                            <button type="button" wire:click="removeCustomField({{ $index }})" class="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 transition" title="Delete custom field">
+                                                                <i class="fa-light fa-trash-can"></i>
+                                                            </button>
+                                                        @else
+                                                            <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600" title="Core system field">Core</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Add Custom Field & Integration Widget -->
+                        <div class="space-y-6">
+                            <!-- Add New Custom Field Form -->
+                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                    <i class="fa-light fa-plus-circle text-blue-600"></i>
+                                    {{ __('Add Custom Capture Field') }}
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-1">Add energy consumption metrics, roof parameters, or enterprise metadata.</p>
+
+                                <form wire:submit.prevent="addCustomField" class="mt-4 space-y-3.5">
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Field Display Label <span class="text-rose-500">*</span></label>
+                                        <input type="text" wire:model="newCustomField.label" placeholder="e.g. Roof Shading & Orientation" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Variable Key (Optional)</label>
+                                        <input type="text" wire:model="newCustomField.key" placeholder="e.g. roof_shading" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Input Data Type</label>
+                                        <select wire:model="newCustomField.type" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="text">Text (Single Line)</option>
+                                            <option value="number">Number / Currency (NGN)</option>
+                                            <option value="select">Dropdown Selection</option>
+                                            <option value="textarea">Textarea (Multi-line Notes)</option>
+                                            <option value="phone">Phone Number</option>
+                                            <option value="email">Email Address</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Dropdown Options (Comma separated)</label>
+                                        <input type="text" wire:model="newCustomField.options" placeholder="Option 1, Option 2, Option 3" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div class="flex items-center gap-2 pt-1">
+                                        <input type="checkbox" id="fieldReqCheck" wire:model="newCustomField.required" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                        <label for="fieldReqCheck" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Mark field as mandatory</label>
+                                    </div>
+                                    <button type="submit" class="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                        <i class="fa-light fa-plus mr-1.5"></i>{{ __('Add Field to Schema') }}
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Integration & Webhook Snippet Card -->
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+                                <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-light fa-code text-emerald-600"></i>
+                                    {{ __('Public Web Capture Endpoint') }}
+                                </h4>
+                                <p class="text-[11px] text-slate-500 mt-1">Live webhook ingest URL for <span class="font-semibold text-blue-600">www.ascendsystems.ng</span> quote calculator:</p>
+                                <div class="mt-2.5 rounded-xl bg-slate-900 p-3 text-[11px] font-mono text-emerald-400 select-all overflow-x-auto">
+                                    POST https://app.ascendsystems.ng/api/public/lead-capture
+                                </div>
+                                <div class="mt-3 flex items-center justify-between text-[11px]">
+                                    <span class="text-slate-500"><i class="fa-light fa-shield-check mr-1 text-emerald-500"></i>Auto-AI Scoring Active</span>
+                                    <button type="button" wire:click="setCrmBuilderTab('preview')" class="font-bold text-blue-600 hover:underline">Launch Form Preview &rarr;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- SUB-TAB 2: PIPELINE STAGES & WIN RATES -->
+                @if ($crmBuilderTab === 'stages')
+                    <div class="space-y-6">
+                        <!-- Visual Pipeline Flow Progression -->
+                        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">{{ __('Live Enterprise Pipeline Flow Progression') }}</h3>
+                            <div class="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                                @foreach ($crmLeadStages as $stg)
+                                    <div class="rounded-2xl border border-{{ $stg['color'] }}-200 bg-{{ $stg['color'] }}-50/50 p-4 dark:border-{{ $stg['color'] }}-900/40 dark:bg-{{ $stg['color'] }}-950/20">
+                                        <div class="flex items-center justify-between">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-{{ $stg['color'] }}-500/20 text-{{ $stg['color'] }}-600 text-xs font-black">
+                                                {{ $stg['probability'] }}%
+                                            </span>
+                                            <span class="text-[10px] font-bold uppercase text-{{ $stg['color'] }}-600">Lead Stage</span>
+                                        </div>
+                                        <h4 class="mt-2.5 text-xs font-extrabold text-slate-900 dark:text-white">{{ $stg['label'] }}</h4>
+                                        <p class="mt-1 text-[10px] text-slate-500 line-clamp-2"><i class="fa-light fa-bolt text-amber-500 mr-1"></i>{{ $stg['auto_action'] }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="grid gap-6 lg:grid-cols-3">
+                            <!-- Lead Stages List -->
+                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                                    <div>
+                                        <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Lead Qualification Stages') }}</h3>
+                                        <p class="text-[11px] text-slate-500">Inbound qualification & sizing cycle</p>
+                                    </div>
+                                    <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-600">{{ count($crmLeadStages) }} Stages</span>
+                                </div>
+                                <div class="mt-3 space-y-2.5">
+                                    @foreach ($crmLeadStages as $idx => $stg)
+                                        <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 hover:bg-slate-50/50 dark:border-slate-800 dark:hover:bg-slate-800/50 transition">
+                                            <div class="flex items-center gap-2.5">
+                                                <span class="h-3 w-3 rounded-full bg-{{ $stg['color'] }}-500"></span>
+                                                <div>
+                                                    <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $stg['label'] }}</p>
+                                                    <p class="text-[10px] text-slate-400">Probability: <span class="font-bold text-blue-600">{{ $stg['probability'] }}%</span></p>
+                                                </div>
+                                            </div>
+                                            @if ($idx > 1)
+                                                <button type="button" wire:click="removePipelineStage('lead', {{ $idx }})" class="text-slate-300 hover:text-rose-500 transition"><i class="fa-light fa-trash-can text-xs"></i></button>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Deal Stages List -->
+                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                                    <div>
+                                        <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Deals Pipeline Stages') }}</h3>
+                                        <p class="text-[11px] text-slate-500">Commercial revenue closing cycle</p>
+                                    </div>
+                                    <span class="rounded-full bg-purple-500/10 px-2.5 py-0.5 text-[10px] font-bold text-purple-600">{{ count($crmDealStages) }} Stages</span>
+                                </div>
+                                <div class="mt-3 space-y-2.5">
+                                    @foreach ($crmDealStages as $idx => $stg)
+                                        <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 hover:bg-slate-50/50 dark:border-slate-800 dark:hover:bg-slate-800/50 transition">
+                                            <div class="flex items-center gap-2.5">
+                                                <span class="h-3 w-3 rounded-full bg-{{ $stg['color'] }}-500"></span>
+                                                <div>
+                                                    <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $stg['label'] }}</p>
+                                                    <p class="text-[10px] text-slate-400">Win Rate: <span class="font-bold text-purple-600">{{ $stg['probability'] }}%</span></p>
+                                                </div>
+                                            </div>
+                                            @if ($idx > 2)
+                                                <button type="button" wire:click="removePipelineStage('deal', {{ $idx }})" class="text-slate-300 hover:text-rose-500 transition"><i class="fa-light fa-trash-can text-xs"></i></button>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Create New Stage Form -->
+                            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                                <h3 class="text-sm font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                    <i class="fa-light fa-plus-circle text-blue-600"></i>
+                                    {{ __('Add Custom Stage') }}
+                                </h3>
+                                <p class="text-[11px] text-slate-500 mt-1">Extend workflow with bespoke sales milestones.</p>
+
+                                <form wire:submit.prevent="addPipelineStage" class="mt-4 space-y-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Target Workflow</label>
+                                        <select wire:model="newCrmStage.category" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="lead">Lead Acquisition Cycle</option>
+                                            <option value="deal">Deals Pipeline Cycle</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Stage Name <span class="text-rose-500">*</span></label>
+                                        <input type="text" wire:model="newCrmStage.label" placeholder="e.g. Bank Financing Approved" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-[11px] font-bold uppercase text-slate-500">Win Rate (%)</label>
+                                            <input type="number" min="0" max="100" wire:model="newCrmStage.probability" placeholder="65" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold uppercase text-slate-500">Badge Color</label>
+                                            <select wire:model="newCrmStage.color" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                                <option value="blue">Blue</option>
+                                                <option value="purple">Purple</option>
+                                                <option value="amber">Amber</option>
+                                                <option value="emerald">Emerald</option>
+                                                <option value="rose">Rose</option>
+                                                <option value="sky">Sky</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold uppercase text-slate-500">Automated Action Trigger</label>
+                                        <input type="text" wire:model="newCrmStage.auto_action" placeholder="e.g. Send SMS & WhatsApp Notification" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <button type="submit" class="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                        <i class="fa-light fa-plus mr-1.5"></i>{{ __('Create Pipeline Stage') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- SUB-TAB 3: WORKFLOW & AUTOMATION PREFERENCES -->
+                @if ($crmBuilderTab === 'preferences')
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <!-- Lead Distribution & SLA Settings -->
+                        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                <i class="fa-light fa-route text-blue-600"></i>
+                                {{ __('Lead Distribution & Follow-up SLA') }}
+                            </h3>
+                            <p class="text-xs text-slate-500">Configure how inbound prospects are assigned and tracked across sales reps.</p>
+
+                            <div class="space-y-4 pt-2">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500">Lead Assignment Strategy</label>
+                                    <select wire:model="crmWorkflowSettings.lead_assignment_mode" class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="round_robin">Round-Robin (Equally distributed among active sales engineers)</option>
+                                        <option value="territory">Regional Territory Routing (Abuja vs Lagos vs Kano Desk)</option>
+                                        <option value="manual">Manual Unassigned Queue (Reps claim leads manually)</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-500">Inactivity SLA (Hours)</label>
+                                        <select wire:model="crmWorkflowSettings.followup_sla_hours" class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="12">12 Hours (High Priority)</option>
+                                            <option value="24">24 Hours (Standard)</option>
+                                            <option value="48">48 Hours</option>
+                                            <option value="72">72 Hours</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-500">Min Score for Auto-Deal</label>
+                                        <input type="number" min="50" max="100" wire:model="crmWorkflowSettings.min_score_for_auto_deal" class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500">Default Central Lead Desk</label>
+                                    <input type="text" wire:model="crmWorkflowSettings.default_lead_owner" class="mt-1 block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Notifications & Quotation Rules -->
+                        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                <i class="fa-light fa-bell-ring text-purple-600"></i>
+                                {{ __('Automations & Quote Parameters') }}
+                            </h3>
+                            <p class="text-xs text-slate-500">Auto-responder triggers and proposal validity preferences.</p>
+
+                            <div class="space-y-3 pt-2">
+                                <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white">Instant WhatsApp Welcome & PDF Brochure</p>
+                                        <p class="text-[10px] text-slate-400">Auto-send product brochure to prospect on form submit</p>
+                                    </div>
+                                    <input type="checkbox" wire:model="crmWorkflowSettings.send_whatsapp_on_new_lead" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+
+                                <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white">Instant Email Confirmation</p>
+                                        <p class="text-[10px] text-slate-400">Send confirmation email with sizing reference ID</p>
+                                    </div>
+                                    <input type="checkbox" wire:model="crmWorkflowSettings.send_email_on_new_lead" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+
+                                <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white">Notify Sales Manager on High Value (> ₦5M)</p>
+                                        <p class="text-[10px] text-slate-400">Dispatch SMS & In-app priority alert to executive team</p>
+                                    </div>
+                                    <input type="checkbox" wire:model="crmWorkflowSettings.auto_notify_sales_manager" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 pt-1">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-500">Quote Validity (Days)</label>
+                                        <input type="number" wire:model="crmWorkflowSettings.default_quote_validity_days" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-500">Default Currency</label>
+                                        <input type="text" wire:model="crmWorkflowSettings.currency" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="lg:col-span-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <button type="button" wire:click="resetCrmDefaults" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">
+                                <i class="fa-light fa-rotate-left mr-1.5"></i>{{ __('Reset Defaults') }}
+                            </button>
+                            <button type="button" wire:click="saveCrmSettings" class="rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                <i class="fa-light fa-floppy-disk mr-1.5 text-emerald-400"></i>{{ __('Save All Preferences') }}
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- SUB-TAB 4: LIVE WEB FORM PREVIEW & TEST RUNNER -->
+                @if ($crmBuilderTab === 'preview')
+                    <div class="grid gap-6 lg:grid-cols-3">
+                        <!-- Live Client Form Simulator (Left 2 Cols) -->
+                        <div class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-6">
+                            <div class="border-b pb-4 dark:border-slate-800">
+                                <div class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow-sm mb-3">
+                                    <i class="fa-light fa-solar-panel"></i> Ascend Systems Lead Capture Simulator
+                                </div>
+                                <h3 class="text-xl font-black text-slate-950 dark:text-white">Commercial & Residential Solar Quote Inquiry</h3>
+                                <p class="text-xs text-slate-500 mt-1">This interactive widget simulates the live form hosted on <span class="font-semibold text-blue-600">www.ascendsystems.ng</span> reflecting active schema fields.</p>
+                            </div>
+
+                            <form wire:submit.prevent="submitTestLead" class="space-y-4">
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Client / Contact Name <span class="text-rose-500">*</span></label>
+                                        <input type="text" wire:model="testLeadForm.client_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Company / Business Name</label>
+                                        <input type="text" wire:model="testLeadForm.company_name" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">WhatsApp Phone Number <span class="text-rose-500">*</span></label>
+                                        <input type="text" wire:model="testLeadForm.phone" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Email Address</label>
+                                        <input type="email" wire:model="testLeadForm.email" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">State / Region (Nigeria)</label>
+                                        <select wire:model="testLeadForm.city_location" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="Abuja">Abuja FCT</option>
+                                            <option value="Lagos">Lagos State</option>
+                                            <option value="Kano">Kano State</option>
+                                            <option value="Port Harcourt">Port Harcourt / Rivers</option>
+                                            <option value="Ibadan">Ibadan / Oyo</option>
+                                            <option value="Enugu">Enugu State</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Facility / Property Type</label>
+                                        <select wire:model="testLeadForm.property_type" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="Industrial / Factory">Industrial / Factory</option>
+                                            <option value="Commercial Office / Plaza">Commercial Office / Plaza</option>
+                                            <option value="Residential Villa / Duplex">Residential Villa / Duplex</option>
+                                            <option value="Residential Flat">Residential Flat</option>
+                                            <option value="Hospital / Healthcare">Hospital / Healthcare</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Solar Package Sizing Interest</label>
+                                        <select wire:model="testLeadForm.system_interest" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="Ascend 20kVA-50kVA Industrial Microgrid">Ascend 20kVA-50kVA Industrial Microgrid</option>
+                                            <option value="Ascend 15kVA Commercial Solar Array">Ascend 15kVA Commercial Solar Array</option>
+                                            <option value="Ascend 10.2kVA Commercial Dual MPPT Inverter">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
+                                            <option value="Ascend 5.5kVA Hybrid Solar Inverter">Ascend 5.5kVA Hybrid Solar Inverter (4-Bed Duplex)</option>
+                                            <option value="Ascend 3.5kVA Inverter">Ascend 3.5kVA / 24V Pure Sine Wave Inverter</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Estimated Budget (NGN)</label>
+                                        <input type="number" wire:model="testLeadForm.deal_value" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Daily Generator Run Time</label>
+                                        <select wire:model="testLeadForm.daily_generator_hours" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                            <option value="None / Grid Only">None / Grid Only</option>
+                                            <option value="2-4 Hours Daily">2-4 Hours Daily</option>
+                                            <option value="5-8 Hours Daily">5-8 Hours Daily</option>
+                                            <option value="8-16 Hours Daily">8-16 Hours Daily</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300">Load Sizing Scope & Notes</label>
+                                        <textarea wire:model="testLeadForm.notes" rows="2" class="mt-1 block w-full rounded-2xl border border-slate-200 p-3 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
+                                    <button type="submit" class="rounded-2xl bg-blue-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition flex items-center gap-2">
+                                        <i class="fa-light fa-paper-plane-top"></i>{{ __('Submit Test Lead & Run Qualification') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right Column: Schema Diagnostics & AI Scoring Engine Rules -->
+                        <div class="space-y-6">
+                            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                                <h4 class="text-sm font-bold text-slate-950 dark:text-white flex items-center gap-2">
+                                    <i class="fa-light fa-brain-circuit text-purple-600"></i>
+                                    {{ __('AI Lead Scoring Engine Diagnostics') }}
+                                </h4>
+                                <p class="text-xs text-slate-500">Scoring weights applied when leads are ingested into pipeline:</p>
+
+                                <div class="space-y-3 text-xs">
+                                    <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                        <span class="text-slate-500">Base Sizing Completeness</span>
+                                        <span class="font-bold text-emerald-600">+85 Pts</span>
+                                    </div>
+                                    <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                        <span class="text-slate-500">Commercial / Industrial Facility</span>
+                                        <span class="font-bold text-purple-600">+10 Pts</span>
+                                    </div>
+                                    <div class="flex justify-between border-b pb-2 dark:border-slate-800">
+                                        <span class="text-slate-500">Immediate Timeline (&lt; 7 Days)</span>
+                                        <span class="font-bold text-blue-600">+5 Pts</span>
+                                    </div>
+                                    <div class="flex justify-between pt-1 font-bold">
+                                        <span class="text-slate-900 dark:text-white">Auto-Convert Deal Trigger</span>
+                                        <span class="text-amber-600">&ge; 80 Pts</span>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-2xl bg-blue-50 p-4 text-xs text-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+                                    <p class="font-bold"><i class="fa-light fa-check-circle mr-1"></i>Automated Conversion Active</p>
+                                    <p class="text-[11px] text-blue-700 dark:text-blue-300 mt-1">High-scoring leads immediately create active Deals in the pipeline with commercial proposal stage.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
         @endif
     @endif
 

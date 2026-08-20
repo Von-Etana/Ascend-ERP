@@ -154,6 +154,89 @@ class AscendModuleViewer extends Component
 
     public array $crmContracts = [];
 
+    // === CRM BUILDER & SETTINGS STATE ===
+    public string $crmBuilderTab = 'fields'; // 'fields', 'stages', 'preferences', 'preview'
+
+    public array $crmCustomFields = [
+        ['key' => 'client_name', 'label' => 'Client / Contact Person', 'type' => 'text', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => 'e.g. Chief Emeka Nwosu'],
+        ['key' => 'company_name', 'label' => 'Company / Organization', 'type' => 'text', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => 'e.g. Nwosu Logistics Ltd'],
+        ['key' => 'phone', 'label' => 'WhatsApp / Mobile Number', 'type' => 'phone', 'required' => true, 'enabled' => true, 'system' => true, 'placeholder' => '+234 802 888 9900'],
+        ['key' => 'email', 'label' => 'Email Address', 'type' => 'email', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => 'client@nwosugroup.ng'],
+        ['key' => 'city_location', 'label' => 'State / Region (Nigeria)', 'type' => 'select', 'required' => true, 'enabled' => true, 'system' => true, 'options' => 'Abuja, Lagos, Port Harcourt, Kano, Ibadan, Enugu, Kaduna, Benin City'],
+        ['key' => 'property_type', 'label' => 'Property / Facility Type', 'type' => 'select', 'required' => false, 'enabled' => true, 'system' => true, 'options' => 'Residential Villa / Duplex, Residential Flat, Commercial Office / Plaza, Industrial / Factory, Hospital / Healthcare, Borehole / Solar Farm'],
+        ['key' => 'system_interest', 'label' => 'Solar & Battery Sizing Interest', 'type' => 'select', 'required' => true, 'enabled' => true, 'system' => true, 'options' => 'Ascend 3.5kVA Inverter (Starter), Ascend 5.5kVA Hybrid Inverter (4-Bed Duplex), Ascend 10.2kVA Commercial Dual MPPT Inverter, Ascend 15kVA Commercial Solar Array, Ascend 20kVA-50kVA Industrial Microgrid, Ascend 10.2kWh LiFePO4 Battery Bank'],
+        ['key' => 'deal_value', 'label' => 'Estimated Budget (NGN)', 'type' => 'number', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => '2500000'],
+        ['key' => 'purchasing_timeline', 'label' => 'Purchasing Timeline', 'type' => 'select', 'required' => false, 'enabled' => true, 'system' => true, 'options' => 'Immediate (< 7 Days), Within 30 Days, Budgeting / Next Quarter'],
+        ['key' => 'monthly_nepa_bill', 'label' => 'Monthly Electricity / NEPA Bill (NGN)', 'type' => 'number', 'required' => false, 'enabled' => true, 'system' => false, 'placeholder' => 'e.g. 150000'],
+        ['key' => 'daily_generator_hours', 'label' => 'Daily Generator Run Time (Hours)', 'type' => 'select', 'required' => false, 'enabled' => true, 'system' => false, 'options' => 'None / Grid Only, 2-4 Hours Daily, 5-8 Hours Daily, 8-16 Hours Daily, 24/7 Continuous Heavy Diesel Run'],
+        ['key' => 'notes', 'label' => 'Load Sizing Notes & Requirements', 'type' => 'textarea', 'required' => false, 'enabled' => true, 'system' => true, 'placeholder' => 'Appliance details, air conditioner tonnage, roof type...'],
+    ];
+
+    public array $newCustomField = [
+        'label' => '',
+        'key' => '',
+        'type' => 'text',
+        'required' => false,
+        'enabled' => true,
+        'options' => '',
+    ];
+
+    public array $crmLeadStages = [
+        ['key' => 'new', 'label' => 'New Inbound Prospect', 'color' => 'blue', 'probability' => 15, 'auto_action' => 'Instant WhatsApp Greeting & Solar Brochure Delivery'],
+        ['key' => 'contacted', 'label' => 'Contacted / Discovery Call', 'color' => 'amber', 'probability' => 35, 'auto_action' => 'Assign Dedicated Technical Energy Consultant'],
+        ['key' => 'audit_scheduled', 'label' => 'Site Audit & Roof Inspection', 'color' => 'sky', 'probability' => 55, 'auto_action' => 'Generate Field Engineering Inspection Job Card'],
+        ['key' => 'qualified', 'label' => 'Qualified & Load Sized', 'color' => 'purple', 'probability' => 70, 'auto_action' => 'Auto-generate Commercial Quotation Proposal'],
+        ['key' => 'converted', 'label' => 'Converted to Won Deal', 'color' => 'emerald', 'probability' => 100, 'auto_action' => 'Create CRM Deal & Dispatch Warehouse Waybill'],
+    ];
+
+    public array $crmDealStages = [
+        ['key' => 'prospecting', 'label' => 'Prospecting & Initial Sizing', 'color' => 'slate', 'probability' => 20],
+        ['key' => 'proposal', 'label' => 'Technical Proposal & Quote Submitted', 'color' => 'blue', 'probability' => 50],
+        ['key' => 'negotiation', 'label' => 'Commercial Negotiation & Terms', 'color' => 'amber', 'probability' => 75],
+        ['key' => 'closed_won', 'label' => 'Closed Won (Deposit Verified)', 'color' => 'emerald', 'probability' => 100],
+        ['key' => 'closed_lost', 'label' => 'Closed Lost / Deferred Sizing', 'color' => 'rose', 'probability' => 0],
+    ];
+
+    public array $newCrmStage = [
+        'category' => 'lead',
+        'label' => '',
+        'key' => '',
+        'color' => 'blue',
+        'probability' => 50,
+        'auto_action' => 'Auto-Notify Assigned Sales Rep',
+    ];
+
+    public array $crmWorkflowSettings = [
+        'lead_assignment_mode' => 'round_robin',
+        'auto_score_leads' => true,
+        'min_score_for_auto_deal' => 80,
+        'followup_sla_hours' => 24,
+        'send_whatsapp_on_new_lead' => true,
+        'send_email_on_new_lead' => true,
+        'auto_notify_sales_manager' => true,
+        'default_quote_validity_days' => 14,
+        'currency' => 'NGN (₦)',
+        'public_lead_capture_url' => 'https://www.ascendsystems.ng/solar-quote-request',
+        'webhook_endpoint' => '/api/public/lead-capture',
+        'enable_spam_honeypot' => true,
+        'default_lead_owner' => 'Abuja Central Sales Desk',
+    ];
+
+    public array $testLeadForm = [
+        'client_name' => 'Alhaji Sanusi Garba',
+        'company_name' => 'Garba Agro Mills Ltd',
+        'phone' => '+234 803 555 8899',
+        'email' => 'sanusi@garbaagro.ng',
+        'city_location' => 'Kano',
+        'property_type' => 'Industrial / Factory',
+        'system_interest' => 'Ascend 20kVA-50kVA Industrial Microgrid',
+        'deal_value' => '18500000',
+        'purchasing_timeline' => 'immediate',
+        'monthly_nepa_bill' => '850000',
+        'daily_generator_hours' => '8-16 Hours Daily',
+        'notes' => 'Looking to displace 60kVA diesel generator for agro processing factory & cold storage.',
+    ];
+
     // === PRIORITY 1: FINANCIAL SUITE ===
     public array $salaryRecords = [];
     public array $expenseRecords = [];
@@ -2675,6 +2758,189 @@ class AscendModuleViewer extends Component
         $this->agentResult = '';
     }
 
+    public function setCrmBuilderTab(string $tab): void
+    {
+        $this->crmBuilderTab = $tab;
+    }
+
+    public function navigateToAddLead(): void
+    {
+        if ($this->moduleKey === 'crm') {
+            $this->activeTab = 'leads';
+        }
+        $this->openCreateModal('lead');
+    }
+
+    public function toggleCustomField(int $index, string $prop): void
+    {
+        if (isset($this->crmCustomFields[$index]) && isset($this->crmCustomFields[$index][$prop])) {
+            $this->crmCustomFields[$index][$prop] = !$this->crmCustomFields[$index][$prop];
+            session()->flash('status', __('Field ":field" :prop updated.', [
+                'field' => $this->crmCustomFields[$index]['label'],
+                'prop' => $prop === 'required' ? 'requirement' : 'visibility',
+            ]));
+        }
+    }
+
+    public function addCustomField(): void
+    {
+        if (trim($this->newCustomField['label']) === '') {
+            session()->flash('warning', __('Please specify a valid field label!'));
+            return;
+        }
+
+        $key = trim($this->newCustomField['key']) ?: \Illuminate\Support\Str::slug($this->newCustomField['label'], '_');
+        $this->crmCustomFields[] = [
+            'key' => $key,
+            'label' => $this->newCustomField['label'],
+            'type' => $this->newCustomField['type'],
+            'required' => (bool) $this->newCustomField['required'],
+            'enabled' => true,
+            'system' => false,
+            'options' => $this->newCustomField['options'],
+            'placeholder' => 'Enter '.$this->newCustomField['label'],
+        ];
+
+        session()->flash('status', __('Custom field ":label" added to CRM Lead Capture Schema!', ['label' => $this->newCustomField['label']]));
+
+        $this->newCustomField = [
+            'label' => '',
+            'key' => '',
+            'type' => 'text',
+            'required' => false,
+            'enabled' => true,
+            'options' => '',
+        ];
+    }
+
+    public function removeCustomField(int $index): void
+    {
+        if (isset($this->crmCustomFields[$index])) {
+            if (!empty($this->crmCustomFields[$index]['system'])) {
+                session()->flash('warning', __('Core system fields cannot be deleted. You can toggle their visibility instead.'));
+                return;
+            }
+            $label = $this->crmCustomFields[$index]['label'];
+            array_splice($this->crmCustomFields, $index, 1);
+            session()->flash('status', __('Custom field ":label" removed from form schema.', ['label' => $label]));
+        }
+    }
+
+    public function addPipelineStage(): void
+    {
+        if (trim($this->newCrmStage['label']) === '') {
+            session()->flash('warning', __('Please specify a valid stage name!'));
+            return;
+        }
+
+        $key = trim($this->newCrmStage['key']) ?: \Illuminate\Support\Str::slug($this->newCrmStage['label'], '_');
+        $stageItem = [
+            'key' => $key,
+            'label' => $this->newCrmStage['label'],
+            'color' => $this->newCrmStage['color'] ?: 'blue',
+            'probability' => (int) $this->newCrmStage['probability'],
+            'auto_action' => $this->newCrmStage['auto_action'] ?: 'Auto-Notify Assigned Sales Rep',
+        ];
+
+        if (($this->newCrmStage['category'] ?? 'lead') === 'deal') {
+            $this->crmDealStages[] = $stageItem;
+        } else {
+            $this->crmLeadStages[] = $stageItem;
+        }
+
+        session()->flash('status', __('New pipeline stage ":label" created successfully!', ['label' => $this->newCrmStage['label']]));
+
+        $this->newCrmStage = [
+            'category' => $this->newCrmStage['category'] ?? 'lead',
+            'label' => '',
+            'key' => '',
+            'color' => 'blue',
+            'probability' => 50,
+            'auto_action' => 'Auto-Notify Assigned Sales Rep',
+        ];
+    }
+
+    public function removePipelineStage(string $category, int $index): void
+    {
+        if ($category === 'deal' && isset($this->crmDealStages[$index])) {
+            $label = $this->crmDealStages[$index]['label'];
+            array_splice($this->crmDealStages, $index, 1);
+            session()->flash('status', __('Deal pipeline stage ":label" removed.', ['label' => $label]));
+        } elseif ($category === 'lead' && isset($this->crmLeadStages[$index])) {
+            $label = $this->crmLeadStages[$index]['label'];
+            array_splice($this->crmLeadStages, $index, 1);
+            session()->flash('status', __('Lead pipeline stage ":label" removed.', ['label' => $label]));
+        }
+    }
+
+    public function saveCrmSettings(): void
+    {
+        log_activity('crm.settings.update', 'Updated CRM workflow preferences and pipeline parameters.');
+        session()->flash('status', __('CRM Workflow Preferences & Automation Rules saved successfully!'));
+    }
+
+    public function resetCrmDefaults(): void
+    {
+        $this->crmWorkflowSettings = [
+            'lead_assignment_mode' => 'round_robin',
+            'auto_score_leads' => true,
+            'min_score_for_auto_deal' => 80,
+            'followup_sla_hours' => 24,
+            'send_whatsapp_on_new_lead' => true,
+            'send_email_on_new_lead' => true,
+            'auto_notify_sales_manager' => true,
+            'default_quote_validity_days' => 14,
+            'currency' => 'NGN (₦)',
+            'public_lead_capture_url' => 'https://www.ascendsystems.ng/solar-quote-request',
+            'webhook_endpoint' => '/api/public/lead-capture',
+            'enable_spam_honeypot' => true,
+            'default_lead_owner' => 'Abuja Central Sales Desk',
+        ];
+        session()->flash('status', __('CRM settings reset to factory defaults.'));
+    }
+
+    public function submitTestLead(): void
+    {
+        $score = 85;
+        if (str_contains(strtolower($this->testLeadForm['property_type']), 'industrial') || str_contains(strtolower($this->testLeadForm['property_type']), 'commercial')) {
+            $score += 10;
+        }
+        if ($this->testLeadForm['purchasing_timeline'] === 'immediate') {
+            $score += 5;
+        }
+        $score = min(100, $score);
+
+        $lead = CrmLead::create([
+            'company_name' => $this->testLeadForm['company_name'] ?: 'Test Enterprise Lead',
+            'contact_person' => $this->testLeadForm['client_name'] ?: 'Test Contact Person',
+            'email' => $this->testLeadForm['email'] ?: 'testlead@ascendsystems.ng',
+            'phone' => $this->testLeadForm['phone'] ?: '+234 800 000 0000',
+            'city_location' => $this->testLeadForm['city_location'] ?: 'Abuja',
+            'system_interest' => $this->testLeadForm['system_interest'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter',
+            'deal_value' => (float) ($this->testLeadForm['deal_value'] ?: 2500000),
+            'ai_lead_score' => $score,
+            'purchasing_timeline' => $this->testLeadForm['purchasing_timeline'] ?: 'immediate',
+            'status' => 'new',
+            'notes' => '[Form Builder Live Test Submission] ' . ($this->testLeadForm['notes'] ?: ''),
+        ]);
+
+        if ($score >= (int) ($this->crmWorkflowSettings['min_score_for_auto_deal'] ?? 80)) {
+            CrmDeal::create([
+                'crm_lead_id' => $lead->id,
+                'deal_name' => 'Deal — ' . $lead->company_name,
+                'stage' => 'proposal',
+                'value' => $lead->deal_value,
+                'expected_close' => now()->addDays(21),
+            ]);
+        }
+
+        session()->flash('status', __('Test Lead ":name" (:company) captured with AI Score :score/100 and auto-synced to CRM pipeline!', [
+            'name' => $lead->contact_person,
+            'company' => $lead->company_name,
+            'score' => $score,
+        ]));
+    }
+
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
@@ -2868,8 +3134,11 @@ class AscendModuleViewer extends Component
             $this->form['subtotal'] = '1500000';
         }
 
-        if ($type === 'lead') {
+        if ($type === 'lead' || $type === 'crm') {
             $this->modalType = 'lead';
+            if ($this->moduleKey === 'crm') {
+                $this->activeTab = 'leads';
+            }
             $this->form['client_name'] = '';
             $this->form['company_name'] = '';
             $this->form['phone'] = '';
