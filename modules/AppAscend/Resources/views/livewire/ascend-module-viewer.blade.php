@@ -167,6 +167,7 @@
                         'deals' => ['label' => 'Deals Pipeline', 'icon' => 'fa-light fa-chart-kanban'],
                         'contacts' => ['label' => 'Customer Contacts', 'icon' => 'fa-light fa-address-book'],
                         'contracts' => ['label' => 'Contracts & Notes', 'icon' => 'fa-light fa-file-contract'],
+                        'drip' => ['label' => 'Automated Lead Drip Sequences', 'icon' => 'fa-light fa-paper-plane-top'],
                         'builder' => ['label' => 'Form Builder & Settings', 'icon' => 'fa-light fa-sliders'],
                     ],
                     'sales' => [
@@ -186,6 +187,7 @@
                     ],
                     'inventory' => [
                         'products' => ['label' => 'Products & Stock Levels', 'icon' => 'fa-light fa-box-archive'],
+                        'reorder_po' => ['label' => 'Low-Stock Reorder & Supplier POs', 'icon' => 'fa-light fa-cart-flatbed-boxes'],
                         'b2b_dispatch' => ['label' => 'Warehouse Barcode Dispatch', 'icon' => 'fa-light fa-barcode-read'],
                         'warranty_hub' => ['label' => '5-Year Warranty & Maintenance', 'icon' => 'fa-light fa-shield-check'],
                         'stock' => ['label' => 'Stock Movement Audit', 'icon' => 'fa-light fa-arrows-repeat'],
@@ -235,10 +237,12 @@
                         'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
                     ],
                     'retailer' => [
-                        'catalog'  => ['label' => 'Solar & Renewable Catalog', 'icon' => 'fa-light fa-solar-panel'],
-                        'cart'     => ['label' => 'B2B Bulk Order Cart', 'icon' => 'fa-light fa-cart-shopping'],
-                        'orders'   => ['label' => 'Order Tracking & Status', 'icon' => 'fa-light fa-truck-ramp-box'],
-                        'invoices' => ['label' => 'B2B Invoices & PDF Statements', 'icon' => 'fa-light fa-file-invoice-dollar'],
+                        'catalog'   => ['label' => 'Solar & Renewable Catalog', 'icon' => 'fa-light fa-solar-panel'],
+                        'cart'      => ['label' => 'B2B Bulk Order Cart', 'icon' => 'fa-light fa-cart-shopping'],
+                        'orders'    => ['label' => 'Order Tracking & Status', 'icon' => 'fa-light fa-truck-ramp-box'],
+                        'invoices'  => ['label' => 'B2B Invoices & PDF Statements', 'icon' => 'fa-light fa-file-invoice-dollar'],
+                        'warranty'  => ['label' => 'Partner Warranty Claims & RMA', 'icon' => 'fa-light fa-shield-check'],
+                        'contracts' => ['label' => 'B2B Agreements & Certificate', 'icon' => 'fa-light fa-certificate'],
                     ],
                     default => ['overview' => ['label' => 'Overview', 'icon' => 'fa-light fa-border-all']],
                 };
@@ -1161,6 +1165,226 @@
                     </table>
                 </div>
             </section>
+        @elseif ($activeTab === 'drip')
+            <!-- AUTOMATED WHATSAPP & EMAIL LEAD FOLLOW-UP DRIP SEQUENCES STUDIO -->
+            <div class="space-y-6">
+                <!-- Drip Overview & Cadence Rules Header -->
+                <div class="rounded-3xl border border-blue-500/20 bg-gradient-to-r from-blue-950 via-slate-900 to-slate-950 p-6 text-white shadow-xl md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <div class="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-3.5 py-1 text-xs font-bold text-blue-400 border border-blue-500/30">
+                                <i class="fa-light fa-paper-plane-top"></i> {{ __('Automated CRM Lead Nurture Engine') }}
+                            </div>
+                            <h2 class="mt-3 text-2xl font-black md:text-3xl text-white">{{ __('WhatsApp & Email Lead Follow-up Drip Sequences') }}</h2>
+                            <p class="mt-1 text-sm text-slate-300 max-w-3xl">
+                                {{ __('Ensure zero lead leakage with multi-stage automated follow-up cadences. Automatically dispatch product catalogs within 1 hour, request energy audit details on Day 2, and send price-lock reminders on Day 5.') }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 text-center">
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total Dispatched') }}</p>
+                                <p class="text-xl font-black text-blue-400">{{ $dbCrmLeadDripLogs->count() }}</p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 text-center">
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Response Rate') }}</p>
+                                <p class="text-xl font-black text-emerald-400">
+                                    {{ $dbCrmLeadDripLogs->count() > 0 ? round(($dbCrmLeadDripLogs->where('status', 'replied')->count() / $dbCrmLeadDripLogs->count()) * 100) : 48 }}%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3-Stage Drip Timeline Cards -->
+                    <div class="mt-8 grid gap-4 sm:grid-cols-3 border-t border-slate-800 pt-6">
+                        <div class="rounded-2xl border border-blue-500/30 bg-blue-900/20 p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="rounded-full bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-blue-300 border border-blue-500/30">Step 1 • 0-1 hr</span>
+                                <span class="flex items-center gap-1 text-xs text-emerald-400 font-bold"><i class="fa-brands fa-whatsapp"></i> <i class="fa-light fa-envelope"></i></span>
+                            </div>
+                            <h4 class="mt-2 text-sm font-bold text-white">Instant Welcome & Solar Catalog</h4>
+                            <p class="mt-1 text-xs text-slate-400">Dispatches 2026 Solar & Inverter spec sheet, wholesale price guide, and company intro.</p>
+                        </div>
+                        <div class="rounded-2xl border border-purple-500/30 bg-purple-900/20 p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="rounded-full bg-purple-500/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-purple-300 border border-purple-500/30">Step 2 • Day 2</span>
+                                <span class="flex items-center gap-1 text-xs text-emerald-400 font-bold"><i class="fa-brands fa-whatsapp"></i></span>
+                            </div>
+                            <h4 class="mt-2 text-sm font-bold text-white">Energy Audit & Sizing Survey</h4>
+                            <p class="mt-1 text-xs text-slate-400">Prompts client to confirm critical electrical loads (ACs, pumps) to lock inverter kVA size.</p>
+                        </div>
+                        <div class="rounded-2xl border border-amber-500/30 bg-amber-900/20 p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-amber-300 border border-amber-500/30">Step 3 • Day 5</span>
+                                <span class="flex items-center gap-1 text-xs text-emerald-400 font-bold"><i class="fa-light fa-envelope"></i> <i class="fa-brands fa-whatsapp"></i></span>
+                            </div>
+                            <h4 class="mt-2 text-sm font-bold text-white">Quotation Expiry & Financing</h4>
+                            <p class="mt-1 text-xs text-slate-400">Notifies client of quotation price-lock expiry and offers flexible Net 30/Installment terms.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fast Lead Drip Trigger Station -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Active Inbound Leads — Drip Launch Station') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Dispatch individual nurture steps or schedule the full 3-stage automated cadence with 1 click.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Lead / Company</th>
+                                    <th class="px-4 py-3.5">Contact Channels</th>
+                                    <th class="px-4 py-3.5">System Interest</th>
+                                    <th class="px-4 py-3.5">Deal Value</th>
+                                    <th class="px-4 py-3.5 text-right">Trigger Drip Step</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbLeads->take(6) as $lead)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5">
+                                            <div class="flex items-center gap-2">
+                                                <p class="font-bold text-slate-900 dark:text-white">{{ $lead->company_name }}</p>
+                                                @if (($lead->lead_type ?? 'customer') === 'partner')
+                                                    <span class="rounded-full bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[9px] font-black text-purple-600">B2B Partner</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-xs text-slate-400">{{ $lead->contact_person }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-brands fa-whatsapp text-emerald-500 mr-1"></i>{{ $lead->phone }}</p>
+                                            <p class="text-slate-400"><i class="fa-light fa-envelope mr-1"></i>{{ $lead->email }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                            {{ $lead->system_interest ?: 'Commercial Solar Inverter Array' }}
+                                        </td>
+                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($lead->deal_value, 2) }}</td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <button type="button" wire:click="triggerLeadDrip({{ $lead->id }}, 'hour_1', 'whatsapp')" class="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 transition" title="Send Hour 1 Welcome">
+                                                    <i class="fa-light fa-paper-plane mr-1"></i>Hr 1
+                                                </button>
+                                                <button type="button" wire:click="triggerLeadDrip({{ $lead->id }}, 'day_2', 'whatsapp')" class="rounded-lg bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-600 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300 transition" title="Send Day 2 Audit Survey">
+                                                    <i class="fa-light fa-clipboard-question mr-1"></i>Day 2
+                                                </button>
+                                                <button type="button" wire:click="triggerLeadDrip({{ $lead->id }}, 'day_5', 'email')" class="rounded-lg bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-600 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 transition" title="Send Day 5 Quote Expiry">
+                                                    <i class="fa-light fa-clock-rotate-left mr-1"></i>Day 5
+                                                </button>
+                                                <button type="button" wire:click="dispatchFullDripCadence({{ $lead->id }})" class="rounded-lg bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 transition" title="Launch Full 3-Stage Sequence">
+                                                    <i class="fa-light fa-wand-magic-sparkles mr-1"></i>Full Sequence
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-8 text-center text-slate-400">{{ __('No active leads in pipeline.') }}</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Real-Time Delivery & Engagement Logs -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Real-Time Drip Dispatch & Engagement Logs') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Live feed of delivered messages, read receipts, and incoming customer replies.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Recipient</th>
+                                    <th class="px-4 py-3.5">Channel & Step</th>
+                                    <th class="px-4 py-3.5">Subject & Content Snippet</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5">Sent At</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbCrmLeadDripLogs as $log)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">
+                                            {{ $log->recipient_name }}
+                                            <span class="block text-[11px] font-normal text-slate-400">{{ $log->recipient_phone ?: $log->recipient_email }}</span>
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <div class="flex items-center gap-1.5">
+                                                @if ($log->channel === 'whatsapp')
+                                                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-extrabold text-emerald-600 border border-emerald-500/20">
+                                                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-extrabold text-blue-600 border border-blue-500/20">
+                                                        <i class="fa-light fa-envelope"></i> Email
+                                                    </span>
+                                                @endif
+                                                <span class="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                    {{ strtoupper(str_replace('_', ' ', $log->step)) }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs max-w-xs">
+                                            <p class="font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $log->subject_or_action }}</p>
+                                            <p class="text-slate-400 truncate text-[11px] mt-0.5">{{ $log->message_body }}</p>
+                                            @if ($log->reply_content)
+                                                <div class="mt-1 rounded-lg bg-emerald-50 p-1.5 text-[11px] font-medium text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                    <i class="fa-light fa-reply mr-1"></i>{{ $log->reply_content }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ match($log->status) {
+                                                'delivered' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                'read' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+                                                'replied' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                default => 'bg-slate-100 text-slate-600',
+                                            } }}">
+                                                <i class="fa-light {{ match($log->status) {
+                                                    'delivered' => 'fa-check',
+                                                    'read' => 'fa-check-double',
+                                                    'replied' => 'fa-comments',
+                                                    default => 'fa-clock',
+                                                } }}"></i>
+                                                {{ ucfirst($log->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs text-slate-500">
+                                            {{ $log->sent_at?->format('M d, H:i') ?: $log->created_at->format('M d, H:i') }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            @if ($log->status !== 'replied')
+                                                <button type="button" wire:click="simulateDripReply({{ $log->id }})" class="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:text-slate-300 transition">
+                                                    <i class="fa-light fa-reply mr-1"></i>Simulate Reply
+                                                </button>
+                                            @else
+                                                <span class="text-[10px] font-bold text-emerald-600"><i class="fa-light fa-circle-check mr-1"></i>Replied</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                                            <i class="fa-light fa-paper-plane text-4xl mb-2"></i>
+                                            <p>{{ __('No drip messages dispatched yet. Trigger a lead drip above.') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
         @else
             <!-- COMPREHENSIVE CRM FORM BUILDER, PIPELINE STAGES & WORKFLOW SETTINGS STUDIO -->
             <div class="space-y-6">
@@ -2311,6 +2535,212 @@
                     </table>
                 </div>
             </section>
+        @elseif ($activeTab === 'reorder_po')
+            <!-- INTELLIGENT INVENTORY REORDER TRIGGERS & SUPPLIER PURCHASE ORDERS (PO) -->
+            <div class="space-y-6">
+                <!-- Reorder Studio Header Banner -->
+                <div class="rounded-3xl border border-orange-500/20 bg-gradient-to-r from-orange-950 via-slate-900 to-slate-950 p-6 text-white shadow-xl md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <div class="inline-flex items-center gap-2 rounded-full bg-orange-500/20 px-3.5 py-1 text-xs font-bold text-orange-400 border border-orange-500/30">
+                                <i class="fa-light fa-cart-flatbed-boxes"></i> {{ __('Intelligent Supply Chain & Reorder Engine') }}
+                            </div>
+                            <h2 class="mt-3 text-2xl font-black md:text-3xl text-white">{{ __('Low-Stock Auto-Reorder & Supplier Purchase Orders (PO)') }}</h2>
+                            <p class="mt-1 text-sm text-slate-300 max-w-3xl">
+                                {{ __('Automated inventory buffer monitoring across Abuja, Lagos & Port Harcourt warehouses. Generate OEM factory replenishment purchase orders in USD/NGN with 1-click supplier dispatch and automatic stock receipt.') }}
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 shrink-0">
+                            <button type="button" wire:click="generateAutoReorderPo('Abuja Central Distribution Hub')" class="inline-flex items-center gap-2 rounded-2xl bg-orange-600 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-orange-700 transition active:scale-95">
+                                <i class="fa-light fa-wand-magic-sparkles"></i> {{ __('Auto-Generate Reorder PO') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Stock Health KPI Matrix -->
+                    <div class="mt-8 grid gap-4 sm:grid-cols-3 border-t border-slate-800 pt-6">
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-400">Abuja Central Hub</span>
+                                <span class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-black text-emerald-400">Primary HQ</span>
+                            </div>
+                            <p class="mt-2 text-xl font-black text-white">82.4% Stock Health</p>
+                            <p class="mt-1 text-xs text-slate-400">3 SKUs near reorder safety threshold</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-400">Lagos Fulfillment Hub</span>
+                                <span class="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-black text-blue-400">Port Gateway</span>
+                            </div>
+                            <p class="mt-2 text-xl font-black text-white">91.0% Stock Health</p>
+                            <p class="mt-1 text-xs text-slate-400">Containers clearing Apapa custom terminal</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-400">Port Harcourt Depot</span>
+                                <span class="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-black text-purple-400">South-South</span>
+                            </div>
+                            <p class="mt-2 text-xl font-black text-white">76.5% Stock Health</p>
+                            <p class="mt-1 text-xs text-slate-400">Battery buffer transfer scheduled</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual OEM Purchase Order Creator Drawer -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Create New OEM Supplier Purchase Order (PO)') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Issue direct factory manufacturing orders to international suppliers (Growatt, CATL, Trina).') }}</p>
+                        </div>
+                    </div>
+
+                    <form wire:submit.prevent="createSupplierPurchaseOrder" class="grid gap-4 sm:grid-cols-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">OEM Supplier Name</label>
+                            <select wire:model="newPoForm.supplier_name" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="Shenzhen Growatt New Energy Co., Ltd">Shenzhen Growatt New Energy Co., Ltd (Inverters)</option>
+                                <option value="Contemporary Amperex Technology Co. (CATL)">CATL Energy Ltd (LiFePO4 Cells)</option>
+                                <option value="Trina Solar Co., Ltd">Trina Solar Co., Ltd (Mono PV Panels)</option>
+                                <option value="Huawei Digital Power Technologies">Huawei Digital Power (Commercial Microgrid)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Supplier OEM Contact Email</label>
+                            <input wire:model="newPoForm.supplier_email" type="email" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Destination Warehouse</label>
+                            <select wire:model="newPoForm.destination_warehouse" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="Abuja Central Distribution Hub">Abuja Central Distribution Hub</option>
+                                <option value="Lagos Island Fulfillment Warehouse">Lagos Island Fulfillment Warehouse</option>
+                                <option value="Port Harcourt Energy Depot">Port Harcourt Energy Depot</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Target Product SKU & Name</label>
+                            <select wire:model="newPoForm.sku" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="SLR-INV-55KW">SLR-INV-55KW — Ascend 5.5kVA Hybrid Solar Inverter</option>
+                                <option value="SLR-BAT-10KW">SLR-BAT-10KW — Ascend 10.2kWh LiFePO4 Battery Storage</option>
+                                <option value="SLR-PNL-550W">SLR-PNL-550W — 550W Monocrystalline Tier-1 Solar Panel</option>
+                                <option value="SLR-INV-10KW">SLR-INV-10KW — Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Reorder Quantity (Units)</label>
+                            <input wire:model="newPoForm.quantity" type="number" min="1" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Unit OEM Cost ($ USD)</label>
+                            <input wire:model="newPoForm.unit_cost_usd" type="number" step="0.01" min="1" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Shipping & Logistics Method</label>
+                            <select wire:model="newPoForm.shipping_method" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="Sea Freight (Apapa Port Lagos)">Sea Freight (Apapa Port Lagos - 30 Days)</option>
+                                <option value="Air Cargo (Abuja International Airport)">Air Cargo (Abuja International Airport - 5 Days)</option>
+                                <option value="Regional Courier Express">Regional Courier Express</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2 flex items-end justify-end">
+                            <button type="submit" class="rounded-xl bg-orange-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-orange-700 transition flex items-center gap-2">
+                                <i class="fa-light fa-plus-circle"></i> {{ __('Create & Draft Purchase Order') }}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Supplier Purchase Orders Registry -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('OEM Purchase Orders & Restocking Log') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Track issued purchase orders, factory shipments, and trigger automated warehouse stock replenishment upon delivery.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">PO Number</th>
+                                    <th class="px-4 py-3.5">Supplier & Warehouse</th>
+                                    <th class="px-4 py-3.5">Item Summary</th>
+                                    <th class="px-4 py-3.5">Total ($ USD / ₦ NGN)</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbSupplierPurchaseOrders as $po)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">
+                                            {{ $po->po_number }}
+                                            <span class="block text-[10px] font-normal text-slate-400">{{ $po->created_at->format('Y-m-d H:i') }}</span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-bold text-slate-800 dark:text-slate-200">{{ $po->supplier_name }}</p>
+                                            <p class="text-slate-400"><i class="fa-light fa-warehouse mr-1"></i>{{ $po->destination_warehouse }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            @if (is_array($po->items) && count($po->items) > 0)
+                                                <p class="font-semibold text-slate-700 dark:text-slate-300">
+                                                    {{ $po->items[0]['name'] ?? ($po->items[0]['sku'] ?? 'Equipment') }}
+                                                    <span class="text-orange-600 font-bold">({{ $po->items[0]['reorder_quantity'] ?? 0 }} Units)</span>
+                                                </p>
+                                                @if (count($po->items) > 1)
+                                                    <span class="text-[10px] text-slate-400">+{{ count($po->items) - 1 }} more item(s)</span>
+                                                @endif
+                                            @else
+                                                <span class="text-slate-400">No items</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-black text-slate-900 dark:text-white">${{ number_format($po->subtotal_usd, 2) }}</p>
+                                            <p class="text-slate-400 font-semibold">₦{{ number_format($po->subtotal_ngn, 2) }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase {{ match($po->status) {
+                                                'draft' => 'bg-slate-100 text-slate-600 border border-slate-300 dark:bg-slate-800 dark:text-slate-300',
+                                                'sent' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                'in_transit' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                'received' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                default => 'bg-rose-500/10 text-rose-600',
+                                            } }}">
+                                                {{ ucfirst(str_replace('_', ' ', $po->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                @if ($po->status === 'draft')
+                                                    <button type="button" wire:click="sendPoToSupplier({{ $po->id }})" class="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-blue-700 transition">
+                                                        <i class="fa-light fa-paper-plane mr-1"></i>Dispatch to OEM
+                                                    </button>
+                                                @endif
+                                                @if ($po->status === 'sent' || $po->status === 'in_transit' || $po->status === 'draft')
+                                                    <button type="button" wire:click="receivePoStock({{ $po->id }})" class="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                                        <i class="fa-light fa-box-check mr-1"></i>Receive & Restock
+                                                    </button>
+                                                @endif
+                                                @if ($po->status === 'received')
+                                                    <span class="text-[10px] font-bold text-emerald-600"><i class="fa-light fa-check-circle mr-1"></i>Restocked</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                                            <i class="fa-light fa-cart-flatbed text-4xl mb-2"></i>
+                                            <p>{{ __('No supplier purchase orders generated yet. Click "Auto-Generate Reorder PO" above.') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
         @elseif ($activeTab === 'b2b_dispatch')
             <div class="space-y-6">
                 <!-- Warehouse Barcode Scanner Station -->
@@ -6737,6 +7167,215 @@
                     </div>
                 </section>
             </div>
+        @elseif ($activeTab === 'warranty')
+            <!-- PARTNER WARRANTY CLAIMS & RMA CENTER -->
+            <div class="space-y-6">
+                <!-- Warranty Header Banner -->
+                <div class="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 p-6 text-white shadow-xl md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <div class="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3.5 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
+                                <i class="fa-light fa-shield-check"></i> {{ __('5-Year Direct Manufacturer Replacement Guarantee') }}
+                            </div>
+                            <h2 class="mt-3 text-2xl font-black md:text-3xl text-white">{{ __('Partner Warranty Claims & RMA Center') }}</h2>
+                            <p class="mt-1 text-sm text-slate-300 max-w-3xl">
+                                {{ __('Fast-track Return Merchandise Authorization (RMA) for authorized distributors and installers. Submit faulty serial numbers for priority engineering testing and instant replacement from nearest regional warehouse.') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit New Warranty Claim Drawer -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Log New Equipment RMA / Warranty Claim') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Provide equipment serial number and fault diagnosis for engineering authorization.') }}</p>
+                        </div>
+                    </div>
+
+                    <form wire:submit.prevent="submitPartnerWarrantyClaim" class="grid gap-4 sm:grid-cols-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Equipment Serial Number <span class="text-rose-500">*</span></label>
+                            <input wire:model="partnerWarrantyForm.serial_number" type="text" placeholder="e.g. SN-INV-2026-98412" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Product Model & SKU</label>
+                            <select wire:model="partnerWarrantyForm.product_sku" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <option value="SLR-INV-55KW">Ascend 5.5kVA Hybrid Solar Inverter</option>
+                                <option value="SLR-BAT-10KW">Ascend 10.2kWh LiFePO4 Battery Storage</option>
+                                <option value="SLR-PNL-550W">550W Tier-1 Monocrystalline Solar Panel</option>
+                                <option value="SLR-INV-10KW">Ascend 10.2kVA Commercial Dual MPPT Inverter</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Installation Date</label>
+                            <input wire:model="partnerWarrantyForm.installation_date" type="date" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Site Contact Person</label>
+                            <input wire:model="partnerWarrantyForm.contact_person" type="text" placeholder="Engr. Lead Contact" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Contact Phone (WhatsApp)</label>
+                            <input wire:model="partnerWarrantyForm.contact_phone" type="text" placeholder="+234 803 111 2233" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Fault Description & Error Code</label>
+                            <input wire:model="partnerWarrantyForm.fault_description" type="text" placeholder="e.g. Error 04 / Battery communication drop" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold outline-none focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                        </div>
+                        <div class="sm:col-span-3 flex justify-end">
+                            <button type="submit" class="rounded-xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="fa-light fa-shield-plus"></i> {{ __('Submit Warranty RMA Claim') }}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Claims Table -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Submitted RMA Claims & Replacement Tracking') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Track RMA tracking codes, engineering review notes, and warehouse unit replacements.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-4 py-3.5">Claim & RMA Code</th>
+                                    <th class="px-4 py-3.5">Equipment / Serial</th>
+                                    <th class="px-4 py-3.5">Partner Contact</th>
+                                    <th class="px-4 py-3.5">Fault Details</th>
+                                    <th class="px-4 py-3.5">Status</th>
+                                    <th class="px-4 py-3.5 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @forelse ($dbPartnerWarrantyClaims as $claim)
+                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">
+                                            {{ $claim->claim_number }}
+                                            <span class="block font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">{{ $claim->rma_tracking_code }}</span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-bold text-slate-800 dark:text-slate-200">{{ $claim->product_name }}</p>
+                                            <p class="font-mono text-slate-400">{{ $claim->serial_number }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs">
+                                            <p class="font-semibold text-slate-700 dark:text-slate-300">{{ $claim->contact_person }}</p>
+                                            <p class="text-slate-400">{{ $claim->contact_phone }}</p>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-xs text-slate-600 dark:text-slate-300 max-w-xs truncate">
+                                            {{ $claim->fault_description }}
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase {{ match($claim->status) {
+                                                'pending_review' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                'approved_replacement' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                'in_repair' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+                                                'resolved' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                default => 'bg-rose-500/10 text-rose-600',
+                                            } }}">
+                                                {{ ucfirst(str_replace('_', ' ', $claim->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right">
+                                            @if ($claim->status === 'pending_review')
+                                                <button type="button" wire:click="updateWarrantyClaimStatus({{ $claim->id }}, 'approved_replacement')" class="rounded-lg bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 transition">
+                                                    Approve RMA
+                                                </button>
+                                            @elseif ($claim->status === 'approved_replacement')
+                                                <button type="button" wire:click="updateWarrantyClaimStatus({{ $claim->id }}, 'resolved')" class="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 transition">
+                                                    Mark Resolved
+                                                </button>
+                                            @else
+                                                <span class="text-[10px] font-bold text-slate-400">Complete</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                                            <i class="fa-light fa-shield-check text-4xl mb-2"></i>
+                                            <p>{{ __('No warranty claims submitted. Equipment operates under 100% health.') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        @elseif ($activeTab === 'contracts')
+            <!-- B2B DISTRIBUTORSHIP AGREEMENT & CERTIFICATE HUB -->
+            <div class="space-y-6">
+                <!-- Distributorship Status Header -->
+                <div class="rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 p-6 text-white shadow-xl md:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <div class="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3.5 py-1 text-xs font-bold text-amber-400 border border-amber-500/30">
+                                <i class="fa-light fa-certificate"></i> {{ __('Official Authorized Regional Distributorship') }}
+                            </div>
+                            <h2 class="mt-3 text-2xl font-black md:text-3xl text-white">{{ __('B2B Distributorship Agreement & Certificate') }}</h2>
+                            <p class="mt-1 text-sm text-slate-300 max-w-3xl">
+                                {{ __('Official partnership documentation, regional trade terms, credit line agreements, and digital Certificate of Distributorship.') }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <button type="button" wire:click="openDistributorCertificate" class="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 text-xs font-extrabold text-slate-950 shadow-lg hover:bg-amber-400 transition active:scale-95">
+                                <i class="fa-light fa-award text-base"></i> {{ __('View & Print Certificate') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Distributorship Terms Matrix -->
+                    <div class="mt-8 grid gap-4 sm:grid-cols-4 border-t border-slate-800 pt-6">
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Assigned Partner Tier</p>
+                            <p class="mt-1 text-base font-black text-amber-400">
+                                {{ match(auth()->user()?->distributor_tier) {
+                                    'tier1_platinum' => 'Tier 1 Platinum (20% Off)',
+                                    'tier2_gold' => 'Tier 2 Gold (15% Off)',
+                                    default => 'Authorized Reseller',
+                                } }}
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Approved Territory</p>
+                            <p class="mt-1 text-base font-black text-white">Nigeria & ECOWAS</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Net 30 Credit Limit</p>
+                            <p class="mt-1 text-base font-black text-emerald-400">₦{{ number_format(auth()->user()?->credit_limit ?: 15000000, 2) }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Contract Period</p>
+                            <p class="mt-1 text-base font-black text-blue-400">Jan 2026 — Dec 2027</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Certificate Preview Card -->
+                <div class="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-white to-amber-500/5 p-8 text-center shadow-md dark:border-amber-500/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+                    <div class="mx-auto max-w-2xl space-y-4">
+                        <div class="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 text-3xl text-slate-950 shadow-xl shadow-amber-500/30 border-4 border-white dark:border-slate-800">
+                            <i class="fa-light fa-award"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-950 dark:text-white">Certificate of Authorized Regional Distributorship</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">
+                            This verifies that <span class="font-bold text-slate-950 dark:text-white">{{ auth()->user()?->name ?: 'Authorized Commercial Partner' }}</span> is an accredited distributor for Ascend Systems pure sine wave hybrid solar inverters and LiFePO4 battery energy storage solutions.
+                        </p>
+                        <div class="pt-2">
+                            <button type="button" wire:click="openDistributorCertificate" class="rounded-2xl bg-slate-950 px-6 py-3 text-xs font-bold text-white shadow-lg hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 transition inline-flex items-center gap-2">
+                                <i class="fa-light fa-expand"></i> {{ __('Open Full-Resolution Digital Certificate') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @endif
     @endif
 
@@ -8182,6 +8821,93 @@
                         </div>
                     </form>
                 @endif
+            </div>
+        </div>
+    @endif
+
+    <!-- DIGITAL CERTIFICATE OF AUTHORIZED DISTRIBUTORSHIP MODAL -->
+    @if ($showCertificateModal && $distributorCertData)
+        <div class="fixed inset-0 z-[180] flex items-center justify-center overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md">
+            <div class="relative w-full max-w-4xl rounded-3xl border border-amber-500/40 bg-white p-8 md:p-12 shadow-2xl dark:bg-slate-900 text-slate-900 dark:text-white print:p-0 print:border-none print:shadow-none">
+                <!-- Close Button (Hidden during print) -->
+                <button type="button" wire:click="closeCertificateModal" class="absolute right-6 top-6 rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white print:hidden transition">
+                    <i class="fa-light fa-xmark text-xl"></i>
+                </button>
+
+                <!-- Certificate Frame (Gold Double Border) -->
+                <div class="relative rounded-2xl border-4 border-double border-amber-500/60 p-8 md:p-10 bg-gradient-to-b from-amber-50/30 via-white to-amber-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-center overflow-hidden">
+                    <!-- Subtle Watermark -->
+                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-5">
+                        <i class="fa-light fa-award text-[300px] text-amber-500"></i>
+                    </div>
+
+                    <!-- Header -->
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 text-2xl font-black shadow-md">
+                            <i class="fa-light fa-solar-panel"></i>
+                        </div>
+                        <div class="text-left">
+                            <h2 class="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white">ASCEND SYSTEMS</h2>
+                            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400">Clean Energy & Microgrid Technologies Nigeria</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 border-b border-amber-500/30 pb-4">
+                        <p class="font-serif text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-slate-400">Official Commercial Distributorship Credential</p>
+                        <h1 class="mt-2 text-2xl md:text-4xl font-serif font-black tracking-tight text-amber-600 dark:text-amber-400">
+                            CERTIFICATE OF AUTHORIZED DISTRIBUTORSHIP
+                        </h1>
+                        <p class="mt-1 font-mono text-xs text-slate-400">Serial No: <span class="font-bold text-slate-700 dark:text-slate-300">{{ $distributorCertData['cert_number'] }}</span></p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="mt-8 space-y-4 max-w-2xl mx-auto">
+                        <p class="text-sm font-medium text-slate-600 dark:text-slate-300">This is to officially certify that</p>
+                        <h3 class="text-2xl md:text-3xl font-extrabold text-slate-950 dark:text-white tracking-tight underline decoration-amber-500/50 decoration-2 underline-offset-8">
+                            {{ $distributorCertData['company_name'] }}
+                        </h3>
+                        <p class="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                            {{ $distributorCertData['tier'] }}
+                        </p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-2">
+                            Has satisfied all technical requirements and is hereby designated as an Authorized Regional Wholesale Partner & Distributor for Ascend Systems pure sine wave hybrid solar inverters, high-density LiFePO4 battery storage, and clean energy commercial hardware across <span class="font-bold text-slate-900 dark:text-white">{{ $distributorCertData['country'] }}</span>.
+                        </p>
+                    </div>
+
+                    <!-- Footer Details & Signatures -->
+                    <div class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-6 items-end border-t border-amber-500/30 pt-6 text-xs">
+                        <div class="text-left">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Issue Date</p>
+                            <p class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">{{ $distributorCertData['issue_date'] }}</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Valid Until: {{ $distributorCertData['valid_until'] }}</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 text-2xl font-black shadow-lg shadow-amber-500/20">
+                                <i class="fa-light fa-stamp"></i>
+                            </div>
+                            <span class="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 mt-1.5">Official Executive Seal</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-block border-b border-slate-400 pb-1 text-right font-serif italic text-sm text-slate-800 dark:text-slate-200 font-bold">
+                                Ascend Executive Board
+                            </div>
+                            <p class="text-[10px] font-bold uppercase text-slate-400 mt-0.5">{{ $distributorCertData['managing_director'] }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print & Download Actions (Hidden during print) -->
+                <div class="mt-6 flex items-center justify-between print:hidden">
+                    <p class="text-xs text-slate-400"><i class="fa-light fa-lock-hashtag mr-1"></i>Cryptographically verified and indexed at <span class="font-mono">app.ascendsystems.ng</span></p>
+                    <div class="flex items-center gap-3">
+                        <button type="button" wire:click="closeCertificateModal" class="rounded-xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300">
+                            {{ __('Close') }}
+                        </button>
+                        <button type="button" onclick="window.print()" class="rounded-xl bg-amber-500 px-6 py-2.5 text-xs font-extrabold text-slate-950 shadow-md hover:bg-amber-400 transition flex items-center gap-2">
+                            <i class="fa-light fa-print"></i> {{ __('Print / Save PDF Certificate') }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     @endif

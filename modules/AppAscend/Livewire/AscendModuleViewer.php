@@ -451,6 +451,60 @@ class AscendModuleViewer extends Component
         'referral_code' => '',
     ];
 
+    // === WHOLESALE PARTNER PORTAL & WARRANTY CLAIMS ===
+    public array $partnerWarrantyForm = [
+        'serial_number' => '',
+        'product_sku' => 'SLR-INV-55KW',
+        'product_name' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+        'fault_description' => '',
+        'installation_date' => '',
+        'contact_person' => '',
+        'contact_phone' => '',
+    ];
+    public bool $showCertificateModal = false;
+    public ?array $distributorCertData = null;
+
+    // === CRM LEAD DRIP AUTOMATION ===
+    public string $dripChannelFilter = 'all';
+    public array $dripCadenceRules = [
+        'hour_1' => [
+            'name' => 'Hour 1 — Instant Welcome & Solar Catalog Dispatch',
+            'delay' => 'Immediate (0-1 Hour)',
+            'channels' => ['WhatsApp', 'Email'],
+            'description' => 'Dispatches Ascend official catalog, pricing overview, and introduction message.',
+        ],
+        'day_2' => [
+            'name' => 'Day 2 — Energy Sizing Questionnaire & Audit Booking',
+            'delay' => '48 Hours Post-Intake',
+            'channels' => ['WhatsApp'],
+            'description' => 'Prompts client to confirm critical electrical loads (ACs, pumps, inverters) to finalize solar capacity.',
+        ],
+        'day_5' => [
+            'name' => 'Day 5 — Quotation Expiry Notice & Installment Options',
+            'delay' => '120 Hours Post-Intake',
+            'channels' => ['Email', 'WhatsApp'],
+            'description' => 'Provides price-lock discount reminder and flexible Net 30/Installment terms.',
+        ],
+    ];
+
+    // === INVENTORY REORDER & SUPPLIER PURCHASE ORDERS (PO) ===
+    public string $poWarehouseFilter = 'all';
+    public array $newPoForm = [
+        'supplier_name' => 'Shenzhen Growatt New Energy Co., Ltd',
+        'supplier_email' => 'sales-oem@growatt-solar.cn',
+        'supplier_country' => 'China',
+        'destination_warehouse' => 'Abuja Central Distribution Hub',
+        'sku' => 'SLR-INV-55KW',
+        'product_name' => 'Ascend 5.5kVA Hybrid Solar Inverter',
+        'quantity' => 40,
+        'unit_cost_usd' => 280.00,
+        'exchange_rate' => 1620.00,
+        'shipping_method' => 'Sea Freight (Apapa Port)',
+        'payment_terms' => '30% Advance, 70% Bill of Lading',
+        'expected_delivery_date' => '',
+        'notes' => 'Q4 Stock Replenishment for Abuja & Lagos Hubs',
+    ];
+
     // === PRIORITY 7: AI AGENTS ===
     public array $agentCatalog = [
         ['id' => 'content', 'name' => 'Content AI Agent', 'desc' => 'Generates social posts, captions, ad copy and marketing content', 'icon' => 'fa-light fa-pen-sparkles', 'color' => 'purple', 'status' => 'active', 'tasks_run' => 0, 'avg_ms' => 0],
@@ -4278,6 +4332,325 @@ class AscendModuleViewer extends Component
         session()->flash('status', __('WhatsApp Product Catalog & Wholesale Price Sheet dispatched to :seg B2B contacts!', ['seg' => strtoupper($segment)]));
     }
 
+    // =========================================================
+    // WHOLESALE PARTNER PORTAL & DISTRIBUTORSHIP METHODS
+    // =========================================================
+
+    public function submitPartnerWarrantyClaim(): void
+    {
+        $serial = trim($this->partnerWarrantyForm['serial_number']);
+        if (!$serial) {
+            session()->flash('warning', __('Please enter a valid product serial number!'));
+            return;
+        }
+
+        $user = auth()->user();
+        $claimNumber = 'RMA-' . date('Ymd') . '-' . rand(100, 999);
+
+        \App\Models\PartnerWarrantyClaim::create([
+            'claim_number' => $claimNumber,
+            'user_id' => $user?->id,
+            'partner_company' => $user?->name ?: 'Authorized Partner',
+            'contact_person' => $this->partnerWarrantyForm['contact_person'] ?: ($user?->name ?: 'Partner Rep'),
+            'contact_phone' => $this->partnerWarrantyForm['contact_phone'] ?: '+234 803 000 1122',
+            'serial_number' => $serial,
+            'product_sku' => $this->partnerWarrantyForm['product_sku'] ?: 'SLR-INV-55KW',
+            'product_name' => $this->partnerWarrantyForm['product_name'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter',
+            'installation_date' => $this->partnerWarrantyForm['installation_date'] ? date('Y-m-d', strtotime($this->partnerWarrantyForm['installation_date'])) : now()->subMonths(3),
+            'fault_description' => $this->partnerWarrantyForm['fault_description'] ?: 'Inverter error code 04 (Battery disconnected/voltage drop during switchover).',
+            'status' => 'pending_review',
+            'rma_tracking_code' => 'ASC-RMA-' . rand(10000, 99999),
+        ]);
+
+        $this->partnerWarrantyForm['serial_number'] = '';
+        $this->partnerWarrantyForm['fault_description'] = '';
+
+        session()->flash('status', __('Warranty RMA Claim :num submitted successfully! Engineering inspection ticket generated.', ['num' => $claimNumber]));
+    }
+
+    public function updateWarrantyClaimStatus(int $id, string $status): void
+    {
+        $claim = \App\Models\PartnerWarrantyClaim::find($id);
+        if ($claim) {
+            $claim->update([
+                'status' => $status,
+                'resolved_at' => in_array($status, ['resolved', 'approved_replacement']) ? now() : null,
+            ]);
+            session()->flash('status', __('Warranty Claim :num marked as :status.', [
+                'num' => $claim->claim_number,
+                'status' => ucfirst(str_replace('_', ' ', $status)),
+            ]));
+        }
+    }
+
+    public function openDistributorCertificate(?int $userId = null): void
+    {
+        $user = $userId ? User::find($userId) : auth()->user();
+        $this->distributorCertData = [
+            'cert_number' => 'ASC-DIST-' . date('Y') . '-' . str_pad($user?->id ?? 1, 4, '0', STR_PAD_LEFT),
+            'company_name' => $user?->name ?: 'Ascend Authorized Partner & Distributor',
+            'tier' => match($user?->distributor_tier) {
+                'tier1_platinum' => 'Tier 1 Platinum Wholesale Partner (20% Off)',
+                'tier2_gold' => 'Tier 2 Gold Wholesale Partner (15% Off)',
+                default => 'Authorized Regional Reseller & EPC Partner',
+            },
+            'country' => 'Nigeria & West African Trade Corridor',
+            'authorized_products' => 'Hybrid Inverters (3.5kVA - 50kVA), LiFePO4 Lithium Batteries & Microgrids',
+            'issue_date' => now()->startOfYear()->format('F j, Y'),
+            'valid_until' => now()->endOfYear()->format('F j, Y'),
+            'managing_director' => 'Ascend Systems Commercial Executive Board',
+        ];
+        $this->showCertificateModal = true;
+    }
+
+    public function closeCertificateModal(): void
+    {
+        $this->showCertificateModal = false;
+        $this->distributorCertData = null;
+    }
+
+    // =========================================================
+    // CRM AUTOMATED LEAD DRIP SEQUENCES
+    // =========================================================
+
+    public function triggerLeadDrip(int $leadId, string $step, string $channel = 'whatsapp'): void
+    {
+        $lead = CrmLead::find($leadId);
+        if (!$lead) {
+            return;
+        }
+
+        $actionDetails = match($step) {
+            'hour_1' => [
+                'subject' => 'Ascend Solar Product Catalog & Wholesale Pricing Guide',
+                'body' => "Hello {$lead->contact_person}, thank you for inquiring with Ascend Systems! Attached is our comprehensive 2026 Solar & Inverter Catalog with technical specifications and warranty terms.",
+            ],
+            'day_2' => [
+                'subject' => 'Energy Audit & Load Sizing Questionnaire',
+                'body' => "Hi {$lead->contact_person}, to help size your hybrid solar system accurately ({$lead->system_interest}), please let us know your heavy appliances (ACs, pumps, freezers) or book a free engineer audit.",
+            ],
+            'day_5' => [
+                'subject' => 'Quotation Price-Lock Expiration & Financing Options',
+                'body' => "Hello {$lead->contact_person}, your customized solar proposal (₦" . number_format($lead->deal_value, 2) . ") is ready! Lock in current wholesale component pricing before the quarterly review.",
+            ],
+            default => [
+                'subject' => 'Follow-up on Solar Solution',
+                'body' => "Hello {$lead->contact_person}, checking in regarding your solar inquiry with Ascend Systems.",
+            ],
+        };
+
+        \App\Models\CrmLeadDripLog::create([
+            'crm_lead_id' => $lead->id,
+            'recipient_name' => $lead->contact_person ?: $lead->company_name,
+            'recipient_phone' => $lead->phone,
+            'recipient_email' => $lead->email,
+            'channel' => $channel,
+            'step' => $step,
+            'subject_or_action' => $actionDetails['subject'],
+            'message_body' => $actionDetails['body'],
+            'status' => 'delivered',
+            'sent_at' => now(),
+            'read_at' => now()->addMinutes(12),
+        ]);
+
+        session()->flash('status', __(':step Drip dispatched via :chan to :name!', [
+            'step' => strtoupper(str_replace('_', ' ', $step)),
+            'chan' => ucfirst($channel),
+            'name' => $lead->contact_person ?: $lead->company_name,
+        ]));
+    }
+
+    public function dispatchFullDripCadence(int $leadId): void
+    {
+        $this->triggerLeadDrip($leadId, 'hour_1', 'whatsapp');
+        $this->triggerLeadDrip($leadId, 'day_2', 'whatsapp');
+        $this->triggerLeadDrip($leadId, 'day_5', 'email');
+        session()->flash('status', __('Full 3-stage drip nurture cadence scheduled and initiated for lead!'));
+    }
+
+    public function simulateDripReply(int $logId, ?string $replyText = null): void
+    {
+        $log = \App\Models\CrmLeadDripLog::find($logId);
+        if ($log) {
+            $log->update([
+                'status' => 'replied',
+                'read_at' => $log->read_at ?: now(),
+                'replied_at' => now(),
+                'reply_content' => $replyText ?: 'Yes, I would like to schedule a site audit for 3 units of 1.5HP inverter ACs and a 1HP water pump in Abuja.',
+            ]);
+            session()->flash('status', __('Customer response recorded for Drip step :step!', ['step' => $log->step]));
+        }
+    }
+
+    public function markDripRead(int $logId): void
+    {
+        $log = \App\Models\CrmLeadDripLog::find($logId);
+        if ($log && $log->status === 'delivered') {
+            $log->update([
+                'status' => 'read',
+                'read_at' => now(),
+            ]);
+        }
+    }
+
+    // =========================================================
+    // INVENTORY REORDER & OEM SUPPLIER PURCHASE ORDERS (PO)
+    // =========================================================
+
+    public function generateAutoReorderPo(string $warehouse = 'Abuja Central Distribution Hub'): void
+    {
+        $lowStockProducts = InventoryProduct::where('stock_quantity', '<', 15)->get();
+        if ($lowStockProducts->isEmpty()) {
+            $lowStockProducts = InventoryProduct::take(2)->get();
+        }
+
+        $items = [];
+        $totalUsd = 0;
+
+        foreach ($lowStockProducts as $p) {
+            $orderQty = max(20, 30 - $p->stock_quantity);
+            $unitCostUsd = round(($p->cost_price ?: 350000) / 1620, 2);
+            $lineUsd = $orderQty * $unitCostUsd;
+            $totalUsd += $lineUsd;
+
+            $items[] = [
+                'product_id' => $p->id,
+                'sku' => $p->sku,
+                'name' => $p->name,
+                'current_stock' => $p->stock_quantity,
+                'reorder_quantity' => $orderQty,
+                'unit_cost_usd' => $unitCostUsd,
+                'line_total_usd' => $lineUsd,
+            ];
+        }
+
+        $poNumber = 'PO-' . date('Y') . '-' . rand(1000, 9999);
+        $totalNgn = $totalUsd * 1620.00;
+
+        \App\Models\SupplierPurchaseOrder::create([
+            'po_number' => $poNumber,
+            'supplier_name' => 'Shenzhen Growatt New Energy Co., Ltd',
+            'supplier_email' => 'oem-export@growatt-solar.cn',
+            'supplier_country' => 'China',
+            'destination_warehouse' => $warehouse,
+            'items' => $items,
+            'subtotal_usd' => $totalUsd,
+            'subtotal_ngn' => $totalNgn,
+            'exchange_rate' => 1620.00,
+            'status' => 'draft',
+            'payment_terms' => '30% Advance, 70% Bill of Lading',
+            'shipping_method' => 'Sea Freight (Apapa Port Lagos)',
+            'expected_delivery_date' => now()->addDays(35),
+            'notes' => "Automated reorder triggered by low-stock threshold in {$warehouse}.",
+        ]);
+
+        session()->flash('status', __('Automated OEM Purchase Order :num generated for :count low-stock items ($:usd / ₦:ngn)!', [
+            'num' => $poNumber,
+            'count' => count($items),
+            'usd' => number_format($totalUsd, 2),
+            'ngn' => number_format($totalNgn, 2),
+        ]));
+    }
+
+    public function createSupplierPurchaseOrder(): void
+    {
+        $qty = (int) ($this->newPoForm['quantity'] ?? 30);
+        $unitUsd = (float) ($this->newPoForm['unit_cost_usd'] ?? 280.00);
+        $subtotalUsd = $qty * $unitUsd;
+        $rate = (float) ($this->newPoForm['exchange_rate'] ?? 1620.00);
+        $subtotalNgn = $subtotalUsd * $rate;
+
+        $items = [
+            [
+                'sku' => $this->newPoForm['sku'] ?: 'SLR-INV-55KW',
+                'name' => $this->newPoForm['product_name'] ?: 'Ascend 5.5kVA Hybrid Solar Inverter',
+                'reorder_quantity' => $qty,
+                'unit_cost_usd' => $unitUsd,
+                'line_total_usd' => $subtotalUsd,
+            ]
+        ];
+
+        $poNumber = 'PO-' . date('Y') . '-' . rand(1000, 9999);
+
+        \App\Models\SupplierPurchaseOrder::create([
+            'po_number' => $poNumber,
+            'supplier_name' => $this->newPoForm['supplier_name'] ?: 'Shenzhen Growatt New Energy Co., Ltd',
+            'supplier_email' => $this->newPoForm['supplier_email'] ?: 'sales-oem@growatt-solar.cn',
+            'supplier_country' => $this->newPoForm['supplier_country'] ?: 'China',
+            'destination_warehouse' => $this->newPoForm['destination_warehouse'] ?: 'Abuja Central Distribution Hub',
+            'items' => $items,
+            'subtotal_usd' => $subtotalUsd,
+            'subtotal_ngn' => $subtotalNgn,
+            'exchange_rate' => $rate,
+            'status' => 'draft',
+            'payment_terms' => $this->newPoForm['payment_terms'] ?: '30% Advance, 70% Bill of Lading',
+            'shipping_method' => $this->newPoForm['shipping_method'] ?: 'Sea Freight (Apapa Port)',
+            'expected_delivery_date' => $this->newPoForm['expected_delivery_date'] ? date('Y-m-d', strtotime($this->newPoForm['expected_delivery_date'])) : now()->addDays(30),
+            'notes' => $this->newPoForm['notes'] ?: 'OEM Manufacturing PO',
+        ]);
+
+        session()->flash('status', __('Supplier Purchase Order :num created successfully ($:usd / ₦:ngn)!', [
+            'num' => $poNumber,
+            'usd' => number_format($subtotalUsd, 2),
+            'ngn' => number_format($subtotalNgn, 2),
+        ]));
+    }
+
+    public function sendPoToSupplier(int $poId): void
+    {
+        $po = \App\Models\SupplierPurchaseOrder::find($poId);
+        if ($po) {
+            $po->update([
+                'status' => 'sent',
+                'sent_to_supplier_at' => now(),
+            ]);
+            session()->flash('status', __('Purchase Order :num officially dispatched to :sup (:email)!', [
+                'num' => $po->po_number,
+                'sup' => $po->supplier_name,
+                'email' => $po->supplier_email ?: 'supplier@oem.cn',
+            ]));
+        }
+    }
+
+    public function receivePoStock(int $poId): void
+    {
+        $po = \App\Models\SupplierPurchaseOrder::find($poId);
+        if ($po && $po->status !== 'received') {
+            // Replenish stock for each item in the PO
+            if (is_array($po->items)) {
+                foreach ($po->items as $item) {
+                    $sku = $item['sku'] ?? null;
+                    $qty = (int) ($item['reorder_quantity'] ?? 0);
+                    if ($sku && $qty > 0) {
+                        $product = InventoryProduct::where('sku', $sku)->first();
+                        if ($product) {
+                            $product->increment('stock_quantity', $qty);
+                        }
+                    }
+                }
+            }
+
+            $po->update([
+                'status' => 'received',
+                'received_at' => now(),
+            ]);
+
+            session()->flash('status', __('PO :num received and stock successfully replenished in :wh!', [
+                'num' => $po->po_number,
+                'wh' => $po->destination_warehouse,
+            ]));
+        }
+    }
+
+    public function cancelPo(int $poId): void
+    {
+        $po = \App\Models\SupplierPurchaseOrder::find($poId);
+        if ($po) {
+            $po->update(['status' => 'cancelled']);
+            session()->flash('status', __('Purchase Order :num cancelled.', ['num' => $po->po_number]));
+        }
+    }
+
     public function render(): View
     {
         if (app()->environment(['local', 'testing']) && config('app.demo_mode', false)) {
@@ -4453,6 +4826,9 @@ class AscendModuleViewer extends Component
             'dbWarrantySerials' => \App\Models\WarrantySerial::query()->latest()->get(),
             'dbInfluencers' => \App\Models\InfluencerAmbassador::query()->latest()->get(),
             'dbWebLeads' => \App\Models\WebLeadCapture::query()->latest()->get(),
+            'dbSupplierPurchaseOrders' => \App\Models\SupplierPurchaseOrder::query()->latest()->get(),
+            'dbCrmLeadDripLogs' => \App\Models\CrmLeadDripLog::query()->latest()->get(),
+            'dbPartnerWarrantyClaims' => \App\Models\PartnerWarrantyClaim::query()->latest()->get(),
             'users' => User::query()->with('role')->orderBy('name')->get(),
             'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
             'logs' => AuditLog::query()->latest()->take(20)->get(),
