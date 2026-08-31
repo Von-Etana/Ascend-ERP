@@ -171,8 +171,49 @@ class InboxAiResponder
 
     protected function agentInput(InboxConversation $conversation, InboxMessage $message): array
     {
+        $products = [];
+        if (class_exists(\App\Models\InventoryProduct::class) && \Illuminate\Support\Facades\Schema::hasTable('inventory_products')) {
+            $products = \App\Models\InventoryProduct::query()
+                ->select(['sku', 'name', 'category', 'unit_price', 'wholesale_price', 'stock_quantity', 'location'])
+                ->take(15)
+                ->get()
+                ->toArray();
+        }
+
         return [
             'provider' => $conversation->provider_key,
+            'company_knowledge' => [
+                'company_name' => 'Ascend Systems',
+                'website' => 'https://www.ascendsystems.ng',
+                'tagline' => 'Clean Energy, Microgrid & Smart Power Hardware Technologies',
+                'locations' => [
+                    'Abuja HQ' => 'Plot 402 Maitama District, Abuja HQ Region',
+                    'Lagos Hub' => 'Lekki Phase 1 Commercial Gateway, Lagos',
+                ],
+                'contact' => [
+                    'email' => 'sales@ascendsystems.ng',
+                    'phone' => '+234 803 000 1122',
+                ],
+                'warranty_policy' => '5-Year Direct Manufacturer Replacement Guarantee on all Hybrid Inverters and LiFePO4 Lithium Batteries.',
+                'financing_options' => 'Flexible Net 30 credit terms for approved B2B wholesale partners and zero-down installment payment plans.',
+                'featured_products_catalog' => $products,
+                'standard_system_packages' => [
+                    [
+                        'name' => 'Ascend 5.5kVA Hybrid Solar System',
+                        'components' => '5.5kVA Hybrid Inverter + 10.2kWh LiFePO4 Lithium Battery + 6x 550W Mono Panels',
+                        'retail_price_ngn' => 2030000.00,
+                        'wholesale_price_ngn' => 1745000.00,
+                        'ideal_for' => '3-4 bedroom homes, powering ACs, refrigerators, water pumps, laptops, and lighting.',
+                    ],
+                    [
+                        'name' => 'Ascend 10.2kVA Commercial Dual MPPT System',
+                        'components' => '10.2kVA Dual MPPT Hybrid Inverter + 2x 10.2kWh LiFePO4 Batteries + 12x 550W Mono Panels',
+                        'retail_price_ngn' => 4500000.00,
+                        'wholesale_price_ngn' => 3825000.00,
+                        'ideal_for' => 'Commercial offices, agro farms, petrol stations, and health clinics.',
+                    ],
+                ],
+            ],
             'contact' => [
                 'name' => $conversation->contact_name,
                 'handle' => $conversation->contact_handle,
