@@ -334,6 +334,28 @@
             </div>
         @elseif ($activeTab === 'overview')
             <div class="space-y-6">
+                <!-- Finance Overview Time Period Filter & Activity Scope -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                            <i class="fa-light fa-calendar-range text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Financial Activity & Period Analytics Scope') }}</h3>
+                            <p class="text-xs text-slate-500">{{ __('Filter operational revenue, expenses, net profit, and activity breakdown by date range.') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Filter Pills -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                        @foreach (['today' => 'Today', 'this_week' => 'This Week', 'this_month' => 'This Month', 'this_year' => 'This Year', 'all_time' => 'All Time'] as $filterKey => $filterLabel)
+                            <button type="button" wire:click="setFinancePeriodFilter('{{ $filterKey }}')" class="rounded-lg px-3.5 py-1.5 text-xs font-bold transition {{ $financePeriodFilter === $filterKey ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' }}">
+                                {{ __($filterLabel) }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Total Revenue') }}</p>
@@ -571,11 +593,33 @@
                             <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Reference / Invoice #') }}</label>
                             <input wire:model="expenseForm.reference" type="text" placeholder="EXP-2026-001" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                         </div>
-                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-4 text-center dark:border-slate-700">
-                            <i class="fa-light fa-cloud-arrow-up text-2xl text-slate-400"></i>
-                            <p class="mt-2 text-xs font-semibold text-slate-500">{{ __('Receipt Upload') }}</p>
-                            <p class="text-[10px] text-slate-400">{{ __('PDF, JPG, PNG up to 5MB') }}</p>
-                            <input type="file" class="mt-2 w-full text-xs text-slate-400" accept=".pdf,.jpg,.png,.jpeg">
+                        <div class="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40">
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                <i class="fa-light fa-paperclip text-orange-500 mr-1"></i>{{ __('Attach Receipts & Documents (Multiple Support)') }}
+                            </label>
+                            
+                            <div class="flex items-center gap-2">
+                                <input type="text" wire:model="newExpenseReceiptUrl" placeholder="Enter receipt image URL or document link..." class="w-full rounded-xl border border-slate-200 p-2 text-xs outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                <button type="button" wire:click="addExpenseReceiptUrl" class="shrink-0 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800 dark:bg-slate-700">
+                                    + Add
+                                </button>
+                            </div>
+
+                            @if (!empty($expenseReceiptUrls))
+                                <div class="mt-2 space-y-1.5 border-t pt-2 dark:border-slate-700">
+                                    <p class="text-[10px] font-bold uppercase text-slate-400">Attached Receipts ({{ count($expenseReceiptUrls) }}):</p>
+                                    @foreach ($expenseReceiptUrls as $index => $url)
+                                        <div class="flex items-center justify-between rounded-lg bg-white p-2 text-xs border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+                                            <span class="truncate max-w-[200px] text-slate-700 dark:text-slate-300 font-mono text-[11px]">
+                                                <i class="fa-light fa-file-image text-emerald-500 mr-1"></i> {{ $url }}
+                                            </span>
+                                            <button type="button" wire:click="removeExpenseReceiptUrl({{ $index }})" class="text-rose-500 hover:text-rose-700 text-xs font-bold ml-2">
+                                                <i class="fa-light fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                         <button type="button" wire:click="saveExpense" class="w-full rounded-xl bg-orange-600 py-3 text-sm font-bold text-white hover:bg-orange-700 transition">
                             <i class="fa-light fa-plus mr-1.5"></i> {{ __('Log Expense') }}
@@ -3661,6 +3705,49 @@
     @if ($moduleKey === 'pos')
         @if ($activeTab === 'checkout')
             <div class="space-y-6">
+                <!-- POS Invoice / Quote Quick Search & Payment Settlement Station -->
+                <section class="rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950 via-slate-900 to-slate-950 p-5 text-white shadow-md">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                <i class="fa-light fa-file-invoice-dollar text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">{{ __('POS Existing Invoice & Quote Payment Settlement') }}</h3>
+                                <p class="text-xs text-slate-300">{{ __('Enter an Invoice or Quote Number (e.g. INV-2026-001 or QTE-2026-002) to fetch details and record terminal payment.') }}</p>
+                            </div>
+                        </div>
+
+                        <form wire:submit.prevent="lookupInvoiceInPos" class="flex items-center gap-2 w-full lg:w-auto">
+                            <div class="relative w-full lg:w-72">
+                                <i class="fa-light fa-magnifying-glass absolute left-3.5 top-3 text-xs text-slate-400"></i>
+                                <input type="text" wire:model="posInvoiceQuery" placeholder="Enter Invoice/Quote #..." class="w-full rounded-xl border border-slate-700 bg-slate-900/90 pl-9 pr-3 py-2 text-xs font-semibold text-white outline-none focus:border-blue-500">
+                            </div>
+                            <button type="submit" class="shrink-0 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-500 transition">
+                                <i class="fa-light fa-arrow-down-to-bracket mr-1"></i>{{ __('Fetch & Pay') }}
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Fetched Invoice Settlement Detail Banner -->
+                    @if ($fetchedInvoiceDetails)
+                        <div class="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-4 text-xs font-semibold text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <span class="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold uppercase text-emerald-400 border border-emerald-500/30 mr-2">
+                                    {{ strtoupper($fetchedInvoiceDetails['type']) }} FOUND
+                                </span>
+                                <span class="font-mono font-bold text-white">{{ $fetchedInvoiceDetails['number'] }}</span> — Client: <span class="font-bold text-white">{{ $fetchedInvoiceDetails['client_name'] }}</span>
+                                <span class="block text-slate-300 text-[11px] mt-0.5">
+                                    Total: ₦{{ number_format($fetchedInvoiceDetails['total'], 2) }} | Paid to date: ₦{{ number_format($fetchedInvoiceDetails['paid_amount'], 2) }} | <strong class="text-amber-400">Balance Due: ₦{{ number_format($fetchedInvoiceDetails['balance_due'], 2) }}</strong>
+                                </span>
+                            </div>
+                            <button type="button" wire:click="settleFetchedInvoiceInPos" class="shrink-0 rounded-xl bg-emerald-500 px-5 py-2 text-xs font-black text-slate-950 shadow-md hover:bg-emerald-400 transition flex items-center gap-1.5">
+                                <i class="fa-light fa-circle-check"></i> {{ __('Settle ₦:amt Payment', ['amt' => number_format($fetchedInvoiceDetails['balance_due'], 2)]) }}
+                            </button>
+                        </div>
+                    @endif
+                </section>
+
                 <!-- Fast Barcode Quick Scanner Bar -->
                 <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <form wire:submit.prevent="scanBarcode" class="flex flex-col sm:flex-row items-center gap-3">

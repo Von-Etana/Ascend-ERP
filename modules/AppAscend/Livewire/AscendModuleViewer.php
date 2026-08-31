@@ -464,6 +464,17 @@ class AscendModuleViewer extends Component
     public bool $showCertificateModal = false;
     public ?array $distributorCertData = null;
 
+    // === FINANCE MODULE OVERVIEW & TIME PERIOD FILTERING ===
+    public string $financePeriodFilter = 'this_month';
+
+    // === MULTIPLE EXPENSE RECEIPTS / ATTACHMENTS ===
+    public array $expenseReceiptUrls = [];
+    public string $newExpenseReceiptUrl = '';
+
+    // === POS INVOICE & QUOTE SEARCH / INSTANT PAYMENT SETTLEMENT ===
+    public string $posInvoiceQuery = '';
+    public ?array $fetchedInvoiceDetails = null;
+
     // === CRM LEAD DRIP AUTOMATION ===
     public string $dripChannelFilter = 'all';
     public array $dripCadenceRules = [
@@ -4649,6 +4660,211 @@ class AscendModuleViewer extends Component
             $po->update(['status' => 'cancelled']);
             session()->flash('status', __('Purchase Order :num cancelled.', ['num' => $po->po_number]));
         }
+    }
+
+    // =========================================================
+    // FINANCE PERIOD FILTER & MULTIPLE RECEIPT ATTACHMENTS
+    // =========================================================
+
+    public function setFinancePeriodFilter(string $period): void
+    {
+        $this->financePeriodFilter = $period;
+        session()->flash('status', __('Finance Overview filter set to :period.', [
+            'period' => ucfirst(str_replace('_', ' ', $period)),
+        ]));
+    }
+
+    public function addExpenseReceiptUrl(): void
+    {
+        $url = trim($this->newExpenseReceiptUrl);
+        if ($url !== '') {
+            $this->expenseReceiptUrls[] = $url;
+            $this->newExpenseReceiptUrl = '';
+            session()->flash('status', __('Receipt attachment URL added!'));
+        }
+    }
+
+    public function removeExpenseReceiptUrl(int $index): void
+    {
+        if (isset($this->expenseReceiptUrls[$index])) {
+            unset($this->expenseReceiptUrls[$index]);
+            $this->expenseReceiptUrls = array_values($this->expenseReceiptUrls);
+            session()->flash('status', __('Receipt attachment removed.'));
+        }
+    }
+
+    // =========================================================
+    // POS INVOICE & QUOTE SEARCH / INSTANT PAYMENT SETTLEMENT
+    // =========================================================
+
+    public function lookupInvoiceInPos(): void
+    {
+        $query = trim($this->posInvoiceQuery);
+        if ($query === '') {
+            session()->flash('warning', __('Please enter an Invoice or Quote Number (e.g. INV-2026-001 or QTE-2026-002).'));
+            return;
+        }
+
+        // 1. Search in Invoices
+        $invoice = \App\Models\Invoice::where('invoice_number', 'like', "%{$query}%")->first();
+        if ($invoice) {
+            $balance = $invoice->balance_due;
+            if ($balance <= 0) {
+                session()->flash('warning', __('Invoice :num is already fully PAID!', ['num' => $invoice->invoice_number]));
+                return;
+            }
+
+            $this->fetchedInvoiceDetails = [
+                'type' => 'invoice',
+                'id' => $invoice->id,
+                'number' => $invoice->invoice_number,
+                'client_name' => $invoice->client_name,
+                'total' => (float) $invoice->total,
+                'paid_amount' => (float) $invoice->paid_amount,
+                'balance_due' => $balance,
+                'items' => is_array($invoice->items) ? $invoice->items : [
+                    ['sku' => $invoice->invoice_number, 'name' => 'Invoice Settlement: '.$invoice->client_name, 'price' => $balance, 'quantity' => 1]
+                ],
+            ];
+
+            // Load into POS Cart for payment
+            $this->posCart = [
+                [
+                    'sku' => $invoice->invoice_number,
+                    'name' => 'Invoice Payment: '.$invoice->invoice_number.' ('.$invoice->client_name.')',
+                    'price' => $balance,
+                    'quantity' => 1,
+                ]
+            ];
+            $this->customerName = $invoice->client_name;
+
+            session()->flash('status', __('Invoice :num loaded into POS Checkout! Remaining Balance: ₦:bal', [
+                'num' => $invoice->invoice_number,
+                'bal' => number_format($balance, 2),
+            ]));
+            return;
+        }
+
+        // 2. Search in Price Quotes
+        $quote = \App\Models\PriceQuote::where('quote_number', 'like', "%{$query}%")->first();
+        if ($quote) {
+            $total = (float) $quote->total_amount;
+            $this->fetchedInvoiceDetails = [
+                'type' => 'quote',
+                'id' => $quote->id,
+                'number' => $quote->quote_number,
+                'client_name' => $quote->client_name,
+                'total' => $total,
+                'paid_amount' => 0.00,
+                'balance_due' => $total,
+                'items' => is_array($quote->items) ? $quote->items : [
+                    ['sku' => $quote->quote_number, 'name' => 'Quote Settlement: '.$quote->client_name, 'price' => $total, 'quantity' => 1]
+                ],
+            ];
+
+            $this->posCart = [
+                [
+                    'sku' => $quote->quote_number,
+                    'name' => 'Quote Acceptance: '.$quote->quote_number.' ('.$quote->client_name.')',
+                    'price' => $total,
+                    'quantity' => 1,
+                ]
+            ];
+            $this->customerName = $quote->client_name;
+
+            session()->flash('status', __('Quote :num loaded into POS Checkout! Amount: ₦:amt', [
+                'num' => $quote->quote_number,
+                'amt' => number_format($total, 2),
+            ]));
+            return;
+        }
+
+        session()->flash('warning', __('No active Invoice or Quote found matching \":query\".', ['query' => $query]));
+    }
+
+    public function settleFetchedInvoiceInPos(): void
+    {
+        if (!$this->fetchedInvoiceDetails) {
+            $this->checkoutPos();
+            return;
+        }
+
+        $details = $this->fetchedInvoiceDetails;
+        $amountPaidNow = (float) $details['balance_due'];
+
+        if ($details['type'] === 'invoice') {
+            $inv = \App\Models\Invoice::find($details['id']);
+            if ($inv) {
+                $newPaid = (float) $inv->paid_amount + $amountPaidNow;
+                $inv->update([
+                    'paid_amount' => $newPaid,
+                    'status' => $newPaid >= (float) $inv->total ? 'paid' : 'partially_paid',
+                ]);
+            }
+        } elseif ($details['type'] === 'quote') {
+            $qte = \App\Models\PriceQuote::find($details['id']);
+            if ($qte) {
+                $qte->update(['status' => 'accepted']);
+                \App\Models\Invoice::create([
+                    'invoice_number' => 'INV-SETTLED-'.rand(1000, 9999),
+                    'client_name' => $qte->client_name,
+                    'issue_date' => now(),
+                    'due_date' => now(),
+                    'subtotal' => $qte->subtotal,
+                    'tax' => $qte->tax_amount,
+                    'total' => $qte->total_amount,
+                    'paid_amount' => $qte->total_amount,
+                    'status' => 'paid',
+                    'notes' => 'Settled via POS Terminal from Quote '.$qte->quote_number,
+                ]);
+            }
+        }
+
+        $this->checkoutPos();
+
+        $this->fetchedInvoiceDetails = null;
+        $this->posInvoiceQuery = '';
+        session()->flash('status', __('Invoice/Quote :num payment successfully recorded & settled!', ['num' => $details['number']]));
+    }
+
+    // =========================================================
+    // META ADS LEAD AUTOMATIC INGESTION TO CRM
+    // =========================================================
+
+    public function ingestMetaAdsLead(?array $leadData = null): void
+    {
+        $companyName = $leadData['company_name'] ?? 'Maitama Solar Estate Ltd';
+        $contactPerson = $leadData['full_name'] ?? 'Chief Engr. Ibrahim Bello';
+        $email = $leadData['email'] ?? 'ibrahim@maitamasolar.ng';
+        $phone = $leadData['phone'] ?? '+234 803 444 8899';
+        $systemInterest = $leadData['system_interest'] ?? 'Ascend 10.2kVA Commercial Dual MPPT Inverter';
+
+        $lead = \App\Models\CrmLead::create([
+            'company_name' => $companyName,
+            'contact_person' => $contactPerson,
+            'email' => $email,
+            'phone' => $phone,
+            'deal_value' => (float) ($leadData['deal_value'] ?? 4500000.00),
+            'status' => 'new',
+            'lead_type' => 'customer',
+            'system_interest' => $systemInterest,
+        ]);
+
+        \App\Models\WebLeadCapture::create([
+            'client_name' => $contactPerson,
+            'phone' => $phone,
+            'email' => $email,
+            'city_location' => $leadData['city'] ?? 'Abuja HQ Region',
+            'system_interest' => $systemInterest,
+            'estimated_budget_ngn' => (float) ($leadData['deal_value'] ?? 4500000.00),
+            'source_url' => 'Meta Lead Ads API (Facebook & IG Campaign)',
+            'status' => 'new',
+        ]);
+
+        // Auto trigger Hour 1 Drip
+        $this->triggerLeadDrip($lead->id, 'hour_1', 'whatsapp');
+
+        session()->flash('status', __('Meta Lead Ads lead captured and auto-saved to CRM for :company!', ['company' => $companyName]));
     }
 
     public function render(): View

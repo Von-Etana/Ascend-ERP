@@ -13,6 +13,7 @@ class Expense extends Model
         'payment_method',
         'expense_date',
         'description',
+        'attachments',
     ];
 
     protected function casts(): array
@@ -20,6 +21,7 @@ class Expense extends Model
         return [
             'expense_date' => 'date',
             'amount' => 'decimal:2',
+            'attachments' => 'array',
         ];
     }
 }

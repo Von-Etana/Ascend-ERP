@@ -14,6 +14,7 @@ class Invoice extends Model
         'subtotal',
         'tax',
         'total',
+        'paid_amount',
         'status',
         'notes',
         'items',
@@ -27,7 +28,13 @@ class Invoice extends Model
             'subtotal' => 'decimal:2',
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
+            'paid_amount' => 'decimal:2',
             'items' => 'array',
         ];
+    }
+
+    public function getBalanceDueAttribute(): float
+    {
+        return max(0.00, (float) $this->total - (float) $this->paid_amount);
     }
 }
