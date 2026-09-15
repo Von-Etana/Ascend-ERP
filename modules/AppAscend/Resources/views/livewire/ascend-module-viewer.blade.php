@@ -524,7 +524,16 @@
                                                 <td class="px-4 py-3 font-black text-slate-900 dark:text-white">₦{{ number_format($exp['amount'], 2) }}</td>
                                                 <td class="px-4 py-3 text-slate-500">{{ $exp['expense_date'] }}</td>
                                                 <td class="px-4 py-3">
-                                                    @if ($exp['receipt_path'])
+                                                    @if (! empty($exp['attachments']))
+                                                        <div class="flex flex-col gap-1">
+                                                            @foreach ($exp['attachments'] as $attachment)
+                                                                <a href="{{ $attachment['url'] ?? '#' }}" target="_blank" class="inline-flex items-center text-blue-600 hover:underline text-[10px] font-bold">
+                                                                    <i class="fa-light fa-paperclip mr-1"></i>
+                                                                    <span class="truncate max-w-[120px]">{{ Str::limit($attachment['name'] ?? '', 16) }}</span>
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    @elseif ($exp['receipt_path'])
                                                         <a href="/storage/{{ $exp['receipt_path'] }}" target="_blank" class="text-blue-600 hover:underline text-[10px] font-bold"><i class="fa-light fa-paperclip mr-1"></i>View</a>
                                                     @else
                                                         <span class="text-slate-300 text-[10px]">No receipt</span>

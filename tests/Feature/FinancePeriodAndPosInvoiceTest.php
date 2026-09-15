@@ -5,9 +5,11 @@ use App\Models\Invoice;
 use App\Models\PriceQuote;
 use App\Models\CrmLead;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Modules\AdminUser\Models\User;
 use Modules\AppAscend\Livewire\AscendModuleViewer;
+use Modules\AppFiles\Models\AppFile;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -26,7 +28,7 @@ it('filters finance overview by time period pills', function (): void {
 it('supports attaching multiple receipts to an expense transaction', function (): void {
     $user = User::factory()->create(['is_super_admin' => true]);
 
-    Livewire::actingAs($user)
+    $component = Livewire::actingAs($user)
         ->test(AscendModuleViewer::class, ['moduleKey' => 'finance'])
         ->set('newExpenseReceiptUrl', 'https://app.ascendsystems.ng/receipts/slip_001.pdf')
         ->call('addExpenseReceiptUrl')
@@ -40,6 +42,90 @@ it('supports attaching multiple receipts to an expense transaction', function ()
         ->assertSet('expenseReceiptUrls', [
             'https://app.ascendsystems.ng/receipts/bank_transfer.png',
         ]);
+
+    // Save the expense and verify DB persistence
+    $component
+        ->set('expenseForm.vendor', 'Kano Solar Distribution Hub')
+        ->set('expenseForm.amount', '45000')
+        ->call('saveExpense');
+
+    $expense = Expense::where('vendor', 'Kano Solar Distribution Hub')->first();
+    expect($expense)->not->toBeNull()
+        ->and($expense->attachments)->toHaveCount(1)
+        ->and($expense->attachments[0]['type'] ?? '')->toBe('url')
+        ->and($expense->attachments[0]['url'] ?? '')->toBe('https://app.ascendsystems.ng/receipts/bank_transfer.png');
+});
+
+it('imports external receipt URLs into the file manager when saving an expense', function (): void {
+    Http::fake([
+        'https://app.ascendsystems.ng/receipts/slip_001.pdf' => Http::response('pdf contents', 200, ['Content-Type' => 'application/pdf']),
+        'https://app.ascendsystems.ng/receipts/bank_transfer.png' => Http::response('png contents', 200, ['Content-Type' => 'image/png']),
+    ]);
+
+    $user = User::factory()->create(['is_super_admin' => true]);
+
+    Livewire::actingAs($user)
+        ->test(AscendModuleViewer::class, ['moduleKey' => 'finance'])
+        ->set('expenseForm', [
+            'category' => 'Office Supplies',
+            'vendor' => 'Abuja Office Depot',
+            'amount' => '125000',
+            'payment_method' => 'Bank Transfer',
+            'expense_date' => now()->toDateString(),
+            'description' => 'Monthly office stationery',
+            'reference' => 'EXP-2026-042',
+        ])
+        ->set('newExpenseReceiptUrl', 'https://app.ascendsystems.ng/receipts/slip_001.pdf')
+        ->call('addExpenseReceiptUrl')
+        ->set('newExpenseReceiptUrl', 'https://app.ascendsystems.ng/receipts/bank_transfer.png')
+        ->call('addExpenseReceiptUrl')
+        ->call('saveExpense');
+
+    $expense = Expense::where('vendor', 'Abuja Office Depot')->first();
+    expect($expense)->not->toBeNull()
+        ->and($expense->attachments)->toHaveCount(2)
+        ->and($expense->attachments[0]['type'] ?? '')->toBe('appfile')
+        ->and($expense->attachments[1]['type'] ?? '')->toBe('appfile');
+
+    $fileIds = array_column($expense->attachments ?? [], 'id');
+    expect(AppFile::query()->whereIn('id', $fileIds)->count())->toBe(2);
+
+    $component = Livewire::actingAs($user)
+        ->test(AscendModuleViewer::class, ['moduleKey' => 'finance']);
+
+    $records = $component->get('expenseRecords');
+    $saved = collect($records)->first(fn ($r) => ($r['vendor'] ?? '') === 'Abuja Office Depot');
+    expect($saved)->not->toBeNull()
+        ->and($saved['attachments'])->toHaveCount(2)
+        ->and($saved['attachments'][0]['url'] ?? '')->toContain('/storage/app/public/');
+});
+
+it('falls back to raw URLs when external receipt import fails', function (): void {
+    Http::fake([
+        'https://app.ascendsystems.ng/receipts/unreachable.pdf' => Http::response('', 404),
+    ]);
+
+    $user = User::factory()->create(['is_super_admin' => true]);
+
+    Livewire::actingAs($user)
+        ->test(AscendModuleViewer::class, ['moduleKey' => 'finance'])
+        ->set('expenseForm', [
+            'category' => 'Office Supplies',
+            'vendor' => 'Failed Receipt Vendor',
+            'amount' => '5000',
+            'payment_method' => 'Bank Transfer',
+            'expense_date' => now()->toDateString(),
+            'description' => 'Testing import fallback',
+            'reference' => 'EXP-FAIL-001',
+        ])
+        ->set('newExpenseReceiptUrl', 'https://app.ascendsystems.ng/receipts/unreachable.pdf')
+        ->call('addExpenseReceiptUrl')
+        ->call('saveExpense');
+
+    $expense = Expense::where('vendor', 'Failed Receipt Vendor')->first();
+    expect($expense)->not->toBeNull()
+        ->and($expense->attachments[0]['type'] ?? '')->toBe('url')
+        ->and($expense->attachments[0]['url'] ?? '')->toBe('https://app.ascendsystems.ng/receipts/unreachable.pdf');
 });
 
 it('fetches existing invoice details in POS checkout terminal and settles payment', function (): void {

@@ -22,6 +22,8 @@ use Modules\AppAutomation\Models\AutomationWebhook;
 use Modules\AppChannels\Models\SocialAccount;
 use Modules\AppEmail\Models\EmailCampaign;
 use Modules\AdminNotifications\Models\Notification;
+use Modules\AppFiles\Models\AppFile;
+use Modules\AppFiles\Support\FileManager;
 
 class AscendModuleViewer extends Component
 {
@@ -1165,6 +1167,7 @@ class AscendModuleViewer extends Component
                     'expense_date'    => $e->expense_date?->toDateString() ?? '—',
                     'description'     => (string) ($e->description ?? ''),
                     'receipt_path'    => (string) ($e->receipt_path ?? ''),
+                    'attachments'     => $this->resolveExpenseAttachmentUrls((array) ($e->attachments ?? [])),
                     'approval_status' => (string) ($e->approval_status ?? 'pending'),
                     'reference'       => (string) ($e->reference ?? ''),
                 ])
@@ -2560,7 +2563,8 @@ class AscendModuleViewer extends Component
             return;
         }
         try {
-            \App\Models\Expense::create([
+            $attachments = $this->importExpenseReceiptsToFileManager();
+            $expense = \App\Models\Expense::create([
                 'category'       => $this->expenseForm['category'],
                 'vendor'         => $this->expenseForm['vendor'],
                 'amount'         => (float) $this->expenseForm['amount'],
@@ -2569,13 +2573,128 @@ class AscendModuleViewer extends Component
                 'description'    => $this->expenseForm['description'],
                 'reference'      => $this->expenseForm['reference'] ?? null,
                 'approval_status' => 'pending',
+                'attachments'    => $attachments,
             ]);
+            $this->expenseReceiptUrls = [];
             $this->expenseForm = ['category' => 'Office Supplies', 'vendor' => '', 'amount' => '', 'payment_method' => 'Bank Transfer', 'expense_date' => '', 'description' => '', 'reference' => ''];
             $this->hydrateLiveData();
             session()->flash('status', __('Expense logged and submitted for approval!'));
         } catch (\Throwable $e) {
             session()->flash('warning', 'Failed: '.$e->getMessage());
         }
+    }
+
+    protected function importExpenseReceiptsToFileManager(): array
+    {
+        $urls = array_values(array_filter(array_map('trim', $this->expenseReceiptUrls)));
+
+        if ($urls === []) {
+            return [];
+        }
+
+        /** @var ?User $user */
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            return $urls;
+        }
+
+        $files = app(FileManager::class);
+
+        if (! $files->isActionEnabled('upload_from_url', $user)) {
+            return $urls;
+        }
+
+        $imported = [];
+
+        foreach ($urls as $url) {
+            // Skip URLs that are already managed AppFiles assets.
+            $existing = $this->findExistingAppFileForUrl($url);
+
+            if ($existing) {
+                $imported[] = [
+                    'type' => 'appfile',
+                    'id'   => $existing->id,
+                    'url'  => $this->resolveAppFileUrl($existing),
+                    'name' => $existing->name,
+                ];
+                continue;
+            }
+
+            try {
+                $stored = $files->storeRemoteFile($user, $url);
+                $imported[] = [
+                    'type' => 'appfile',
+                    'id'   => $stored->id,
+                    'url'  => $this->resolveAppFileUrl($stored),
+                    'name' => $stored->name,
+                ];
+            } catch (\Throwable $exception) {
+                // Keep the original URL as a fallback so the expense is still saved.
+                $imported[] = [
+                    'type'  => 'url',
+                    'url'   => $url,
+                    'error' => $exception->getMessage(),
+                ];
+            }
+        }
+
+        return $imported;
+    }
+
+    protected function findExistingAppFileForUrl(string $url): ?AppFile
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+
+        if ($path === '') {
+            return null;
+        }
+
+        return AppFile::query()
+            ->where(fn ($query) => $query->where('path', 'like', "%{$path}%"))
+            ->orWhere('name', basename($path))
+            ->first();
+    }
+
+    protected function resolveAppFileUrl(AppFile $file): ?string
+    {
+        return app(\App\Support\Storage\StorageDriverManager::class)
+            ->publicUrl((string) $file->disk, (string) $file->path);
+    }
+
+    protected function resolveExpenseAttachmentUrls(array $attachments): array
+    {
+        $resolved = [];
+
+        foreach ($attachments as $attachment) {
+            if (is_string($attachment)) {
+                $resolved[] = ['url' => $attachment, 'name' => basename($attachment)];
+                continue;
+            }
+
+            if (! is_array($attachment) || empty($attachment['url'])) {
+                continue;
+            }
+
+            if (($attachment['type'] ?? 'url') === 'appfile' && ! empty($attachment['id'])) {
+                $file = AppFile::query()->find($attachment['id']);
+
+                if ($file) {
+                    $resolved[] = [
+                        'url' => $this->resolveAppFileUrl($file) ?? $attachment['url'],
+                        'name' => $file->name ?: ($attachment['name'] ?? basename($attachment['url'])),
+                    ];
+                    continue;
+                }
+            }
+
+            $resolved[] = [
+                'url' => $attachment['url'],
+                'name' => $attachment['name'] ?? basename($attachment['url']),
+            ];
+        }
+
+        return $resolved;
     }
 
     public function approveExpense(int $id): void
