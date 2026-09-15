@@ -26,6 +26,7 @@ yarn-error.log
 /storage/framework/cache/*
 /storage/framework/sessions/*
 /storage/framework/views/*
+/storage/framework/testing/*
 /storage/logs/*
 !/storage/framework/cache/.gitignore
 !/storage/framework/sessions/.gitignore
