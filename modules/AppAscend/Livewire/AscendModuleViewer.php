@@ -27,6 +27,7 @@ use Modules\AppFiles\Support\FileManager;
 
 class AscendModuleViewer extends Component
 {
+    use \Livewire\WithFileUploads;
     public string $moduleKey = 'finance';
 
     public string $activeTab = 'overview';
@@ -472,6 +473,8 @@ class AscendModuleViewer extends Component
     // === MULTIPLE EXPENSE RECEIPTS / ATTACHMENTS ===
     public array $expenseReceiptUrls = [];
     public string $newExpenseReceiptUrl = '';
+    public array $expenseReceiptUploads = [];
+    public array $pendingExpenseReceipts = []; // holds uploaded temp paths + display names
 
     // === POS INVOICE & QUOTE SEARCH / INSTANT PAYMENT SETTLEMENT ===
     public string $posInvoiceQuery = '';
@@ -2576,6 +2579,7 @@ class AscendModuleViewer extends Component
                 'attachments'    => $attachments,
             ]);
             $this->expenseReceiptUrls = [];
+            $this->pendingExpenseReceipts = [];
             $this->expenseForm = ['category' => 'Office Supplies', 'vendor' => '', 'amount' => '', 'payment_method' => 'Bank Transfer', 'expense_date' => '', 'description' => '', 'reference' => ''];
             $this->hydrateLiveData();
             session()->flash('status', __('Expense logged and submitted for approval!'));
@@ -2586,10 +2590,20 @@ class AscendModuleViewer extends Component
 
     protected function importExpenseReceiptsToFileManager(): array
     {
+        $attachments = [];
+
+        // 1. Include already-uploaded files (from local device)
+        foreach ($this->pendingExpenseReceipts as $receipt) {
+            if (is_array($receipt) && ($receipt['type'] ?? 'url') === 'appfile' && ! empty($receipt['id'])) {
+                $attachments[] = $receipt;
+            }
+        }
+
+        // 2. Import external URLs
         $urls = array_values(array_filter(array_map('trim', $this->expenseReceiptUrls)));
 
         if ($urls === []) {
-            return [];
+            return $attachments;
         }
 
         /** @var ?User $user */
@@ -4809,6 +4823,58 @@ class AscendModuleViewer extends Component
             unset($this->expenseReceiptUrls[$index]);
             $this->expenseReceiptUrls = array_values($this->expenseReceiptUrls);
             session()->flash('status', __('Receipt attachment removed.'));
+        }
+    }
+
+    public function addExpenseReceiptUploads(): void
+    {
+        /** @var ?User $user */
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            session()->flash('warning', __('You must be logged in to upload receipts.'));
+            return;
+        }
+
+        $files = app(FileManager::class);
+
+        if (! $files->filesEnabled($user)) {
+            session()->flash('warning', __('File uploads are not enabled for your account.'));
+            return;
+        }
+
+        $uploads = array_filter($this->expenseReceiptUploads, fn ($file) => $file instanceof \Illuminate\Http\UploadedFile);
+
+        if ($uploads === []) {
+            session()->flash('warning', __('Please select receipt files to upload.'));
+            return;
+        }
+
+        try {
+            $stored = $files->storeUploads($user, $uploads);
+
+            foreach ($stored as $appFile) {
+                $this->pendingExpenseReceipts[] = [
+                    'type' => 'appfile',
+                    'id' => $appFile->id,
+                    'url' => $this->resolveAppFileUrl($appFile),
+                    'name' => $appFile->name,
+                ];
+            }
+
+            $this->expenseReceiptUploads = [];
+            session()->flash('status', __('Receipt files uploaded successfully.'));
+        } catch (\Throwable $exception) {
+            session()->flash('warning', __('Receipt upload failed: :message', ['message' => $exception->getMessage()]));
+        }
+    }
+
+    public function removeExpenseReceiptUpload(int $index): void
+    {
+        if (isset($this->pendingExpenseReceipts[$index])) {
+            unset($this->pendingExpenseReceipts[$index]);
+            $this->pendingExpenseReceipts = array_values($this->pendingExpenseReceipts);
+            session()->flash('status', __('Uploaded receipt removed.'));
         }
     }
 

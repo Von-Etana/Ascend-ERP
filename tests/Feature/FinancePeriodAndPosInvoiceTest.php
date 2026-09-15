@@ -128,6 +128,40 @@ it('falls back to raw URLs when external receipt import fails', function (): voi
         ->and($expense->attachments[0]['url'] ?? '')->toBe('https://app.ascendsystems.ng/receipts/unreachable.pdf');
 });
 
+it('uploads local receipt files to file manager and attaches to expense', function (): void {
+    $user = User::factory()->create(['is_super_admin' => true]);
+
+    $component = Livewire::actingAs($user)
+        ->test(AscendModuleViewer::class, ['moduleKey' => 'finance'])
+        ->set('expenseForm', [
+            'category' => 'Office Supplies',
+            'vendor' => 'Lagos Stationery Mart',
+            'amount' => '87000',
+            'payment_method' => 'Bank Transfer',
+            'expense_date' => now()->toDateString(),
+            'description' => 'Printer cartridges',
+            'reference' => 'EXP-UP-001',
+        ])
+        ->set('expenseReceiptUploads', [
+            \Illuminate\Http\UploadedFile::fake()->create('receipt_front.jpg', 12, 'image/jpeg'),
+            \Illuminate\Http\UploadedFile::fake()->create('invoice.pdf', 12, 'application/pdf'),
+        ])
+        ->call('addExpenseReceiptUploads')
+        ->assertSet('pendingExpenseReceipts', function ($receipts): bool {
+            return count($receipts) === 2 && ($receipts[0]['type'] ?? '') === 'appfile';
+        })
+        ->call('saveExpense');
+
+    $expense = Expense::where('vendor', 'Lagos Stationery Mart')->first();
+    expect($expense)->not->toBeNull()
+        ->and($expense->attachments)->toHaveCount(2)
+        ->and($expense->attachments[0]['type'] ?? '')->toBe('appfile')
+        ->and($expense->attachments[1]['type'] ?? '')->toBe('appfile');
+
+    $fileIds = array_column($expense->attachments ?? [], 'id');
+    expect(AppFile::query()->whereIn('id', $fileIds)->count())->toBe(2);
+});
+
 it('fetches existing invoice details in POS checkout terminal and settles payment', function (): void {
     $user = User::factory()->create(['is_super_admin' => true]);
 

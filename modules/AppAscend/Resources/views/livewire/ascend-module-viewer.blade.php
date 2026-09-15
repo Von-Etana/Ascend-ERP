@@ -614,15 +614,39 @@
                                 </button>
                             </div>
 
-                            @if (!empty($expenseReceiptUrls))
+                            <div class="flex items-center gap-2">
+                                <label class="flex w-full cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white p-2 text-xs text-slate-600 hover:border-orange-500 hover:bg-orange-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-orange-500">
+                                    <i class="fa-light fa-cloud-arrow-up text-orange-500"></i>
+                                    <span>{{ count($expenseReceiptUploads) ? count($expenseReceiptUploads).' file(s) selected' : 'Upload receipt files from device' }}</span>
+                                    <input type="file" wire:model="expenseReceiptUploads" multiple class="hidden" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip">
+                                </label>
+                                <button type="button" wire:click="addExpenseReceiptUploads" class="shrink-0 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 dark:bg-emerald-700">
+                                    Upload
+                                </button>
+                            </div>
+                            <div wire:loading wire:target="expenseReceiptUploads" class="text-[10px] text-slate-500">
+                                <i class="fa-light fa-spinner fa-spin mr-1"></i> Reading files...
+                            </div>
+
+                            @if (!empty($expenseReceiptUrls) || !empty($pendingExpenseReceipts))
                                 <div class="mt-2 space-y-1.5 border-t pt-2 dark:border-slate-700">
-                                    <p class="text-[10px] font-bold uppercase text-slate-400">Attached Receipts ({{ count($expenseReceiptUrls) }}):</p>
+                                    <p class="text-[10px] font-bold uppercase text-slate-400">Attached Receipts ({{ count($expenseReceiptUrls) + count($pendingExpenseReceipts) }}):</p>
                                     @foreach ($expenseReceiptUrls as $index => $url)
                                         <div class="flex items-center justify-between rounded-lg bg-white p-2 text-xs border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
                                             <span class="truncate max-w-[200px] text-slate-700 dark:text-slate-300 font-mono text-[11px]">
-                                                <i class="fa-light fa-file-image text-emerald-500 mr-1"></i> {{ $url }}
+                                                <i class="fa-light fa-link text-emerald-500 mr-1"></i> {{ $url }}
                                             </span>
                                             <button type="button" wire:click="removeExpenseReceiptUrl({{ $index }})" class="text-rose-500 hover:text-rose-700 text-xs font-bold ml-2">
+                                                <i class="fa-light fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                    @foreach ($pendingExpenseReceipts as $index => $file)
+                                        <div class="flex items-center justify-between rounded-lg bg-white p-2 text-xs border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+                                            <span class="truncate max-w-[200px] text-slate-700 dark:text-slate-300 font-mono text-[11px]">
+                                                <i class="fa-light fa-file-image text-blue-500 mr-1"></i> {{ $file['name'] ?? 'Receipt file' }}
+                                            </span>
+                                            <button type="button" wire:click="removeExpenseReceiptUpload({{ $index }})" class="text-rose-500 hover:text-rose-700 text-xs font-bold ml-2">
                                                 <i class="fa-light fa-trash-can"></i>
                                             </button>
                                         </div>
