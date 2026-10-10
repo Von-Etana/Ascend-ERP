@@ -201,8 +201,8 @@ class Dashboard extends Component
         }
 
         return view(theme_view('livewire.portal.ascend-dashboard', 'app'), [
-            'dashboardItems' => user_dashboard_items(auth()->user(), 'main'),
-            'socialItems' => user_dashboard_items(auth()->user(), 'main'),
+            'dashboardItems' => [],
+            'socialItems' => [],
             'totalRevenueFormatted' => '₦'.number_format($totalRevenue, 2),
             'netRevenueFormatted' => '₦'.number_format($netRevenue, 2),
             'avgOrderFormatted' => '₦'.number_format($avgOrder, 2),

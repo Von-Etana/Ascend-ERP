@@ -2,12 +2,6 @@
     @php($user = auth()->user())
     @php($isPortal = request()->routeIs('portal.*'))
     @php($hasBillingAccess = false)
-    @php($plan = $user?->plan)
-    @php($creditSummary = $user?->creditSummary() ?? ['limit' => null, 'used' => 0, 'remaining' => null, 'unlimited' => true])
-    @php($creditLimit = is_numeric($creditSummary['limit'] ?? null) ? max(0, (int) $creditSummary['limit']) : null)
-    @php($creditsUsed = max(0, (int) ($creditSummary['used'] ?? 0)))
-    @php($creditsRemaining = $creditSummary['remaining'] ?? null)
-    @php($creditsUsedPercent = $creditLimit && $creditLimit > 0 ? min(100, (int) round(($creditsUsed / $creditLimit) * 100)) : null)
 
     <x-ui.dropdown-menu align="right" width="auto" class="min-w-[16rem]">
         <x-slot:trigger>
