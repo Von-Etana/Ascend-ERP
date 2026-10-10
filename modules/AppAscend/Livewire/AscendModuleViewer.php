@@ -5302,6 +5302,8 @@ class AscendModuleViewer extends Component
 
     public function render(): View
     {
+        $this->hydrateLiveData();
+
         $dbTasks = ProjectTask::query()->latest()->get();
         if ($dbTasks->isNotEmpty()) {
             $this->tasks = $dbTasks->map(function ($t) {

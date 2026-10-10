@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             AITemplateCategorySeeder::class,
             AITemplateSeeder::class,
             AscendWorkspaceSeeder::class,
+            EnterpriseModuleSeeder::class,
+            RoleAndUserSeeder::class,
         ]);
     }
 }
