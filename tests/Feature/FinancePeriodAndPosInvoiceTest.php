@@ -208,3 +208,64 @@ it('auto saves leads from Meta Ads into CRM and triggers drip sequence', functio
         ->and($lead->company_name)->toBe('Wuse Commercial Complex')
         ->and((float) $lead->deal_value)->toBe(3800000.00);
 });
+
+it('calculates real figures for total expenses and revenue in finance overview', function (): void {
+    $user = User::factory()->create(['is_super_admin' => true]);
+
+    // Create real expenses
+    Expense::create([
+        'vendor' => 'Abuja Power Solutions',
+        'category' => 'Maintenance',
+        'amount' => 150000.00,
+        'payment_method' => 'Bank Transfer',
+        'expense_date' => now()->toDateString(),
+        'description' => 'Generator maintenance',
+    ]);
+
+    Expense::create([
+        'vendor' => 'Lagos Hosting Ltd',
+        'category' => 'Cloud & SaaS',
+        'amount' => 50000.00,
+        'payment_method' => 'Card',
+        'expense_date' => now()->toDateString(),
+        'description' => 'Server subscription',
+    ]);
+
+    // Create real paid invoice
+    Invoice::create([
+        'invoice_number' => 'INV-REAL-001',
+        'client_name' => 'Maitama Solar Estate',
+        'issue_date' => now(),
+        'due_date' => now()->addDays(14),
+        'subtotal' => 500000.00,
+        'tax' => 37500.00,
+        'total' => 537500.00,
+        'paid_amount' => 537500.00,
+        'status' => 'paid',
+    ]);
+
+    // Create real POS sale
+    \App\Models\PosReceipt::create([
+        'receipt_number' => 'REC-REAL-001',
+        'cashier_name' => 'John Doe',
+        'subtotal' => 100000.00,
+        'tax' => 7500.00,
+        'total' => 107500.00,
+        'payment_method' => 'card',
+    ]);
+
+    $component = Livewire::actingAs($user)
+        ->test(AscendModuleViewer::class, ['moduleKey' => 'finance'])
+        ->call('setFinancePeriodFilter', 'all_time');
+
+    $metrics = $component->instance()->getFinanceOverviewMetrics();
+
+    expect((float) $metrics['totalInputtedExpenses'])->toBe(200000.00)
+        ->and((float) $metrics['paidInvoicesRevenue'])->toBe(537500.00)
+        ->and((float) $metrics['posRevenue'])->toBe(107500.00)
+        ->and((float) $metrics['totalRevenue'])->toBe(645000.00)
+        ->and((float) $metrics['netProfit'])->toBe(445000.00)
+        ->and(count($metrics['recentExpenses']))->toBe(2)
+        ->and(count($metrics['revenueFeed']))->toBe(2);
+});
+

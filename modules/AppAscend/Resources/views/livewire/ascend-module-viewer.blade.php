@@ -356,65 +356,272 @@
                     </div>
                 </div>
 
+                <!-- Real Executive KPI Summary Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Total Revenue') }}</p>
-                        <p class="mt-2 text-2xl font-black text-emerald-600">₦1,245,780.00</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+18.6% vs last month</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Total Revenue') }}</p>
+                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20">{{ $financeMetrics['periodLabel'] }}</span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format($financeMetrics['totalRevenue'], 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <i class="fa-light fa-receipt mr-1 text-emerald-500"></i>₦{{ number_format($financeMetrics['paidInvoicesRevenue'], 2) }} Invoices · ₦{{ number_format($financeMetrics['posRevenue'], 2) }} POS
+                        </p>
                     </div>
+
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Operating Expenses') }}</p>
-                        <p class="mt-2 text-2xl font-black text-rose-500">₦324,500.00</p>
-                        <p class="mt-1 text-xs font-medium text-slate-400">Fixed & variable operational costs</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Operating Expenses') }}</p>
+                            <span class="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-500/20">{{ $financeMetrics['periodLabel'] }}</span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-rose-500">₦{{ number_format($financeMetrics['totalExpenses'], 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <i class="fa-light fa-money-bill-transfer mr-1 text-rose-500"></i>₦{{ number_format($financeMetrics['totalInputtedExpenses'], 2) }} Logged · ₦{{ number_format($financeMetrics['totalSalaries'], 2) }} Salaries
+                        </p>
                     </div>
+
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Net Profit Margin') }}</p>
-                        <p class="mt-2 text-2xl font-black text-blue-600">₦921,280.00</p>
-                        <p class="mt-1 text-xs font-medium text-blue-500">73.9% net margin</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Net Profit / Loss') }}</p>
+                            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $financeMetrics['netProfit'] >= 0 ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' : 'bg-rose-500/10 text-rose-600 border border-rose-500/20' }}">
+                                {{ $financeMetrics['netMarginPercent'] }}% margin
+                            </span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black {{ $financeMetrics['netProfit'] >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600' }}">
+                            ₦{{ number_format($financeMetrics['netProfit'], 2) }}
+                        </p>
+                        <p class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            {{ $financeMetrics['netProfit'] >= 0 ? 'Profitable operational margin' : 'Deficit in current scope' }}
+                        </p>
                     </div>
+
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Outstanding Bills') }}</p>
-                        <p class="mt-2 text-2xl font-black text-amber-600">₦180,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-slate-400">2 pending vendor bills</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Outstanding Receivables') }}</p>
+                            <span class="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-500/20">Pending</span>
+                        </div>
+                        <p class="mt-2 text-2xl font-black text-amber-600">₦{{ number_format($financeMetrics['outstandingReceivables'], 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <i class="fa-light fa-hourglass-clock mr-1 text-amber-500"></i>{{ $financeMetrics['unpaidInvoicesCount'] }} unpaid client invoice(s)
+                        </p>
                     </div>
                 </div>
 
-                <!-- Banking Accounts & Liquid Reserves -->
-                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                <!-- Two-Column Financial Activity Breakdown (Recent Expenses + Revenue Overview) -->
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <!-- SECTION 1: RECENT EXPENSES OVERVIEW & CATEGORY BREAKDOWN -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Banking Accounts & Liquid Reserves (NGN)') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Bank accounts, cash reserves, and inter-company liquidity transfers.') }}</p>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4 dark:border-slate-800">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h2 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Recent Logged Expenses') }}</h2>
+                                        <span class="rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-bold text-rose-600">
+                                            {{ count($financeMetrics['recentExpenses']) }} {{ __('Entries') }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">{{ __('Real vendor disbursements, office costs, and receipts.') }}</p>
+                                </div>
+                                <button type="button" wire:click="setTab('expenses')" class="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 transition dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200">
+                                    <i class="fa-light fa-arrow-up-right-from-square text-[10px]"></i>
+                                    {{ __('Manage Expenses') }}
+                                </button>
+                            </div>
+
+                            <!-- Category Distribution Pills -->
+                            @if (!empty($financeMetrics['categoryBreakdown']))
+                                <div class="mt-4 flex flex-wrap items-center gap-1.5 border-b pb-3 dark:border-slate-800">
+                                    <span class="text-[10px] font-bold uppercase text-slate-400 mr-1">{{ __('Top Categories:') }}</span>
+                                    @foreach ($financeMetrics['categoryBreakdown'] as $cat)
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                            <span class="font-bold text-slate-900 dark:text-white">{{ $cat['category'] }}:</span>
+                                            <span>₦{{ number_format($cat['amount'], 0) }}</span>
+                                            <span class="text-rose-500 font-bold">({{ $cat['percent'] }}%)</span>
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <!-- Recent Expenses Table -->
+                            <div class="mt-3 overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-semibold border-b dark:border-slate-800">
+                                        <tr>
+                                            <th class="px-3 py-2.5">{{ __('Vendor / Category') }}</th>
+                                            <th class="px-3 py-2.5">{{ __('Amount') }}</th>
+                                            <th class="px-3 py-2.5">{{ __('Date') }}</th>
+                                            <th class="px-3 py-2.5">{{ __('Receipt') }}</th>
+                                            <th class="px-3 py-2.5 text-right">{{ __('Status') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        @forelse ($financeMetrics['recentExpenses'] as $exp)
+                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                                                <td class="px-3 py-3">
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $exp->vendor ?? $exp['vendor'] ?? 'Vendor' }}</p>
+                                                    <span class="text-[10px] text-slate-400">{{ $exp->category ?? $exp['category'] ?? 'General' }}</span>
+                                                </td>
+                                                <td class="px-3 py-3 font-black text-rose-600 dark:text-rose-400 whitespace-nowrap">
+                                                    ₦{{ number_format($exp->amount ?? $exp['amount'] ?? 0, 2) }}
+                                                </td>
+                                                <td class="px-3 py-3 text-slate-500 whitespace-nowrap text-[11px]">
+                                                    {{ ($exp->expense_date instanceof \DateTimeInterface) ? $exp->expense_date->format('d M Y') : ($exp['expense_date'] ?? '—') }}
+                                                </td>
+                                                <td class="px-3 py-3">
+                                                    @php
+                                                        $attachList = is_array($exp) ? ($exp['attachments'] ?? []) : ($exp->attachments ?? []);
+                                                        $rPath = is_array($exp) ? ($exp['receipt_path'] ?? null) : ($exp->receipt_path ?? null);
+                                                    @endphp
+                                                    @if (!empty($attachList))
+                                                        <span class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-200 dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-300">
+                                                            <i class="fa-light fa-paperclip"></i>{{ count($attachList) }} {{ __('file(s)') }}
+                                                        </span>
+                                                    @elseif ($rPath)
+                                                        <a href="/storage/{{ $rPath }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline">
+                                                            <i class="fa-light fa-paperclip"></i>{{ __('View') }}
+                                                        </a>
+                                                    @else
+                                                        <span class="text-[10px] text-slate-400 italic">{{ __('None') }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-3 py-3 text-right">
+                                                    @php $appStatus = is_array($exp) ? ($exp['approval_status'] ?? 'pending') : ($exp->approval_status ?? 'pending'); @endphp
+                                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $appStatus === 'approved' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : ($appStatus === 'rejected' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20') }}">
+                                                        {{ ucfirst($appStatus) }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="py-8 text-center text-slate-400">
+                                                    <i class="fa-light fa-receipt text-3xl mb-2 text-slate-300 dark:text-slate-600"></i>
+                                                    <p class="text-xs font-semibold">{{ __('No expenses logged in this period.') }}</p>
+                                                    <button type="button" wire:click="setTab('expenses')" class="mt-2 text-xs font-bold text-emerald-600 hover:underline">
+                                                        + {{ __('Log an expense now') }}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <button type="button" wire:click="initiateBankTransfer('Access Bank HQ', 'GTBank Operations', 500000.00)" class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+
+                        <div class="mt-4 pt-3 border-t dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                            <span>{{ __('Total Operating Expenses in Scope:') }}</span>
+                            <span class="font-black text-slate-900 dark:text-white">₦{{ number_format($financeMetrics['totalExpenses'], 2) }}</span>
+                        </div>
+                    </section>
+
+                    <!-- SECTION 2: REVENUE INFLOWS & SETTLEMENTS OVERVIEW -->
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-4 dark:border-slate-800">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h2 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Revenue Inflow Streams') }}</h2>
+                                        <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                                            {{ count($financeMetrics['revenueFeed']) }} {{ __('Inflows') }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">{{ __('Settled client invoices, POS retail checkouts, and wholesale payments.') }}</p>
+                                </div>
+                                <button type="button" wire:click="openCreateModal('invoice')" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white transition shadow-sm">
+                                    <i class="fa-light fa-plus text-[10px]"></i>
+                                    {{ __('New Invoice') }}
+                                </button>
+                            </div>
+
+                            <!-- Inflow Channel Summary Chips -->
+                            <div class="mt-4 grid grid-cols-3 gap-2 border-b pb-3 dark:border-slate-800 text-center">
+                                <div class="rounded-xl bg-slate-50 p-2 dark:bg-slate-800">
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">{{ __('Invoices') }}</p>
+                                    <p class="text-xs font-black text-emerald-600 mt-0.5">₦{{ number_format($financeMetrics['paidInvoicesRevenue'], 0) }}</p>
+                                </div>
+                                <div class="rounded-xl bg-slate-50 p-2 dark:bg-slate-800">
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">{{ __('POS Retail') }}</p>
+                                    <p class="text-xs font-black text-blue-600 mt-0.5">₦{{ number_format($financeMetrics['posRevenue'], 0) }}</p>
+                                </div>
+                                <div class="rounded-xl bg-slate-50 p-2 dark:bg-slate-800">
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">{{ __('B2B Orders') }}</p>
+                                    <p class="text-xs font-black text-purple-600 mt-0.5">₦{{ number_format($financeMetrics['retailerRevenue'], 0) }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Recent Revenue Feed -->
+                            <div class="mt-3 space-y-2.5">
+                                @forelse ($financeMetrics['revenueFeed'] as $item)
+                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-3 hover:bg-slate-100/60 dark:border-slate-800 dark:bg-slate-800/40 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-{{ $item['badge_color'] }}-500/10 text-{{ $item['badge_color'] }}-600">
+                                                <i class="{{ $item['icon'] }} text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $item['title'] }}</p>
+                                                <p class="text-[10px] text-slate-400">
+                                                    <span class="font-mono">{{ $item['ref'] }}</span> · {{ $item['date'] }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-xs font-black text-emerald-600 dark:text-emerald-400">+₦{{ number_format($item['amount'], 2) }}</p>
+                                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.2 text-[9px] font-bold text-emerald-600 uppercase">{{ $item['status'] }}</span>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="py-8 text-center text-slate-400">
+                                        <i class="fa-light fa-coins text-3xl mb-2 text-slate-300 dark:text-slate-600"></i>
+                                        <p class="text-xs font-semibold">{{ __('No settled revenue transactions recorded for this period.') }}</p>
+                                        <button type="button" wire:click="openCreateModal('invoice')" class="mt-2 text-xs font-bold text-emerald-600 hover:underline">
+                                            + {{ __('Issue an invoice') }}
+                                        </button>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                            <span>{{ __('Total Realized Revenue in Scope:') }}</span>
+                            <span class="font-black text-emerald-600 dark:text-emerald-400">₦{{ number_format($financeMetrics['totalRevenue'], 2) }}</span>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Banking Accounts & Liquid Reserves (NGN) -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Banking Accounts & Liquid Reserves (NGN)') }}</h2>
+                                <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-black text-blue-600">
+                                    ₦{{ number_format($financeMetrics['totalLiquidCash'], 2) }} {{ __('Total Liquid') }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-slate-500 mt-0.5">{{ __('Active corporate bank accounts, cash reserves, and inter-company liquidity transfers.') }}</p>
+                        </div>
+                        <button type="button" wire:click="initiateBankTransfer('Access Bank HQ', 'GTBank Operations', 500000.00)" class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300 transition shadow-xs">
                             <i class="fa-light fa-arrow-right-arrow-left mr-1.5"></i>{{ __('Initiate Transfer') }}
                         </button>
                     </div>
                     <div class="mt-5 grid gap-4 md:grid-cols-3">
-                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase text-slate-400">Access Bank HQ</span>
-                                <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">Active Account</span>
+                        @forelse ($financeMetrics['bankAccounts'] as $account)
+                            <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 hover:border-emerald-500/30 transition">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase text-slate-400">{{ $account->bank_name ?? $account->name }}</span>
+                                    <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                                        {{ ucfirst($account->status ?? 'active') }}
+                                    </span>
+                                </div>
+                                <p class="mt-3 text-2xl font-black text-slate-900 dark:text-white">₦{{ number_format((float) $account->balance, 2) }}</p>
+                                <p class="mt-1 text-xs text-slate-400 font-mono">
+                                    Acc: {{ $account->account_number ?? '0000000000' }} · {{ $account->name ?? 'Corporate' }}
+                                </p>
                             </div>
-                            <p class="mt-3 text-2xl font-black text-slate-900 dark:text-white">₦4,850,000.00</p>
-                            <p class="mt-1 text-xs text-slate-400">Acc: 0129481029 · Lagos HQ</p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase text-slate-400">GTBank Operations</span>
-                                <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600">Active Account</span>
+                        @empty
+                            <div class="col-span-full py-6 text-center text-slate-400">
+                                <p class="text-xs">{{ __('No bank accounts registered.') }}</p>
                             </div>
-                            <p class="mt-3 text-2xl font-black text-slate-900 dark:text-white">₦2,140,500.00</p>
-                            <p class="mt-1 text-xs text-slate-400">Acc: 0548102941 · Abuja Branch</p>
-                        </div>
-                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase text-slate-400">Zenith Petty Cash</span>
-                                <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-600">Cash Reserve</span>
-                            </div>
-                            <p class="mt-3 text-2xl font-black text-slate-900 dark:text-white">₦350,000.00</p>
-                            <p class="mt-1 text-xs text-slate-400">Acc: 1019482014 · Operations</p>
-                        </div>
+                        @endforelse
                     </div>
                 </section>
             </div>

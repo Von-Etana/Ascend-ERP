@@ -4807,6 +4807,176 @@ class AscendModuleViewer extends Component
         ]));
     }
 
+    public function getFinanceOverviewMetrics(): array
+    {
+        $now = now();
+        $dateRange = match ($this->financePeriodFilter) {
+            'today' => [$now->clone()->startOfDay(), $now->clone()->endOfDay()],
+            'this_week' => [$now->clone()->startOfWeek(), $now->clone()->endOfWeek()],
+            'this_month' => [$now->clone()->startOfMonth(), $now->clone()->endOfMonth()],
+            'this_year' => [$now->clone()->startOfYear(), $now->clone()->endOfYear()],
+            default => null, // 'all_time'
+        };
+
+        // 1. EXPENSES (Real inputed expenses)
+        $expensesQuery = Expense::query();
+        if ($dateRange) {
+            $expensesQuery->where(function ($q) use ($dateRange) {
+                $q->whereBetween('expense_date', [$dateRange[0]->toDateString(), $dateRange[1]->toDateString()])
+                  ->orWhere(function ($sub) use ($dateRange) {
+                      $sub->whereNull('expense_date')
+                          ->whereBetween('created_at', $dateRange);
+                  });
+            });
+        }
+        $periodExpenses = $expensesQuery->latest('expense_date')->get();
+        $totalInputtedExpenses = (float) $periodExpenses->sum('amount');
+
+        // Optional salary records
+        $totalSalaries = 0.0;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('salary_records')) {
+                $salaryQuery = \Illuminate\Support\Facades\DB::table('salary_records')
+                    ->where('status', 'paid');
+                if ($dateRange) {
+                    $salaryQuery->whereBetween('created_at', $dateRange);
+                }
+                $totalSalaries = (float) $salaryQuery->sum('net_salary');
+            }
+        } catch (\Throwable) {}
+
+        $totalOperatingExpenses = $totalInputtedExpenses + $totalSalaries;
+
+        // 2. REVENUE FROM INVOICES
+        $invoicesQuery = Invoice::query();
+        if ($dateRange) {
+            $invoicesQuery->where(function ($q) use ($dateRange) {
+                $q->whereBetween('issue_date', [$dateRange[0]->toDateString(), $dateRange[1]->toDateString()])
+                  ->orWhereBetween('updated_at', $dateRange)
+                  ->orWhereBetween('created_at', $dateRange);
+            });
+        }
+        $periodInvoices = $invoicesQuery->latest()->get();
+        $paidInvoicesRevenue = 0.0;
+        $outstandingReceivables = 0.0;
+        $unpaidInvoicesCount = 0;
+
+        foreach ($periodInvoices as $inv) {
+            $paid = (float) ($inv->paid_amount ?? 0);
+            if ($inv->status === 'paid') {
+                $paid = max($paid, (float) $inv->total);
+            }
+            $paidInvoicesRevenue += $paid;
+
+            if ($inv->status !== 'paid') {
+                $balance = max(0.0, (float) $inv->total - $paid);
+                $outstandingReceivables += $balance;
+                $unpaidInvoicesCount++;
+            }
+        }
+
+        // 3. REVENUE FROM POS RECEIPTS
+        $posQuery = PosReceipt::query();
+        if ($dateRange) {
+            $posQuery->whereBetween('created_at', $dateRange);
+        }
+        $periodPosReceipts = $posQuery->latest()->get();
+        $posRevenue = (float) $periodPosReceipts->sum('total');
+
+        // 4. REVENUE FROM B2B RETAILER ORDERS
+        $retailerRevenue = 0.0;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('retailer_orders')) {
+                $retailerQuery = RetailerOrder::query()->whereIn('payment_status', ['paid', 'confirmed']);
+                if ($dateRange) {
+                    $retailerQuery->whereBetween('created_at', $dateRange);
+                }
+                $retailerRevenue = (float) $retailerQuery->sum('total_amount');
+            }
+        } catch (\Throwable) {}
+
+        // TOTAL COMBINED REVENUE
+        $totalRevenue = $paidInvoicesRevenue + $posRevenue + $retailerRevenue;
+        $netProfit = $totalRevenue - $totalOperatingExpenses;
+        $netMarginPercent = $totalRevenue > 0 ? round(($netProfit / $totalRevenue) * 100, 1) : 0.0;
+
+        // RECENT INPUTED EXPENSES (Take from period, fallback to latest overall if empty)
+        $recentExpenses = $periodExpenses->take(8);
+        if ($recentExpenses->isEmpty()) {
+            $recentExpenses = Expense::query()->latest('expense_date')->take(6)->get();
+        }
+
+        // EXPENSE CATEGORIES SUMMARY
+        $categoryBreakdown = $periodExpenses->groupBy('category')->map(function ($items, $cat) use ($totalInputtedExpenses) {
+            $sum = (float) $items->sum('amount');
+            $pct = $totalInputtedExpenses > 0 ? round(($sum / $totalInputtedExpenses) * 100, 1) : 0;
+            return [
+                'category' => $cat ?: 'General',
+                'amount' => $sum,
+                'count' => $items->count(),
+                'percent' => $pct,
+            ];
+        })->sortByDesc('amount')->values()->take(5)->toArray();
+
+        // RECENT REVENUE STREAM FEED (Combined Invoices + POS Sales)
+        $revenueFeed = collect();
+
+        foreach ($periodInvoices->take(6) as $inv) {
+            $amt = (float) ($inv->paid_amount > 0 ? $inv->paid_amount : ($inv->status === 'paid' ? $inv->total : 0));
+            if ($amt > 0 || $inv->status === 'paid') {
+                $revenueFeed->push([
+                    'type' => 'invoice',
+                    'title' => 'Invoice Payment — ' . ($inv->client_name ?: 'Client'),
+                    'ref' => $inv->invoice_number,
+                    'amount' => $amt > 0 ? $amt : (float) $inv->total,
+                    'date' => $inv->issue_date?->format('d M Y') ?? $inv->created_at?->format('d M Y') ?? now()->format('d M Y'),
+                    'status' => $inv->status,
+                    'badge_color' => 'emerald',
+                    'icon' => 'fa-light fa-file-invoice-dollar',
+                ]);
+            }
+        }
+
+        foreach ($periodPosReceipts->take(6) as $pos) {
+            $revenueFeed->push([
+                'type' => 'pos',
+                'title' => 'POS Cashier Sale — ' . ($pos->cashier_name ?: 'Counter POS'),
+                'ref' => $pos->receipt_number,
+                'amount' => (float) $pos->total,
+                'date' => $pos->created_at?->format('d M Y, h:i A') ?? now()->format('d M Y'),
+                'status' => 'settled',
+                'badge_color' => 'blue',
+                'icon' => 'fa-light fa-cash-register',
+            ]);
+        }
+
+        $sortedRevenueFeed = $revenueFeed->sortByDesc('date')->values()->take(8);
+
+        // BANK LIQUIDITY
+        $bankAccounts = BankAccount::query()->orderBy('name')->get();
+        $totalLiquidCash = (float) $bankAccounts->sum('balance');
+
+        return [
+            'totalRevenue' => $totalRevenue,
+            'paidInvoicesRevenue' => $paidInvoicesRevenue,
+            'posRevenue' => $posRevenue,
+            'retailerRevenue' => $retailerRevenue,
+            'totalExpenses' => $totalOperatingExpenses,
+            'totalInputtedExpenses' => $totalInputtedExpenses,
+            'totalSalaries' => $totalSalaries,
+            'netProfit' => $netProfit,
+            'netMarginPercent' => $netMarginPercent,
+            'outstandingReceivables' => $outstandingReceivables,
+            'unpaidInvoicesCount' => $unpaidInvoicesCount,
+            'recentExpenses' => $recentExpenses,
+            'categoryBreakdown' => $categoryBreakdown,
+            'revenueFeed' => $sortedRevenueFeed,
+            'bankAccounts' => $bankAccounts,
+            'totalLiquidCash' => $totalLiquidCash,
+            'periodLabel' => ucfirst(str_replace('_', ' ', $this->financePeriodFilter)),
+        ];
+    }
+
     public function addExpenseReceiptUrl(): void
     {
         $url = trim($this->newExpenseReceiptUrl);
@@ -5210,6 +5380,7 @@ class AscendModuleViewer extends Component
         }
 
         return view('appascend::livewire.ascend-module-viewer', [
+            'financeMetrics' => $this->getFinanceOverviewMetrics(),
             'dbBankAccounts' => BankAccount::query()->orderBy('name')->get(),
             'dbInvoices' => Invoice::query()->latest()->get(),
             'dbExpenses' => Expense::query()->latest()->get(),
