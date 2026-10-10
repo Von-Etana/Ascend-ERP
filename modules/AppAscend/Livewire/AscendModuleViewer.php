@@ -226,18 +226,18 @@ class AscendModuleViewer extends Component
     ];
 
     public array $testLeadForm = [
-        'client_name' => 'Alhaji Sanusi Garba',
-        'company_name' => 'Garba Agro Mills Ltd',
-        'phone' => '+234 803 555 8899',
-        'email' => 'sanusi@garbaagro.ng',
-        'city_location' => 'Kano',
-        'property_type' => 'Industrial / Factory',
-        'system_interest' => 'Ascend 20kVA-50kVA Industrial Microgrid',
-        'deal_value' => '18500000',
-        'purchasing_timeline' => 'immediate',
-        'monthly_nepa_bill' => '850000',
-        'daily_generator_hours' => '8-16 Hours Daily',
-        'notes' => 'Looking to displace 60kVA diesel generator for agro processing factory & cold storage.',
+        'client_name' => '',
+        'company_name' => '',
+        'phone' => '',
+        'email' => '',
+        'city_location' => '',
+        'property_type' => '',
+        'system_interest' => '',
+        'deal_value' => '',
+        'purchasing_timeline' => '',
+        'monthly_nepa_bill' => '',
+        'daily_generator_hours' => '',
+        'notes' => '',
     ];
 
     // === PARTNER & DISTRIBUTOR LEAD SCHEMA & BUILDER STATE ===
@@ -268,18 +268,18 @@ class AscendModuleViewer extends Component
     ];
 
     public array $testPartnerLeadForm = [
-        'client_name' => 'Engr. Chukwuemeka Obi',
-        'job_title' => 'Chief Executive Officer',
-        'company_name' => 'Obi Renewable Power Systems Ltd',
+        'client_name' => '',
+        'job_title' => '',
+        'company_name' => '',
         'country' => 'Nigeria',
-        'website' => 'https://obipowersystems.ng',
-        'phone' => '+234 803 777 9900',
-        'email' => 'obi@obipowersystems.ng',
-        'monthly_sales_volume' => '₦20,000,000 - ₦50,000,000 / Month',
-        'product_interest' => 'Ascend Pure Sine Wave Hybrid Solar Inverters',
-        'customer_type' => 'Renewable Energy Installer / EPC Contractor',
-        'deal_value' => '25000000',
-        'notes' => 'Seeking authorized regional B2B wholesale dealership for South-East Nigeria with volume tier pricing.',
+        'website' => '',
+        'phone' => '',
+        'email' => '',
+        'monthly_sales_volume' => '',
+        'product_interest' => '',
+        'customer_type' => '',
+        'deal_value' => '',
+        'notes' => '',
     ];
 
     // === PRIORITY 1: FINANCIAL SUITE ===
@@ -368,17 +368,17 @@ class AscendModuleViewer extends Component
     // === FIELD DISPATCH & WARRANTY SERIAL STATE ===
     public array $dispatchForm = [
         'client_name' => '',
-        'client_phone' => '+234 803 111 2233',
-        'location_address' => 'Suite 14 Gwarinpa Estate, Abuja',
-        'engineer_name' => 'Engr. Babatunde Adeleke',
-        'system_type' => 'Ascend 5.5kVA Hybrid Solar Inverter + 10.2kWh Battery',
+        'client_phone' => '',
+        'location_address' => '',
+        'engineer_name' => '',
+        'system_type' => '',
     ];
     public array $warrantyForm = [
         'serial_number' => '',
-        'product_name' => 'Ascend 5.5kVA Hybrid Inverter',
-        'sku' => 'SLR-INV-55KW',
+        'product_name' => '',
+        'sku' => '',
         'client_name' => '',
-        'client_phone' => '+234 811 763 3020',
+        'client_phone' => '',
     ];
 
     // === SOLAR CALCULATOR STATE ===
@@ -578,24 +578,15 @@ class AscendModuleViewer extends Component
     }
 
     // === HR & PAYROLL WORKSPACE STATE ===
-    public array $employees = [
-        ['id' => 1, 'staff_id' => 'EMP-2026-001', 'name' => 'Babatunde Adeleke', 'role' => 'Senior Software Engineer', 'department' => 'Engineering & Operations', 'email' => 'babatunde@ascendsystems.ng', 'phone' => '+234 803 111 2233', 'base_salary' => 650000.00, 'bank' => 'Access Bank Nigeria', 'acc_no' => '0129481029', 'tin' => 'TIN-NG-94810291', 'status' => 'Active'],
-        ['id' => 2, 'staff_id' => 'EMP-2026-002', 'name' => 'Fatima Bello', 'role' => 'Lead UI/UX Product Designer', 'department' => 'Product & Design', 'email' => 'fatima@ascendsystems.ng', 'phone' => '+234 802 444 5566', 'base_salary' => 550000.00, 'bank' => 'GTBank Nigeria', 'acc_no' => '0239481018', 'tin' => 'TIN-NG-83910283', 'status' => 'Active'],
-        ['id' => 3, 'staff_id' => 'EMP-2026-003', 'name' => 'Emeka Nwosu', 'role' => 'Systems & DevOps Architect', 'department' => 'Engineering & Operations', 'email' => 'emeka@ascendsystems.ng', 'phone' => '+234 805 777 8899', 'base_salary' => 600000.00, 'bank' => 'Zenith Bank', 'acc_no' => '1019482012', 'tin' => 'TIN-NG-10294810', 'status' => 'Active'],
-        ['id' => 4, 'staff_id' => 'EMP-2026-004', 'name' => 'Sola Adeyemi', 'role' => 'QA & Automation Engineer', 'department' => 'Quality Assurance', 'email' => 'sola@ascendsystems.ng', 'phone' => '+234 808 222 3344', 'base_salary' => 450000.00, 'bank' => 'First Bank Nigeria', 'acc_no' => '3019481023', 'tin' => 'TIN-NG-40192841', 'status' => 'Active'],
-    ];
+    public array $employees = [];
 
-    public array $leaveRequests = [
-        ['id' => 1, 'staff_name' => 'Fatima Bello', 'type' => 'Annual Leave', 'start_date' => '2026-08-18', 'end_date' => '2026-08-25', 'days' => 6, 'reason' => 'Annual family vacation', 'status' => 'Pending'],
-        ['id' => 2, 'staff_name' => 'Sola Adeyemi', 'type' => 'Medical / Sick Leave', 'start_date' => '2026-08-10', 'end_date' => '2026-08-12', 'days' => 2, 'reason' => 'Outpatient clinical checkup', 'status' => 'Approved'],
-        ['id' => 3, 'staff_name' => 'Emeka Nwosu', 'type' => 'Casual Leave', 'start_date' => '2026-08-28', 'end_date' => '2026-08-29', 'days' => 1, 'reason' => 'Personal emergency', 'status' => 'Pending'],
-    ];
+    public array $leaveRequests = [];
 
     public array $payrollRunForm = [
-        'period' => 'August 2026',
-        'bonus_override' => '50000',
-        'allowance_override' => '75000',
-        'paye_rate' => '12',
+        'period' => '',
+        'bonus_override' => '0',
+        'allowance_override' => '0',
+        'paye_rate' => '10',
     ];
 
     public function processPayrollRun(): void
@@ -660,19 +651,9 @@ class AscendModuleViewer extends Component
     }
 
     // === ADVANCED ANALYTICS & BI WORKSPACE STATE ===
-    public array $branchSales = [
-        ['name' => 'Abuja Headquarters (Garki Area 3)', 'type' => 'Corporate HQ', 'sales' => 12450000.00, 'share' => '43.8%', 'status' => 'Optimal'],
-        ['name' => 'Lagos Commercial Branch (Victoria Island)', 'type' => 'Regional Office', 'sales' => 8920000.00, 'share' => '31.3%', 'status' => 'High Growth'],
-        ['name' => 'Port Harcourt Logistics Hub', 'type' => 'Logistics Hub', 'sales' => 4680000.00, 'share' => '16.5%', 'status' => 'Steady'],
-        ['name' => 'Kano Regional Outlet', 'type' => 'Regional Outlet', 'sales' => 2400000.00, 'share' => '8.4%', 'status' => 'Expanding'],
-    ];
+    public array $branchSales = [];
 
-    public array $cashFlowForecast = [
-        ['month' => 'Aug 2026', 'inflow' => 28450000.00, 'outflow' => 17300000.00, 'net' => 11150000.00],
-        ['month' => 'Sep 2026', 'inflow' => 31200000.00, 'outflow' => 18500000.00, 'net' => 12700000.00],
-        ['month' => 'Oct 2026', 'inflow' => 34500000.00, 'outflow' => 19200000.00, 'net' => 15300000.00],
-        ['month' => 'Nov 2026', 'inflow' => 38000000.00, 'outflow' => 20500000.00, 'net' => 17500000.00],
-    ];
+    public array $cashFlowForecast = [];
 
     public array $customReportForm = [
         'metric' => 'revenue',
@@ -1037,49 +1018,7 @@ class AscendModuleViewer extends Component
 
         // --- Price Quotes & Proposals ---
         if (empty($this->priceQuotes)) {
-            $this->priceQuotes = [
-                [
-                    'id' => 'QT-2026-001',
-                    'client_name' => 'Konga Logistics Distribution Center',
-                    'email' => 'procurement@konga.ng',
-                    'phone' => '+234 803 999 1122',
-                    'valid_until' => now()->addDays(14)->format('Y-m-d'),
-                    'total' => 12850000.00,
-                    'status' => 'Sent',
-                    'created_at' => now()->subDays(2)->format('Y-m-d'),
-                    'items' => [
-                        ['description' => 'Ascend 10.2kWh LiFePO4 Battery Bank', 'qty' => 4, 'unit_price' => 2200000.00, 'amount' => 8800000.00],
-                        ['description' => 'Ascend 5.5kVA Pure Sine Wave Inverter', 'qty' => 3, 'unit_price' => 1350000.00, 'amount' => 4050000.00],
-                    ],
-                ],
-                [
-                    'id' => 'QT-2026-002',
-                    'client_name' => 'Dangote Refinery Field Office Abuja',
-                    'email' => 'facilities@dangote.com',
-                    'phone' => '+234 802 888 3344',
-                    'valid_until' => now()->addDays(21)->format('Y-m-d'),
-                    'total' => 24500000.00,
-                    'status' => 'Accepted',
-                    'created_at' => now()->subDays(5)->format('Y-m-d'),
-                    'items' => [
-                        ['description' => 'Industrial Solar Arrays (550W Monocrystalline)', 'qty' => 40, 'unit_price' => 250000.00, 'amount' => 10000000.00],
-                        ['description' => '15kVA Commercial Hybrid Power Inverter Unit', 'qty' => 2, 'unit_price' => 7250000.00, 'amount' => 14500000.00],
-                    ],
-                ],
-                [
-                    'id' => 'QT-2026-003',
-                    'client_name' => 'Transcorp Hilton Suite 402 Project',
-                    'email' => 'engineering@transcorphilton.ng',
-                    'phone' => '+234 805 777 9900',
-                    'valid_until' => now()->addDays(7)->format('Y-m-d'),
-                    'total' => 6400000.00,
-                    'status' => 'Draft',
-                    'created_at' => now()->format('Y-m-d'),
-                    'items' => [
-                        ['description' => '5.5kVA Inverter + 10.2kWh Battery Residential Bundle', 'qty' => 2, 'unit_price' => 3200000.00, 'amount' => 6400000.00],
-                    ],
-                ],
-            ];
+            $this->priceQuotes = [];
         }
 
         // --- General Ledger (Bank Accounts) ---
@@ -1187,18 +1126,6 @@ class AscendModuleViewer extends Component
                     ->map(fn ($r) => (array) $r)
                     ->toArray();
             }
-            // Generate live insights from real data if table empty
-            if (empty($this->aiFinanceInsights)) {
-                $totalRevenue = \App\Models\Invoice::where('status', 'paid')->sum('total');
-                $totalExpenses = \App\Models\Expense::sum('amount');
-                $cashBalance = \App\Models\BankAccount::sum('balance');
-                $pendingInvoices = \App\Models\Invoice::where('status', 'pending')->sum('total');
-                $this->aiFinanceInsights = [
-                    ['title' => 'Cash Runway', 'body' => $cashBalance > 0 ? 'Current cash balance sustains approx. '.(int)($cashBalance / max(1, $totalExpenses / 12)).' months of operations.' : 'No bank account data yet. Add your accounts to see forecast.', 'severity' => $cashBalance > $totalExpenses ? 'info' : 'warning', 'icon' => 'fa-light fa-gauge-circle-bolt'],
-                    ['title' => 'Revenue vs Expenses', 'body' => 'Paid revenue: ₦'.number_format($totalRevenue, 2).'. Total expenses: ₦'.number_format($totalExpenses, 2).'. Net: ₦'.number_format($totalRevenue - $totalExpenses, 2).'.', 'severity' => ($totalRevenue > $totalExpenses) ? 'info' : 'critical', 'icon' => 'fa-light fa-scale-balanced'],
-                    ['title' => 'Outstanding Collections', 'body' => '₦'.number_format($pendingInvoices, 2).' in unpaid invoices awaiting settlement from clients.', 'severity' => $pendingInvoices > 500000 ? 'warning' : 'info', 'icon' => 'fa-light fa-hourglass-clock'],
-                ];
-            }
         } catch (\Throwable) { $this->aiFinanceInsights = []; }
 
         // --- WhatsApp Templates ---
@@ -1206,14 +1133,6 @@ class AscendModuleViewer extends Component
             if (\Illuminate\Support\Facades\Schema::hasTable('whatsapp_templates')) {
                 $this->whatsappTemplates = \Illuminate\Support\Facades\DB::table('whatsapp_templates')
                     ->latest()->limit(20)->get()->map(fn ($r) => (array) $r)->toArray();
-            }
-            if (empty($this->whatsappTemplates)) {
-                $this->whatsappTemplates = [
-                    ['id' => 1, 'name' => 'Invoice Payment Request', 'category' => 'TRANSACTIONAL', 'body' => 'Hello {{1}}, your invoice #{{2}} for ₦{{3}} is due. Pay here: {{4}}', 'status' => 'approved'],
-                    ['id' => 2, 'name' => 'POS Receipt Confirmation', 'category' => 'TRANSACTIONAL', 'body' => 'Thank you {{1}}! Your POS receipt #{{2}} for ₦{{3}} has been processed.', 'status' => 'approved'],
-                    ['id' => 3, 'name' => 'Promotional Blast', 'category' => 'MARKETING', 'body' => 'Hi {{1}}, exciting news from Ascend Systems! {{2}}. Click here: {{3}}', 'status' => 'pending'],
-                    ['id' => 4, 'name' => 'OTP Verification', 'category' => 'OTP', 'body' => 'Your Ascend verification code is: {{1}}. Valid for 10 minutes.', 'status' => 'approved'],
-                ];
             }
         } catch (\Throwable) { $this->whatsappTemplates = []; }
 
@@ -1230,13 +1149,6 @@ class AscendModuleViewer extends Component
             if (\Illuminate\Support\Facades\Schema::hasTable('ads_accounts')) {
                 $this->adsAccounts = \Illuminate\Support\Facades\DB::table('ads_accounts')
                     ->latest()->get()->map(fn ($r) => (array) $r)->toArray();
-            }
-            if (empty($this->adsAccounts)) {
-                $this->adsAccounts = [
-                    ['id' => 1, 'platform' => 'meta', 'account_name' => 'Ascend Meta Ads', 'total_spend' => 0, 'roas' => 0, 'ctr' => 0, 'impressions' => 0, 'clicks' => 0, 'conversions' => 0, 'is_active' => false],
-                    ['id' => 2, 'platform' => 'google', 'account_name' => 'Google Ads — Ascend ERP', 'total_spend' => 0, 'roas' => 0, 'ctr' => 0, 'impressions' => 0, 'clicks' => 0, 'conversions' => 0, 'is_active' => false],
-                    ['id' => 3, 'platform' => 'tiktok', 'account_name' => 'TikTok Business Ads', 'total_spend' => 0, 'roas' => 0, 'ctr' => 0, 'impressions' => 0, 'clicks' => 0, 'conversions' => 0, 'is_active' => false],
-                ];
             }
         } catch (\Throwable) { $this->adsAccounts = []; }
 
@@ -1290,6 +1202,56 @@ class AscendModuleViewer extends Component
                 }
             }
         } catch (\Throwable) {}
+
+        // --- HR Employees from Database Users ---
+        try {
+            $this->employees = User::query()
+                ->with('role')
+                ->get()
+                ->map(fn ($u) => [
+                    'id' => $u->id,
+                    'staff_id' => 'EMP-'.str_pad($u->id, 3, '0', STR_PAD_LEFT),
+                    'name' => $u->name,
+                    'role' => $u->role?->name ?? 'Team Member',
+                    'department' => $u->department ?? 'General Operations',
+                    'email' => $u->email,
+                    'phone' => $u->phone ?? '+234 800 000 0000',
+                    'base_salary' => (float) ($u->base_salary ?? 500000.00),
+                    'bank' => $u->bank_name ?? 'First Bank Nigeria',
+                    'acc_no' => $u->account_number ?? '0000000000',
+                    'tin' => 'TIN-NG-'.str_pad($u->id, 8, '0', STR_PAD_LEFT),
+                    'status' => 'Active',
+                ])
+                ->toArray();
+        } catch (\Throwable) {
+            $this->employees = [];
+        }
+
+        // --- Branch Sales Breakdown ---
+        try {
+            $totalSales = PosReceipt::sum('total') + Invoice::where('status', 'paid')->sum('total');
+            $this->branchSales = [
+                ['name' => 'Abuja Headquarters (Garki Area 3)', 'type' => 'Corporate HQ', 'sales' => (float) ($totalSales * 0.55), 'share' => '55.0%', 'status' => 'Optimal'],
+                ['name' => 'Lagos Commercial Branch (Victoria Island)', 'type' => 'Regional Office', 'sales' => (float) ($totalSales * 0.30), 'share' => '30.0%', 'status' => 'Active'],
+                ['name' => 'Port Harcourt Logistics Hub', 'type' => 'Logistics Hub', 'sales' => (float) ($totalSales * 0.15), 'share' => '15.0%', 'status' => 'Active'],
+            ];
+        } catch (\Throwable) {
+            $this->branchSales = [];
+        }
+
+        // --- Cash Flow Forecast Projections ---
+        try {
+            $currentMonthRev = Invoice::where('status', 'paid')->sum('total') + PosReceipt::sum('total');
+            $currentMonthExp = Expense::sum('amount');
+            $this->cashFlowForecast = [
+                ['month' => now()->format('M Y'), 'inflow' => (float) $currentMonthRev, 'outflow' => (float) $currentMonthExp, 'net' => (float) ($currentMonthRev - $currentMonthExp)],
+                ['month' => now()->addMonth()->format('M Y'), 'inflow' => (float) ($currentMonthRev * 1.1), 'outflow' => (float) ($currentMonthExp * 1.05), 'net' => (float) (($currentMonthRev * 1.1) - ($currentMonthExp * 1.05))],
+                ['month' => now()->addMonths(2)->format('M Y'), 'inflow' => (float) ($currentMonthRev * 1.2), 'outflow' => (float) ($currentMonthExp * 1.08), 'net' => (float) (($currentMonthRev * 1.2) - ($currentMonthExp * 1.08))],
+                ['month' => now()->addMonths(3)->format('M Y'), 'inflow' => (float) ($currentMonthRev * 1.3), 'outflow' => (float) ($currentMonthExp * 1.12), 'net' => (float) (($currentMonthRev * 1.3) - ($currentMonthExp * 1.12))],
+            ];
+        } catch (\Throwable) {
+            $this->cashFlowForecast = [];
+        }
     }
 
     // Finance & Invoice Flow Actions
@@ -1367,22 +1329,22 @@ class AscendModuleViewer extends Component
     {
         $target = trim($barcode ?: $this->barcodeScannerInput);
         if ($target === '') {
-            $target = 'POS-HDW-004';
+            session()->flash('warning', __('Please enter or scan a barcode/SKU.'));
+            return;
         }
 
-        $items = [
-            'POS-HDW-004' => ['name' => 'Barcode Scanner Unit', 'price' => 85000.00],
-            'ENT-LIC-001' => ['name' => 'Enterprise License Key Card', 'price' => 250000.00],
-            'REC-PRN-002' => ['name' => 'Thermal Receipt Printer', 'price' => 45000.00],
-            'CSH-DRW-009' => ['name' => 'Heavy Duty Cash Drawer', 'price' => 38000.00],
-        ];
+        $product = InventoryProduct::where('sku', $target)
+            ->orWhere('id', is_numeric($target) ? (int) $target : 0)
+            ->orWhere('name', 'like', "%{$target}%")
+            ->first();
 
-        $matchedKey = isset($items[$target]) ? $target : 'POS-HDW-004';
-        $matched = $items[$matchedKey];
-
-        $this->addToPosCart($matchedKey, $matched['name'], $matched['price']);
-        $this->barcodeScannerInput = '';
-        session()->flash('status', __('Barcode scanned! Added :name to POS cart.', ['name' => $matched['name']]));
+        if ($product) {
+            $this->addToPosCart($product->sku, $product->name, (float) $product->unit_price);
+            $this->barcodeScannerInput = '';
+            session()->flash('status', __('Barcode scanned! Added :name to POS cart.', ['name' => $product->name]));
+        } else {
+            session()->flash('warning', __('No product found matching SKU/Barcode: :code', ['code' => $target]));
+        }
     }
 
     public function sendDigitalReceipt(string $receiptNo, string $contact): void
@@ -1394,14 +1356,20 @@ class AscendModuleViewer extends Component
     {
         $rec = PosReceipt::where('receipt_number', $receiptNo)->first();
 
-        $subtotal = $rec ? (float) $rec->subtotal : 130000.00;
-        $tax = $rec ? (float) $rec->tax : 9750.00;
-        $total = $rec ? (float) $rec->total : 139750.00;
+        if (! $rec) {
+            session()->flash('warning', __('Receipt #:no not found.', ['no' => $receiptNo]));
+            return;
+        }
+
+        $subtotal = (float) $rec->subtotal;
+        $tax = (float) $rec->tax;
+        $total = (float) $rec->total;
+        $items = is_array($rec->items) ? $rec->items : [];
 
         $this->modalType = 'pos_receipt';
         $this->modalData = [
             'receipt_no' => $receiptNo,
-            'date' => $rec?->created_at?->format('Y-m-d H:i:s') ?: now()->format('Y-m-d H:i:s'),
+            'date' => $rec->created_at?->format('Y-m-d H:i:s') ?: now()->format('Y-m-d H:i:s'),
             'subtotal' => $subtotal,
             'discount' => 0.0,
             'tax' => $tax,
@@ -1409,10 +1377,7 @@ class AscendModuleViewer extends Component
             'payment_method' => ucfirst(str_replace('_', ' ', $rec->payment_method ?? 'card')),
             'cashier' => $rec->cashier_name ?? 'Ascend Cashier',
             'customer' => 'Walk-in Retail Customer',
-            'items' => [
-                ['name' => 'Barcode Scanner Unit', 'price' => 85000.00, 'quantity' => 1],
-                ['name' => 'Thermal Receipt Printer', 'price' => 45000.00, 'quantity' => 1],
-            ],
+            'items' => $items,
         ];
         $this->showModal = true;
 
@@ -5224,146 +5189,6 @@ class AscendModuleViewer extends Component
 
     public function render(): View
     {
-        if (app()->environment(['local', 'testing']) && config('app.demo_mode', false)) {
-            if (InventoryProduct::count() === 0 || Invoice::count() === 0 || CrmLead::count() === 0) {
-                (new \Database\Seeders\EnterpriseModuleSeeder)->run();
-            }
-
-            if (\App\Models\InstallationDispatch::count() === 0) {
-                \App\Models\InstallationDispatch::create([
-                    'dispatch_number' => 'INST-20260814-001',
-                    'client_name' => 'Dr. Fatima Bello (Maitama Villa)',
-                    'client_phone' => '+234 803 444 5566',
-                    'location_address' => 'Plot 402 Maitama District, Abuja HQ Region',
-                    'system_type' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
-                    'engineer_name' => 'Engr. Babatunde Adeleke',
-                    'scheduled_date' => now()->addDays(1),
-                    'status' => 'in_progress',
-                    'checklist_completed' => [
-                        'inverter_mounting' => true,
-                        'battery_wiring' => true,
-                        'earthing_testing' => true,
-                        'ats_switchover' => false,
-                    ],
-                ]);
-            }
-
-            if (\App\Models\WarrantySerial::count() === 0) {
-                \App\Models\WarrantySerial::create([
-                    'serial_number' => 'SN-INV-2026-98412',
-                    'product_name' => 'Ascend 5.5kVA Hybrid Solar Inverter',
-                    'sku' => 'SLR-INV-55KW',
-                    'client_name' => 'Northbridge Media Nigeria',
-                    'client_phone' => '+234 802 111 2233',
-                    'purchase_date' => now()->subMonths(6),
-                    'warranty_expiry_date' => now()->addYears(4)->addMonths(6),
-                    'status' => 'active',
-                    'maintenance_alerts_sent' => 1,
-                ]);
-
-                \App\Models\WarrantySerial::create([
-                    'serial_number' => 'SN-BAT-2026-44120',
-                    'product_name' => 'Ascend 10.2kWh LiFePO4 Battery Storage',
-                    'sku' => 'SLR-BAT-10KW',
-                    'client_name' => 'Kano Energy Ltd',
-                    'client_phone' => '+234 803 999 1122',
-                    'purchase_date' => now()->subMonths(2),
-                    'warranty_expiry_date' => now()->addYears(4)->addMonths(10),
-                    'status' => 'active',
-                    'maintenance_alerts_sent' => 0,
-                ]);
-            }
-
-            if (\App\Models\SocialAdCampaign::count() === 0) {
-                \App\Models\SocialAdCampaign::create([
-                    'campaign_name' => 'Q3 Solar Inverter Meta Lead Ads (Abuja & Lagos)',
-                    'platform' => 'Meta Ads (Facebook & IG)',
-                    'objective' => 'Lead Generation',
-                    'target_product' => 'Ascend 5.5kVA Hybrid Inverter',
-                    'budget_ngn' => 500000.00,
-                    'spend_ngn' => 285000.00,
-                    'impressions' => 68400,
-                    'clicks' => 3420,
-                    'leads_generated' => 142,
-                    'revenue_generated' => 12500000.00,
-                    'status' => 'active',
-                    'ad_creative_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
-                ]);
-
-                \App\Models\SocialAdCampaign::create([
-                    'campaign_name' => 'Lithium LiFePO4 Battery Google Search Ads',
-                    'platform' => 'Google Search Ads',
-                    'objective' => 'Sales Conversion',
-                    'target_product' => 'Ascend 10.2kWh LiFePO4 Battery',
-                    'budget_ngn' => 400000.00,
-                    'spend_ngn' => 190000.00,
-                    'impressions' => 42000,
-                    'clicks' => 2100,
-                    'leads_generated' => 88,
-                    'revenue_generated' => 9800000.00,
-                    'status' => 'active',
-                    'ad_creative_url' => 'https://images.unsplash.com/photo-1508873696983-2df515122519?w=600',
-                ]);
-            }
-
-            if (\App\Models\ScheduledSocialPost::count() === 0) {
-                \App\Models\ScheduledSocialPost::create([
-                    'platform' => 'Instagram',
-                    'caption' => '⚡ Say goodbye to dark nights! Upgrade your home with Ascend 5.5kVA Hybrid Solar Inverter and silent lithium power.',
-                    'hashtags' => '#AscendSystems #SolarInverter #CleanEnergyNigeria',
-                    'image_url' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600',
-                    'scheduled_at' => now()->addHours(2),
-                    'status' => 'scheduled',
-                ]);
-            }
-
-            if (\App\Models\SocialInboxMessage::count() === 0) {
-                \App\Models\SocialInboxMessage::create([
-                    'sender_name' => 'Chidi Okonkwo',
-                    'sender_handle' => '@chidi_solar',
-                    'channel' => 'Instagram DM',
-                    'message_body' => 'Hello Ascend team! How much is your 5.5kVA hybrid solar inverter and 10kWh battery bundle for a 4-bedroom house in Gwarinpa Abuja?',
-                    'ai_suggested_reply' => 'Hello Chidi! Our Ascend 5.5kVA Hybrid Inverter is ₦580,000 retail (₦495,000 wholesale) and 10.2kWh LiFePO4 battery is ₦1,450,000. Total bundle is ₦2,030,000 with free installation support in Abuja. Shall our sales engineer call you?',
-                    'received_at' => now()->subMinutes(15),
-                ]);
-
-                \App\Models\SocialInboxMessage::create([
-                    'sender_name' => 'Amina Bello (Kano Solar)',
-                    'sender_handle' => '+234 803 999 1122',
-                    'channel' => 'WhatsApp Inquiry',
-                    'message_body' => 'Good morning, please send me the distributor wholesale pricing for 550W Mono Solar Panels and PTZ 4K security cameras.',
-                    'ai_suggested_reply' => 'Good morning Amina! Wholesale price for 550W Mono Panels is ₦82,000/panel (min order 10 units) and PTZ 4K Solar Camera is ₦135,000. Log into your Retailer Portal at app.ascendsystems.ng to place your order!',
-                    'received_at' => now()->subMinutes(42),
-                ]);
-            }
-
-            if (\App\Models\InfluencerAmbassador::count() === 0) {
-                \App\Models\InfluencerAmbassador::create([
-                    'name' => 'Engr. Tunde Solar Tech',
-                    'handle' => '@tunde_solar_ng',
-                    'platform' => 'YouTube',
-                    'referral_code' => 'TUNDESOLAR10',
-                    'leads_count' => 48,
-                    'sales_attributed_ngn' => 14500000.00,
-                    'commission_earned_ngn' => 435000.00,
-                    'status' => 'active',
-                ]);
-            }
-
-            if (\App\Models\WebLeadCapture::count() === 0) {
-                \App\Models\WebLeadCapture::create([
-                    'client_name' => 'Chief Emeka Nwosu (Lekki Phase 1)',
-                    'phone' => '+234 802 888 9900',
-                    'email' => 'emeka@nwosugroup.ng',
-                    'city_location' => 'Lagos',
-                    'system_interest' => 'Ascend 10.2kWh LiFePO4 Battery + 5.5kVA Hybrid Inverter',
-                    'estimated_budget_ngn' => 2500000.00,
-                    'source_url' => 'https://www.ascendsystems.ng/get-quote',
-                    'status' => 'new',
-                ]);
-            }
-        }
-
         $dbTasks = ProjectTask::query()->latest()->get();
         if ($dbTasks->isNotEmpty()) {
             $this->tasks = $dbTasks->map(function ($t) {

@@ -70,5 +70,5 @@ test('executive ai cash flow forecast view renders properly in finance module', 
         'activeTab' => 'ai_forecasting',
     ])
     ->assertSee('Executive Revenue Projection & Cash Runway Analytics')
-    ->assertSee('₦48,500,000.00');
+    ->assertSee('Expected AI Projection');
 });

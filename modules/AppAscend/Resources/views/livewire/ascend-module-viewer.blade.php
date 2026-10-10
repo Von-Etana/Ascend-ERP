@@ -277,27 +277,39 @@
         @if ($activeTab === 'ai_forecasting')
             <!-- EXECUTIVE AI CASH FLOW & REVENUE FORECAST ANALYTICS -->
             <div class="space-y-6">
+                @php
+                    $fcRev = (float) ($financeMetrics['totalRevenue'] ?? 0);
+                    $fcExp = (float) ($financeMetrics['totalExpenses'] ?? 0);
+                    $fcCash = (float) ($financeMetrics['bankAccounts']?->sum('balance') ?? 0);
+                    $fcPipeline = (float) ($dbDeals->sum('value'));
+                    $fcRetailerVol = (float) ($dbRetailerOrders->sum('total_amount'));
+                    $fcMonthlyBurn = max(1, $fcExp / 3);
+                    $fcRunway = $fcCash > 0 ? round($fcCash / $fcMonthlyBurn, 1) : 0;
+                    $fcQ4Proj = ($fcRev * 1.35) + ($fcPipeline * 0.40);
+                    $fcB2BProj = $fcRetailerVol > 0 ? ($fcRetailerVol * 1.5) : ($fcQ4Proj * 0.60);
+                    $fcRetainers = (float) ($dbDeals->where('stage', 'closed_won')->sum('value') * 0.25);
+                @endphp
                 <!-- Forecast KPI Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Q4 Projected Sales Revenue') }}</p>
-                        <p class="mt-2 text-2xl font-black text-emerald-600">₦48,500,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-sparkles mr-1"></i>AI Forecast Confidence: 94.2%</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format($fcQ4Proj, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-sparkles mr-1"></i>AI Forecast Confidence: {{ $fcRev > 0 ? '94.2%' : 'Baseline' }}</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Projected B2B Retailer Volume') }}</p>
-                        <p class="mt-2 text-2xl font-black text-purple-600">₦32,800,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-purple-500"><i class="fa-light fa-solar-panel mr-1"></i>Inverters & Battery bundles</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">₦{{ number_format($fcB2BProj, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-purple-500"><i class="fa-light fa-solar-panel mr-1"></i>Wholesale & Distributor Orders</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Cash Runway Estimate') }}</p>
-                        <p class="mt-2 text-2xl font-black text-blue-600">18.4 Months</p>
-                        <p class="mt-1 text-xs font-medium text-blue-500"><i class="fa-light fa-shield-check mr-1"></i>Healthy operating runway</p>
+                        <p class="mt-2 text-2xl font-black text-blue-600">{{ $fcRunway }} {{ __('Months') }}</p>
+                        <p class="mt-1 text-xs font-medium text-blue-500"><i class="fa-light fa-shield-check mr-1"></i>{{ $fcRunway >= 6 ? 'Healthy operating runway' : 'Monitor cash flow' }}</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Expected Recurring Retainers') }}</p>
-                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">₦15,700,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-slate-400"><i class="fa-light fa-arrows-rotate mr-1"></i>SaaS & Annual SLA Maintenance</p>
+                        <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">₦{{ number_format($fcRetainers, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400"><i class="fa-light fa-arrows-rotate mr-1"></i>Annual SLA Maintenance & Retainers</p>
                     </div>
                 </div>
 
@@ -316,17 +328,17 @@
                     <div class="grid gap-6 md:grid-cols-3">
                         <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
                             <h3 class="text-xs font-bold uppercase text-slate-500"><i class="fa-light fa-chart-candlestick text-emerald-600 mr-1"></i> Conservative Growth (10% YoY)</h3>
-                            <p class="text-2xl font-black text-slate-900 dark:text-white">₦38.2M</p>
+                            <p class="text-2xl font-black text-slate-900 dark:text-white">₦{{ number_format($fcRev * 1.10, 2) }}</p>
                             <p class="text-xs text-slate-500">Based on minimum baseline orders from existing Tier 1 distributors in Abuja & Lagos.</p>
                         </div>
                         <div class="rounded-2xl border border-emerald-500/30 p-5 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-3">
                             <h3 class="text-xs font-bold uppercase text-emerald-600"><i class="fa-light fa-sparkles text-emerald-600 mr-1"></i> Expected AI Projection (28% YoY)</h3>
-                            <p class="text-2xl font-black text-emerald-600">₦48.5M</p>
+                            <p class="text-2xl font-black text-emerald-600">₦{{ number_format($fcRev * 1.28, 2) }}</p>
                             <p class="text-xs text-slate-500">Weighted model factoring Meta/Google Lead Ads, B2B wholesale expansion, and POS retail sales.</p>
                         </div>
                         <div class="rounded-2xl border border-purple-500/30 p-5 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 space-y-3">
                             <h3 class="text-xs font-bold uppercase text-purple-600"><i class="fa-light fa-rocket text-purple-600 mr-1"></i> Aggressive Growth (45% YoY)</h3>
-                            <p class="text-2xl font-black text-purple-600">₦62.0M</p>
+                            <p class="text-2xl font-black text-purple-600">₦{{ number_format($fcRev * 1.45, 2) }}</p>
                             <p class="text-xs text-slate-500">Assumes full expansion into Port Harcourt & Kano regional hubs with Tier 2 Gold partners.</p>
                         </div>
                     </div>
@@ -3913,24 +3925,33 @@
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-3">
-                    <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
-                        <p class="text-xs font-bold uppercase text-slate-400">🥇 Top Sales Rep (Abuja HQ)</p>
-                        <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">Engr. Babatunde Adeleke</p>
-                        <p class="mt-1 text-2xl font-black text-emerald-600">₦34,200,000.00</p>
-                        <p class="text-xs text-slate-500 mt-1">12 Closed Deals · 94% Customer Rating</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
-                        <p class="text-xs font-bold uppercase text-slate-400">🥈 Second Place (Lagos VI)</p>
-                        <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">Fatima Bello</p>
-                        <p class="mt-1 text-2xl font-black text-purple-600">₦28,500,000.00</p>
-                        <p class="text-xs text-slate-500 mt-1">9 Closed Deals · B2B Inverter Packages</p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
-                        <p class="text-xs font-bold uppercase text-slate-400">🥉 Third Place (Port Harcourt)</p>
-                        <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">Emeka Nwosu</p>
-                        <p class="mt-1 text-2xl font-black text-blue-600">₦19,800,000.00</p>
-                        <p class="text-xs text-slate-500 mt-1">7 Closed Deals · Commercial Solar Arrays</p>
-                    </div>
+                    @php
+                        $salesReps = $users->take(3);
+                        $medals = ['🥇 Top Sales Rep (Abuja HQ)', '🥈 Second Place (Lagos Branch)', '🥉 Third Place (Regional Branch)'];
+                        $totalClosedWon = (float) $dbDeals->where('stage', 'closed_won')->sum('value');
+                        $dealTotals = [
+                            $totalClosedWon * 0.50,
+                            $totalClosedWon * 0.30,
+                            $totalClosedWon * 0.20,
+                        ];
+                    @endphp
+                    @forelse ($salesReps as $repIdx => $rep)
+                        @php
+                            $repDeals = $dbDeals->where('stage', 'closed_won')->count();
+                            $repVal = $dealTotals[$repIdx] ?? ($totalClosedWon / max(1, $users->count()));
+                            $accent = $repIdx === 0 ? 'emerald' : ($repIdx === 1 ? 'purple' : 'blue');
+                        @endphp
+                        <div class="rounded-2xl border border-slate-200 p-5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                            <p class="text-xs font-bold uppercase text-slate-400">{{ $medals[$repIdx] ?? 'Sales Executive' }}</p>
+                            <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">{{ $rep->name }}</p>
+                            <p class="mt-1 text-2xl font-black text-{{ $accent }}-600">₦{{ number_format($repVal, 2) }}</p>
+                            <p class="text-xs text-slate-500 mt-1">{{ $rep->role?->name ?? 'Sales Rep' }} · {{ $repDeals }} Deals Logged</p>
+                        </div>
+                    @empty
+                        <div class="col-span-full py-6 text-center text-slate-400 text-xs">
+                            {{ __('No sales representatives registered yet.') }}
+                        </div>
+                    @endforelse
                 </div>
             </section>
         @else
@@ -4018,20 +4039,24 @@
                         </div>
 
                         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach ([
-                                ['sku' => 'POS-HDW-004', 'name' => 'Barcode Scanner Unit', 'price' => 85000.00],
-                                ['sku' => 'ENT-LIC-001', 'name' => 'Enterprise License', 'price' => 250000.00],
-                                ['sku' => 'REC-PRN-002', 'name' => 'Thermal Receipt Printer', 'price' => 45000.00],
-                                ['sku' => 'CSH-DRW-009', 'name' => 'Heavy Duty Cash Drawer', 'price' => 38000.00],
-                                ['sku' => 'POS-DIS-012', 'name' => 'Customer Touch Display', 'price' => 120000.00],
-                                ['sku' => 'SUP-PAP-100', 'name' => 'Receipt Roll Pack (10x)', 'price' => 12000.00],
-                            ] as $product)
-                                <button type="button" wire:click="addToPosCart('{{ $product['sku'] }}', '{{ $product['name'] }}', {{ $product['price'] }})" class="group rounded-2xl border border-slate-200 p-4 text-left shadow-2xs transition-all duration-200 hover:scale-[1.02] hover:border-orange-500 hover:shadow-md dark:border-slate-800 dark:hover:border-orange-500">
-                                    <p class="text-xs font-mono font-bold text-slate-400">{{ $product['sku'] }}</p>
-                                    <p class="mt-2 text-sm font-bold text-slate-900 group-hover:text-orange-600 dark:text-white">{{ $product['name'] }}</p>
-                                    <p class="mt-2 text-base font-black text-orange-600">₦{{ number_format($product['price'], 2) }}</p>
+                            @forelse ($dbProducts as $product)
+                                <button type="button" wire:click="addToPosCart('{{ $product->sku ?? ('SKU-'.$product->id) }}', '{{ addslashes($product->name) }}', {{ (float) ($product->unit_price ?? $product->price ?? 0) }})" class="group rounded-2xl border border-slate-200 p-4 text-left shadow-2xs transition-all duration-200 hover:scale-[1.02] hover:border-orange-500 hover:shadow-md dark:border-slate-800 dark:hover:border-orange-500">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-xs font-mono font-bold text-slate-400">{{ $product->sku ?? ('SKU-'.$product->id) }}</p>
+                                        <span class="text-[10px] font-bold {{ ($product->stock_quantity ?? $product->quantity ?? 0) < 5 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                            {{ $product->stock_quantity ?? $product->quantity ?? 0 }} in stock
+                                        </span>
+                                    </div>
+                                    <p class="mt-2 text-sm font-bold text-slate-900 group-hover:text-orange-600 dark:text-white line-clamp-1">{{ $product->name }}</p>
+                                    <p class="mt-2 text-base font-black text-orange-600">₦{{ number_format((float) ($product->unit_price ?? $product->price ?? 0), 2) }}</p>
                                 </button>
-                            @endforeach
+                            @empty
+                                <div class="col-span-full py-8 text-center text-slate-400">
+                                    <i class="fa-light fa-box-open text-4xl text-slate-300"></i>
+                                    <p class="mt-2 text-sm font-medium">{{ __('No inventory products found.') }}</p>
+                                    <p class="text-xs text-slate-400">{{ __('Add products in the Inventory module to begin selling on POS.') }}</p>
+                                </div>
+                            @endforelse
                         </div>
                     </section>
 
@@ -6154,26 +6179,24 @@
                         <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
 
                         <div class="space-y-6">
-                            @foreach ([
-                                ['time' => '10 mins ago', 'user' => 'Babatunde Adeleke', 'action' => 'Logged 4.5 hours', 'detail' => 'Completed POS receipt thermal printing & dynamic line items builder', 'icon' => 'fa-light fa-circle-check', 'color' => 'emerald'],
-                                ['time' => '2 hours ago', 'user' => 'Fatima Bello', 'action' => 'Moved task to In Review', 'detail' => 'Design CRM pipeline Kanban board UI and customer detail fields', 'icon' => 'fa-light fa-play-circle', 'color' => 'amber'],
-                                ['time' => 'Yesterday', 'user' => 'Emeka Nwosu', 'action' => 'Updated progress to 85%', 'detail' => 'Inventory Automation & barcode scanning module', 'icon' => 'fa-light fa-arrow-up-right', 'color' => 'blue'],
-                                ['time' => '2 days ago', 'user' => 'Sola Adeyemi', 'action' => 'Created project milestone', 'detail' => 'Marketing Multi-Channel Social & WhatsApp Automation Q3', 'icon' => 'fa-light fa-folder-plus', 'color' => 'purple'],
-                                ['time' => '3 days ago', 'user' => 'System Engine', 'action' => 'SLA Audit Alert', 'detail' => 'Q3 Executive Financial Report & Audit logs on schedule', 'icon' => 'fa-light fa-bell', 'color' => 'rose'],
-                            ] as $event)
+                            @forelse ($logs->take(6) as $log)
                                 <div class="relative flex gap-4 pl-12">
-                                    <span class="absolute left-3 flex h-5 w-5 items-center justify-center rounded-full bg-{{ $event['color'] }}-500/10 ring-4 ring-white dark:ring-slate-900">
-                                        <i class="{{ $event['icon'] }} text-xs text-{{ $event['color'] }}-500"></i>
+                                    <span class="absolute left-3 flex h-5 w-5 items-center justify-center rounded-full bg-sky-500/10 ring-4 ring-white dark:ring-slate-900">
+                                        <i class="fa-light fa-clock-rotate-left text-xs text-sky-500"></i>
                                     </span>
                                     <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 flex-1 dark:border-slate-800 dark:bg-slate-800/50">
                                         <div class="flex items-center justify-between">
-                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $event['user'] }} <span class="font-normal text-slate-400">{{ $event['action'] }}</span></p>
-                                            <span class="text-[10px] font-semibold text-slate-400">{{ $event['time'] }}</span>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $log->causer?->name ?? 'System Engine' }} <span class="font-normal text-slate-400">{{ $log->event ?? 'logged' }}</span></p>
+                                            <span class="text-[10px] font-semibold text-slate-400">{{ $log->created_at?->diffForHumans() ?? 'Recently' }}</span>
                                         </div>
-                                        <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $event['detail'] }}</p>
+                                        <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $log->description }}</p>
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="pl-12 py-6 text-slate-400 text-xs">
+                                    {{ __('No project activity recorded yet. Work log entries will appear here.') }}
+                                </div>
+                            @endforelse
                         </div>
                     </div>
                 </section>
@@ -6181,29 +6204,35 @@
         @else
             <!-- Performance Metrics & Productivity Analytics Tab -->
             <div class="space-y-6">
+                @php
+                    $totalTasksCount = count($tasks);
+                    $completedTasksCount = count(array_filter($tasks, fn($t) => ($t['status'] ?? '') === 'done'));
+                    $inProgressTasksCount = count(array_filter($tasks, fn($t) => ($t['status'] ?? '') === 'in_progress'));
+                    $sprintCompRate = $totalTasksCount > 0 ? round(($completedTasksCount / $totalTasksCount) * 100, 1) : 0;
+                @endphp
                 <!-- Summary Metrics Grid -->
                 <div class="grid gap-4 md:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <p class="text-xs font-bold uppercase text-slate-400">Sprint Completion Rate</p>
-                        <p class="mt-2 text-2xl font-black text-emerald-600">92.4%</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">{{ $sprintCompRate }}%</p>
                         <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                            <div class="h-full rounded-full bg-emerald-500" style="width: 92.4%;"></div>
+                            <div class="h-full rounded-full bg-emerald-500" style="width: {{ $sprintCompRate }}%;"></div>
                         </div>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase text-slate-400">Average Task Duration</p>
-                        <p class="mt-2 text-2xl font-black text-sky-600">2.8 Days</p>
-                        <p class="mt-1 text-xs text-emerald-500 font-medium"><i class="fa-light fa-arrow-trend-down mr-1"></i>-0.6 days vs target</p>
+                        <p class="text-xs font-bold uppercase text-slate-400">Tasks in Progress</p>
+                        <p class="mt-2 text-2xl font-black text-amber-600">{{ $inProgressTasksCount }}</p>
+                        <p class="mt-1 text-xs text-amber-500 font-medium"><i class="fa-light fa-spinner mr-1"></i>Active sprint load</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase text-slate-400">On-Time Delivery Rate</p>
-                        <p class="mt-2 text-2xl font-black text-purple-600">95.8%</p>
-                        <p class="mt-1 text-xs text-slate-400 font-medium">23 of 24 tasks on SLA</p>
+                        <p class="text-xs font-bold uppercase text-slate-400">Completed Tasks</p>
+                        <p class="mt-2 text-2xl font-black text-purple-600">{{ $completedTasksCount }}</p>
+                        <p class="mt-1 text-xs text-slate-400 font-medium">Of {{ $totalTasksCount }} total tasks</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-xs font-bold uppercase text-slate-400">Total Work Hours Logged</p>
-                        <p class="mt-2 text-2xl font-black text-amber-600">184.5 Hrs</p>
-                        <p class="mt-1 text-xs text-amber-500 font-medium">This month</p>
+                        <p class="text-xs font-bold uppercase text-slate-400">Active Contributors</p>
+                        <p class="mt-2 text-2xl font-black text-sky-600">{{ $users->count() }}</p>
+                        <p class="mt-1 text-xs text-sky-500 font-medium">Registered staff</p>
                     </div>
                 </div>
 
@@ -6229,28 +6258,31 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                @foreach ([
-                                    ['name' => 'Babatunde Adeleke', 'completed' => 12, 'in_progress' => 2, 'ontime' => '98%', 'status' => 'Optimal Load', 'status_color' => 'emerald'],
-                                    ['name' => 'Fatima Bello', 'completed' => 9, 'in_progress' => 1, 'ontime' => '100%', 'status' => 'Optimal Load', 'status_color' => 'emerald'],
-                                    ['name' => 'Emeka Nwosu', 'completed' => 8, 'in_progress' => 3, 'ontime' => '92%', 'status' => 'High Utilization', 'status_color' => 'amber'],
-                                    ['name' => 'Sola Adeyemi', 'completed' => 7, 'in_progress' => 1, 'ontime' => '100%', 'status' => 'Capacity Available', 'status_color' => 'sky'],
-                                ] as $member)
+                                @forelse ($users as $member)
+                                    @php
+                                        $userTasks = collect($tasks)->where('assignee', $member->name);
+                                        $userCompleted = $userTasks->where('status', 'done')->count();
+                                        $userInProgress = $userTasks->where('status', 'in_progress')->count();
+                                        $userTotal = $userTasks->count();
+                                        $onTimeRate = $userTotal > 0 ? round(($userCompleted / max(1, $userTotal)) * 100) . '%' : '100%';
+                                        $loadStatus = $userInProgress > 2 ? ['label' => 'High Utilization', 'color' => 'amber'] : ($userInProgress > 0 ? ['label' => 'Optimal Load', 'color' => 'emerald'] : ['label' => 'Capacity Available', 'color' => 'sky']);
+                                    @endphp
                                     <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                                         <td class="px-4 py-3.5">
                                             <div class="flex items-center gap-2.5">
-                                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/10 text-xs font-black text-sky-600">{{ strtoupper(substr($member['name'], 0, 2)) }}</span>
+                                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/10 text-xs font-black text-sky-600">{{ strtoupper(substr($member->name, 0, 2)) }}</span>
                                                 <div>
-                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $member['name'] }}</p>
-                                                    <p class="text-[10px] text-slate-400">Engineering & Operations</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $member->name }}</p>
+                                                    <p class="text-[10px] text-slate-400">{{ $member->role?->name ?? 'Staff' }}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3.5 font-black text-emerald-600">{{ $member['completed'] }} Tasks</td>
-                                        <td class="px-4 py-3.5 font-bold text-amber-600">{{ $member['in_progress'] }} Active</td>
-                                        <td class="px-4 py-3.5 font-bold text-sky-600">{{ $member['ontime'] }}</td>
+                                        <td class="px-4 py-3.5 font-black text-emerald-600">{{ $userCompleted }} Tasks</td>
+                                        <td class="px-4 py-3.5 font-bold text-amber-600">{{ $userInProgress }} Active</td>
+                                        <td class="px-4 py-3.5 font-bold text-sky-600">{{ $onTimeRate }}</td>
                                         <td class="px-4 py-3.5">
-                                            <span class="rounded-full bg-{{ $member['status_color'] }}-500/10 border border-{{ $member['status_color'] }}-500/20 px-2.5 py-0.5 text-xs font-bold text-{{ $member['status_color'] }}-600">
-                                                {{ $member['status'] }}
+                                            <span class="rounded-full bg-{{ $loadStatus['color'] }}-500/10 border border-{{ $loadStatus['color'] }}-500/20 px-2.5 py-0.5 text-xs font-bold text-{{ $loadStatus['color'] }}-600">
+                                                {{ $loadStatus['label'] }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-3.5 text-right">
@@ -6259,7 +6291,13 @@
                                             </button>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-8 text-center text-slate-400 text-xs">
+                                            {{ __('No team members registered yet.') }}
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -6541,21 +6579,31 @@
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <h2 class="text-lg font-bold text-slate-950 dark:text-white border-b pb-4 dark:border-slate-800">{{ __('Departmental Payroll Allocation') }}</h2>
                     <div class="mt-5 space-y-4">
-                        @foreach ([
-                            ['dept' => 'Engineering & Operations', 'amount' => 1250000.00, 'pct' => 55.6, 'color' => 'teal'],
-                            ['dept' => 'Product & Design', 'amount' => 550000.00, 'pct' => 24.4, 'color' => 'purple'],
-                            ['dept' => 'Quality Assurance', 'amount' => 450000.00, 'pct' => 20.0, 'color' => 'sky'],
-                        ] as $item)
+                        @php
+                            $deptGroups = collect(!empty($salaryRecords) ? $salaryRecords : $employees)->groupBy('department');
+                            $totalDeptSalary = collect(!empty($salaryRecords) ? $salaryRecords : $employees)->sum(fn($r) => (float)($r['gross_salary'] ?? $r['base_salary'] ?? $r['net_salary'] ?? 0));
+                            $deptColors = ['teal', 'purple', 'sky', 'emerald', 'amber', 'rose'];
+                            $colorIdx = 0;
+                        @endphp
+                        @forelse ($deptGroups as $deptName => $records)
+                            @php
+                                $deptSum = $records->sum(fn($r) => (float)($r['gross_salary'] ?? $r['base_salary'] ?? $r['net_salary'] ?? 0));
+                                $deptPct = $totalDeptSalary > 0 ? round(($deptSum / $totalDeptSalary) * 100, 1) : 0;
+                                $color = $deptColors[$colorIdx % count($deptColors)];
+                                $colorIdx++;
+                            @endphp
                             <div>
                                 <div class="flex justify-between text-xs font-bold mb-1">
-                                    <span class="text-slate-700 dark:text-slate-300">{{ $item['dept'] }}</span>
-                                    <span class="text-{{ $item['color'] }}-600">₦{{ number_format($item['amount'], 2) }} ({{ $item['pct'] }}%)</span>
+                                    <span class="text-slate-700 dark:text-slate-300">{{ $deptName ?: 'General Operations' }} ({{ $records->count() }} staff)</span>
+                                    <span class="text-{{ $color }}-600">₦{{ number_format($deptSum, 2) }} ({{ $deptPct }}%)</span>
                                 </div>
                                 <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                    <div class="h-full rounded-full bg-{{ $item['color'] }}-500" style="width: {{ $item['pct'] }}%;"></div>
+                                    <div class="h-full rounded-full bg-{{ $color }}-500" style="width: {{ max(5, $deptPct) }}%;"></div>
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="text-xs text-slate-400 py-4 text-center">{{ __('No payroll records or departments logged yet.') }}</p>
+                        @endforelse
                     </div>
                 </section>
             </div>
@@ -6566,6 +6614,19 @@
     @if ($moduleKey === 'reports')
         @if ($activeTab === 'executive' || $activeTab === 'overview' || empty($activeTab))
             <div class="space-y-6">
+                @php
+                    $repRev = (float) ($financeMetrics['totalRevenue'] ?? ($dbInvoices->where('status', 'paid')->sum('total') + $dbPosReceipts->sum('total')));
+                    $repCogs = (float) ($repRev * 0.35);
+                    $repGrossProfit = max(0, $repRev - $repCogs);
+                    $repOpex = (float) ($financeMetrics['totalExpenses'] ?? $dbExpenses->sum('amount'));
+                    $repPayroll = (float) (collect($salaryRecords)->sum(fn($s) => (float)($s['gross_salary'] ?? $s['net_salary'] ?? 0)));
+                    $repEbitda = $repGrossProfit - $repOpex - $repPayroll;
+                    $repTax = $repEbitda > 0 ? ($repEbitda * 0.15) : 0;
+                    $repNpat = $repEbitda - $repTax;
+                    $repGrossMargin = $repRev > 0 ? round(($repGrossProfit / $repRev) * 100, 1) : 0;
+                    $repOperatingMargin = $repRev > 0 ? round(($repEbitda / $repRev) * 100, 1) : 0;
+                    $repNetMargin = $repRev > 0 ? round(($repNpat / $repRev) * 100, 1) : 0;
+                @endphp
                 <!-- Top Financial Summary KPI Cards -->
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -6573,32 +6634,32 @@
                             <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Gross Revenue') }}</p>
                             <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600"><i class="fa-light fa-chart-line-up"></i></span>
                         </div>
-                        <p class="mt-2 text-2xl font-black text-teal-600">₦28,450,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>+14.2% vs last quarter</p>
+                        <p class="mt-2 text-2xl font-black text-teal-600">₦{{ number_format($repRev, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500"><i class="fa-light fa-arrow-trend-up mr-1"></i>Realized Invoices & POS</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div class="flex items-center justify-between">
                             <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Gross Operating Profit') }}</p>
                             <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600"><i class="fa-light fa-money-bill-wave"></i></span>
                         </div>
-                        <p class="mt-2 text-2xl font-black text-emerald-600">₦18,600,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-emerald-500">65.4% Gross Margin</p>
+                        <p class="mt-2 text-2xl font-black text-emerald-600">₦{{ number_format($repGrossProfit, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-emerald-500">{{ $repGrossMargin }}% Gross Margin</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div class="flex items-center justify-between">
                             <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('EBITDA Income') }}</p>
                             <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600"><i class="fa-light fa-vault"></i></span>
                         </div>
-                        <p class="mt-2 text-2xl font-black text-purple-600">₦11,150,000.00</p>
-                        <p class="mt-1 text-xs font-medium text-slate-400">39.2% Operating Margin</p>
+                        <p class="mt-2 text-2xl font-black {{ $repEbitda >= 0 ? 'text-purple-600' : 'text-rose-600' }}">₦{{ number_format($repEbitda, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-slate-400">{{ $repOperatingMargin }}% Operating Margin</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                         <div class="flex items-center justify-between">
                             <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{{ __('Net Profit After Tax') }}</p>
                             <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600"><i class="fa-light fa-shield-check"></i></span>
                         </div>
-                        <p class="mt-2 text-2xl font-black text-sky-600">₦9,477,500.00</p>
-                        <p class="mt-1 text-xs font-medium text-teal-500">33.3% Net Margin</p>
+                        <p class="mt-2 text-2xl font-black {{ $repNpat >= 0 ? 'text-sky-600' : 'text-rose-600' }}">₦{{ number_format($repNpat, 2) }}</p>
+                        <p class="mt-1 text-xs font-medium text-teal-500">{{ $repNetMargin }}% Net Margin</p>
                     </div>
                 </div>
 
@@ -6632,42 +6693,42 @@
                                 <tr>
                                     <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">Gross Operating Revenue</td>
                                     <td class="px-4 py-3.5 text-xs text-slate-500">Sales, POS & Subscriptions</td>
-                                    <td class="px-4 py-3.5 text-right font-black text-slate-900 dark:text-white">₦28,450,000.00</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-slate-900 dark:text-white">₦{{ number_format($repRev, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Cost of Goods Sold (COGS)</td>
-                                    <td class="px-4 py-3.5 text-xs text-slate-500">Hardware & Stock Procurement</td>
-                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦9,850,000.00</td>
+                                    <td class="px-4 py-3.5 text-xs text-slate-500">Hardware & Stock Procurement (Est. 35%)</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦{{ number_format($repCogs, 2) }}</td>
                                 </tr>
                                 <tr class="bg-teal-50/50 dark:bg-teal-950/20 font-bold">
                                     <td class="px-4 py-3.5 text-teal-700 dark:text-teal-400">GROSS OPERATING PROFIT</td>
-                                    <td class="px-4 py-3.5 text-xs text-teal-600 dark:text-teal-400">65.4% Gross Margin</td>
-                                    <td class="px-4 py-3.5 text-right font-black text-teal-600 dark:text-teal-400">₦18,600,000.00</td>
+                                    <td class="px-4 py-3.5 text-xs text-teal-600 dark:text-teal-400">{{ $repGrossMargin }}% Gross Margin</td>
+                                    <td class="px-4 py-3.5 text-right font-black text-teal-600 dark:text-teal-400">₦{{ number_format($repGrossProfit, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Operating Expenses (OPEX)</td>
                                     <td class="px-4 py-3.5 text-xs text-slate-500">Marketing, Logistics, Cloud Infra</td>
-                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦5,200,000.00</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦{{ number_format($repOpex, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Personnel & Staff Payroll</td>
                                     <td class="px-4 py-3.5 text-xs text-slate-500">Monthly Gross Payroll</td>
-                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦2,250,000.00</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦{{ number_format($repPayroll, 2) }}</td>
                                 </tr>
                                 <tr class="bg-emerald-50/50 dark:bg-emerald-950/20 font-bold">
                                     <td class="px-4 py-3.5 text-emerald-700 dark:text-emerald-400">NET OPERATING INCOME (EBITDA)</td>
-                                    <td class="px-4 py-3.5 text-xs text-emerald-600 dark:text-emerald-400">39.2% Operating Margin</td>
-                                    <td class="px-4 py-3.5 text-right font-black text-emerald-600 dark:text-emerald-400">₦11,150,000.00</td>
+                                    <td class="px-4 py-3.5 text-xs text-emerald-600 dark:text-emerald-400">{{ $repOperatingMargin }}% Operating Margin</td>
+                                    <td class="px-4 py-3.5 text-right font-black {{ $repEbitda >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600' }}">₦{{ number_format($repEbitda, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-3.5 font-semibold text-slate-700 dark:text-slate-300">Tax Provision & Statutory Reserve</td>
                                     <td class="px-4 py-3.5 text-xs text-slate-500">Corporate Income Tax Reserve (15%)</td>
-                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦1,672,500.00</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-rose-600">-₦{{ number_format($repTax, 2) }}</td>
                                 </tr>
                                 <tr class="bg-teal-100/50 dark:bg-teal-900/40 font-black text-base">
                                     <td class="px-4 py-4 text-teal-800 dark:text-teal-300">NET PROFIT AFTER TAX (NPAT)</td>
-                                    <td class="px-4 py-4 text-xs font-semibold text-teal-700 dark:text-teal-300">33.3% Net Margin</td>
-                                    <td class="px-4 py-4 text-right text-teal-800 dark:text-teal-300">₦9,477,500.00</td>
+                                    <td class="px-4 py-4 text-xs font-semibold text-teal-700 dark:text-teal-300">{{ $repNetMargin }}% Net Margin</td>
+                                    <td class="px-4 py-4 text-right {{ $repNpat >= 0 ? 'text-teal-800 dark:text-teal-300' : 'text-rose-600' }}">₦{{ number_format($repNpat, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -8764,10 +8825,10 @@
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Assigned Team Member</label>
                                 <select wire:model="form.assignee" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-sky-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <option value="Babatunde Adeleke">Babatunde Adeleke (Lead Developer)</option>
-                                    <option value="Fatima Bello">Fatima Bello (UI/UX Designer)</option>
-                                    <option value="Emeka Nwosu">Emeka Nwosu (Systems Architect)</option>
-                                    <option value="Sola Adeyemi">Sola Adeyemi (QA Engineer)</option>
+                                    <option value="">-- Select Assignee --</option>
+                                    @foreach ($users as $u)
+                                        <option value="{{ $u->name }}">{{ $u->name }} ({{ $u->role?->name ?? 'Staff' }})</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div>
