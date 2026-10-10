@@ -42,20 +42,11 @@ class Leads extends Component
 
     public function render(): View
     {
-        $seededLeads = collect([
-            ['name' => 'Brighton Labs', 'email' => 'hello@brightonlabs.com', 'source' => 'Email', 'status' => 'qualified', 'score' => 92, 'owner' => 'Sarah Williams'],
-            ['name' => 'Horizon Media', 'email' => 'team@horizonmedia.co', 'source' => 'Instagram', 'status' => 'new', 'score' => 78, 'owner' => 'Unassigned'],
-            ['name' => 'Northbridge Ltd', 'email' => 'procurement@northbridge.com', 'source' => 'Website form', 'status' => 'contacted', 'score' => 71, 'owner' => 'Michael Chen'],
-            ['name' => 'Summit Retail', 'email' => 'ops@summitretail.com', 'source' => 'WhatsApp', 'status' => 'qualified', 'score' => 86, 'owner' => 'Emily Davis'],
-        ]);
         $leads = collect();
         try {
             $leads = Lead::query()->latest()->get()->map(fn (Lead $lead): array => ['name' => $lead->name, 'email' => $lead->email ?: '—', 'source' => Str::headline($lead->source), 'status' => $lead->status, 'score' => $lead->score, 'owner' => $lead->owner?->name ?: 'Unassigned']);
         } catch (\Throwable) {
             $leads = collect();
-        }
-        if ($leads->isEmpty()) {
-            $leads = $seededLeads;
         }
         $leads = $leads->when($this->status !== 'all', fn ($items) => $items->where('status', $this->status))->when(trim($this->search) !== '', function ($items): mixed {
             $term = Str::lower(trim($this->search));

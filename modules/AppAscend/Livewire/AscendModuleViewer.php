@@ -305,6 +305,7 @@ class AscendModuleViewer extends Component
         'description' => '',
         'reference' => '',
     ];
+    public ?int $editingExpenseId = null;
     public bool $showReceiptUpload = false;
 
     // === PRIORITY 3: WHATSAPP AUTOMATION ===
@@ -2550,6 +2551,118 @@ class AscendModuleViewer extends Component
             session()->flash('status', __('Expense logged and submitted for approval!'));
         } catch (\Throwable $e) {
             session()->flash('warning', 'Failed: '.$e->getMessage());
+        }
+    }
+
+    public function editExpense(int $id): void
+    {
+        $expense = \App\Models\Expense::find($id);
+        if (! $expense) {
+            session()->flash('warning', __('Expense not found.'));
+            return;
+        }
+
+        $this->editingExpenseId = $id;
+        $this->expenseForm = [
+            'category'       => (string) ($expense->category ?? 'Office Supplies'),
+            'vendor'         => (string) ($expense->vendor ?? ''),
+            'amount'         => (string) ($expense->amount ?? ''),
+            'payment_method' => (string) ($expense->payment_method ?? 'Bank Transfer'),
+            'expense_date'   => $expense->expense_date?->toDateString() ?? now()->toDateString(),
+            'description'    => (string) ($expense->description ?? ''),
+            'reference'      => (string) ($expense->reference ?? ''),
+        ];
+
+        // Load existing attachments
+        $this->expenseReceiptUrls = [];
+        $this->pendingExpenseReceipts = [];
+        $existingAttachments = (array) ($expense->attachments ?? []);
+        foreach ($existingAttachments as $att) {
+            if (is_string($att)) {
+                $this->expenseReceiptUrls[] = $att;
+            } elseif (is_array($att)) {
+                if (($att['type'] ?? '') === 'appfile') {
+                    $this->pendingExpenseReceipts[] = $att;
+                } elseif (! empty($att['url'])) {
+                    $this->expenseReceiptUrls[] = $att['url'];
+                }
+            }
+        }
+
+        session()->flash('status', __('Loaded expense #:id for editing. Modify details below and click "Save Changes".', ['id' => $id]));
+    }
+
+    public function cancelEditExpense(): void
+    {
+        $this->editingExpenseId = null;
+        $this->expenseReceiptUrls = [];
+        $this->pendingExpenseReceipts = [];
+        $this->expenseForm = [
+            'category'       => 'Office Supplies',
+            'vendor'         => '',
+            'amount'         => '',
+            'payment_method' => 'Bank Transfer',
+            'expense_date'   => '',
+            'description'    => '',
+            'reference'      => '',
+        ];
+    }
+
+    public function updateExpense(): void
+    {
+        if (! $this->editingExpenseId) {
+            session()->flash('warning', __('No expense selected for update.'));
+            return;
+        }
+
+        if (blank($this->expenseForm['vendor']) || blank($this->expenseForm['amount'])) {
+            session()->flash('warning', __('Vendor and amount are required.'));
+            return;
+        }
+
+        try {
+            $expense = \App\Models\Expense::find($this->editingExpenseId);
+            if (! $expense) {
+                session()->flash('warning', __('Expense not found.'));
+                return;
+            }
+
+            $attachments = $this->importExpenseReceiptsToFileManager();
+
+            $expense->update([
+                'category'       => $this->expenseForm['category'],
+                'vendor'         => $this->expenseForm['vendor'],
+                'amount'         => (float) $this->expenseForm['amount'],
+                'payment_method' => $this->expenseForm['payment_method'],
+                'expense_date'   => $this->expenseForm['expense_date'] ?: now()->toDateString(),
+                'description'    => $this->expenseForm['description'],
+                'reference'      => $this->expenseForm['reference'] ?? null,
+                'attachments'    => $attachments,
+            ]);
+
+            $id = $expense->id;
+            $this->cancelEditExpense();
+            $this->hydrateLiveData();
+            session()->flash('status', __('Expense #:id updated successfully!', ['id' => $id]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', 'Failed to update expense: '.$e->getMessage());
+        }
+    }
+
+    public function deleteExpense(int $id): void
+    {
+        try {
+            $expense = \App\Models\Expense::find($id);
+            if ($expense) {
+                $expense->delete();
+                if ($this->editingExpenseId === $id) {
+                    $this->cancelEditExpense();
+                }
+                $this->hydrateLiveData();
+                session()->flash('status', __('Expense #:id deleted successfully.', ['id' => $id]));
+            }
+        } catch (\Throwable $e) {
+            session()->flash('warning', 'Failed to delete expense: '.$e->getMessage());
         }
     }
 

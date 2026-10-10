@@ -765,11 +765,17 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-4 py-3">
-                                                    <div class="flex gap-2">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <button type="button" wire:click="editExpense({{ $exp['id'] }})" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition" title="{{ __('Edit Expense') }}">
+                                                            <i class="fa-light fa-pen-to-square mr-0.5"></i>{{ __('Edit') }}
+                                                        </button>
                                                         @if (($exp['approval_status'] ?? 'pending') === 'pending')
-                                                            <button type="button" wire:click="approveExpense({{ $exp['id'] }})" class="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20">✓ Approve</button>
-                                                            <button type="button" wire:click="rejectExpense({{ $exp['id'] }})" class="rounded-lg bg-rose-500/10 px-2.5 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-500/20">✗ Reject</button>
+                                                            <button type="button" wire:click="approveExpense({{ $exp['id'] }})" class="rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="{{ __('Approve') }}">✓</button>
+                                                            <button type="button" wire:click="rejectExpense({{ $exp['id'] }})" class="rounded-lg bg-rose-500/10 px-2 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-500/20 transition" title="{{ __('Reject') }}">✗</button>
                                                         @endif
+                                                        <button type="button" wire:click="deleteExpense({{ $exp['id'] }})" wire:confirm="{{ __('Are you sure you want to delete this expense record?') }}" class="rounded-lg p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition" title="{{ __('Delete Expense') }}">
+                                                            <i class="fa-light fa-trash-can text-xs"></i>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -780,9 +786,26 @@
                         @endif
                     </section>
 
-                    <!-- Log Expense Form -->
+                    <!-- Log / Edit Expense Form -->
                     <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4">
-                        <h3 class="text-sm font-bold text-slate-950 dark:text-white border-b pb-3 dark:border-slate-800">{{ __('Log New Expense') }}</h3>
+                        <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+                            @if ($editingExpenseId)
+                                <div>
+                                    <h3 class="text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                                        <i class="fa-light fa-pen-to-square"></i>{{ __('Edit Expense #' . $editingExpenseId) }}
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400">{{ __('Modify details and update attachments below') }}</p>
+                                </div>
+                                <button type="button" wire:click="cancelEditExpense" class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300">
+                                    {{ __('Cancel') }}
+                                </button>
+                            @else
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Log New Expense') }}</h3>
+                                    <p class="text-[11px] text-slate-400">{{ __('Record company outflow with multiple receipts') }}</p>
+                                </div>
+                            @endif
+                        </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Category') }}</label>
                             <select wire:model="expenseForm.category" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
@@ -873,9 +896,20 @@
                                 </div>
                             @endif
                         </div>
-                        <button type="button" wire:click="saveExpense" class="w-full rounded-xl bg-orange-600 py-3 text-sm font-bold text-white hover:bg-orange-700 transition">
-                            <i class="fa-light fa-plus mr-1.5"></i> {{ __('Log Expense') }}
-                        </button>
+                        @if ($editingExpenseId)
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="updateExpense" class="flex-1 rounded-xl bg-amber-600 py-3 text-sm font-bold text-white hover:bg-amber-700 transition shadow-md">
+                                    <i class="fa-light fa-check mr-1.5"></i> {{ __('Save Changes') }}
+                                </button>
+                                <button type="button" wire:click="cancelEditExpense" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 transition">
+                                    {{ __('Cancel') }}
+                                </button>
+                            </div>
+                        @else
+                            <button type="button" wire:click="saveExpense" class="w-full rounded-xl bg-orange-600 py-3 text-sm font-bold text-white hover:bg-orange-700 transition shadow-md">
+                                <i class="fa-light fa-plus mr-1.5"></i> {{ __('Log Expense') }}
+                            </button>
+                        @endif
                     </section>
                 </div>
             </div>
