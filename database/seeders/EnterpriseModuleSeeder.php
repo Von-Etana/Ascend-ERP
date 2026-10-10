@@ -57,14 +57,73 @@ class EnterpriseModuleSeeder extends Seeder
             'notes' => 'CRM custom integration services',
         ]);
 
-        // 3. Expenses
-        Expense::query()->firstOrCreate(['vendor' => 'Cloud Host Solutions'], [
-            'category' => 'Infrastructure & Hosting',
-            'amount' => 185000.00,
-            'payment_method' => 'bank_transfer',
-            'expense_date' => now()->subDays(3),
-            'description' => 'Dedicated cloud server renewal',
-        ]);
+        // 3. Initial Expenses
+        $initialExpenses = [
+            [
+                'vendor' => 'Cloud Host Solutions Ltd',
+                'category' => 'Infrastructure & Hosting',
+                'amount' => 185000.00,
+                'payment_method' => 'bank_transfer',
+                'expense_date' => now()->subDays(3)->toDateString(),
+                'description' => 'Dedicated cloud server renewal and high-availability backup cluster',
+                'reference' => 'EXP-2026-001',
+                'approval_status' => 'approved',
+            ],
+            [
+                'vendor' => 'Starlink Internet Nigeria',
+                'category' => 'Utilities & Communications',
+                'amount' => 45000.00,
+                'payment_method' => 'card',
+                'expense_date' => now()->subDays(6)->toDateString(),
+                'description' => 'Monthly high-speed satellite internet subscription for Lagos Operations Hub',
+                'reference' => 'EXP-2026-002',
+                'approval_status' => 'approved',
+            ],
+            [
+                'vendor' => 'TotalEnergies Retail Station VI',
+                'category' => 'Facility Operations',
+                'amount' => 120000.00,
+                'payment_method' => 'bank_transfer',
+                'expense_date' => now()->subDays(8)->toDateString(),
+                'description' => 'Diesel fuel supply (100L) for HQ backup generators',
+                'reference' => 'EXP-2026-003',
+                'approval_status' => 'approved',
+            ],
+            [
+                'vendor' => 'Meta Platforms Ireland Ltd',
+                'category' => 'Marketing & Advertising',
+                'amount' => 350000.00,
+                'payment_method' => 'card',
+                'expense_date' => now()->subDays(10)->toDateString(),
+                'description' => 'Paid acquisition ad spend on Facebook & Instagram Lead Ads',
+                'reference' => 'EXP-2026-004',
+                'approval_status' => 'approved',
+            ],
+            [
+                'vendor' => 'FedEx / Red Star Express',
+                'category' => 'Logistics & Dispatch',
+                'amount' => 68500.00,
+                'payment_method' => 'bank_transfer',
+                'expense_date' => now()->subDays(12)->toDateString(),
+                'description' => 'Courier and express delivery of POS hardware scanners to Abuja clients',
+                'reference' => 'EXP-2026-005',
+                'approval_status' => 'approved',
+            ],
+            [
+                'vendor' => 'Prime Stationery & Printing Mart',
+                'category' => 'Office Supplies',
+                'amount' => 32000.00,
+                'payment_method' => 'cash',
+                'expense_date' => now()->subDays(15)->toDateString(),
+                'description' => 'Thermal receipt roll boxes (50 rolls) and office stationery',
+                'reference' => 'EXP-2026-006',
+                'approval_status' => 'approved',
+            ],
+        ];
+
+        foreach ($initialExpenses as $expData) {
+            Expense::query()->firstOrCreate(['reference' => $expData['reference']], $expData);
+        }
 
         // 4. CRM Leads & Deals
         $lead = CrmLead::query()->firstOrCreate(['company_name' => 'Horizon Media Communications'], [
