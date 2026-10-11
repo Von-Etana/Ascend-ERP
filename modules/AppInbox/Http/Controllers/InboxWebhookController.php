@@ -21,6 +21,7 @@ class InboxWebhookController
         protected InboxAiResponder $ai,
         protected AutomationWebhookDispatcher $automation,
         protected WhatsAppMenuFlowService $whatsappFlow,
+        protected \Modules\AppInbox\Support\MetaLeadAdsService $leadAds,
     ) {}
 
     public function __invoke(Request $request, string $provider): Response
@@ -33,7 +34,7 @@ class InboxWebhookController
 
             $expectedToken = config("modules.appinbox.webhook_secrets.{$provider}")
                 ?: config('modules.appinbox.whatsapp_bot.verify_token')
-                ?: env('WHATSAPP_VERIFY_TOKEN', 'ascend_webhook_secret');
+                ?: env('WHATSAPP_VERIFY_TOKEN', env('META_VERIFY_TOKEN', 'ascend_webhook_secret'));
 
             if ($mode === 'subscribe' && $token === $expectedToken) {
                 return response((string) $challenge, 200)->header('Content-Type', 'text/plain');
@@ -46,6 +47,17 @@ class InboxWebhookController
         $adapter = $this->providers->get($provider);
         $raw = (string) $request->getContent();
         abort_unless($adapter->verifyWebhook($request->headers->all(), $raw), 401, 'Invalid inbox webhook signature.');
+
+        // 2a. Check if this is a Meta Lead Ads submission event
+        if ($this->leadAds->isLeadgenEvent($request->all())) {
+            $lead = $this->leadAds->handle($request->all());
+
+            return response()->json([
+                'ok' => true,
+                'event' => 'meta_leadgen',
+                'lead_id' => $lead?->id,
+            ]);
+        }
 
         $normalized = $adapter->normalizeInbound($request->all());
 
