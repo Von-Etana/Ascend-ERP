@@ -747,7 +747,7 @@ class AscendModuleViewer extends Component
 
     // === DYNAMIC LINE ITEMS FOR INVOICES, RECEIPTS & DELIVERY NOTES ===
     public array $invoiceItems = [
-        ['product_id' => '', 'sku' => 'ENT-LIC-001', 'description' => 'Enterprise Software & Services Package', 'quantity' => 1, 'unit_price' => 250000.00, 'discount_percent' => 0, 'amount' => 250000.00],
+        ['product_id' => '', 'sku' => '', 'description' => '', 'quantity' => 1, 'unit_price' => 0.00, 'discount_percent' => 0, 'amount' => 0.00],
     ];
 
     public function addInvoiceLine(): void
@@ -1040,45 +1040,6 @@ class AscendModuleViewer extends Component
         // --- Price Quotes & Proposals (Persisted & Draft-Aware) ---
         try {
             if (Schema::hasTable('price_quotes')) {
-                if (PriceQuote::count() === 0) {
-                    PriceQuote::create([
-                        'quote_number' => 'ASL-QT-0001',
-                        'client_name' => 'Apex Technology Solutions Ltd',
-                        'email' => 'procurement@apextech.ng',
-                        'phone' => '+234 803 444 5566',
-                        'address' => 'Plot 14, Victoria Island, Lagos',
-                        'valid_until' => now()->addDays(14)->toDateString(),
-                        'subtotal' => 4500000.00,
-                        'discount_amount' => 0.00,
-                        'tax' => 337500.00,
-                        'total' => 4837500.00,
-                        'status' => 'Sent',
-                        'notes' => '10.2kVA Commercial Dual MPPT Hybrid Solar Backup System',
-                        'items' => [
-                            ['product_id' => 1, 'sku' => 'ASL-0001', 'description' => 'Ascend 10.2kVA Commercial Hybrid Solar Inverter', 'qty' => 1, 'unit_price' => 2450000.00, 'amount' => 2450000.00],
-                            ['product_id' => 2, 'sku' => 'ASL-0002', 'description' => 'Ascend 10.2kWh LiFePO4 Rack-mount Battery 51.2V', 'qty' => 2, 'unit_price' => 1025000.00, 'amount' => 2050000.00],
-                        ],
-                    ]);
-                    PriceQuote::create([
-                        'quote_number' => 'ASL-QT-0002',
-                        'client_name' => 'Maitama Solar Estate Ltd',
-                        'email' => 'ibrahim@maitamasolar.ng',
-                        'phone' => '+234 803 444 8899',
-                        'address' => 'Maitama District, Abuja FCT',
-                        'valid_until' => now()->addDays(7)->toDateString(),
-                        'subtotal' => 7800000.00,
-                        'discount_amount' => 200000.00,
-                        'tax' => 570000.00,
-                        'total' => 8170000.00,
-                        'status' => 'Draft',
-                        'notes' => 'Draft proposal in progress for estate central clubhouse backup.',
-                        'items' => [
-                            ['product_id' => 1, 'sku' => 'ASL-0001', 'description' => 'Ascend 15kVA Commercial Three-Phase Solar Inverter', 'qty' => 1, 'unit_price' => 4200000.00, 'amount' => 4200000.00],
-                            ['product_id' => 3, 'sku' => 'ASL-0003', 'description' => 'Ascend 15kWh High-Voltage Battery Bank', 'qty' => 2, 'unit_price' => 1800000.00, 'amount' => 3600000.00],
-                        ],
-                    ]);
-                }
-
                 $dbQuotes = PriceQuote::latest()->get();
                 $this->priceQuotes = $dbQuotes->map(fn($q) => [
                     'id' => $q->quote_number,
@@ -1099,29 +1060,8 @@ class AscendModuleViewer extends Component
                 ])->toArray();
             }
         } catch (\Throwable) {
-            if (empty($this->priceQuotes)) {
-                $this->priceQuotes = [];
-            }
+            $this->priceQuotes = [];
         }
-
-        // --- Ensure CRM Deals across all 4 stages for rich pipeline cards ---
-        try {
-            if (CrmDeal::count() < 4) {
-                $lead = CrmLead::first();
-                $leadId = $lead?->id;
-                $sampleDeals = [
-                    ['deal_name' => 'Katampe Hills Luxury Villa 15kVA Backup', 'stage' => 'prospecting', 'value' => 6500000.00, 'expected_close' => now()->addDays(20)],
-                    ['deal_name' => 'Northbridge Media Dual Inverter Upgrade', 'stage' => 'proposal', 'value' => 8500000.00, 'expected_close' => now()->addDays(12)],
-                    ['deal_name' => 'Wuse Commercial Plaza 30kVA Solar Farm', 'stage' => 'negotiation', 'value' => 14200000.00, 'expected_close' => now()->addDays(5)],
-                    ['deal_name' => 'Sterling Finance Corp HQ Pure Sine Wave Rollout', 'stage' => 'closed_won', 'value' => 18500000.00, 'expected_close' => now()->subDays(2)],
-                ];
-                foreach ($sampleDeals as $sd) {
-                    if (! CrmDeal::where('deal_name', $sd['deal_name'])->exists()) {
-                        CrmDeal::create(array_merge($sd, ['crm_lead_id' => $leadId]));
-                    }
-                }
-            }
-        } catch (\Throwable) {}
 
         // --- General Ledger (Bank Accounts) ---
         try {
@@ -4102,21 +4042,12 @@ class AscendModuleViewer extends Component
             $this->invoiceItems = [
                 [
                     'product_id' => '',
-                    'sku' => 'SLR-INV-55KW',
-                    'description' => 'Ascend 5.5kVA Pure Sine Wave Hybrid Solar Inverter (Dual MPPT, 0ms Switchover)',
+                    'sku' => '',
+                    'description' => '',
                     'quantity' => 1,
-                    'unit_price' => 1350000.00,
+                    'unit_price' => 0.00,
                     'discount_percent' => 0,
-                    'amount' => 1350000.00,
-                ],
-                [
-                    'product_id' => '',
-                    'sku' => 'BAT-LFP-10KW',
-                    'description' => 'Ascend 10.2kWh LiFePO4 Lithium Battery Bank (6,000+ Deep Cycles Lifespan)',
-                    'quantity' => 1,
-                    'unit_price' => 2200000.00,
-                    'discount_percent' => 0,
-                    'amount' => 2200000.00,
+                    'amount' => 0.00,
                 ],
             ];
             $this->recalculateInvoiceTotals();
@@ -4132,16 +4063,13 @@ class AscendModuleViewer extends Component
         if ($type === 'pos') {
             $this->modalType = 'pos_sale';
             $this->activeTab = 'checkout';
-            if (empty($this->posCart)) {
-                $this->addToPosCart('POS-HDW-004', 'Barcode Scanner Unit', 85000.00);
-            }
         }
 
         if ($type === 'marketing' || $type === 'campaign') {
             $this->modalType = 'campaign';
-            $this->form['title'] = 'Q4 Enterprise Regional Growth Campaign';
-            $this->form['category'] = 'Multi-Channel (Meta, LinkedIn, Google)';
-            $this->form['subtotal'] = '1500000';
+            $this->form['title'] = '';
+            $this->form['category'] = '';
+            $this->form['subtotal'] = '0';
         }
 
         if ($type === 'lead' || $type === 'crm' || $type === 'partner_lead') {
@@ -6066,19 +5994,17 @@ class AscendModuleViewer extends Component
         $search = trim($this->globalSearch);
 
         $dbTasks = ProjectTask::query()->latest()->get();
-        if ($dbTasks->isNotEmpty()) {
-            $this->tasks = $dbTasks->map(function ($t) {
-                return [
-                    'id' => $t->id,
-                    'title' => $t->title,
-                    'project' => $t->project?->name ?: 'Enterprise Project',
-                    'assignee' => $t->assignee ?: 'Team Member',
-                    'priority' => ucfirst($t->priority ?: 'Normal'),
-                    'status' => $t->completed ? 'done' : 'in_progress',
-                    'due' => $t->due_date?->format('Y-m-d') ?: now()->format('Y-m-d'),
-                ];
-            })->toArray();
-        }
+        $this->tasks = $dbTasks->map(function ($t) {
+            return [
+                'id' => $t->id,
+                'title' => $t->title,
+                'project' => $t->project?->name ?: 'Enterprise Project',
+                'assignee' => $t->assignee ?: 'Team Member',
+                'priority' => ucfirst($t->priority ?: 'Normal'),
+                'status' => $t->completed ? 'done' : 'in_progress',
+                'due' => $t->due_date?->format('Y-m-d') ?: now()->format('Y-m-d'),
+            ];
+        })->toArray();
 
         $dbInvoices = Invoice::query()
             ->when($search !== '', function ($q) use ($search) {
