@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\InventoryProduct;
 use App\Models\Invoice;
 use App\Models\PosReceipt;
+use App\Models\PriceQuote;
 use App\Models\Project;
 use App\Models\ProjectTask;
 use App\Models\RetailerOrder;
@@ -112,6 +113,20 @@ class AscendModuleViewer extends Component
     public array $salesOrders = [];
 
     public array $priceQuotes = [];
+
+    // === CRM DEAL & PIPELINE INSPECTION STATE ===
+    public ?array $inspectDealData = null;
+    public bool $showDealModal = false;
+    public ?array $inspectStageData = null;
+    public bool $showStageModal = false;
+    public string $dealStageFilter = 'all';
+    public string $dealViewMode = 'table';
+
+    // === PRICE QUOTE DRAFT & INSPECTION STATE ===
+    public ?array $inspectQuoteData = null;
+    public bool $showQuoteModal = false;
+    public string $quoteStatusFilter = 'all';
+    public ?string $activeEditingQuoteId = null;
 
     public array $salesOrderForm = [
         'customer' => '',
@@ -1022,10 +1037,91 @@ class AscendModuleViewer extends Component
             $this->salesOrders = [];
         }
 
-        // --- Price Quotes & Proposals ---
-        if (empty($this->priceQuotes)) {
-            $this->priceQuotes = [];
+        // --- Price Quotes & Proposals (Persisted & Draft-Aware) ---
+        try {
+            if (Schema::hasTable('price_quotes')) {
+                if (PriceQuote::count() === 0) {
+                    PriceQuote::create([
+                        'quote_number' => 'ASL-QT-0001',
+                        'client_name' => 'Apex Technology Solutions Ltd',
+                        'email' => 'procurement@apextech.ng',
+                        'phone' => '+234 803 444 5566',
+                        'address' => 'Plot 14, Victoria Island, Lagos',
+                        'valid_until' => now()->addDays(14)->toDateString(),
+                        'subtotal' => 4500000.00,
+                        'discount_amount' => 0.00,
+                        'tax' => 337500.00,
+                        'total' => 4837500.00,
+                        'status' => 'Sent',
+                        'notes' => '10.2kVA Commercial Dual MPPT Hybrid Solar Backup System',
+                        'items' => [
+                            ['product_id' => 1, 'sku' => 'ASL-0001', 'description' => 'Ascend 10.2kVA Commercial Hybrid Solar Inverter', 'qty' => 1, 'unit_price' => 2450000.00, 'amount' => 2450000.00],
+                            ['product_id' => 2, 'sku' => 'ASL-0002', 'description' => 'Ascend 10.2kWh LiFePO4 Rack-mount Battery 51.2V', 'qty' => 2, 'unit_price' => 1025000.00, 'amount' => 2050000.00],
+                        ],
+                    ]);
+                    PriceQuote::create([
+                        'quote_number' => 'ASL-QT-0002',
+                        'client_name' => 'Maitama Solar Estate Ltd',
+                        'email' => 'ibrahim@maitamasolar.ng',
+                        'phone' => '+234 803 444 8899',
+                        'address' => 'Maitama District, Abuja FCT',
+                        'valid_until' => now()->addDays(7)->toDateString(),
+                        'subtotal' => 7800000.00,
+                        'discount_amount' => 200000.00,
+                        'tax' => 570000.00,
+                        'total' => 8170000.00,
+                        'status' => 'Draft',
+                        'notes' => 'Draft proposal in progress for estate central clubhouse backup.',
+                        'items' => [
+                            ['product_id' => 1, 'sku' => 'ASL-0001', 'description' => 'Ascend 15kVA Commercial Three-Phase Solar Inverter', 'qty' => 1, 'unit_price' => 4200000.00, 'amount' => 4200000.00],
+                            ['product_id' => 3, 'sku' => 'ASL-0003', 'description' => 'Ascend 15kWh High-Voltage Battery Bank', 'qty' => 2, 'unit_price' => 1800000.00, 'amount' => 3600000.00],
+                        ],
+                    ]);
+                }
+
+                $dbQuotes = PriceQuote::latest()->get();
+                $this->priceQuotes = $dbQuotes->map(fn($q) => [
+                    'id' => $q->quote_number,
+                    'quote_number' => $q->quote_number,
+                    'client_name' => $q->client_name,
+                    'email' => $q->email ?: '—',
+                    'phone' => $q->phone ?: '—',
+                    'address' => $q->address ?: '',
+                    'valid_until' => ($q->valid_until instanceof \DateTimeInterface) ? $q->valid_until->format('Y-m-d') : ($q->valid_until ?: now()->addDays(14)->format('Y-m-d')),
+                    'subtotal' => (float) $q->subtotal,
+                    'discount_amount' => (float) $q->discount_amount,
+                    'tax' => (float) $q->tax,
+                    'total' => (float) $q->total,
+                    'status' => $q->status ?: 'Draft',
+                    'created_at' => ($q->created_at instanceof \DateTimeInterface) ? $q->created_at->format('Y-m-d') : now()->format('Y-m-d'),
+                    'notes' => $q->notes ?: '',
+                    'items' => is_array($q->items) ? $q->items : (json_decode($q->items ?? '[]', true) ?: []),
+                ])->toArray();
+            }
+        } catch (\Throwable) {
+            if (empty($this->priceQuotes)) {
+                $this->priceQuotes = [];
+            }
         }
+
+        // --- Ensure CRM Deals across all 4 stages for rich pipeline cards ---
+        try {
+            if (CrmDeal::count() < 4) {
+                $lead = CrmLead::first();
+                $leadId = $lead?->id;
+                $sampleDeals = [
+                    ['deal_name' => 'Katampe Hills Luxury Villa 15kVA Backup', 'stage' => 'prospecting', 'value' => 6500000.00, 'expected_close' => now()->addDays(20)],
+                    ['deal_name' => 'Northbridge Media Dual Inverter Upgrade', 'stage' => 'proposal', 'value' => 8500000.00, 'expected_close' => now()->addDays(12)],
+                    ['deal_name' => 'Wuse Commercial Plaza 30kVA Solar Farm', 'stage' => 'negotiation', 'value' => 14200000.00, 'expected_close' => now()->addDays(5)],
+                    ['deal_name' => 'Sterling Finance Corp HQ Pure Sine Wave Rollout', 'stage' => 'closed_won', 'value' => 18500000.00, 'expected_close' => now()->subDays(2)],
+                ];
+                foreach ($sampleDeals as $sd) {
+                    if (! CrmDeal::where('deal_name', $sd['deal_name'])->exists()) {
+                        CrmDeal::create(array_merge($sd, ['crm_lead_id' => $leadId]));
+                    }
+                }
+            }
+        } catch (\Throwable) {}
 
         // --- General Ledger (Bank Accounts) ---
         try {
@@ -1936,21 +2032,33 @@ class AscendModuleViewer extends Component
         }
     }
 
-    public function createPriceQuoteFromModal(?string $dispatchAction = null): void
+    public function createPriceQuoteFromModal(?string $dispatchAction = null, bool $isDraft = false): void
     {
         $this->persistNewInventoryProducts();
         $this->recalculateInvoiceTotals();
 
         $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
         $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3550000.00));
-        $qtId = (!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-QT-')) ? $this->form['invoice_number'] : $this->getNextQuoteNumber();
+        $qtId = $this->activeEditingQuoteId ?: ((!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-QT-')) ? $this->form['invoice_number'] : $this->getNextQuoteNumber());
         $phone = $this->form['client_phone'] ?: ($this->form['phone'] ?: '+234 811 763 3020');
         $email = $this->form['client_email'] ?: ($this->form['email'] ?: 'client@ascendsystems.ng');
 
         $isSent = in_array($dispatchAction, ['email', 'whatsapp', 'both']);
+        $status = $isDraft ? 'Draft' : ($isSent ? 'Sent' : 'Draft');
+
+        $items = array_map(fn($item) => [
+            'product_id' => $item['product_id'] ?? null,
+            'sku' => $item['sku'] ?? '',
+            'description' => $item['description'] ?? 'Custom Solar Product Item',
+            'qty' => (int) ($item['quantity'] ?? 1),
+            'unit_price' => (float) ($item['unit_price'] ?? 0),
+            'discount_percent' => (float) ($item['discount_percent'] ?? 0),
+            'amount' => (float) ($item['amount'] ?? 0),
+        ], $this->invoiceItems);
 
         $newQuote = [
             'id' => $qtId,
+            'quote_number' => $qtId,
             'client_name' => $client,
             'email' => $email,
             'phone' => $phone,
@@ -1960,21 +2068,50 @@ class AscendModuleViewer extends Component
             'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
             'tax' => (float) ($this->form['tax'] ?? 0),
             'total' => $amount,
-            'status' => $isSent ? 'Sent' : 'Draft',
+            'status' => $status,
             'created_at' => now()->format('Y-m-d'),
             'notes' => $this->form['notes'] ?: 'Standard commercial quotation',
-            'items' => array_map(fn($item) => [
-                'product_id' => $item['product_id'] ?? null,
-                'sku' => $item['sku'] ?? '',
-                'description' => $item['description'] ?? 'Custom Solar Product Item',
-                'qty' => (int) ($item['quantity'] ?? 1),
-                'unit_price' => (float) ($item['unit_price'] ?? 0),
-                'discount_percent' => (float) ($item['discount_percent'] ?? 0),
-                'amount' => (float) ($item['amount'] ?? 0),
-            ], $this->invoiceItems),
+            'items' => $items,
         ];
 
-        array_unshift($this->priceQuotes, $newQuote);
+        // Persist to database
+        try {
+            if (Schema::hasTable('price_quotes')) {
+                PriceQuote::updateOrCreate(
+                    ['quote_number' => $qtId],
+                    [
+                        'client_name' => $client,
+                        'email' => $email,
+                        'phone' => $phone,
+                        'address' => $this->form['client_address'] ?? null,
+                        'valid_until' => $this->form['due_date'] ?: now()->addDays(14)->toDateString(),
+                        'subtotal' => (float) ($this->form['subtotal'] ?? $amount),
+                        'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
+                        'tax' => (float) ($this->form['tax'] ?? 0),
+                        'total' => $amount,
+                        'status' => $status,
+                        'notes' => $this->form['notes'] ?: null,
+                        'items' => $items,
+                    ]
+                );
+            }
+        } catch (\Throwable) {}
+
+        // Update in-memory array
+        $foundIndex = null;
+        foreach ($this->priceQuotes as $idx => $q) {
+            if (($q['id'] ?? '') === $qtId || ($q['quote_number'] ?? '') === $qtId) {
+                $foundIndex = $idx;
+                break;
+            }
+        }
+        if ($foundIndex !== null) {
+            $this->priceQuotes[$foundIndex] = $newQuote;
+        } else {
+            array_unshift($this->priceQuotes, $newQuote);
+        }
+
+        $this->activeEditingQuoteId = null;
 
         if ($dispatchAction === 'whatsapp' || $dispatchAction === 'both') {
             try {
@@ -1991,7 +2128,11 @@ class AscendModuleViewer extends Component
 
         $this->showModal = false;
 
-        if ($dispatchAction === 'email') {
+        if ($isDraft) {
+            session()->flash('status', __('Quote draft :id saved successfully! You can view and resume it at any time.', [
+                'id' => $qtId,
+            ]));
+        } elseif ($dispatchAction === 'email') {
             session()->flash('status', __('Official Price Quote :id generated and dispatched via Email to :email! Total: ₦:total', [
                 'id' => $qtId,
                 'email' => $email,
@@ -2010,6 +2151,281 @@ class AscendModuleViewer extends Component
                 'total' => number_format($amount, 2),
             ]));
         }
+    }
+
+    public function saveQuoteDraft(): void
+    {
+        $this->createPriceQuoteFromModal(null, true);
+    }
+
+    public function editQuoteDraft(string $quoteId): void
+    {
+        $quote = null;
+        try {
+            if (Schema::hasTable('price_quotes')) {
+                $quote = PriceQuote::where('quote_number', $quoteId)->first();
+            }
+        } catch (\Throwable) {}
+
+        if (! $quote) {
+            $quoteData = collect($this->priceQuotes)->firstWhere('id', $quoteId) ?: collect($this->priceQuotes)->firstWhere('quote_number', $quoteId);
+            if ($quoteData) {
+                $quote = (object) $quoteData;
+                $quote->quote_number = $quoteData['id'] ?? $quoteData['quote_number'];
+            }
+        }
+
+        if (! $quote) {
+            session()->flash('warning', __('Quote draft not found.'));
+            return;
+        }
+
+        $this->activeEditingQuoteId = $quote->quote_number;
+        $this->modalType = 'quote';
+        $this->form['invoice_number'] = $quote->quote_number;
+        $this->form['client_name'] = $quote->client_name;
+        $this->form['client_phone'] = $quote->phone ?? '';
+        $this->form['client_email'] = $quote->email ?? '';
+        $this->form['client_address'] = $quote->address ?? '';
+        $this->form['due_date'] = ($quote->valid_until instanceof \DateTimeInterface) ? $quote->valid_until->format('Y-m-d') : ($quote->valid_until ?? now()->addDays(14)->format('Y-m-d'));
+        $this->form['subtotal'] = (float) $quote->subtotal;
+        $this->form['discount_amount'] = (float) $quote->discount_amount;
+        $this->form['tax'] = (float) $quote->tax;
+        $this->form['total'] = (float) $quote->total;
+        $this->form['notes'] = $quote->notes ?? '';
+
+        $rawItems = is_array($quote->items) ? $quote->items : (json_decode($quote->items ?? '[]', true) ?: []);
+        if (! empty($rawItems)) {
+            $this->invoiceItems = array_map(function ($it) {
+                return [
+                    'product_id' => $it['product_id'] ?? null,
+                    'sku' => $it['sku'] ?? '',
+                    'description' => $it['description'] ?? 'Solar Product Item',
+                    'quantity' => (int) ($it['qty'] ?? ($it['quantity'] ?? 1)),
+                    'unit_price' => (float) ($it['unit_price'] ?? 0),
+                    'discount_percent' => (float) ($it['discount_percent'] ?? 0),
+                    'amount' => (float) ($it['amount'] ?? 0),
+                ];
+            }, $rawItems);
+        }
+
+        $this->showModal = true;
+        $this->showQuoteModal = false;
+        session()->flash('status', __('Resumed Quote Draft :num. You can make adjustments and save.', ['num' => $quote->quote_number]));
+    }
+
+    public function inspectPriceQuote(string $quoteId): void
+    {
+        $quote = null;
+        try {
+            if (Schema::hasTable('price_quotes')) {
+                $quote = PriceQuote::where('quote_number', $quoteId)->first();
+            }
+        } catch (\Throwable) {}
+
+        if (! $quote) {
+            $quoteData = collect($this->priceQuotes)->firstWhere('id', $quoteId) ?: collect($this->priceQuotes)->firstWhere('quote_number', $quoteId);
+            if ($quoteData) {
+                $quote = (object) $quoteData;
+                $quote->quote_number = $quoteData['id'] ?? $quoteData['quote_number'];
+            }
+        }
+
+        if (! $quote) {
+            session()->flash('warning', __('Quote details not found.'));
+            return;
+        }
+
+        $rawItems = is_array($quote->items) ? $quote->items : (json_decode($quote->items ?? '[]', true) ?: []);
+
+        $this->inspectQuoteData = [
+            'id' => $quote->quote_number,
+            'client_name' => $quote->client_name,
+            'phone' => $quote->phone ?? '—',
+            'email' => $quote->email ?? '—',
+            'address' => $quote->address ?? '—',
+            'valid_until' => ($quote->valid_until instanceof \DateTimeInterface) ? $quote->valid_until->format('d M Y') : ($quote->valid_until ?? '—'),
+            'created_at' => ($quote->created_at instanceof \DateTimeInterface) ? $quote->created_at->format('d M Y') : now()->format('d M Y'),
+            'subtotal' => (float) $quote->subtotal,
+            'discount_amount' => (float) $quote->discount_amount,
+            'tax' => (float) $quote->tax,
+            'total' => (float) $quote->total,
+            'status' => $quote->status ?: 'Draft',
+            'notes' => $quote->notes ?: 'Commercial solar and inverter proposal issued by Ascend Systems Nigeria.',
+            'items' => $rawItems,
+        ];
+
+        $this->showQuoteModal = true;
+    }
+
+    public function closeQuoteModal(): void
+    {
+        $this->showQuoteModal = false;
+        $this->inspectQuoteData = null;
+    }
+
+    public function setQuoteStatusFilter(string $status): void
+    {
+        $this->quoteStatusFilter = $status;
+    }
+
+    // =========================================================
+    // CRM DEAL & PIPELINE STAGE INSPECTION ACTIONS
+    // =========================================================
+
+    public function inspectCrmDeal(int $dealId): void
+    {
+        $deal = CrmDeal::with('lead')->find($dealId);
+        if (! $deal) {
+            session()->flash('warning', __('Deal not found.'));
+            return;
+        }
+
+        $lead = $deal->lead;
+        $linkedQuote = null;
+        try {
+            if (Schema::hasTable('price_quotes')) {
+                $linkedQuote = PriceQuote::where('crm_deal_id', $deal->id)
+                    ->orWhere('client_name', $deal->deal_name)
+                    ->orWhere('client_name', $lead?->company_name)
+                    ->latest()
+                    ->first();
+            }
+        } catch (\Throwable) {}
+
+        $this->inspectDealData = [
+            'id' => $deal->id,
+            'deal_name' => $deal->deal_name,
+            'stage' => $deal->stage,
+            'value' => (float) $deal->value,
+            'expected_close' => $deal->expected_close?->format('Y-m-d') ?: 'TBD',
+            'probability' => match($deal->stage) {
+                'prospecting' => 20,
+                'proposal' => 50,
+                'negotiation' => 75,
+                'closed_won' => 100,
+                'closed_lost' => 0,
+                default => 30,
+            },
+            'lead_id' => $lead?->id,
+            'company_name' => $lead?->company_name ?: ($deal->deal_name ?: 'Enterprise Client'),
+            'contact_person' => $lead?->contact_person ?: 'Client Representative',
+            'job_title' => $lead?->job_title ?: 'Authorized Representative',
+            'phone' => $lead?->phone ?: '+234 803 000 0000',
+            'email' => $lead?->email ?: 'contact@client.ng',
+            'city_location' => $lead?->city_location ?: 'Abuja HQ Region',
+            'system_interest' => $lead?->system_interest ?: 'Commercial Solar & Hybrid Inverter Sizing',
+            'lead_type' => $lead?->lead_type ?: 'customer',
+            'notes' => $lead?->notes ?: 'Commercial solar installation inquiry.',
+            'created_at' => $deal->created_at?->format('d M Y') ?? now()->format('d M Y'),
+            'quote_id' => $linkedQuote?->quote_number,
+            'quote_total' => (float) ($linkedQuote?->total ?? 0),
+            'quote_status' => $linkedQuote?->status,
+        ];
+
+        $this->showDealModal = true;
+    }
+
+    public function closeDealModal(): void
+    {
+        $this->showDealModal = false;
+        $this->inspectDealData = null;
+    }
+
+    public function updateDealStage(int $dealId, string $newStage): void
+    {
+        $deal = CrmDeal::find($dealId);
+        if ($deal) {
+            $old = $deal->stage;
+            $deal->update(['stage' => $newStage]);
+
+            if ($this->inspectDealData && $this->inspectDealData['id'] === $dealId) {
+                $this->inspectDealData['stage'] = $newStage;
+                $this->inspectDealData['probability'] = match($newStage) {
+                    'prospecting' => 20,
+                    'proposal' => 50,
+                    'negotiation' => 75,
+                    'closed_won' => 100,
+                    'closed_lost' => 0,
+                    default => 30,
+                };
+            }
+
+            session()->flash('status', __('Deal ":name" moved from :old to :new stage!', [
+                'name' => $deal->deal_name,
+                'old' => ucfirst(str_replace('_', ' ', $old)),
+                'new' => ucfirst(str_replace('_', ' ', $newStage)),
+            ]));
+        }
+    }
+
+    public function filterDealStage(string $stageKey): void
+    {
+        $this->dealStageFilter = ($this->dealStageFilter === $stageKey) ? 'all' : $stageKey;
+    }
+
+    public function setDealViewMode(string $mode): void
+    {
+        $this->dealViewMode = in_array($mode, ['table', 'kanban']) ? $mode : 'table';
+    }
+
+    public function createQuoteForDeal(int $dealId): void
+    {
+        $deal = CrmDeal::with('lead')->find($dealId);
+        if (! $deal) {
+            return;
+        }
+
+        $lead = $deal->lead;
+        $this->openCreateModal('quote');
+        $this->form['client_name'] = $lead?->company_name ?: $deal->deal_name;
+        $this->form['client_phone'] = $lead?->phone ?: '';
+        $this->form['client_email'] = $lead?->email ?: '';
+        $this->form['total'] = (float) $deal->value;
+        $this->form['notes'] = 'Proposal for Deal #' . $deal->id . ': ' . $deal->deal_name;
+        $this->showDealModal = false;
+    }
+
+    public function inspectPipelineStage(string $stageKey): void
+    {
+        $meta = [
+            'prospecting' => ['label' => 'Prospecting & Initial Sizing', 'color' => 'slate', 'icon' => 'fa-light fa-magnifying-glass', 'prob' => 20, 'desc' => 'Inbound prospects undergoing initial energy load sizing, roof inspection scoping, and requirement qualification.'],
+            'proposal' => ['label' => 'Technical Proposal & Quote Submitted', 'color' => 'blue', 'icon' => 'fa-light fa-file-signature', 'prob' => 50, 'desc' => 'Commercial proposals and official price quotes submitted to clients awaiting procurement review.'],
+            'negotiation' => ['label' => 'Commercial Negotiation & Terms', 'color' => 'amber', 'icon' => 'fa-light fa-handshake', 'prob' => 75, 'desc' => 'Contracts in active discussion, financing terms, milestone billing, and payment structuring.'],
+            'closed_won' => ['label' => 'Closed Won (Deposit Verified)', 'color' => 'emerald', 'icon' => 'fa-light fa-trophy', 'prob' => 100, 'desc' => 'Finalized orders with verified deposits, ready for warehouse waybill dispatch and installation commissioning.'],
+        ][$stageKey] ?? ['label' => ucfirst($stageKey), 'color' => 'blue', 'icon' => 'fa-light fa-folder', 'prob' => 50, 'desc' => ''];
+
+        $deals = CrmDeal::with('lead')->where('stage', $stageKey)->get();
+        $totalVal = (float) $deals->sum('value');
+
+        $this->inspectStageData = [
+            'key' => $stageKey,
+            'label' => $meta['label'],
+            'color' => $meta['color'],
+            'icon' => $meta['icon'],
+            'probability' => $meta['prob'],
+            'description' => $meta['desc'],
+            'deal_count' => $deals->count(),
+            'total_value' => $totalVal,
+            'weighted_value' => $totalVal * ($meta['prob'] / 100),
+            'deals' => $deals->map(fn($d) => [
+                'id' => $d->id,
+                'name' => $d->deal_name,
+                'value' => (float) $d->value,
+                'expected_close' => $d->expected_close?->format('Y-m-d') ?: 'TBD',
+                'client' => $d->lead?->company_name ?: $d->deal_name,
+                'contact' => $d->lead?->contact_person ?: 'Contact',
+                'phone' => $d->lead?->phone ?: '',
+            ])->toArray(),
+        ];
+
+        $this->showStageModal = true;
+    }
+
+    public function closeStageModal(): void
+    {
+        $this->showStageModal = false;
+        $this->inspectStageData = null;
     }
 
     // Finance Invoice Payment
@@ -5721,6 +6137,10 @@ class AscendModuleViewer extends Component
                         ->orWhere('stage', 'like', "%{$search}%");
                 });
             })
+            ->when($this->dealStageFilter !== 'all', function ($q) {
+                $q->where('stage', $this->dealStageFilter);
+            })
+            ->with('lead')
             ->latest()
             ->get();
 
@@ -5735,6 +6155,21 @@ class AscendModuleViewer extends Component
             ->latest()
             ->get();
 
+        $displayedPriceQuotes = collect($this->priceQuotes)
+            ->when($this->quoteStatusFilter !== 'all', function ($collection) {
+                return $collection->where('status', $this->quoteStatusFilter);
+            })
+            ->when($search !== '', function ($collection) use ($search) {
+                $lower = strtolower($search);
+                return $collection->filter(function ($item) use ($lower) {
+                    return str_contains(strtolower($item['quote_number'] ?? ''), $lower)
+                        || str_contains(strtolower($item['client_name'] ?? ''), $lower)
+                        || str_contains(strtolower($item['notes'] ?? ''), $lower);
+                });
+            })
+            ->values()
+            ->all();
+
         return view('appascend::livewire.ascend-module-viewer', [
             'financeMetrics' => $this->getFinanceOverviewMetrics(),
             'dbBankAccounts' => BankAccount::query()->orderBy('name')->get(),
@@ -5742,6 +6177,7 @@ class AscendModuleViewer extends Component
             'dbExpenses' => $dbExpenses,
             'dbLeads' => $dbLeads,
             'dbDeals' => $dbDeals,
+            'displayedPriceQuotes' => $displayedPriceQuotes,
             'dbProjects' => Project::query()->latest()->get(),
             'dbProjectTasks' => $dbTasks,
             'dbProducts' => $dbProducts,
@@ -5756,7 +6192,7 @@ class AscendModuleViewer extends Component
             'dbWebLeads' => \App\Models\WebLeadCapture::query()->latest()->get(),
             'dbSupplierPurchaseOrders' => \App\Models\SupplierPurchaseOrder::query()->latest()->get(),
             'dbCrmLeadDripLogs' => \App\Models\CrmLeadDripLog::query()->latest()->get(),
-            'dbPartnerWarrantyClaims' => \App\Models\PartnerWarrantyClaim::query()->latest()->get(),
+            'dbPartnerWarrantyClaim' => \App\Models\PartnerWarrantyClaim::query()->latest()->get(),
             'users' => User::query()->with('role')->orderBy('name')->get(),
             'roles' => AdminRole::query()->withCount('users')->orderBy('name')->get(),
             'logs' => AuditLog::query()->latest()->take(20)->get(),

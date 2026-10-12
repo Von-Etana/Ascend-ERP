@@ -1473,7 +1473,7 @@
             </div>
         @elseif ($activeTab === 'deals')
             <div class="space-y-6">
-                <!-- Pipeline Stage Visualization -->
+                <!-- Pipeline Stage Visualization (Clickable Cards) -->
                 <div class="grid gap-4 sm:grid-cols-4">
                     @php
                         $stages = [
@@ -1484,81 +1484,168 @@
                         ];
                     @endphp
                     @foreach ($stages as $stageKey => $stageMeta)
-                        @php $stageDeals = $dbDeals->where('stage', $stageKey); @endphp
-                        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                        @php 
+                            $stageDealsCount = \App\Models\CrmDeal::where('stage', $stageKey)->count();
+                            $stageDealsSum = \App\Models\CrmDeal::where('stage', $stageKey)->sum('value');
+                            $isSelectedStage = $dealStageFilter === $stageKey;
+                        @endphp
+                        <div wire:click="inspectPipelineStage('{{ $stageKey }}')" class="group relative cursor-pointer rounded-2xl border {{ $isSelectedStage ? 'border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/20 dark:bg-blue-950/20' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900' }} p-5 shadow-sm transition hover:shadow-md hover:border-blue-400">
                             <div class="flex items-center justify-between">
-                                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-{{ $stageMeta['color'] }}-500/10 text-{{ $stageMeta['color'] }}-600">
+                                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-{{ $stageMeta['color'] }}-500/10 text-{{ $stageMeta['color'] }}-600 group-hover:scale-105 transition">
                                     <i class="{{ $stageMeta['icon'] }} text-lg"></i>
                                 </span>
-                                <span class="text-xs font-bold text-slate-400 uppercase">{{ $stageDeals->count() }} Deals</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs font-bold text-slate-400 uppercase">{{ $stageDealsCount }} Deals</span>
+                                    <i class="fa-light fa-circle-info text-xs text-slate-400 group-hover:text-blue-500 transition"></i>
+                                </div>
                             </div>
-                            <h3 class="mt-3 text-base font-bold text-slate-900 dark:text-white">{{ $stageMeta['label'] }}</h3>
-                            <p class="mt-1 text-lg font-black text-{{ $stageMeta['color'] }}-600">₦{{ number_format($stageDeals->sum('value'), 2) }}</p>
+                            <h3 class="mt-3 text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition">{{ $stageMeta['label'] }}</h3>
+                            <p class="mt-1 text-lg font-black text-{{ $stageMeta['color'] }}-600">₦{{ number_format($stageDealsSum, 2) }}</p>
+                            <p class="mt-2 text-[10px] font-semibold text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">Click to view stage dossier & deals →</p>
                         </div>
                     @endforeach
                 </div>
 
-                <!-- Deals Table -->
-                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Active Deals & Revenue Pipeline') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Track deal stages, expected close dates, and projected revenue.') }}</p>
+                <!-- Active Filter Indicator (if filtered) -->
+                @if ($dealStageFilter !== 'all')
+                    <div class="flex items-center justify-between rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs font-bold text-blue-800 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-200">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-light fa-filter"></i>
+                            <span>Filtering deals by stage: <strong>{{ ucfirst(str_replace('_', ' ', $dealStageFilter)) }}</strong></span>
                         </div>
-                        <button type="button" wire:click="openCreateModal('deal')" class="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
-                            <i class="fa-light fa-plus mr-1.5"></i>{{ __('New Deal') }}
+                        <button type="button" wire:click="filterDealStage('all')" class="text-xs underline hover:text-blue-600">
+                            {{ __('Show All Stages') }}
                         </button>
                     </div>
+                @endif
 
-                    <div class="mt-5 overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
-                                <tr>
-                                    <th class="px-4 py-3.5">Deal Name</th>
-                                    <th class="px-4 py-3.5">Pipeline Stage</th>
-                                    <th class="px-4 py-3.5">Value (NGN)</th>
-                                    <th class="px-4 py-3.5">Expected Close</th>
-                                    <th class="px-4 py-3.5">Probability</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                @forelse ($dbDeals as $deal)
-                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                                        <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-white">{{ $deal->deal_name }}</td>
-                                        <td class="px-4 py-3.5">
-                                            <span class="rounded-full px-3 py-1 text-xs font-bold {{ match($deal->stage) {
-                                                'prospecting' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
-                                                'proposal' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
-                                                'negotiation' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
-                                                'closed_won' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
-                                                default => 'bg-slate-100 text-slate-600',
-                                            } }}">
-                                                {{ ucfirst(str_replace('_', ' ', $deal->stage)) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($deal->value, 2) }}</td>
-                                        <td class="px-4 py-3.5 text-xs text-slate-500">{{ $deal->expected_close?->format('Y-m-d') ?: 'TBD' }}</td>
-                                        <td class="px-4 py-3.5">
-                                            @php $prob = match($deal->stage) { 'prospecting' => 20, 'proposal' => 50, 'negotiation' => 75, 'closed_won' => 100, default => 30 }; @endphp
-                                            <div class="flex items-center gap-2">
-                                                <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                                    <div class="h-full rounded-full bg-blue-500 transition-all" style="width: {{ $prob }}%;"></div>
-                                                </div>
-                                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">{{ $prob }}%</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-12 text-center">
-                                            <i class="fa-light fa-chart-kanban text-4xl text-slate-300"></i>
-                                            <p class="mt-3 text-sm font-medium text-slate-400">{{ __('No deals in pipeline yet.') }}</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                <!-- Deals Hub Section (Table / Kanban View) -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Active Deals & Revenue Pipeline') }}</h2>
+                            <p class="text-sm text-slate-500">{{ __('Track deal stages, expected close dates, and projected revenue. Click any deal or stage to inspect full dossier.') }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <!-- View Mode Toggle -->
+                            <div class="flex items-center rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                                <button type="button" wire:click="setDealViewMode('table')" class="rounded-lg px-3 py-1.5 text-xs font-bold transition {{ $dealViewMode === 'table' ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400' }}">
+                                    <i class="fa-light fa-table-list mr-1"></i>{{ __('Table') }}
+                                </button>
+                                <button type="button" wire:click="setDealViewMode('kanban')" class="rounded-lg px-3 py-1.5 text-xs font-bold transition {{ $dealViewMode === 'kanban' ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400' }}">
+                                    <i class="fa-light fa-chart-kanban mr-1"></i>{{ __('Pipeline Cards') }}
+                                </button>
+                            </div>
+                            <button type="button" wire:click="openCreateModal('deal')" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition">
+                                <i class="fa-light fa-plus mr-1.5"></i>{{ __('New Deal') }}
+                            </button>
+                        </div>
                     </div>
+
+                    @if ($dealViewMode === 'kanban')
+                        <!-- KANBAN PIPELINE VIEW -->
+                        <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            @foreach ($stages as $stageKey => $stageMeta)
+                                @php $colDeals = $dbDeals->where('stage', $stageKey); @endphp
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+                                    <div class="flex items-center justify-between border-b pb-3 dark:border-slate-800 cursor-pointer" wire:click="inspectPipelineStage('{{ $stageKey }}')">
+                                        <div class="flex items-center gap-2">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-{{ $stageMeta['color'] }}-500/10 text-{{ $stageMeta['color'] }}-600">
+                                                <i class="{{ $stageMeta['icon'] }} text-xs"></i>
+                                            </span>
+                                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-white">{{ $stageMeta['label'] }}</h3>
+                                        </div>
+                                        <span class="rounded-full bg-slate-200/60 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ $colDeals->count() }}</span>
+                                    </div>
+                                    <div class="mt-3 space-y-3">
+                                        @forelse ($colDeals as $deal)
+                                            <div wire:click="inspectCrmDeal({{ $deal->id }})" class="group cursor-pointer rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs transition hover:border-blue-400 hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
+                                                <div class="flex items-start justify-between">
+                                                    <h4 class="text-xs font-bold text-slate-900 group-hover:text-blue-600 dark:text-white transition leading-snug">{{ $deal->deal_name }}</h4>
+                                                </div>
+                                                @if ($deal->lead)
+                                                    <p class="mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                                        <i class="fa-light fa-building text-[10px]"></i>{{ $deal->lead->company_name }}
+                                                    </p>
+                                                @endif
+                                                <p class="mt-2 text-sm font-black text-blue-600 dark:text-blue-400">₦{{ number_format($deal->value, 2) }}</p>
+                                                <div class="mt-2 flex items-center justify-between text-[10px] text-slate-400 border-t pt-2 dark:border-slate-700/60">
+                                                    <span><i class="fa-light fa-calendar mr-1"></i>{{ $deal->expected_close?->format('M d, Y') ?: 'Open' }}</span>
+                                                    <span class="font-bold text-blue-500">View Dossier →</span>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="py-8 text-center text-xs text-slate-400">
+                                                <p>No deals in this stage</p>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <!-- TABLE VIEW -->
+                        <div class="mt-5 overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
+                                    <tr>
+                                        <th class="px-4 py-3.5">Deal Name / Lead</th>
+                                        <th class="px-4 py-3.5">Pipeline Stage</th>
+                                        <th class="px-4 py-3.5">Value (NGN)</th>
+                                        <th class="px-4 py-3.5">Expected Close</th>
+                                        <th class="px-4 py-3.5">Probability</th>
+                                        <th class="px-4 py-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    @forelse ($dbDeals as $deal)
+                                        <tr wire:click="inspectCrmDeal({{ $deal->id }})" class="cursor-pointer transition hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                                            <td class="px-4 py-3.5">
+                                                <p class="font-bold text-slate-900 dark:text-white hover:text-blue-600 transition">{{ $deal->deal_name }}</p>
+                                                @if ($deal->lead)
+                                                    <p class="text-xs text-slate-500"><i class="fa-light fa-building mr-1"></i>{{ $deal->lead->company_name }} ({{ $deal->lead->contact_person }})</p>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3.5">
+                                                <span class="rounded-full px-3 py-1 text-xs font-bold {{ match($deal->stage) {
+                                                    'prospecting' => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+                                                    'proposal' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                    'negotiation' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                                    'closed_won' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                                    default => 'bg-slate-100 text-slate-600',
+                                                } }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $deal->stage)) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($deal->value, 2) }}</td>
+                                            <td class="px-4 py-3.5 text-xs text-slate-500">{{ $deal->expected_close?->format('Y-m-d') ?: 'TBD' }}</td>
+                                            <td class="px-4 py-3.5">
+                                                @php $prob = match($deal->stage) { 'prospecting' => 20, 'proposal' => 50, 'negotiation' => 75, 'closed_won' => 100, default => 30 }; @endphp
+                                                <div class="flex items-center gap-2">
+                                                    <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                                        <div class="h-full rounded-full bg-blue-500 transition-all" style="width: {{ $prob }}%;"></div>
+                                                    </div>
+                                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300">{{ $prob }}%</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3.5 text-right" onclick="event.stopPropagation()">
+                                                <button type="button" wire:click="inspectCrmDeal({{ $deal->id }})" class="rounded-lg bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition">
+                                                    <i class="fa-light fa-eye mr-1"></i>{{ __('Dossier') }}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="px-4 py-12 text-center">
+                                                <i class="fa-light fa-chart-kanban text-4xl text-slate-300"></i>
+                                                <p class="mt-3 text-sm font-medium text-slate-400">{{ __('No deals in pipeline yet.') }}</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </section>
             </div>
         @elseif ($activeTab === 'contacts')
@@ -3848,7 +3935,7 @@
                                 <i class="fa-light fa-file-signature"></i> Official Proposals Engine
                             </span>
                             <h2 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Price Quotes & Commercial Proposals') }}</h2>
-                            <p class="text-sm text-slate-500">{{ __('Generate professional solar & software price quotes, track validity, dispatch via WhatsApp/Email, and convert to Sales Orders or Invoices in one click.') }}</p>
+                            <p class="text-sm text-slate-500">{{ __('Generate professional solar & software price quotes, track drafts, dispatch via WhatsApp/Email, and convert to Sales Orders or Invoices in one click.') }}</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             <button type="button" wire:click="openCreateModal('quote')" class="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition active:scale-95">
@@ -3857,7 +3944,24 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 overflow-x-auto">
+                    <!-- Status Filter Pills -->
+                    <div class="mt-4 flex flex-wrap items-center gap-2 border-b pb-4 dark:border-slate-800">
+                        <span class="text-xs font-bold uppercase text-slate-400 mr-1">{{ __('Filter Status:') }}</span>
+                        @foreach ([
+                            'all' => ['label' => 'All Quotes', 'count' => count($priceQuotes)],
+                            'Draft' => ['label' => 'Drafts (Saved)', 'count' => count(array_filter($priceQuotes, fn($q) => ($q['status'] ?? '') === 'Draft'))],
+                            'Sent' => ['label' => 'Sent', 'count' => count(array_filter($priceQuotes, fn($q) => ($q['status'] ?? '') === 'Sent'))],
+                            'Accepted' => ['label' => 'Accepted', 'count' => count(array_filter($priceQuotes, fn($q) => ($q['status'] ?? '') === 'Accepted'))],
+                            'Converted' => ['label' => 'Converted', 'count' => count(array_filter($priceQuotes, fn($q) => ($q['status'] ?? '') === 'Converted'))],
+                        ] as $statusKey => $statusData)
+                            <button type="button" wire:click="setQuoteStatusFilter('{{ $statusKey }}')" class="rounded-xl px-3 py-1.5 text-xs font-bold transition flex items-center gap-1.5 {{ $quoteStatusFilter === $statusKey ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                                <span>{{ $statusData['label'] }}</span>
+                                <span class="rounded-full px-1.5 py-0.2 text-[10px] {{ $quoteStatusFilter === $statusKey ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300' }}">{{ $statusData['count'] }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4 overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 text-xs uppercase text-slate-400 dark:bg-slate-800">
                                 <tr>
@@ -3871,13 +3975,19 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                @foreach ($priceQuotes as $index => $qt)
-                                    <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                @forelse ($displayedPriceQuotes as $index => $qt)
+                                    <tr wire:click="inspectPriceQuote('{{ $qt['id'] }}')" class="cursor-pointer transition hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
                                         <td class="px-4 py-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">
-                                            <i class="fa-light fa-file-signature mr-1.5"></i>{{ $qt['id'] }}
+                                            <div class="flex items-center gap-1.5">
+                                                <i class="fa-light fa-file-signature"></i>
+                                                <span>{{ $qt['id'] }}</span>
+                                            </div>
+                                            @if (($qt['status'] ?? '') === 'Draft')
+                                                <span class="mt-0.5 inline-block rounded-sm bg-amber-500/10 px-1.5 py-0.2 text-[9px] font-bold text-amber-600 border border-amber-500/20">Saved Draft</span>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3.5">
-                                            <p class="font-bold text-slate-950 dark:text-white">{{ $qt['client_name'] }}</p>
+                                            <p class="font-bold text-slate-950 dark:text-white hover:text-blue-600 transition">{{ $qt['client_name'] }}</p>
                                             @if (!empty($qt['items']))
                                                 <div class="mt-1 flex flex-wrap gap-1">
                                                     @foreach (array_slice($qt['items'], 0, 2) as $it)
@@ -3890,53 +4000,50 @@
                                                     @endif
                                                 </div>
                                             @endif
-                                            <p class="mt-1 text-[10px] text-slate-400">Issued: {{ $qt['created_at'] }}</p>
+                                            <p class="mt-1 text-[10px] text-slate-400">Issued: {{ $qt['created_at'] ?? '—' }}</p>
                                         </td>
                                         <td class="px-4 py-3.5 text-xs">
-                                            <p class="font-medium text-slate-700 dark:text-slate-300">{{ $qt['email'] }}</p>
-                                            <p class="text-slate-400">{{ $qt['phone'] }}</p>
+                                            <p class="font-medium text-slate-700 dark:text-slate-300">{{ $qt['email'] ?? '—' }}</p>
+                                            <p class="text-slate-400">{{ $qt['phone'] ?? '—' }}</p>
                                         </td>
                                         <td class="px-4 py-3.5 text-slate-500 text-xs font-semibold">
-                                            <i class="fa-light fa-calendar mr-1 text-slate-400"></i>{{ $qt['valid_until'] }}
+                                            <i class="fa-light fa-calendar mr-1 text-slate-400"></i>{{ $qt['valid_until'] ?? '—' }}
                                         </td>
                                         <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">
-                                            ₦{{ number_format($qt['total'], 2) }}
+                                            ₦{{ number_format((float) ($qt['total'] ?? 0), 2) }}
                                         </td>
                                         <td class="px-4 py-3.5">
-                                            <span class="rounded-full px-3 py-1 text-xs font-bold {{ match($qt['status']) {
+                                            <span class="rounded-full px-3 py-1 text-xs font-bold {{ match($qt['status'] ?? '') {
                                                 'Converted' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
                                                 'Accepted' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
                                                 'Sent' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                                'Draft' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
                                                 'Expired' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
                                                 default => 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
                                             } }}">
-                                                {{ $qt['status'] }}
+                                                {{ $qt['status'] ?? 'Draft' }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3.5 text-right space-x-1">
+                                        <td class="px-4 py-3.5 text-right space-x-1" onclick="event.stopPropagation()">
+                                            @if (($qt['status'] ?? '') === 'Draft')
+                                                <button type="button" wire:click="editQuoteDraft('{{ $qt['id'] }}')" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Resume editing saved draft">
+                                                    <i class="fa-light fa-pen-to-square"></i>{{ __('Resume Draft') }}
+                                                </button>
+                                            @endif
+
+                                            <button type="button" wire:click="inspectPriceQuote('{{ $qt['id'] }}')" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Inspect full quote details">
+                                                <i class="fa-light fa-eye"></i>{{ __('View') }}
+                                            </button>
+
                                             @php $qtEncoded = base64_encode(json_encode($qt)); @endphp
-                                            <a href="{{ route('portal.quote.public-view', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Open Client Public Approval Portal">
+                                            <a href="{{ route('portal.quote.public-view', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2 py-1 text-xs font-bold text-slate-600 hover:bg-slate-500/20 transition dark:text-slate-300" title="Open Client Public Approval Portal">
                                                 <i class="fa-light fa-arrow-up-right-from-square"></i>Portal
-                                            </a>
-                                            <a href="{{ route('portal.field.portal', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-indigo-500/10 px-2 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-500/20 transition" title="Open Field Site Inspection & Commissioning Portal">
-                                                <i class="fa-light fa-helmet-safety"></i>Field
                                             </a>
                                             <a href="{{ route('portal.quote.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-500/20 transition dark:text-slate-200" title="Download Official PDF Quote">
                                                 <i class="fa-light fa-file-pdf"></i>PDF
                                             </a>
-                                            <a href="{{ route('portal.quote.inspection.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-cyan-500/10 px-2 py-1 text-xs font-bold text-cyan-600 hover:bg-cyan-500/20 transition" title="Download Site Inspection Report (PDF)">
-                                                <i class="fa-light fa-clipboard-check"></i>Site Audit
-                                            </a>
-                                            <a href="{{ route('portal.quote.waybill.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Download Warehouse Delivery Waybill & Gate Pass (PDF)">
-                                                <i class="fa-light fa-truck-ramp-box"></i>Waybill
-                                            </a>
-                                            <a href="{{ route('portal.quote.warranty.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Download 5-Year Warranty Certificate">
-                                                <i class="fa-light fa-award"></i>Warranty
-                                            </a>
-                                            <a href="{{ route('portal.quote.job-card.pdf', ['data' => $qtEncoded]) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-slate-500/10 px-2 py-1 text-xs font-bold text-slate-600 hover:bg-slate-500/20 transition dark:text-slate-300" title="Download Field Technician Job Card">
-                                                <i class="fa-light fa-clipboard-list-check"></i>Job Card
-                                            </a>
-                                            @if ($qt['status'] !== 'Converted')
+
+                                            @if ($qt['status'] !== 'Converted' && $qt['status'] !== 'Draft')
                                                 <button type="button" wire:click="convertQuoteToSalesOrder({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-purple-500/10 px-2 py-1 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition" title="Convert quote to Confirmed Sales Order (Auto-Decrements Stock)">
                                                     <i class="fa-light fa-cart-circle-check"></i>To Order
                                                 </button>
@@ -3946,17 +4053,21 @@
                                                 <button type="button" wire:click="sendQuoteWhatsApp({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Dispatch quote with link via WhatsApp">
                                                     <i class="fa-brands fa-whatsapp"></i>
                                                 </button>
-                                                <button type="button" wire:click="sendQuoteDripSequence({{ $index }}, 5)" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-1.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Dispatch Day 5 Site Inspection Offer via WhatsApp">
-                                                    <i class="fa-light fa-calendar-clock"></i>Drip
-                                                </button>
-                                            @else
+                                            @elseif ($qt['status'] === 'Converted')
                                                 <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
                                                     <i class="fa-light fa-circle-check"></i> Converted
                                                 </span>
                                             @endif
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-12 text-center">
+                                            <i class="fa-light fa-file-signature text-4xl text-slate-300"></i>
+                                            <p class="mt-3 text-sm font-medium text-slate-400">{{ __('No quotes found matching this filter.') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -9694,6 +9805,390 @@
                             {{ __('Close') }}
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- CRM DEAL INSPECTION DOSSIER MODAL -->
+    @if ($showDealModal && $inspectDealData)
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm animate-fade-in">
+            <div class="relative w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600">
+                            <i class="fa-light fa-briefcase text-xl"></i>
+                        </span>
+                        <div>
+                            <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-500/20 uppercase tracking-wider">
+                                CRM Deal Dossier #{{ $inspectDealData['id'] }}
+                            </span>
+                            <h3 class="text-lg font-black text-slate-950 dark:text-white">{{ $inspectDealData['deal_name'] }}</h3>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeDealModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                        <i class="fa-light fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mt-5 space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+                    <!-- Key Financials Banner -->
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Deal Value</p>
+                            <p class="mt-1 text-xl font-black text-blue-600 dark:text-blue-400">₦{{ number_format((float) ($inspectDealData['value'] ?? 0), 2) }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Pipeline Stage</p>
+                            <span class="mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold {{ match($inspectDealData['stage']) {
+                                'prospecting' => 'bg-slate-200 text-slate-700',
+                                'proposal' => 'bg-blue-500/10 text-blue-600',
+                                'negotiation' => 'bg-amber-500/10 text-amber-600',
+                                'closed_won' => 'bg-emerald-500/10 text-emerald-600',
+                                default => 'bg-slate-100 text-slate-600',
+                            } }}">
+                                {{ ucfirst(str_replace('_', ' ', $inspectDealData['stage'])) }}
+                            </span>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Win Probability</p>
+                            <p class="mt-1 text-xl font-black text-slate-900 dark:text-white">{{ $inspectDealData['probability'] }}%</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage Transition Control -->
+                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-1.5">
+                            <i class="fa-light fa-arrows-split-up-and-left text-blue-600"></i>{{ __('Move Deal to Pipeline Stage') }}
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            @foreach (['prospecting' => 'Prospecting', 'proposal' => 'Proposal', 'negotiation' => 'Negotiation', 'closed_won' => 'Closed Won'] as $stKey => $stLbl)
+                                <button type="button" wire:click="updateDealStage({{ $inspectDealData['id'] }}, '{{ $stKey }}')" class="rounded-xl px-3 py-2 text-xs font-bold transition text-center {{ $inspectDealData['stage'] === $stKey ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300' }}">
+                                    {{ $stLbl }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Client / Lead Information -->
+                    @if (!empty($inspectDealData['lead']))
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-800">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                                <i class="fa-light fa-user-tie text-blue-600"></i>{{ __('Client & Lead Contact Profile') }}
+                            </p>
+                            <div class="grid gap-3 sm:grid-cols-2 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block font-medium">Company Name</span>
+                                    <strong class="text-sm font-bold text-slate-900 dark:text-white">{{ $inspectDealData['lead']['company_name'] }}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-medium">Contact Person</span>
+                                    <strong class="text-sm font-bold text-slate-900 dark:text-white">{{ $inspectDealData['lead']['contact_person'] ?? 'Primary Contact' }}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-medium">Email Address</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectDealData['lead']['email'] ?? '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-medium">Phone Number</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectDealData['lead']['phone'] ?? '—' }}</span>
+                                </div>
+                            </div>
+                            <!-- Direct Contact Actions -->
+                            <div class="mt-4 flex flex-wrap items-center gap-2 border-t pt-3 dark:border-slate-700">
+                                @if (!empty($inspectDealData['lead']['phone']))
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $inspectDealData['lead']['phone']) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition">
+                                        <i class="fa-brands fa-whatsapp"></i>{{ __('Chat on WhatsApp') }}
+                                    </a>
+                                    <a href="tel:{{ $inspectDealData['lead']['phone'] }}" class="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition dark:bg-slate-700 dark:text-slate-200">
+                                        <i class="fa-light fa-phone"></i>{{ __('Call Contact') }}
+                                    </a>
+                                @endif
+                                @if (!empty($inspectDealData['lead']['email']))
+                                    <a href="mailto:{{ $inspectDealData['lead']['email'] }}" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-500/10 px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition">
+                                        <i class="fa-light fa-envelope"></i>{{ __('Send Email') }}
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Linked Proposal / Quote -->
+                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-800">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                                <i class="fa-light fa-file-signature text-blue-600"></i>{{ __('Linked Commercial Quotation') }}
+                            </p>
+                            @if (empty($inspectDealData['linked_quote']))
+                                <button type="button" wire:click="createQuoteForDeal({{ $inspectDealData['id'] }})" class="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition">
+                                    <i class="fa-light fa-plus mr-1"></i>{{ __('Generate Quote') }}
+                                </button>
+                            @endif
+                        </div>
+                        @if (!empty($inspectDealData['linked_quote']))
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-blue-50/60 border border-blue-200 dark:bg-blue-950/20 dark:border-blue-800">
+                                <div>
+                                    <span class="font-mono font-bold text-xs text-blue-600">{{ $inspectDealData['linked_quote']['quote_number'] }}</span>
+                                    <p class="text-xs font-bold text-slate-900 dark:text-white">Total: ₦{{ number_format((float) ($inspectDealData['linked_quote']['total'] ?? 0), 2) }}</p>
+                                </div>
+                                <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-600">
+                                    {{ $inspectDealData['linked_quote']['status'] ?? 'Active' }}
+                                </span>
+                            </div>
+                        @else
+                            <p class="text-xs text-slate-400">{{ __('No proposal quote generated yet for this deal.') }}</p>
+                        @endif
+                    </div>
+
+                    <!-- Expected Timeline & Notes -->
+                    <div class="grid gap-3 sm:grid-cols-2 text-xs">
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
+                            <span class="text-slate-400 block font-medium">Expected Closing Date</span>
+                            <strong class="text-sm font-bold text-slate-900 dark:text-white">{{ $inspectDealData['expected_close'] }}</strong>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
+                            <span class="text-slate-400 block font-medium">Record Created</span>
+                            <strong class="text-sm font-bold text-slate-900 dark:text-white">{{ $inspectDealData['created_at'] }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-6 flex items-center justify-between border-t pt-4 dark:border-slate-800">
+                    <button type="button" wire:click="filterDealStage('{{ $inspectDealData['stage'] }}')" class="text-xs font-bold text-blue-600 hover:underline">
+                        <i class="fa-light fa-filter mr-1"></i>{{ __('Filter all deals in this stage') }}
+                    </button>
+                    <button type="button" wire:click="closeDealModal" class="rounded-xl border border-slate-200 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300">
+                        {{ __('Close Dossier') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- PIPELINE STAGE INSPECTION DOSSIER MODAL -->
+    @if ($showStageModal && $inspectStageData)
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm animate-fade-in">
+            <div class="relative w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-{{ $inspectStageData['color'] }}-500/10 text-{{ $inspectStageData['color'] }}-600">
+                            <i class="{{ $inspectStageData['icon'] }} text-xl"></i>
+                        </span>
+                        <div>
+                            <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                                Pipeline Stage Overview
+                            </span>
+                            <h3 class="text-lg font-black text-slate-950 dark:text-white">{{ $inspectStageData['title'] }}</h3>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeStageModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                        <i class="fa-light fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mt-5 space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+                    <!-- Stage Metrics Cards -->
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Total Deals</p>
+                            <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">{{ $inspectStageData['count'] }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Pipeline Total</p>
+                            <p class="mt-1 text-2xl font-black text-{{ $inspectStageData['color'] }}-600">₦{{ number_format($inspectStageData['total_value'], 2) }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">Weighted Forecast Value</p>
+                            <p class="mt-1 text-2xl font-black text-purple-600">₦{{ number_format($inspectStageData['weighted_value'], 2) }}</p>
+                            <p class="text-[10px] text-slate-400 font-semibold mt-0.5">At {{ $inspectStageData['probability'] }}% close probability</p>
+                        </div>
+                    </div>
+
+                    <!-- Deals in this Stage Table -->
+                    <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-800">
+                        <div class="flex items-center justify-between mb-3 border-b pb-2 dark:border-slate-700">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Deals in this Stage (:count)', ['count' => count($inspectStageData['deals'])]) }}</h4>
+                            <button type="button" wire:click="openCreateModal('deal')" class="rounded-lg bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-blue-700">
+                                <i class="fa-light fa-plus mr-1"></i>{{ __('Add Deal Here') }}
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-50 uppercase text-slate-400 dark:bg-slate-900/50">
+                                    <tr>
+                                        <th class="p-2.5">Deal Name</th>
+                                        <th class="p-2.5">Client / Lead</th>
+                                        <th class="p-2.5">Value (NGN)</th>
+                                        <th class="p-2.5">Expected Close</th>
+                                        <th class="p-2.5 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                                    @forelse ($inspectStageData['deals'] as $stDeal)
+                                        <tr class="transition hover:bg-slate-50/60 dark:hover:bg-slate-700/40">
+                                            <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $stDeal['deal_name'] }}</td>
+                                            <td class="p-2.5 text-slate-600 dark:text-slate-300">{{ $stDeal['lead']['company_name'] ?? '—' }}</td>
+                                            <td class="p-2.5 font-black text-blue-600">₦{{ number_format((float) $stDeal['value'], 2) }}</td>
+                                            <td class="p-2.5 text-slate-400">{{ !empty($stDeal['expected_close']) ? \Carbon\Carbon::parse($stDeal['expected_close'])->format('Y-m-d') : 'TBD' }}</td>
+                                            <td class="p-2.5 text-right">
+                                                <button type="button" wire:click="inspectCrmDeal({{ $stDeal['id'] }})" class="rounded-lg bg-blue-500/10 px-2 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-500/20">
+                                                    {{ __('Inspect') }}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-6 text-center text-slate-400">
+                                                <p>No deals currently in this stage.</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-6 flex items-center justify-between border-t pt-4 dark:border-slate-800">
+                    <button type="button" wire:click="filterDealStage('{{ $inspectStageData['stage_key'] }}')" class="rounded-xl bg-blue-50 border border-blue-200 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-200">
+                        <i class="fa-light fa-filter mr-1.5"></i>{{ __('Filter main workspace to this stage') }}
+                    </button>
+                    <button type="button" wire:click="closeStageModal" class="rounded-xl border border-slate-200 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300">
+                        {{ __('Close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- QUOTE DOSSIER INSPECTION MODAL -->
+    @if ($showQuoteModal && $inspectQuoteData)
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm animate-fade-in">
+            <div class="relative w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600">
+                            <i class="fa-light fa-file-signature text-xl"></i>
+                        </span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono font-bold text-xs text-blue-600">{{ $inspectQuoteData['id'] }}</span>
+                                <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ match($inspectQuoteData['status']) {
+                                    'Converted' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+                                    'Accepted' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                    'Sent' => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                                    'Draft' => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                                    default => 'bg-slate-100 text-slate-600',
+                                } }}">
+                                    {{ $inspectQuoteData['status'] }}
+                                </span>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-950 dark:text-white">{{ $inspectQuoteData['client_name'] }}</h3>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeQuoteModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                        <i class="fa-light fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mt-5 space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+                    <!-- Client & Contact Card -->
+                    <div class="grid gap-3 sm:grid-cols-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs dark:border-slate-800 dark:bg-slate-800/40">
+                        <div>
+                            <span class="text-slate-400 block font-medium">Recipient Client</span>
+                            <strong class="text-sm font-bold text-slate-900 dark:text-white">{{ $inspectQuoteData['client_name'] }}</strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-medium">Email</span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectQuoteData['email'] ?: '—' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-medium">Phone</span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectQuoteData['phone'] ?: '—' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Line Items Table -->
+                    @if (!empty($inspectQuoteData['items']) && is_array($inspectQuoteData['items']))
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">{{ __('Quoted Line Items & Specifications') }}</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-50 uppercase text-slate-400 dark:bg-slate-800">
+                                        <tr>
+                                            <th class="p-2.5">Item Description</th>
+                                            <th class="p-2.5 text-center">Qty</th>
+                                            <th class="p-2.5 text-right">Unit Rate (NGN)</th>
+                                            <th class="p-2.5 text-right">Line Total (NGN)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        @foreach ($inspectQuoteData['items'] as $item)
+                                            <tr>
+                                                <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $item['description'] ?? 'Product Line' }}</td>
+                                                <td class="p-2.5 text-center font-bold">{{ $item['qty'] ?? 1 }}</td>
+                                                <td class="p-2.5 text-right font-mono">₦{{ number_format((float) ($item['rate'] ?? 0), 2) }}</td>
+                                                <td class="p-2.5 text-right font-mono font-bold text-slate-900 dark:text-white">₦{{ number_format((float) ($item['amount'] ?? 0), 2) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Pricing Breakdown -->
+                    <div class="grid gap-3 sm:grid-cols-4">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/40 text-xs">
+                            <span class="text-slate-400 block font-medium">Subtotal</span>
+                            <strong class="text-base font-black text-slate-900 dark:text-white">₦{{ number_format((float) ($inspectQuoteData['subtotal'] ?? 0), 2) }}</strong>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/40 text-xs">
+                            <span class="text-slate-400 block font-medium">Discount</span>
+                            <strong class="text-base font-black text-blue-600">-₦{{ number_format((float) ($inspectQuoteData['discount_amount'] ?? 0), 2) }}</strong>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/40 text-xs">
+                            <span class="text-slate-400 block font-medium">VAT (7.5%)</span>
+                            <strong class="text-base font-black text-slate-700 dark:text-slate-300">₦{{ number_format((float) ($inspectQuoteData['tax'] ?? 0), 2) }}</strong>
+                        </div>
+                        <div class="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-3.5 dark:border-emerald-800 dark:bg-emerald-950/20 text-xs">
+                            <span class="text-emerald-700 dark:text-emerald-300 block font-bold uppercase">Total Quoted</span>
+                            <strong class="text-lg font-black text-emerald-600 dark:text-emerald-400">₦{{ number_format((float) ($inspectQuoteData['total'] ?? 0), 2) }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Commercial Notes -->
+                    @if (!empty($inspectQuoteData['notes']))
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/20">
+                            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Commercial Notes & Terms</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ $inspectQuoteData['notes'] }}</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        @if (($inspectQuoteData['status'] ?? '') === 'Draft')
+                            <button type="button" wire:click="editQuoteDraft('{{ $inspectQuoteData['id'] }}')" class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-700 transition">
+                                <i class="fa-light fa-pen-to-square mr-1.5"></i>{{ __('Resume Editing Draft') }}
+                            </button>
+                        @endif
+
+                        @php $modalQtEncoded = base64_encode(json_encode($inspectQuoteData)); @endphp
+                        <a href="{{ route('portal.quote.pdf', ['data' => $modalQtEncoded]) }}" target="_blank" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition dark:border-slate-800 dark:text-slate-300">
+                            <i class="fa-light fa-file-pdf mr-1.5"></i>{{ __('Download PDF') }}
+                        </a>
+                    </div>
+                    <button type="button" wire:click="closeQuoteModal" class="rounded-xl border border-slate-200 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300">
+                        {{ __('Close') }}
+                    </button>
                 </div>
             </div>
         </div>
