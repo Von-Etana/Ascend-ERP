@@ -1774,6 +1774,7 @@ class AscendModuleViewer extends Component
             $inv = Invoice::create([
                 'invoice_number' => $invNum,
                 'client_name' => $quote['client_name'],
+                'category' => $quote['category'] ?? 'Solar & Inverter Systems',
                 'issue_date' => now(),
                 'due_date' => now()->addDays(14),
                 'subtotal' => (float) ($quote['subtotal'] ?? ($quote['total'] / 1.075)),
@@ -1789,6 +1790,15 @@ class AscendModuleViewer extends Component
                     'line_items' => $quote['items'] ?? [],
                 ],
             ]);
+
+            // Persist status update to PriceQuote database table if exists
+            try {
+                if (Schema::hasTable('price_quotes')) {
+                    PriceQuote::where('quote_number', $quote['id'])
+                        ->orWhere('quote_number', $quote['quote_number'] ?? '')
+                        ->update(['status' => 'Invoiced']);
+                }
+            } catch (\Throwable) {}
 
             // Synchronize corresponding sales orders
             foreach ($this->salesOrders as &$so) {
