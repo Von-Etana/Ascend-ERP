@@ -823,7 +823,14 @@
                             @foreach ($dbInvoices as $inv)
                                 <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                                     <td class="px-4 py-3.5 font-bold font-mono text-slate-900 dark:text-white">{{ $inv->invoice_number }}</td>
-                                    <td class="px-4 py-3.5 font-bold">{{ $inv->client_name }}</td>
+                                    <td class="px-4 py-3.5">
+                                        <p class="font-bold text-slate-900 dark:text-white">{{ $inv->client_name }}</p>
+                                        @if (!empty($inv->category) || !empty($inv->items['category']))
+                                            <span class="inline-block mt-0.5 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20">
+                                                {{ $inv->category ?: ($inv->items['category'] ?? '') }}
+                                            </span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3.5 text-slate-500 text-xs">{{ $inv->issue_date?->format('Y-m-d') ?: now()->format('Y-m-d') }}</td>
                                     <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($inv->total, 2) }}</td>
                                     <td class="px-4 py-3.5">
@@ -3987,7 +3994,14 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3.5">
-                                            <p class="font-bold text-slate-950 dark:text-white hover:text-blue-600 transition">{{ $qt['client_name'] }}</p>
+                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                <p class="font-bold text-slate-950 dark:text-white hover:text-blue-600 transition">{{ $qt['client_name'] }}</p>
+                                                @if (!empty($qt['category']))
+                                                    <span class="inline-block rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-500/20">
+                                                        {{ $qt['category'] }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                             @if (!empty($qt['items']))
                                                 <div class="mt-1 flex flex-wrap gap-1">
                                                     @foreach (array_slice($qt['items'], 0, 2) as $it)
@@ -4025,11 +4039,9 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3.5 text-right space-x-1" onclick="event.stopPropagation()">
-                                            @if (($qt['status'] ?? '') === 'Draft')
-                                                <button type="button" wire:click="editQuoteDraft('{{ $qt['id'] }}')" class="inline-flex items-center gap-1 rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-500/20 transition" title="Resume editing saved draft">
-                                                    <i class="fa-light fa-pen-to-square"></i>{{ __('Resume Draft') }}
-                                                </button>
-                                            @endif
+                                            <button type="button" wire:click="editQuoteDraft('{{ $qt['id'] }}')" class="inline-flex items-center gap-1 rounded-lg {{ ($qt['status'] ?? '') === 'Draft' ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20' : 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20' }} px-2.5 py-1 text-xs font-bold transition" title="{{ ($qt['status'] ?? '') === 'Draft' ? 'Resume editing saved draft' : 'Edit and update quotation' }}">
+                                                <i class="fa-light fa-pen-to-square"></i>{{ ($qt['status'] ?? '') === 'Draft' ? __('Resume Draft') : __('Edit') }}
+                                            </button>
 
                                             <button type="button" wire:click="inspectPriceQuote('{{ $qt['id'] }}')" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Inspect full quote details">
                                                 <i class="fa-light fa-eye"></i>{{ __('View') }}
@@ -7843,7 +7855,14 @@
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                 @forelse ($dbInvoices as $inv)
                                     <tr class="transition hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                                        <td class="px-4 py-3.5 font-mono font-bold text-slate-900 dark:text-white">{{ $inv->invoice_number }}</td>
+                                        <td class="px-4 py-3.5">
+                                            <p class="font-mono font-bold text-slate-900 dark:text-white">{{ $inv->invoice_number }}</p>
+                                            @if (!empty($inv->category) || !empty($inv->items['category']))
+                                                <span class="inline-block mt-0.5 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20">
+                                                    {{ $inv->category ?: ($inv->items['category'] ?? '') }}
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3.5 text-xs text-slate-500">{{ $inv->issue_date?->format('Y-m-d') }}</td>
                                         <td class="px-4 py-3.5 font-black text-slate-900 dark:text-white">₦{{ number_format($inv->total, 2) }}</td>
                                         <td class="px-4 py-3.5">
@@ -8090,7 +8109,12 @@
                         <div>
                             <h1 class="text-xl font-extrabold text-slate-950 dark:text-white">
                                 @if ($modalType === 'invoice') {{ __('New Enterprise Invoice Studio') }}
-                                @elseif ($modalType === 'price_quote') {{ __('New Price Quote & Proposal Studio') }}
+                                @elseif ($modalType === 'price_quote' || $modalType === 'quote')
+                                    @if ($activeEditingQuoteId)
+                                        {{ __('Edit & Update Price Quote') }} ({{ $activeEditingQuoteId }})
+                                    @else
+                                        {{ __('New Price Quote & Proposal Studio') }}
+                                    @endif
                                 @elseif ($modalType === 'sales_order') {{ __('New Confirmed Sales Order Studio') }}
                                 @elseif ($modalType === 'expense') {{ __('Record Expense Transaction Studio') }}
                                 @elseif ($modalType === 'pos_sale') {{ __('New POS Quick Sale & Terminal Checkout') }}
@@ -8110,9 +8134,9 @@
                         <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">
                             {{ __('Cancel & Discard') }}
                         </button>
-                        @if (in_array($modalType, ['invoice', 'price_quote', 'sales_order', 'expense', 'product', 'campaign', 'rule', 'pos_sale', 'deal', 'lead', 'project']))
+                        @if (in_array($modalType, ['invoice', 'price_quote', 'quote', 'sales_order', 'expense', 'product', 'campaign', 'rule', 'pos_sale', 'deal', 'lead', 'project']))
                             <button type="button" wire:click="submitModalForm" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition">
-                                <i class="fa-light fa-cloud-arrow-up mr-2"></i>{{ __('Save & Persist Record') }}
+                                <i class="fa-light fa-cloud-arrow-up mr-2"></i>{{ $activeEditingQuoteId ? __('Update Quote Record') : __('Save & Persist Record') }}
                             </button>
                         @endif
                     </div>
@@ -8336,7 +8360,19 @@
                             </div>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Solution Category *</label>
+                                <select wire:model="form.category" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Solar & Inverter Systems">Solar & Inverter Systems</option>
+                                    <option value="Battery Storage & LiFePO4">Battery Storage & LiFePO4</option>
+                                    <option value="Energy Efficiency & Automation">Energy Efficiency & Automation</option>
+                                    <option value="Maintenance, Audit & SLA">Maintenance, Audit & SLA</option>
+                                    <option value="Hardware & POS Equipment">Hardware & POS Equipment</option>
+                                    <option value="Enterprise Software & Licensing">Enterprise Software & Licensing</option>
+                                    <option value="Consultancy & Engineering Services">Consultancy & Engineering Services</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Issue Date</label>
                                 <input type="date" wire:model="form.issue_date" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-semibold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
@@ -8436,18 +8472,28 @@
                         </div>
 
                         <!-- Calculation Breakdown -->
-                        <div class="grid gap-3 sm:grid-cols-3">
+                        <div class="grid gap-3 sm:grid-cols-4">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Gross Line Subtotal (NGN)</label>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Subtotal (NGN)</label>
                                 <input type="text" wire:model="form.subtotal" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Applied Discount (NGN)</label>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Discount (NGN)</label>
                                 <input type="text" wire:model="form.discount_amount" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-blue-600 bg-slate-100 dark:bg-slate-800 dark:text-blue-400">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">VAT (7.5% Auto)</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">VAT (7.5%)</label>
+                                    <label class="inline-flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-emerald-600 dark:text-emerald-400 select-none">
+                                        <input type="checkbox" wire:model.live="form.apply_vat" wire:change="recalculateInvoiceTotals" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-3.5 w-3.5 cursor-pointer">
+                                        <span>{{ !empty($form['apply_vat']) ? __('Apply') : __('Exempt') }}</span>
+                                    </label>
+                                </div>
                                 <input type="text" wire:model="form.tax" readonly class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Total Payable (NGN)</label>
+                                <input type="text" wire:model="form.total" readonly class="mt-1 block w-full rounded-2xl border border-emerald-500/30 px-3.5 py-2 text-xs font-black text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                             </div>
                         </div>
 
@@ -8461,17 +8507,35 @@
                             <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Invoice</button>
                         </div>
                     </form>
-                @elseif ($modalType === 'price_quote')
+                @elseif ($modalType === 'price_quote' || $modalType === 'quote')
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-4 dark:border-slate-800">
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600 border border-blue-500/20">
-                                    <i class="fa-light fa-file-signature mr-1"></i>Official Commercial Proposal
-                                </span>
-                                <span class="text-xs text-slate-400 font-mono">{{ $form['invoice_number'] ?? 'QT-2026-001' }}</span>
+                                @if ($activeEditingQuoteId)
+                                    <span class="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-600 border border-amber-500/20">
+                                        <i class="fa-light fa-pen-to-square mr-1"></i>{{ __('Updating Existing Quote') }}
+                                    </span>
+                                @else
+                                    <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600 border border-blue-500/20">
+                                        <i class="fa-light fa-file-signature mr-1"></i>Official Commercial Proposal
+                                    </span>
+                                @endif
+                                <span class="text-xs text-slate-400 font-mono font-bold">{{ $form['invoice_number'] ?? ($activeEditingQuoteId ?? 'QT-2026-001') }}</span>
                             </div>
-                            <h3 class="mt-1 text-xl font-extrabold text-slate-950 dark:text-white">{{ __('New Price Quote & Commercial Proposal Studio') }}</h3>
-                            <p class="text-xs font-medium text-slate-500">{{ __('Generate itemized solar & enterprise solution proposals with real-time inventory pricing, tax calculations, and instant multi-channel dispatch.') }}</p>
+                            <h3 class="mt-1 text-xl font-extrabold text-slate-950 dark:text-white">
+                                @if ($activeEditingQuoteId)
+                                    {{ __('Edit & Update Price Quote') }} <span class="font-mono text-amber-600 dark:text-amber-400">({{ $activeEditingQuoteId }})</span>
+                                @else
+                                    {{ __('New Price Quote & Commercial Proposal Studio') }}
+                                @endif
+                            </h3>
+                            <p class="text-xs font-medium text-slate-500">
+                                @if ($activeEditingQuoteId)
+                                    {{ __('Modify line items, quantities, pricing, VAT calculation, and solution category for this proposal.') }}
+                                @else
+                                    {{ __('Generate itemized solar & enterprise solution proposals with real-time inventory pricing, tax calculations, and instant multi-channel dispatch.') }}
+                                @endif
+                            </p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 transition">
@@ -8498,18 +8562,32 @@
 
                     <form wire:submit.prevent="createPriceQuoteFromModal" class="mt-5 space-y-6">
                         <!-- 1. Quote Reference & Timeline -->
-                        <div class="grid gap-3 sm:grid-cols-3">
+                        <div class="grid gap-3 sm:grid-cols-4">
                             <div>
                                 <div class="flex items-center justify-between">
                                     <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Quote Reference Number</label>
-                                    <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-bold text-blue-600 border border-blue-500/20">Serial Auto-Assigned (ASL-QT-)</span>
+                                    <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-bold text-blue-600 border border-blue-500/20">Serial Auto-Assigned</span>
                                 </div>
                                 <div class="relative mt-1">
                                     <input type="text" wire:model="form.invoice_number" readonly required class="block w-full rounded-2xl border border-slate-200 bg-slate-100 dark:bg-slate-800/80 cursor-not-allowed px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 dark:text-slate-200 outline-none">
-                                    <button type="button" wire:click="autoGenerateQuoteNumber" title="Regenerate next serial quote number" class="absolute right-2.5 top-2.5 text-[10px] font-bold text-blue-600 hover:underline">
-                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
-                                    </button>
+                                    @if (!$activeEditingQuoteId)
+                                        <button type="button" wire:click="autoGenerateQuoteNumber" title="Regenerate next serial quote number" class="absolute right-2.5 top-2.5 text-[10px] font-bold text-blue-600 hover:underline">
+                                            <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
+                                        </button>
+                                    @endif
                                 </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Solution Category *</label>
+                                <select wire:model="form.category" class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
+                                    <option value="Solar & Inverter Systems">Solar & Inverter Systems</option>
+                                    <option value="Battery Storage & LiFePO4">Battery Storage & LiFePO4</option>
+                                    <option value="Energy Efficiency & Automation">Energy Efficiency & Automation</option>
+                                    <option value="Maintenance, Audit & SLA">Maintenance, Audit & SLA</option>
+                                    <option value="Hardware & POS Equipment">Hardware & POS Equipment</option>
+                                    <option value="Enterprise Software & Licensing">Enterprise Software & Licensing</option>
+                                    <option value="Consultancy & Engineering Services">Consultancy & Engineering Services</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Issue Date</label>
@@ -8673,7 +8751,13 @@
                                 <p class="mt-1 text-lg font-black text-blue-600 dark:text-blue-400">-₦{{ number_format((float) ($form['discount_amount'] ?? 0), 2) }}</p>
                             </div>
                             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/60">
-                                <p class="text-[10px] font-bold uppercase text-slate-400">VAT (7.5% Standard)</p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-[10px] font-bold uppercase text-slate-400">VAT (7.5%)</p>
+                                    <label class="inline-flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-blue-600 dark:text-blue-400 select-none">
+                                        <input type="checkbox" wire:model.live="form.apply_vat" wire:change="recalculateInvoiceTotals" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5 cursor-pointer">
+                                        <span>{{ !empty($form['apply_vat']) ? __('Apply') : __('Exempt') }}</span>
+                                    </label>
+                                </div>
                                 <p class="mt-1 text-lg font-black text-slate-700 dark:text-slate-300">₦{{ number_format((float) ($form['tax'] ?? 0), 2) }}</p>
                             </div>
                             <div class="rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-4 dark:border-emerald-800 dark:bg-emerald-950/20">
@@ -8695,6 +8779,11 @@
                             </button>
 
                             <div class="flex flex-wrap items-center gap-2">
+                                @if ($activeEditingQuoteId)
+                                    <button type="button" wire:click="createPriceQuoteFromModal(null, false)" class="rounded-2xl bg-amber-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-amber-500/20 hover:bg-amber-700 transition active:scale-95">
+                                        <i class="fa-light fa-check-double mr-1.5"></i>{{ __('Update Quote & Save Changes') }}
+                                    </button>
+                                @endif
                                 <button type="button" wire:click="createPriceQuoteFromModal('draft')" class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 transition">
                                     <i class="fa-light fa-floppy-disk mr-1.5"></i>{{ __('Save Draft') }}
                                 </button>
@@ -8702,7 +8791,7 @@
                                     <i class="fa-brands fa-whatsapp mr-1.5"></i>{{ __('Send WhatsApp (Optional)') }}
                                 </button>
                                 <button type="button" wire:click="createPriceQuoteFromModal('email')" class="rounded-2xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition active:scale-95">
-                                    <i class="fa-light fa-paper-plane mr-1.5"></i>{{ __('Dispatch Quote via Email') }}
+                                    <i class="fa-light fa-paper-plane mr-1.5"></i>{{ $activeEditingQuoteId ? __('Update & Email Quote') : __('Dispatch Quote via Email') }}
                                 </button>
                             </div>
                         </div>
@@ -10077,8 +10166,13 @@
                             <i class="fa-light fa-file-signature text-xl"></i>
                         </span>
                         <div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <span class="font-mono font-bold text-xs text-blue-600">{{ $inspectQuoteData['id'] }}</span>
+                                @if (!empty($inspectQuoteData['category']))
+                                    <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-500/20">
+                                        {{ $inspectQuoteData['category'] }}
+                                    </span>
+                                @endif
                                 <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ match($inspectQuoteData['status']) {
                                     'Converted' => 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
                                     'Accepted' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
@@ -10175,11 +10269,9 @@
                 <!-- Footer Actions -->
                 <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4 dark:border-slate-800">
                     <div class="flex items-center gap-2">
-                        @if (($inspectQuoteData['status'] ?? '') === 'Draft')
-                            <button type="button" wire:click="editQuoteDraft('{{ $inspectQuoteData['id'] }}')" class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-700 transition">
-                                <i class="fa-light fa-pen-to-square mr-1.5"></i>{{ __('Resume Editing Draft') }}
-                            </button>
-                        @endif
+                        <button type="button" wire:click="editQuoteDraft('{{ $inspectQuoteData['id'] }}')" class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-700 transition">
+                            <i class="fa-light fa-pen-to-square mr-1.5"></i>{{ ($inspectQuoteData['status'] ?? '') === 'Draft' ? __('Resume Editing Draft') : __('Edit & Update Quote') }}
+                        </button>
 
                         @php $modalQtEncoded = base64_encode(json_encode($inspectQuoteData)); @endphp
                         <a href="{{ route('portal.quote.pdf', ['data' => $modalQtEncoded]) }}" target="_blank" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition dark:border-slate-800 dark:text-slate-300">

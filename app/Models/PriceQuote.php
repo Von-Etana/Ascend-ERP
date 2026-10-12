@@ -10,6 +10,7 @@ class PriceQuote extends Model
     protected $fillable = [
         'quote_number',
         'client_name',
+        'category',
         'email',
         'phone',
         'address',

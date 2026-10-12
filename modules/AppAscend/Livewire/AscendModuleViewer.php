@@ -837,7 +837,8 @@ class AscendModuleViewer extends Component
         $globalDiscount = min($grossSubtotal, max(0, $globalDiscount));
 
         $taxableSubtotal = max(0, $grossSubtotal - $globalDiscount);
-        $tax = $taxableSubtotal * 0.075;
+        $applyVat = isset($this->form['apply_vat']) ? filter_var($this->form['apply_vat'], FILTER_VALIDATE_BOOLEAN) : true;
+        $tax = $applyVat ? ($taxableSubtotal * 0.075) : 0.00;
         $total = $taxableSubtotal + $tax;
 
         $this->form['subtotal'] = number_format($grossSubtotal, 2, '.', '');
@@ -1045,6 +1046,7 @@ class AscendModuleViewer extends Component
                     'id' => $q->quote_number,
                     'quote_number' => $q->quote_number,
                     'client_name' => $q->client_name,
+                    'category' => $q->category ?: (is_array($q->items) ? ($q->items['category'] ?? 'Solar & Inverter Systems') : 'Solar & Inverter Systems'),
                     'email' => $q->email ?: '—',
                     'phone' => $q->phone ?: '—',
                     'address' => $q->address ?: '',
@@ -1979,12 +1981,14 @@ class AscendModuleViewer extends Component
 
         $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
         $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3550000.00));
+        $isEditing = !empty($this->activeEditingQuoteId);
         $qtId = $this->activeEditingQuoteId ?: ((!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-QT-')) ? $this->form['invoice_number'] : $this->getNextQuoteNumber());
+        $category = !empty($this->form['category']) ? $this->form['category'] : 'Solar & Inverter Systems';
         $phone = $this->form['client_phone'] ?: ($this->form['phone'] ?: '+234 811 763 3020');
         $email = $this->form['client_email'] ?: ($this->form['email'] ?: 'client@ascendsystems.ng');
 
         $isSent = in_array($dispatchAction, ['email', 'whatsapp', 'both']);
-        $status = $isDraft ? 'Draft' : ($isSent ? 'Sent' : 'Draft');
+        $status = $isDraft ? 'Draft' : ($isSent ? 'Sent' : ($isEditing ? ($this->form['status'] ?? 'Sent') : 'Draft'));
 
         $items = array_map(fn($item) => [
             'product_id' => $item['product_id'] ?? null,
@@ -2000,6 +2004,7 @@ class AscendModuleViewer extends Component
             'id' => $qtId,
             'quote_number' => $qtId,
             'client_name' => $client,
+            'category' => $category,
             'email' => $email,
             'phone' => $phone,
             'address' => $this->form['client_address'] ?? '',
@@ -2021,6 +2026,7 @@ class AscendModuleViewer extends Component
                     ['quote_number' => $qtId],
                     [
                         'client_name' => $client,
+                        'category' => $category,
                         'email' => $email,
                         'phone' => $phone,
                         'address' => $this->form['client_address'] ?? null,
@@ -2031,7 +2037,7 @@ class AscendModuleViewer extends Component
                         'total' => $amount,
                         'status' => $status,
                         'notes' => $this->form['notes'] ?: null,
-                        'items' => $items,
+                        'items' => array_merge($items, ['category' => $category]),
                     ]
                 );
             }
@@ -2059,6 +2065,7 @@ class AscendModuleViewer extends Component
                 $msg = "📄 *Ascend Systems Official Price Quote*\n"
                     . "Quote ID: *{$qtId}*\n"
                     . "Client: {$client}\n"
+                    . "Category: {$category}\n"
                     . "Total Amount: ₦" . number_format($amount, 2) . "\n"
                     . "Valid Until: " . ($this->form['due_date'] ?: now()->addDays(14)->format('Y-m-d')) . "\n\n"
                     . "Official PDF Proposal has been generated. Thank you for choosing Ascend Systems Nigeria.";
@@ -2068,7 +2075,12 @@ class AscendModuleViewer extends Component
 
         $this->showModal = false;
 
-        if ($isDraft) {
+        if ($isEditing && !$isDraft && !$dispatchAction) {
+            session()->flash('status', __('Price Quote :id has been updated successfully! Total: ₦:total', [
+                'id' => $qtId,
+                'total' => number_format($amount, 2),
+            ]));
+        } elseif ($isDraft) {
             session()->flash('status', __('Quote draft :id saved successfully! You can view and resume it at any time.', [
                 'id' => $qtId,
             ]));
@@ -2098,6 +2110,11 @@ class AscendModuleViewer extends Component
         $this->createPriceQuoteFromModal(null, true);
     }
 
+    public function editPriceQuote(string $quoteId): void
+    {
+        $this->editQuoteDraft($quoteId);
+    }
+
     public function editQuoteDraft(string $quoteId): void
     {
         $quote = null;
@@ -2116,22 +2133,25 @@ class AscendModuleViewer extends Component
         }
 
         if (! $quote) {
-            session()->flash('warning', __('Quote draft not found.'));
+            session()->flash('warning', __('Quote details not found.'));
             return;
         }
 
         $this->activeEditingQuoteId = $quote->quote_number;
-        $this->modalType = 'quote';
+        $this->modalType = 'price_quote';
         $this->form['invoice_number'] = $quote->quote_number;
+        $this->form['category'] = $quote->category ?? (is_array($quote->items) ? ($quote->items['category'] ?? 'Solar & Inverter Systems') : 'Solar & Inverter Systems');
         $this->form['client_name'] = $quote->client_name;
         $this->form['client_phone'] = $quote->phone ?? '';
         $this->form['client_email'] = $quote->email ?? '';
         $this->form['client_address'] = $quote->address ?? '';
         $this->form['due_date'] = ($quote->valid_until instanceof \DateTimeInterface) ? $quote->valid_until->format('Y-m-d') : ($quote->valid_until ?? now()->addDays(14)->format('Y-m-d'));
+        $this->form['status'] = $quote->status ?? 'Draft';
         $this->form['subtotal'] = (float) $quote->subtotal;
         $this->form['discount_amount'] = (float) $quote->discount_amount;
         $this->form['tax'] = (float) $quote->tax;
         $this->form['total'] = (float) $quote->total;
+        $this->form['apply_vat'] = ((float) $quote->tax > 0);
         $this->form['notes'] = $quote->notes ?? '';
 
         $rawItems = is_array($quote->items) ? $quote->items : (json_decode($quote->items ?? '[]', true) ?: []);
@@ -2149,9 +2169,10 @@ class AscendModuleViewer extends Component
             }, $rawItems);
         }
 
+        $this->recalculateInvoiceTotals();
         $this->showModal = true;
         $this->showQuoteModal = false;
-        session()->flash('status', __('Resumed Quote Draft :num. You can make adjustments and save.', ['num' => $quote->quote_number]));
+        session()->flash('status', __('Loaded Quote :num for editing. You can adjust line items, VAT, or pricing and save changes.', ['num' => $quote->quote_number]));
     }
 
     public function inspectPriceQuote(string $quoteId): void
@@ -2181,6 +2202,7 @@ class AscendModuleViewer extends Component
         $this->inspectQuoteData = [
             'id' => $quote->quote_number,
             'client_name' => $quote->client_name,
+            'category' => $quote->category ?? (is_array($rawItems) ? ($rawItems['category'] ?? 'Solar & Inverter Systems') : 'Solar & Inverter Systems'),
             'phone' => $quote->phone ?? '—',
             'email' => $quote->email ?? '—',
             'address' => $quote->address ?? '—',
@@ -4025,8 +4047,11 @@ class AscendModuleViewer extends Component
 
         if ($type === 'quote' || $type === 'price_quote') {
             $this->modalType = 'price_quote';
+            $this->activeEditingQuoteId = null;
             $this->autoGenerateQuoteNumber();
             $this->form['client_name'] = '';
+            $this->form['category'] = 'Solar & Inverter Systems';
+            $this->form['apply_vat'] = true;
             $this->form['client_phone'] = '';
             $this->form['client_email'] = '';
             $this->form['client_address'] = '';
@@ -4126,7 +4151,8 @@ class AscendModuleViewer extends Component
             'title' => $this->form['title'] ?? '',
             'name' => $this->form['name'] ?? '',
             'amount' => $this->form['amount'] ?? '',
-            'category' => $this->form['category'] ?? 'Hardware',
+            'category' => $this->form['category'] ?? (($type === 'price_quote' || $type === 'quote' || $type === 'invoice') ? 'Solar & Inverter Systems' : 'Hardware'),
+            'apply_vat' => $this->form['apply_vat'] ?? true,
             'sku' => $this->getNextSkuCode(),
             'price' => '',
             'cost_price' => '85000',
@@ -4167,6 +4193,7 @@ class AscendModuleViewer extends Component
         $this->showModal = false;
         $this->modalType = '';
         $this->modalData = null;
+        $this->activeEditingQuoteId = null;
     }
 
     public function submitModalForm(): void
@@ -4174,7 +4201,8 @@ class AscendModuleViewer extends Component
         $this->persistNewInventoryProducts();
         $title = $this->form['client_name'] ?: $this->form['title'] ?: $this->form['name'] ?: 'New Record';
         $subtotal = (float) ($this->form['subtotal'] ?: $this->form['amount'] ?: $this->form['unit_price'] ?: 250000.00);
-        $tax = (float) ($this->form['tax'] ?: ($subtotal * 0.075));
+        $applyVat = isset($this->form['apply_vat']) ? filter_var($this->form['apply_vat'], FILTER_VALIDATE_BOOLEAN) : true;
+        $tax = $applyVat ? (float) ($this->form['tax'] ?: ($subtotal * 0.075)) : 0.00;
         $total = $subtotal + $tax;
 
         match ($this->moduleKey) {
@@ -4193,6 +4221,7 @@ class AscendModuleViewer extends Component
                 default => Invoice::create([
                     'invoice_number' => (!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-INV-')) ? $this->form['invoice_number'] : $this->getNextInvoiceNumber(),
                     'client_name' => $title,
+                    'category' => $this->form['category'] ?: 'Solar & Inverter Systems',
                     'issue_date' => $this->form['issue_date'] ?: now(),
                     'due_date' => $this->form['due_date'] ?: now()->addDays(14),
                     'subtotal' => $subtotal,
@@ -4201,6 +4230,8 @@ class AscendModuleViewer extends Component
                     'status' => 'pending',
                     'notes' => $this->form['notes'] ?: 'Created via finance module modal',
                     'items' => [
+                        'category' => $this->form['category'] ?: 'Solar & Inverter Systems',
+                        'apply_vat' => $applyVat,
                         'client_phone' => $this->form['client_phone'] ?? ($this->form['phone'] ?? ''),
                         'client_email' => $this->form['client_email'] ?? ($this->form['email'] ?? ''),
                         'client_address' => $this->form['client_address'] ?? ($this->form['address'] ?? ''),
