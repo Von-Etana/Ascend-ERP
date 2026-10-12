@@ -42,6 +42,14 @@ Route::get('api/health', function () {
     ], $allOk ? 200 : 503);
 })->name('api.health');
 
+// Public CORS Preflight Handler for External Marketing Website & Widgets
+Route::options('api/{any}', function () {
+    return response('', 204)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+})->where('any', '.*');
+
 // Public Lead Intake & Webhook Endpoint (www.ascendsystems.ng & Embed Widgets)
 Route::post('api/leads/capture', function (\Illuminate\Http\Request $request) {
     $validated = $request->validate([
