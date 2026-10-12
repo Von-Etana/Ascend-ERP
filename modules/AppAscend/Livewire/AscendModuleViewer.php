@@ -2047,7 +2047,7 @@ class AscendModuleViewer extends Component
                         'total' => $amount,
                         'status' => $status,
                         'notes' => $this->form['notes'] ?: null,
-                        'items' => array_merge($items, ['category' => $category]),
+                        'items' => array_values($items),
                     ]
                 );
             }
@@ -2165,9 +2165,13 @@ class AscendModuleViewer extends Component
         $this->form['notes'] = $quote->notes ?? '';
 
         $rawItems = is_array($quote->items) ? $quote->items : (json_decode($quote->items ?? '[]', true) ?: []);
-        if (! empty($rawItems)) {
-            $this->invoiceItems = array_map(function ($it) {
-                return [
+        if (isset($rawItems['line_items']) && is_array($rawItems['line_items'])) {
+            $rawItems = $rawItems['line_items'];
+        }
+        $validItems = [];
+        foreach ($rawItems as $k => $it) {
+            if (is_array($it) && (isset($it['description']) || isset($it['unit_price']) || isset($it['sku']) || isset($it['qty']) || isset($it['quantity']))) {
+                $validItems[] = [
                     'product_id' => $it['product_id'] ?? null,
                     'sku' => $it['sku'] ?? '',
                     'description' => $it['description'] ?? 'Solar Product Item',
@@ -2176,7 +2180,10 @@ class AscendModuleViewer extends Component
                     'discount_percent' => (float) ($it['discount_percent'] ?? 0),
                     'amount' => (float) ($it['amount'] ?? 0),
                 ];
-            }, $rawItems);
+            }
+        }
+        if (! empty($validItems)) {
+            $this->invoiceItems = array_values($validItems);
         }
 
         $this->recalculateInvoiceTotals();
