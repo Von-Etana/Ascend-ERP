@@ -147,130 +147,158 @@
         </div>
     @endif
 
-    <!-- Module Sub-Tabs Pill Navigation Bar -->
-    <div class="rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1.5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
-        <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-            @php
-                $subTabs = match($moduleKey) {
-                    'finance' => [
-                        'overview' => ['label' => 'Overview & Banking', 'icon' => 'fa-light fa-building-columns'],
-                        'ai_forecasting' => ['label' => 'Executive AI Cash Flow Forecast', 'icon' => 'fa-light fa-chart-line-up'],
-                        'invoices' => ['label' => 'Invoices & Estimates', 'icon' => 'fa-light fa-file-invoice-dollar'],
-                        'expenses' => ['label' => 'Expenses & Receipts', 'icon' => 'fa-light fa-receipt'],
-                        'salary'   => ['label' => 'Payroll & Salary', 'icon' => 'fa-light fa-money-bill-wave'],
-                        'ai_finance' => ['label' => 'AI Financial Intelligence', 'icon' => 'fa-light fa-brain-circuit'],
-                        'ledger' => ['label' => 'General Ledger & Balance Sheet', 'icon' => 'fa-light fa-book-journal-whills'],
-                        'reports' => ['label' => 'Profit & Loss Reports', 'icon' => 'fa-light fa-chart-pie'],
-                    ],
-                    'crm' => [
-                        'leads' => ['label' => 'Leads Management', 'icon' => 'fa-light fa-user-plus'],
-                        'deals' => ['label' => 'Deals Pipeline', 'icon' => 'fa-light fa-chart-kanban'],
-                        'contacts' => ['label' => 'Customer Contacts', 'icon' => 'fa-light fa-address-book'],
-                        'contracts' => ['label' => 'Contracts & Notes', 'icon' => 'fa-light fa-file-contract'],
-                        'drip' => ['label' => 'Automated Lead Drip Sequences', 'icon' => 'fa-light fa-paper-plane-top'],
-                        'builder' => ['label' => 'Form Builder & Settings', 'icon' => 'fa-light fa-sliders'],
-                    ],
-                    'sales' => [
-                        'pipeline' => ['label' => 'Deals Pipeline & Revenue', 'icon' => 'fa-light fa-chart-line-up'],
-                        'solar_calculator' => ['label' => 'Solar Capacity & Battery Sizing Calculator', 'icon' => 'fa-light fa-calculator-simple'],
-                        'orders' => ['label' => 'Sales Orders', 'icon' => 'fa-light fa-cart-shopping'],
-                        'quotes' => ['label' => 'Price Quotes & Proposals', 'icon' => 'fa-light fa-file-signature'],
-                        'invoices' => ['label' => 'Billing & Payments', 'icon' => 'fa-light fa-credit-card'],
-                        'analytics' => ['label' => 'Sales Leaderboard', 'icon' => 'fa-light fa-trophy'],
-                    ],
-                    'tasks' => [
-                        'projects' => ['label' => 'Projects Overview', 'icon' => 'fa-light fa-folder-tree'],
-                        'field_dispatch' => ['label' => 'Solar Installation Field Dispatch', 'icon' => 'fa-light fa-screwdriver-wrench'],
-                        'assignments' => ['label' => 'Task Assignments', 'icon' => 'fa-light fa-list-check'],
-                        'progress' => ['label' => 'Progress Logs', 'icon' => 'fa-light fa-timeline'],
-                        'reports' => ['label' => 'Performance Metrics', 'icon' => 'fa-light fa-chart-waterfall'],
-                    ],
-                    'inventory' => [
-                        'products' => ['label' => 'Products & Stock Levels', 'icon' => 'fa-light fa-box-archive'],
-                        'reorder_po' => ['label' => 'Low-Stock Reorder & Supplier POs', 'icon' => 'fa-light fa-cart-flatbed-boxes'],
-                        'b2b_dispatch' => ['label' => 'Warehouse Barcode Dispatch', 'icon' => 'fa-light fa-barcode-read'],
-                        'warranty_hub' => ['label' => '5-Year Warranty & Maintenance', 'icon' => 'fa-light fa-shield-check'],
-                        'stock' => ['label' => 'Stock Movement Audit', 'icon' => 'fa-light fa-arrows-repeat'],
-                        'warehouses' => ['label' => 'Warehouse & Suppliers', 'icon' => 'fa-light fa-warehouse'],
-                        'import' => ['label' => 'Import / Export CSV', 'icon' => 'fa-light fa-file-export'],
-                    ],
-                    'pos' => [
-                        'checkout' => ['label' => 'POS Checkout Terminal', 'icon' => 'fa-light fa-cash-register'],
-                        'receipts' => ['label' => 'Sales Receipts History', 'icon' => 'fa-light fa-receipt'],
-                        'barcodes' => ['label' => 'Barcode & Labels', 'icon' => 'fa-light fa-barcode'],
-                        'insights' => ['label' => 'POS Insights & Shift Logs', 'icon' => 'fa-light fa-chart-line'],
-                    ],
-                    'marketing' => [
-                        'campaigns' => ['label' => 'Marketing Campaigns', 'icon' => 'fa-light fa-bullhorn'],
-                        'ads_manager' => ['label' => 'Meta & Google Ads Manager', 'icon' => 'fa-light fa-bullseye-arrow'],
-                        'web_lead_capture' => ['label' => 'Web Lead Capture (www.ascendsystems.ng)', 'icon' => 'fa-light fa-globe'],
-                        'video_script_ai' => ['label' => 'AI Video Script Studio (TikTok/Reels)', 'icon' => 'fa-light fa-clapperboard'],
-                        'whatsapp_blasts' => ['label' => 'WhatsApp Catalog Broadcast Engine', 'icon' => 'fa-brands fa-whatsapp'],
-                        'influencers' => ['label' => 'Influencer & Ambassador Hub', 'icon' => 'fa-light fa-star'],
-                        'competitor_watch' => ['label' => 'Competitor Solar Ad Intelligence', 'icon' => 'fa-light fa-chart-line-down'],
-                        'content_studio' => ['label' => 'AI Post Studio & Scheduler', 'icon' => 'fa-light fa-pen-sparkles'],
-                        'social_inbox' => ['label' => 'Unified Customer Social Inbox', 'icon' => 'fa-light fa-comments'],
-                    ],
-                    'ai-agents' => [
-                        'agents' => ['label' => 'AI Agent Fleet & Logs', 'icon' => 'fa-light fa-sparkles'],
-                        'caption' => ['label' => 'Caption Generator', 'icon' => 'fa-light fa-pen-sparkles'],
-                        'repurpose' => ['label' => 'Content Repurposer', 'icon' => 'fa-light fa-repeat'],
-                        'planner' => ['label' => 'Content Planner', 'icon' => 'fa-light fa-calendar-star'],
-                        'besttime' => ['label' => 'Best Time Scheduler', 'icon' => 'fa-light fa-clock-rotate-left'],
-                    ],
-                    'automation' => [
-                        'rules' => ['label' => 'Active Automation Rules', 'icon' => 'fa-light fa-bolt'],
-                        'templates' => ['label' => 'Quick Rule Templates', 'icon' => 'fa-light fa-wand-magic-sparkles'],
-                        'triggers' => ['label' => 'Triggers & Webhooks', 'icon' => 'fa-light fa-link'],
-                        'logs' => ['label' => 'Execution Logs', 'icon' => 'fa-light fa-receipt'],
-                    ],
-                    'reports' => [
-                        'executive' => ['label' => 'Executive Summary', 'icon' => 'fa-light fa-chart-mixed'],
-                        'financial' => ['label' => 'Financial Reports', 'icon' => 'fa-light fa-file-invoice-dollar'],
-                        'inventory' => ['label' => 'Inventory Valuation', 'icon' => 'fa-light fa-boxes-stacked'],
-                    ],
-                    'administration' => [
-                        'users' => ['label' => 'User Management', 'icon' => 'fa-light fa-users'],
-                        'roles' => ['label' => 'Roles & Permissions', 'icon' => 'fa-light fa-user-shield'],
-                        'organization' => ['label' => 'Corporate HQ & Branches', 'icon' => 'fa-light fa-building-user'],
-                        'security' => ['label' => 'Security & Audit Logs', 'icon' => 'fa-light fa-shield-check'],
-                        'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
-                    ],
-                    'retailer' => [
-                        'catalog'   => ['label' => 'Solar & Renewable Catalog', 'icon' => 'fa-light fa-solar-panel'],
-                        'cart'      => ['label' => 'B2B Bulk Order Cart', 'icon' => 'fa-light fa-cart-shopping'],
-                        'orders'    => ['label' => 'Order Tracking & Status', 'icon' => 'fa-light fa-truck-ramp-box'],
-                        'invoices'  => ['label' => 'B2B Invoices & PDF Statements', 'icon' => 'fa-light fa-file-invoice-dollar'],
-                        'warranty'  => ['label' => 'Partner Warranty Claims & RMA', 'icon' => 'fa-light fa-shield-check'],
-                        'contracts' => ['label' => 'B2B Agreements & Certificate', 'icon' => 'fa-light fa-certificate'],
-                    ],
-                    default => ['overview' => ['label' => 'Overview', 'icon' => 'fa-light fa-border-all']],
-                };
-            @endphp
+    <!-- Module Sub-Tabs Pill Navigation & Global Search Bar -->
+    <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+        <div class="flex-1 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1.5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80 overflow-x-auto scrollbar-none">
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
+                @php
+                    $subTabs = match($moduleKey) {
+                        'finance' => [
+                            'overview' => ['label' => 'Overview & Banking', 'icon' => 'fa-light fa-building-columns'],
+                            'ai_forecasting' => ['label' => 'Executive AI Cash Flow Forecast', 'icon' => 'fa-light fa-chart-line-up'],
+                            'invoices' => ['label' => 'Invoices & Estimates', 'icon' => 'fa-light fa-file-invoice-dollar'],
+                            'expenses' => ['label' => 'Expenses & Receipts', 'icon' => 'fa-light fa-receipt'],
+                            'salary'   => ['label' => 'Payroll & Salary', 'icon' => 'fa-light fa-money-bill-wave'],
+                            'ai_finance' => ['label' => 'AI Financial Intelligence', 'icon' => 'fa-light fa-brain-circuit'],
+                            'ledger' => ['label' => 'General Ledger & Balance Sheet', 'icon' => 'fa-light fa-book-journal-whills'],
+                            'reports' => ['label' => 'Profit & Loss Reports', 'icon' => 'fa-light fa-chart-pie'],
+                        ],
+                        'crm' => [
+                            'leads' => ['label' => 'Leads Management', 'icon' => 'fa-light fa-user-plus'],
+                            'deals' => ['label' => 'Deals Pipeline', 'icon' => 'fa-light fa-chart-kanban'],
+                            'contacts' => ['label' => 'Customer Contacts', 'icon' => 'fa-light fa-address-book'],
+                            'contracts' => ['label' => 'Contracts & Notes', 'icon' => 'fa-light fa-file-contract'],
+                            'drip' => ['label' => 'Automated Lead Drip Sequences', 'icon' => 'fa-light fa-paper-plane-top'],
+                            'builder' => ['label' => 'Form Builder & Settings', 'icon' => 'fa-light fa-sliders'],
+                        ],
+                        'sales' => [
+                            'pipeline' => ['label' => 'Deals Pipeline & Revenue', 'icon' => 'fa-light fa-chart-line-up'],
+                            'solar_calculator' => ['label' => 'Solar Capacity & Battery Sizing Calculator', 'icon' => 'fa-light fa-calculator-simple'],
+                            'orders' => ['label' => 'Sales Orders', 'icon' => 'fa-light fa-cart-shopping'],
+                            'quotes' => ['label' => 'Price Quotes & Proposals', 'icon' => 'fa-light fa-file-signature'],
+                            'invoices' => ['label' => 'Billing & Payments', 'icon' => 'fa-light fa-credit-card'],
+                            'analytics' => ['label' => 'Sales Leaderboard', 'icon' => 'fa-light fa-trophy'],
+                        ],
+                        'tasks' => [
+                            'projects' => ['label' => 'Projects Overview', 'icon' => 'fa-light fa-folder-tree'],
+                            'field_dispatch' => ['label' => 'Solar Installation Field Dispatch', 'icon' => 'fa-light fa-screwdriver-wrench'],
+                            'assignments' => ['label' => 'Task Assignments', 'icon' => 'fa-light fa-list-check'],
+                            'progress' => ['label' => 'Progress Logs', 'icon' => 'fa-light fa-timeline'],
+                            'reports' => ['label' => 'Performance Metrics', 'icon' => 'fa-light fa-chart-waterfall'],
+                        ],
+                        'inventory' => [
+                            'products' => ['label' => 'Products & Stock Levels', 'icon' => 'fa-light fa-box-archive'],
+                            'reorder_po' => ['label' => 'Low-Stock Reorder & Supplier POs', 'icon' => 'fa-light fa-cart-flatbed-boxes'],
+                            'b2b_dispatch' => ['label' => 'Warehouse Barcode Dispatch', 'icon' => 'fa-light fa-barcode-read'],
+                            'warranty_hub' => ['label' => '5-Year Warranty & Maintenance', 'icon' => 'fa-light fa-shield-check'],
+                            'stock' => ['label' => 'Stock Movement Audit', 'icon' => 'fa-light fa-arrows-repeat'],
+                            'warehouses' => ['label' => 'Warehouse & Suppliers', 'icon' => 'fa-light fa-warehouse'],
+                            'import' => ['label' => 'Import / Export CSV', 'icon' => 'fa-light fa-file-export'],
+                        ],
+                        'pos' => [
+                            'checkout' => ['label' => 'POS Checkout Terminal', 'icon' => 'fa-light fa-cash-register'],
+                            'receipts' => ['label' => 'Sales Receipts History', 'icon' => 'fa-light fa-receipt'],
+                            'barcodes' => ['label' => 'Barcode & Labels', 'icon' => 'fa-light fa-barcode'],
+                            'insights' => ['label' => 'POS Insights & Shift Logs', 'icon' => 'fa-light fa-chart-line'],
+                        ],
+                        'marketing' => [
+                            'campaigns' => ['label' => 'Marketing Campaigns', 'icon' => 'fa-light fa-bullhorn'],
+                            'ads_manager' => ['label' => 'Meta & Google Ads Manager', 'icon' => 'fa-light fa-bullseye-arrow'],
+                            'web_lead_capture' => ['label' => 'Web Lead Capture (www.ascendsystems.ng)', 'icon' => 'fa-light fa-globe'],
+                            'video_script_ai' => ['label' => 'AI Video Script Studio (TikTok/Reels)', 'icon' => 'fa-light fa-clapperboard'],
+                            'whatsapp_blasts' => ['label' => 'WhatsApp Catalog Broadcast Engine', 'icon' => 'fa-brands fa-whatsapp'],
+                            'influencers' => ['label' => 'Influencer & Ambassador Hub', 'icon' => 'fa-light fa-star'],
+                            'competitor_watch' => ['label' => 'Competitor Solar Ad Intelligence', 'icon' => 'fa-light fa-chart-line-down'],
+                            'content_studio' => ['label' => 'AI Post Studio & Scheduler', 'icon' => 'fa-light fa-pen-sparkles'],
+                            'social_inbox' => ['label' => 'Unified Customer Social Inbox', 'icon' => 'fa-light fa-comments'],
+                        ],
+                        'ai-agents' => [
+                            'agents' => ['label' => 'AI Agent Fleet & Logs', 'icon' => 'fa-light fa-sparkles'],
+                            'caption' => ['label' => 'Caption Generator', 'icon' => 'fa-light fa-pen-sparkles'],
+                            'repurpose' => ['label' => 'Content Repurposer', 'icon' => 'fa-light fa-repeat'],
+                            'planner' => ['label' => 'Content Planner', 'icon' => 'fa-light fa-calendar-star'],
+                            'besttime' => ['label' => 'Best Time Scheduler', 'icon' => 'fa-light fa-clock-rotate-left'],
+                        ],
+                        'automation' => [
+                            'rules' => ['label' => 'Active Automation Rules', 'icon' => 'fa-light fa-bolt'],
+                            'templates' => ['label' => 'Quick Rule Templates', 'icon' => 'fa-light fa-wand-magic-sparkles'],
+                            'triggers' => ['label' => 'Triggers & Webhooks', 'icon' => 'fa-light fa-link'],
+                            'logs' => ['label' => 'Execution Logs', 'icon' => 'fa-light fa-receipt'],
+                        ],
+                        'reports' => [
+                            'executive' => ['label' => 'Executive Summary', 'icon' => 'fa-light fa-chart-mixed'],
+                            'financial' => ['label' => 'Financial Reports', 'icon' => 'fa-light fa-file-invoice-dollar'],
+                            'inventory' => ['label' => 'Inventory Valuation', 'icon' => 'fa-light fa-boxes-stacked'],
+                        ],
+                        'administration' => [
+                            'users' => ['label' => 'User Management', 'icon' => 'fa-light fa-users'],
+                            'roles' => ['label' => 'Roles & Permissions', 'icon' => 'fa-light fa-user-shield'],
+                            'organization' => ['label' => 'Corporate HQ & Branches', 'icon' => 'fa-light fa-building-user'],
+                            'security' => ['label' => 'Security & Audit Logs', 'icon' => 'fa-light fa-shield-check'],
+                            'notifications' => ['label' => 'Notifications Centre', 'icon' => 'fa-light fa-bell'],
+                        ],
+                        'retailer' => [
+                            'catalog'   => ['label' => 'Solar & Renewable Catalog', 'icon' => 'fa-light fa-solar-panel'],
+                            'cart'      => ['label' => 'B2B Bulk Order Cart', 'icon' => 'fa-light fa-cart-shopping'],
+                            'orders'    => ['label' => 'Order Tracking & Status', 'icon' => 'fa-light fa-truck-ramp-box'],
+                            'invoices'  => ['label' => 'B2B Invoices & PDF Statements', 'icon' => 'fa-light fa-file-invoice-dollar'],
+                            'warranty'  => ['label' => 'Partner Warranty Claims & RMA', 'icon' => 'fa-light fa-shield-check'],
+                            'contracts' => ['label' => 'B2B Agreements & Certificate', 'icon' => 'fa-light fa-certificate'],
+                        ],
+                        default => ['overview' => ['label' => 'Overview', 'icon' => 'fa-light fa-border-all']],
+                    };
+                @endphp
 
-            @foreach ($subTabs as $tabKey => $tab)
-                <button
-                    type="button"
-                    wire:click="setTab('{{ $tabKey }}')"
-                    class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === $tabKey ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}"
-                    @if ($activeTab === $tabKey) style="color: {{ $accent }};" @endif
-                >
-                    <i class="{{ $tab['icon'] }} text-sm"></i>
-                    {{ __($tab['label']) }}
-                </button>
-            @endforeach
-            @if ($moduleKey === 'finance')
-                <button type="button" wire:click="setTab('salary')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === 'salary' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}" {{ $activeTab === 'salary' ? 'style="color: '.$accent.';"' : '' }}>
-                    <i class="fa-light fa-money-bill-wave text-sm"></i>
-                    {{ __('Payroll & Salary') }}
-                </button>
-                <button type="button" wire:click="setTab('ai_finance')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === 'ai_finance' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}" {{ $activeTab === 'ai_finance' ? 'style="color: '.$accent.';"' : '' }}>
-                    <i class="fa-light fa-sparkles text-sm"></i>
-                    {{ __('AI Analysis') }}
+                @foreach ($subTabs as $tabKey => $tab)
+                    <button
+                        type="button"
+                        wire:click="setTab('{{ $tabKey }}')"
+                        class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === $tabKey ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}"
+                        @if ($activeTab === $tabKey) style="color: {{ $accent }};" @endif
+                    >
+                        <i class="{{ $tab['icon'] }} text-sm"></i>
+                        {{ __($tab['label']) }}
+                    </button>
+                @endforeach
+                @if ($moduleKey === 'finance')
+                    <button type="button" wire:click="setTab('salary')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === 'salary' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}" {{ $activeTab === 'salary' ? 'style="color: '.$accent.';"' : '' }}>
+                        <i class="fa-light fa-money-bill-wave text-sm"></i>
+                        {{ __('Payroll & Salary') }}
+                    </button>
+                    <button type="button" wire:click="setTab('ai_finance')" class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all duration-200 {{ $activeTab === 'ai_finance' ? 'bg-white text-slate-950 shadow-md shadow-slate-200/50 dark:bg-slate-800 dark:text-white dark:shadow-none' : 'text-slate-600 hover:bg-white/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white' }}" {{ $activeTab === 'ai_finance' ? 'style="color: '.$accent.';"' : '' }}>
+                        <i class="fa-light fa-sparkles text-sm"></i>
+                        {{ __('AI Analysis') }}
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <!-- Global Quick Search Bar -->
+        <div class="relative shrink-0 w-full lg:w-80">
+            <i class="fa-light fa-search absolute left-3.5 top-3 text-slate-400"></i>
+            <input type="text"
+                   wire:model.live.debounce.300ms="globalSearch"
+                   placeholder="{{ __('Search records, SKU, invoices...') }}"
+                   class="w-full rounded-2xl border border-slate-200/80 bg-white pl-10 pr-9 py-2.5 text-xs font-semibold text-slate-900 shadow-xs outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-900 dark:text-white" />
+            @if (!empty($globalSearch))
+                <button type="button" wire:click="$set('globalSearch', '')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" title="{{ __('Clear search') }}">
+                    <i class="fa-light fa-circle-xmark text-sm"></i>
                 </button>
             @endif
         </div>
     </div>
+
+    @if (!empty($globalSearch))
+        <div class="flex items-center justify-between rounded-xl bg-blue-50 border border-blue-200 px-4 py-2 text-xs font-bold text-blue-700 dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-300">
+            <div class="flex items-center gap-2">
+                <i class="fa-light fa-filter"></i>
+                <span>{{ __('Active Search Filter: ":term"', ['term' => $globalSearch]) }}</span>
+            </div>
+            <button type="button" wire:click="$set('globalSearch', '')" class="text-blue-600 hover:underline dark:text-blue-400">
+                <i class="fa-light fa-xmark mr-1"></i>{{ __('Reset') }}
+            </button>
+        </div>
+    @endif
 
     <!-- MODULE 1: ACCOUNTING & FINANCE ENHANCED USERFLOW -->
     @if ($moduleKey === 'finance')
@@ -419,6 +447,128 @@
                     </div>
                 </div>
 
+                <!-- COMPREHENSIVE OPERATING EXPENSE BREAKDOWN & OUTLAY ANALYSIS -->
+                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400">
+                                    <i class="fa-light fa-chart-pie-simple text-sm"></i>
+                                </span>
+                                <h2 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Complete Operating Expenses & Financial Outlay Breakdown') }}</h2>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">{{ __('Full transparent visibility into company disbursements, recurring payroll, vendor bills, and approval statuses.') }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                {{ __('Scope: ') }}<span class="text-rose-600 font-extrabold">{{ $financeMetrics['periodLabel'] }}</span>
+                            </span>
+                            <button type="button" wire:click="setTab('expenses')" class="rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition">
+                                <i class="fa-light fa-plus mr-1"></i>{{ __('Log Expense') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Expense Summary Micro-Cards -->
+                    <div class="mt-5 grid gap-4 grid-cols-2 md:grid-cols-4">
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Vendor & Direct Costs') }}</p>
+                            <p class="mt-1 text-xl font-black text-rose-600 dark:text-rose-400">₦{{ number_format($financeMetrics['totalInputtedExpenses'], 2) }}</p>
+                            <p class="mt-1 text-[11px] text-slate-500">{{ count($financeMetrics['recentExpenses']) }} {{ __('logged disbursements') }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Disbursed Salaries') }}</p>
+                            <p class="mt-1 text-xl font-black text-amber-600 dark:text-amber-400">₦{{ number_format($financeMetrics['totalSalaries'], 2) }}</p>
+                            <p class="mt-1 text-[11px] text-slate-500">{{ __('Verified payroll disbursements') }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total Operating Outflow') }}</p>
+                            <p class="mt-1 text-xl font-black text-slate-900 dark:text-white">₦{{ number_format($financeMetrics['totalExpenses'], 2) }}</p>
+                            <p class="mt-1 text-[11px] text-slate-500">{{ __('Combined operational burden') }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Average Expense Outlay') }}</p>
+                            <p class="mt-1 text-xl font-black text-purple-600 dark:text-purple-400">₦{{ number_format($financeMetrics['expenseStats']['avg'] ?? 0, 2) }}</p>
+                            <p class="mt-1 text-[11px] text-slate-500">{{ __('Peak: ₦') }}{{ number_format($financeMetrics['expenseStats']['max'] ?? 0, 0) }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Category Outlay Bars & Payment Methods & Approval Status -->
+                    <div class="mt-6 grid gap-6 lg:grid-cols-3 pt-4 border-t dark:border-slate-800">
+                        <!-- Column 1: Full Category Distribution -->
+                        <div class="lg:col-span-2 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                    <i class="fa-light fa-layer-group mr-1.5 text-rose-500"></i>{{ __('Expense Distribution by Category') }}
+                                </h3>
+                                <span class="text-[11px] font-medium text-slate-400">{{ count($financeMetrics['fullCategoryBreakdown']) }} {{ __('Active Categories') }}</span>
+                            </div>
+
+                            @forelse ($financeMetrics['fullCategoryBreakdown'] as $cat)
+                                <div class="space-y-1">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-bold text-slate-800 dark:text-slate-200">{{ $cat['category'] }} <span class="text-[10px] font-normal text-slate-400">({{ $cat['count'] }} {{ __('transactions') }})</span></span>
+                                        <span class="font-black text-slate-900 dark:text-white">₦{{ number_format($cat['amount'], 2) }} <span class="text-rose-500 font-bold ml-1">({{ $cat['percent'] }}%)</span></span>
+                                    </div>
+                                    <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                        <div class="h-full rounded-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-500" style="width: {{ max(4, min(100, $cat['percent'])) }}%;"></div>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-xs text-slate-400 italic py-2">{{ __('No category expenses recorded for the current scope.') }}</p>
+                            @endforelse
+                        </div>
+
+                        <!-- Column 2: Payment Methods & Approval Status -->
+                        <div class="space-y-5">
+                            <!-- Payment Methods Breakdown -->
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2.5">
+                                    <i class="fa-light fa-credit-card mr-1.5 text-blue-500"></i>{{ __('Outflow by Payment Channel') }}
+                                </h3>
+                                <div class="space-y-2">
+                                    @forelse ($financeMetrics['paymentMethodBreakdown'] as $method => $data)
+                                        <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 px-3 py-2 text-xs dark:border-slate-800 dark:bg-slate-800/40">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-light fa-arrow-right text-[10px] text-slate-400"></i>
+                                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $method }}</span>
+                                                <span class="text-[10px] text-slate-400">({{ $data['count'] }})</span>
+                                            </div>
+                                            <span class="font-black text-slate-900 dark:text-white">₦{{ number_format($data['amount'], 2) }}</span>
+                                        </div>
+                                    @empty
+                                        <p class="text-xs text-slate-400 italic">{{ __('No disbursement records found.') }}</p>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <!-- Approval Pipeline Breakdown -->
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2.5">
+                                    <i class="fa-light fa-shield-check mr-1.5 text-emerald-500"></i>{{ __('Approval Pipeline') }}
+                                </h3>
+                                <div class="grid grid-cols-3 gap-2 text-center">
+                                    <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-emerald-600 dark:text-emerald-400">
+                                        <p class="text-[10px] uppercase font-bold">{{ __('Approved') }}</p>
+                                        <p class="text-base font-black mt-0.5">{{ $financeMetrics['approvalBreakdown']['approved']['count'] ?? 0 }}</p>
+                                        <p class="text-[9px] font-semibold mt-0.5 opacity-80">₦{{ number_format($financeMetrics['approvalBreakdown']['approved']['amount'] ?? 0, 0) }}</p>
+                                    </div>
+                                    <div class="rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-amber-600 dark:text-amber-400">
+                                        <p class="text-[10px] uppercase font-bold">{{ __('Pending') }}</p>
+                                        <p class="text-base font-black mt-0.5">{{ $financeMetrics['approvalBreakdown']['pending']['count'] ?? 0 }}</p>
+                                        <p class="text-[9px] font-semibold mt-0.5 opacity-80">₦{{ number_format($financeMetrics['approvalBreakdown']['pending']['amount'] ?? 0, 0) }}</p>
+                                    </div>
+                                    <div class="rounded-xl border border-rose-500/20 bg-rose-500/10 p-2.5 text-rose-600 dark:text-rose-400">
+                                        <p class="text-[10px] uppercase font-bold">{{ __('Rejected') }}</p>
+                                        <p class="text-base font-black mt-0.5">{{ $financeMetrics['approvalBreakdown']['rejected']['count'] ?? 0 }}</p>
+                                        <p class="text-[9px] font-semibold mt-0.5 opacity-80">₦{{ number_format($financeMetrics['approvalBreakdown']['rejected']['amount'] ?? 0, 0) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Two-Column Financial Activity Breakdown (Recent Expenses + Revenue Overview) -->
                 <div class="grid gap-6 lg:grid-cols-2">
                     <!-- SECTION 1: RECENT EXPENSES OVERVIEW & CATEGORY BREAKDOWN -->
@@ -468,9 +618,12 @@
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                         @forelse ($financeMetrics['recentExpenses'] as $exp)
-                                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                                            @php
+                                                $expId = is_object($exp) ? $exp->id : ($exp['id'] ?? 0);
+                                            @endphp
+                                            <tr wire:click="inspectFinancialRecord('expense', {{ $expId }})" class="hover:bg-slate-100/80 dark:hover:bg-slate-800/60 cursor-pointer transition group" title="{{ __('Click to inspect expense details') }}">
                                                 <td class="px-3 py-3">
-                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $exp->vendor ?? $exp['vendor'] ?? 'Vendor' }}</p>
+                                                    <p class="font-bold text-slate-900 dark:text-white group-hover:text-rose-600 transition">{{ $exp->vendor ?? $exp['vendor'] ?? 'Vendor' }}</p>
                                                     <span class="text-[10px] text-slate-400">{{ $exp->category ?? $exp['category'] ?? 'General' }}</span>
                                                 </td>
                                                 <td class="px-3 py-3 font-black text-rose-600 dark:text-rose-400 whitespace-nowrap">
@@ -489,18 +642,21 @@
                                                             <i class="fa-light fa-paperclip"></i>{{ count($attachList) }} {{ __('file(s)') }}
                                                         </span>
                                                     @elseif ($rPath)
-                                                        <a href="/storage/{{ $rPath }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline">
-                                                            <i class="fa-light fa-paperclip"></i>{{ __('View') }}
-                                                        </a>
+                                                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600">
+                                                            <i class="fa-light fa-paperclip"></i>{{ __('Receipt') }}
+                                                        </span>
                                                     @else
                                                         <span class="text-[10px] text-slate-400 italic">{{ __('None') }}</span>
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-3 text-right">
-                                                    @php $appStatus = is_array($exp) ? ($exp['approval_status'] ?? 'pending') : ($exp->approval_status ?? 'pending'); @endphp
-                                                    <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $appStatus === 'approved' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : ($appStatus === 'rejected' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20') }}">
-                                                        {{ ucfirst($appStatus) }}
-                                                    </span>
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        @php $appStatus = is_array($exp) ? ($exp['approval_status'] ?? 'pending') : ($exp->approval_status ?? 'pending'); @endphp
+                                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $appStatus === 'approved' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : ($appStatus === 'rejected' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20') }}">
+                                                            {{ ucfirst($appStatus) }}
+                                                        </span>
+                                                        <i class="fa-light fa-chevron-right text-[10px] text-slate-300 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition"></i>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
@@ -563,21 +719,24 @@
                             <!-- Recent Revenue Feed -->
                             <div class="mt-3 space-y-2.5">
                                 @forelse ($financeMetrics['revenueFeed'] as $item)
-                                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-3 hover:bg-slate-100/60 dark:border-slate-800 dark:bg-slate-800/40 transition">
+                                    <div wire:click="inspectFinancialRecord('{{ $item['type'] }}', '{{ $item['ref'] }}')" class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-3 hover:bg-emerald-50/70 hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-emerald-950/20 cursor-pointer transition group" title="{{ __('Click to inspect transaction details') }}">
                                         <div class="flex items-center gap-3">
-                                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-{{ $item['badge_color'] }}-500/10 text-{{ $item['badge_color'] }}-600">
+                                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-{{ $item['badge_color'] }}-500/10 text-{{ $item['badge_color'] }}-600 group-hover:scale-110 transition">
                                                 <i class="{{ $item['icon'] }} text-sm"></i>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $item['title'] }}</p>
+                                                <p class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition">{{ $item['title'] }}</p>
                                                 <p class="text-[10px] text-slate-400">
                                                     <span class="font-mono">{{ $item['ref'] }}</span> · {{ $item['date'] }}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div class="text-right">
-                                            <p class="text-xs font-black text-emerald-600 dark:text-emerald-400">+₦{{ number_format($item['amount'], 2) }}</p>
-                                            <span class="rounded-full bg-emerald-500/10 px-2 py-0.2 text-[9px] font-bold text-emerald-600 uppercase">{{ $item['status'] }}</span>
+                                        <div class="flex items-center gap-2">
+                                            <div class="text-right">
+                                                <p class="text-xs font-black text-emerald-600 dark:text-emerald-400">+₦{{ number_format($item['amount'], 2) }}</p>
+                                                <span class="rounded-full bg-emerald-500/10 px-2 py-0.2 text-[9px] font-bold text-emerald-600 uppercase">{{ $item['status'] }}</span>
+                                            </div>
+                                            <i class="fa-light fa-chevron-right text-[10px] text-slate-300 group-hover:text-emerald-600 transition"></i>
                                         </div>
                                     </div>
                                 @empty
@@ -841,8 +1000,11 @@
                             <textarea wire:model="expenseForm.description" rows="2" placeholder="Brief description of expense..." class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white resize-none"></textarea>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Reference / Invoice #') }}</label>
-                            <input wire:model="expenseForm.reference" type="text" placeholder="EXP-2026-001" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-slate-500">{{ __('Reference / Serial ID') }}</label>
+                                <span class="rounded-full bg-orange-500/10 px-2 py-0.5 text-[9px] font-bold text-orange-600 border border-orange-500/20">Serial Auto-Assigned (ASL-EXP-)</span>
+                            </div>
+                            <input wire:model="expenseForm.reference" readonly type="text" placeholder="ASL-EXP-0001" class="w-full rounded-xl border border-slate-200 bg-slate-100 dark:bg-slate-800/80 cursor-not-allowed p-2.5 text-sm font-mono font-bold text-slate-800 dark:text-slate-200 outline-none">
                         </div>
                         <div class="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40">
                             <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">
@@ -3777,6 +3939,9 @@
                                             @if ($qt['status'] !== 'Converted')
                                                 <button type="button" wire:click="convertQuoteToSalesOrder({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-purple-500/10 px-2 py-1 text-xs font-bold text-purple-600 hover:bg-purple-500/20 transition" title="Convert quote to Confirmed Sales Order (Auto-Decrements Stock)">
                                                     <i class="fa-light fa-cart-circle-check"></i>To Order
+                                                </button>
+                                                <button type="button" wire:click="convertQuoteToInvoice({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="Convert quote to Billing Invoice">
+                                                    <i class="fa-light fa-file-invoice-dollar"></i>To Invoice
                                                 </button>
                                                 <button type="button" wire:click="sendQuoteWhatsApp({{ $index }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="Dispatch quote with link via WhatsApp">
                                                     <i class="fa-brands fa-whatsapp"></i>
@@ -8018,10 +8183,15 @@
                         <!-- Invoice Header Info -->
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Invoice Number</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Invoice Number</label>
+                                    <span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-500/20">Serial Auto-Assigned (ASL-INV-)</span>
+                                </div>
                                 <div class="relative mt-1">
-                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2 text-xs font-mono font-bold outline-none focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <button type="button" wire:click="autoGenerateInvoiceNumber" class="absolute right-2 top-2 text-[10px] font-bold text-emerald-600 hover:underline">Auto</button>
+                                    <input type="text" wire:model="form.invoice_number" readonly required class="block w-full rounded-2xl border border-slate-200 bg-slate-100 dark:bg-slate-800/80 cursor-not-allowed px-3.5 py-2 text-xs font-mono font-bold text-slate-800 dark:text-slate-200 outline-none">
+                                    <button type="button" wire:click="autoGenerateInvoiceNumber" title="Regenerate next serial invoice number" class="absolute right-2 top-2 text-[10px] font-bold text-emerald-600 hover:underline">
+                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
+                                    </button>
                                 </div>
                             </div>
                             <div>
@@ -8219,11 +8389,14 @@
                         <!-- 1. Quote Reference & Timeline -->
                         <div class="grid gap-3 sm:grid-cols-3">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Quote Reference Number</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Quote Reference Number</label>
+                                    <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-bold text-blue-600 border border-blue-500/20">Serial Auto-Assigned (ASL-QT-)</span>
+                                </div>
                                 <div class="relative mt-1">
-                                    <input type="text" wire:model="form.invoice_number" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-mono font-bold outline-none focus:border-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <button type="button" wire:click="autoGenerateQuoteNumber" class="absolute right-2.5 top-2.5 text-[10px] font-bold text-blue-600 hover:underline">
-                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Auto
+                                    <input type="text" wire:model="form.invoice_number" readonly required class="block w-full rounded-2xl border border-slate-200 bg-slate-100 dark:bg-slate-800/80 cursor-not-allowed px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 dark:text-slate-200 outline-none">
+                                    <button type="button" wire:click="autoGenerateQuoteNumber" title="Regenerate next serial quote number" class="absolute right-2.5 top-2.5 text-[10px] font-bold text-blue-600 hover:underline">
+                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
                                     </button>
                                 </div>
                             </div>
@@ -8476,10 +8649,15 @@
                     <form wire:submit.prevent="submitModalForm" class="mt-5 space-y-3.5">
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div>
-                                <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">SKU Code</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">SKU Code</label>
+                                    <span class="rounded-full bg-orange-500/10 px-2 py-0.5 text-[9px] font-bold text-orange-600 border border-orange-500/20">Serial Auto-Assigned (ASL-)</span>
+                                </div>
                                 <div class="relative mt-1">
-                                    <input type="text" wire:model="form.sku" required class="block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-xs font-mono font-bold outline-none focus:border-orange-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
-                                    <button type="button" wire:click="autoGenerateSku" class="absolute right-2 top-2 text-[10px] font-bold text-orange-600 hover:underline">Auto</button>
+                                    <input type="text" wire:model="form.sku" readonly required class="block w-full rounded-2xl border border-slate-200 bg-slate-100 dark:bg-slate-800/80 cursor-not-allowed px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 dark:text-slate-200 outline-none">
+                                    <button type="button" wire:click="autoGenerateSku" title="Regenerate next serial SKU" class="absolute right-2 top-2 text-[10px] font-bold text-orange-600 hover:underline">
+                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
+                                    </button>
                                 </div>
                             </div>
                             <div>
@@ -9327,6 +9505,193 @@
                         </button>
                         <button type="button" onclick="window.print()" class="rounded-xl bg-amber-500 px-6 py-2.5 text-xs font-extrabold text-slate-950 shadow-md hover:bg-amber-400 transition flex items-center gap-2">
                             <i class="fa-light fa-print"></i> {{ __('Print / Save PDF Certificate') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- FINANCIAL RECORD DETAIL INSPECTION MODAL -->
+    @if ($showInspectModal && $inspectRecord)
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm transition">
+            <div class="relative w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                <!-- Header -->
+                <div class="flex items-start justify-between border-b pb-4 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ match($inspectRecord['type'] ?? '') {
+                            'expense' => 'bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400',
+                            'invoice' => 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+                            default => 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+                        } }}">
+                            <i class="{{ match($inspectRecord['type'] ?? '') {
+                                'expense' => 'fa-light fa-receipt text-xl',
+                                'invoice' => 'fa-light fa-file-invoice-dollar text-xl',
+                                default => 'fa-light fa-cash-register text-xl',
+                            } }}"></i>
+                        </div>
+                        <div>
+                            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider {{ match($inspectRecord['type'] ?? '') {
+                                'expense' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                'invoice' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                default => 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+                            } }}">
+                                {{ $inspectRecord['title'] ?? __('Financial Record') }}
+                            </span>
+                            <h2 class="mt-1 font-mono text-xl font-black text-slate-950 dark:text-white">
+                                {{ $inspectRecord['reference'] ?? 'REF-0000' }}
+                            </h2>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeInspectModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 transition">
+                        <i class="fa-light fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Main Body -->
+                <div class="mt-6 space-y-6">
+                    <!-- Amount Banner Card -->
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Transaction Amount') }}</p>
+                            <p class="text-3xl font-black {{ ($inspectRecord['type'] ?? '') === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }}">
+                                ₦{{ number_format($inspectRecord['amount'] ?? 0, 2) }}
+                            </p>
+                            @if (!empty($inspectRecord['paid_amount']))
+                                <p class="text-xs font-semibold text-slate-500 mt-1">
+                                    {{ __('Settled / Paid: ₦') }}{{ number_format($inspectRecord['paid_amount'], 2) }}
+                                </p>
+                            @endif
+                        </div>
+                        <div class="text-right sm:text-right">
+                            <span class="rounded-full px-3 py-1 text-xs font-extrabold uppercase {{ match(strtolower($inspectRecord['approval_status'] ?? 'pending')) {
+                                'paid', 'approved', 'settled' => 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
+                                'rejected', 'cancelled' => 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+                                default => 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+                            } }}">
+                                <i class="fa-light {{ match(strtolower($inspectRecord['approval_status'] ?? 'pending')) {
+                                    'paid', 'approved', 'settled' => 'fa-check-circle',
+                                    'rejected', 'cancelled' => 'fa-circle-xmark',
+                                    default => 'fa-clock',
+                                } }} mr-1"></i>{{ ucfirst($inspectRecord['approval_status'] ?? 'pending') }}
+                            </span>
+                            @if (!empty($inspectRecord['approved_by']))
+                                <p class="text-[10px] text-slate-400 mt-1">
+                                    {{ __('Approved by ') }}<span class="font-bold text-slate-600 dark:text-slate-300">{{ $inspectRecord['approved_by'] }}</span>
+                                    @if (!empty($inspectRecord['approved_at']))
+                                        · {{ $inspectRecord['approved_at'] }}
+                                    @endif
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Key Details Grid -->
+                    <div class="grid grid-cols-2 gap-4 text-xs">
+                        <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">{{ ($inspectRecord['type'] ?? '') === 'expense' ? __('Vendor / Payee') : __('Client / Payee') }}</p>
+                            <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['vendor'] ?? '—' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Category / Classification') }}</p>
+                            <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['category'] ?? '—' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Recorded Date') }}</p>
+                            <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['date'] ?? '—' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
+                            <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Payment Channel / Terms') }}</p>
+                            <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['payment_method'] ?? ($inspectRecord['due_date'] ?? 'Bank Transfer') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Description / Narrative -->
+                    @if (!empty($inspectRecord['description']))
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Description / Reference Notes') }}</p>
+                            <p class="mt-1 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{{ $inspectRecord['description'] }}</p>
+                        </div>
+                    @endif
+
+                    <!-- Attachments / Receipt Uploads -->
+                    @php
+                        $attachments = (array) ($inspectRecord['attachments'] ?? []);
+                        $singleReceipt = $inspectRecord['receipt_path'] ?? null;
+                    @endphp
+                    @if (!empty($attachments) || !empty($singleReceipt))
+                        <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/20">
+                            <p class="text-xs font-bold text-slate-900 dark:text-white mb-2.5 flex items-center gap-1.5">
+                                <i class="fa-light fa-paperclip text-rose-500"></i>{{ __('Attached Receipts & Proof of Payment') }}
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                @if (!empty($singleReceipt))
+                                    <a href="/storage/{{ $singleReceipt }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-700 border border-slate-200 shadow-2xs hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                                        <i class="fa-light fa-file-pdf text-rose-500"></i>
+                                        <span>{{ __('Primary Receipt Document') }}</span>
+                                        <i class="fa-light fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                                    </a>
+                                @endif
+                                @foreach ($attachments as $idx => $att)
+                                    <a href="{{ is_array($att) ? ($att['url'] ?? '#') : $att }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-700 border border-slate-200 shadow-2xs hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                                        <i class="fa-light fa-image text-blue-500"></i>
+                                        <span>{{ is_array($att) ? ($att['name'] ?? __('Attachment ').($idx+1)) : __('Attachment ').($idx+1) }}</span>
+                                        <i class="fa-light fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Invoice Line Items if Present -->
+                    @if (!empty($inspectRecord['items']) && is_array($inspectRecord['items']))
+                        <div class="space-y-2">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Invoice Line Items') }}</p>
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-50 dark:bg-slate-800 text-slate-400 uppercase font-semibold">
+                                        <tr>
+                                            <th class="p-2.5">{{ __('Item / Description') }}</th>
+                                            <th class="p-2.5 text-center">{{ __('Qty') }}</th>
+                                            <th class="p-2.5 text-right">{{ __('Rate') }}</th>
+                                            <th class="p-2.5 text-right">{{ __('Amount') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        @foreach ($inspectRecord['items'] as $line)
+                                            @if (is_array($line) && isset($line['name']))
+                                                <tr>
+                                                    <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $line['name'] }}</td>
+                                                    <td class="p-2.5 text-center">{{ $line['quantity'] ?? $line['qty'] ?? 1 }}</td>
+                                                    <td class="p-2.5 text-right">₦{{ number_format($line['price'] ?? $line['rate'] ?? 0, 2) }}</td>
+                                                    <td class="p-2.5 text-right font-black">₦{{ number_format(($line['quantity'] ?? 1) * ($line['price'] ?? 0), 2) }}</td>
+                                                </tr>
+                                            @endif
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-8 flex items-center justify-between border-t pt-4 dark:border-slate-800">
+                    <p class="text-xs text-slate-400">
+                        <i class="fa-light fa-fingerprint mr-1"></i>{{ __('Ascend ERP Record ID: #') }}{{ $inspectRecord['id'] ?? 0 }}
+                    </p>
+                    <div class="flex items-center gap-2">
+                        @if (($inspectRecord['type'] ?? '') === 'expense' && ($inspectRecord['approval_status'] ?? '') === 'pending')
+                            <button type="button" wire:click="approveExpense({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                <i class="fa-light fa-check mr-1"></i>{{ __('Approve Expense') }}
+                            </button>
+                        @elseif (($inspectRecord['type'] ?? '') === 'invoice' && ($inspectRecord['approval_status'] ?? '') !== 'paid')
+                            <button type="button" wire:click="markInvoicePaid({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                <i class="fa-light fa-circle-check mr-1"></i>{{ __('Mark Paid') }}
+                            </button>
+                        @endif
+                        <button type="button" wire:click="closeInspectModal" class="rounded-xl border border-slate-200 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300">
+                            {{ __('Close') }}
                         </button>
                     </div>
                 </div>

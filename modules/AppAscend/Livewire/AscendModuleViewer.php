@@ -308,6 +308,11 @@ class AscendModuleViewer extends Component
     public ?int $editingExpenseId = null;
     public bool $showReceiptUpload = false;
 
+    // === GLOBAL SEARCH & RECORD INSPECTION STATE ===
+    public string $globalSearch = '';
+    public ?array $inspectRecord = null;
+    public bool $showInspectModal = false;
+
     // === PRIORITY 3: WHATSAPP AUTOMATION ===
     public array $whatsappTemplates = [];
     public array $whatsappBroadcasts = [];
@@ -1255,11 +1260,125 @@ class AscendModuleViewer extends Component
         }
     }
 
+    // =========================================================
+    // SERIAL CODE GENERATORS (ASL SYSTEM STANDARD)
+    // =========================================================
+
+    public function getNextSkuCode(): string
+    {
+        $skus = InventoryProduct::where('sku', 'like', 'ASL-%')
+            ->orWhere('sku', 'like', 'ASL%')
+            ->pluck('sku');
+        $max = 0;
+        foreach ($skus as $sku) {
+            if (preg_match('/ASL-?(\d+)/i', (string) $sku, $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $max) {
+                    $max = $num;
+                }
+            }
+        }
+        if ($max === 0) {
+            $max = InventoryProduct::count();
+        }
+        return 'ASL-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getNextInvoiceNumber(): string
+    {
+        $invoices = Invoice::where('invoice_number', 'like', 'ASL-INV-%')->pluck('invoice_number');
+        $max = 0;
+        foreach ($invoices as $inv) {
+            if (preg_match('/ASL-INV-(\d+)/i', (string) $inv, $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $max) {
+                    $max = $num;
+                }
+            }
+        }
+        if ($max === 0) {
+            $max = Invoice::count();
+        }
+        return 'ASL-INV-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getNextExpenseReference(): string
+    {
+        $expenses = Expense::where('reference', 'like', 'ASL-EXP-%')->pluck('reference');
+        $max = 0;
+        foreach ($expenses as $exp) {
+            if (preg_match('/ASL-EXP-(\d+)/i', (string) $exp, $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $max) {
+                    $max = $num;
+                }
+            }
+        }
+        if ($max === 0) {
+            $max = Expense::count();
+        }
+        return 'ASL-EXP-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getNextQuoteNumber(): string
+    {
+        $max = 0;
+        foreach ($this->priceQuotes as $q) {
+            $id = $q['id'] ?? '';
+            if (preg_match('/ASL-QT-(\d+)/i', $id, $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $max) {
+                    $max = $num;
+                }
+            }
+        }
+        if ($max === 0 && !empty($this->priceQuotes)) {
+            $max = count($this->priceQuotes);
+        }
+        return 'ASL-QT-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getNextSalesOrderNumber(): string
+    {
+        $max = 0;
+        foreach ($this->salesOrders as $so) {
+            $id = $so['id'] ?? '';
+            if (preg_match('/ASL-SO-(\d+)/i', $id, $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $max) {
+                    $max = $num;
+                }
+            }
+        }
+        if ($max === 0 && !empty($this->salesOrders)) {
+            $max = count($this->salesOrders);
+        }
+        return 'ASL-SO-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getNextReceiptNumber(): string
+    {
+        $receipts = PosReceipt::where('receipt_number', 'like', 'ASL-REC-%')->pluck('receipt_number');
+        $max = 0;
+        foreach ($receipts as $r) {
+            if (preg_match('/ASL-REC-(\d+)/i', (string) $r, $matches)) {
+                $num = (int) $matches[1];
+                if ($num > $max) {
+                    $max = $num;
+                }
+            }
+        }
+        if ($max === 0) {
+            $max = PosReceipt::count();
+        }
+        return 'ASL-REC-' . str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+    }
+
     // Finance & Invoice Flow Actions
     public function autoGenerateInvoiceNumber(): void
     {
-        $this->form['invoice_number'] = 'INV-'.rand(20500, 29999);
-        session()->flash('status', __('Generated new unique Invoice number: :num', ['num' => $this->form['invoice_number']]));
+        $this->form['invoice_number'] = $this->getNextInvoiceNumber();
+        session()->flash('status', __('Assigned serial Invoice number: :num', ['num' => $this->form['invoice_number']]));
     }
 
     public function sendInvoiceReminder(int $invoiceId): void
@@ -1501,9 +1620,8 @@ class AscendModuleViewer extends Component
     // Inventory & Supply Chain Helper Actions
     public function autoGenerateSku(): void
     {
-        $prefix = strtoupper(substr($this->form['category'] ?: 'SKU', 0, 3));
-        $this->form['sku'] = $prefix.'-'.rand(1000, 9999);
-        session()->flash('status', __('Generated new unique SKU code: :sku', ['sku' => $this->form['sku']]));
+        $this->form['sku'] = $this->getNextSkuCode();
+        session()->flash('status', __('Generated new serial SKU code: :sku', ['sku' => $this->form['sku']]));
     }
 
     public function transferStock(string $sku, string $from, string $to, int $qty): void
@@ -1575,13 +1693,15 @@ class AscendModuleViewer extends Component
         if (isset($this->priceQuotes[$index])) {
             $quote = $this->priceQuotes[$index];
             $this->priceQuotes[$index]['status'] = 'Converted';
-            $soId = 'SO-'.rand(20000, 29999);
+            $soId = $this->getNextSalesOrderNumber();
             $this->salesOrders[] = [
                 'id' => $soId,
+                'quote_id' => $quote['id'],
                 'customer' => $quote['client_name'],
                 'date' => now()->format('Y-m-d'),
                 'amount' => $quote['total'],
                 'status' => 'Confirmed',
+                'items' => $quote['items'] ?? [],
             ];
 
             // Auto-decrement physical inventory stock
@@ -1610,18 +1730,21 @@ class AscendModuleViewer extends Component
     {
         if (isset($this->priceQuotes[$index])) {
             $quote = $this->priceQuotes[$index];
-            $this->priceQuotes[$index]['status'] = 'Converted';
+            $this->priceQuotes[$index]['status'] = 'Invoiced';
 
+            $invNum = $this->getNextInvoiceNumber();
             $inv = Invoice::create([
-                'invoice_number' => 'INV-'.rand(30000, 39999),
+                'invoice_number' => $invNum,
                 'client_name' => $quote['client_name'],
                 'issue_date' => now(),
                 'due_date' => now()->addDays(14),
-                'subtotal' => $quote['total'] / 1.075,
-                'tax' => $quote['total'] - ($quote['total'] / 1.075),
-                'total' => $quote['total'],
-                'status' => 'unpaid',
+                'subtotal' => (float) ($quote['subtotal'] ?? ($quote['total'] / 1.075)),
+                'tax' => (float) ($quote['tax'] ?? ($quote['total'] - ($quote['total'] / 1.075))),
+                'total' => (float) $quote['total'],
+                'status' => 'pending',
+                'notes' => 'Converted from Quote ' . $quote['id'],
                 'items' => [
+                    'quote_id' => $quote['id'],
                     'client_phone' => $quote['phone'] ?? '',
                     'client_email' => $quote['email'] ?? '',
                     'client_address' => $quote['address'] ?? '',
@@ -1629,20 +1752,30 @@ class AscendModuleViewer extends Component
                 ],
             ]);
 
-            // Auto-decrement inventory stock
-            $rawItems = $quote['items'] ?? [];
-            $items = isset($rawItems['line_items']) ? $rawItems['line_items'] : (is_array($rawItems) ? $rawItems : []);
-            foreach ($items as $it) {
-                $qty = (int) ($it['qty'] ?? ($it['quantity'] ?? 1));
-                if (!empty($it['product_id'])) {
-                    $prod = InventoryProduct::find($it['product_id']);
-                    if ($prod) {
-                        $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
-                    }
-                } elseif (!empty($it['sku'])) {
-                    $prod = InventoryProduct::where('sku', $it['sku'])->first();
-                    if ($prod) {
-                        $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+            // Synchronize corresponding sales orders
+            foreach ($this->salesOrders as &$so) {
+                if (($so['quote_id'] ?? null) === $quote['id'] || ($so['customer'] ?? null) === $quote['client_name']) {
+                    $so['status'] = 'Invoiced';
+                    $so['invoice_number'] = $invNum;
+                }
+            }
+
+            // Auto-decrement inventory stock if not already converted to SO
+            if ($quote['status'] !== 'Converted') {
+                $rawItems = $quote['items'] ?? [];
+                $items = isset($rawItems['line_items']) ? $rawItems['line_items'] : (is_array($rawItems) ? $rawItems : []);
+                foreach ($items as $it) {
+                    $qty = (int) ($it['qty'] ?? ($it['quantity'] ?? 1));
+                    if (!empty($it['product_id'])) {
+                        $prod = InventoryProduct::find($it['product_id']);
+                        if ($prod) {
+                            $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+                        }
+                    } elseif (!empty($it['sku'])) {
+                        $prod = InventoryProduct::where('sku', $it['sku'])->first();
+                        if ($prod) {
+                            $prod->decrement('stock_quantity', min($prod->stock_quantity, $qty));
+                        }
                     }
                 }
             }
@@ -1727,7 +1860,7 @@ class AscendModuleViewer extends Component
         $customer = $this->form['client_name'] ?: ($this->form['title'] ?: 'Enterprise Client');
         $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3200000.00));
 
-        $soId = 'SO-'.rand(10000, 19999);
+        $soId = $this->getNextSalesOrderNumber();
         $this->salesOrders[] = [
             'id' => $soId,
             'customer' => $customer,
@@ -1742,7 +1875,8 @@ class AscendModuleViewer extends Component
 
     public function autoGenerateQuoteNumber(): void
     {
-        $this->form['invoice_number'] = 'QT-2026-'.str_pad((string) rand(100, 999), 3, '0', STR_PAD_LEFT);
+        $this->form['invoice_number'] = $this->getNextQuoteNumber();
+        session()->flash('status', __('Assigned serial Quote number: :num', ['num' => $this->form['invoice_number']]));
     }
 
     public function loadQuotePreset(string $preset): void
@@ -1777,7 +1911,7 @@ class AscendModuleViewer extends Component
     {
         foreach ($this->invoiceItems as $i => $item) {
             if (!empty($item['save_to_inventory']) && empty($item['product_id'])) {
-                $sku = !empty($item['sku']) ? $item['sku'] : ('SKU-' . rand(1000, 9999));
+                $sku = (!empty($item['sku']) && str_starts_with($item['sku'], 'ASL-')) ? $item['sku'] : $this->getNextSkuCode();
                 $name = !empty($item['description']) ? $item['description'] : 'Custom Product';
                 $price = (float) ($item['unit_price'] ?? 0);
                 $stock = (int) ($item['stock'] ?? 10);
@@ -1809,7 +1943,7 @@ class AscendModuleViewer extends Component
 
         $client = $this->form['client_name'] ?: ($this->form['title'] ?: 'Prospective Client');
         $amount = (float) ($this->form['total'] ?: ($this->form['amount'] ?: 3550000.00));
-        $qtId = $this->form['invoice_number'] ?: ('QT-2026-'.str_pad((string) rand(100, 999), 3, '0', STR_PAD_LEFT));
+        $qtId = (!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-QT-')) ? $this->form['invoice_number'] : $this->getNextQuoteNumber();
         $phone = $this->form['client_phone'] ?: ($this->form['phone'] ?: '+234 811 763 3020');
         $email = $this->form['client_email'] ?: ($this->form['email'] ?: 'client@ascendsystems.ng');
 
@@ -1883,8 +2017,29 @@ class AscendModuleViewer extends Component
     {
         $inv = Invoice::find($invoiceId);
         if ($inv) {
-            $inv->update(['status' => 'paid']);
-            session()->flash('status', __('Invoice :num marked as Paid!', ['num' => $inv->invoice_number]));
+            $inv->update([
+                'status' => 'paid',
+                'paid_amount' => (float) $inv->total,
+            ]);
+
+            // Synchronize linked Quote status
+            $quoteId = data_get($inv->items, 'quote_id');
+            if ($quoteId) {
+                foreach ($this->priceQuotes as &$q) {
+                    if (($q['id'] ?? null) === $quoteId) {
+                        $q['status'] = 'Paid / Settled';
+                    }
+                }
+            }
+
+            // Synchronize linked Sales Orders
+            foreach ($this->salesOrders as &$so) {
+                if (($quoteId && ($so['quote_id'] ?? null) === $quoteId) || ($so['customer'] ?? null) === $inv->client_name) {
+                    $so['status'] = 'Delivered & Paid';
+                }
+            }
+
+            session()->flash('status', __('Invoice :num marked as Paid & synchronized across Quotes and Sales Orders!', ['num' => $inv->invoice_number]));
         }
     }
 
@@ -2533,6 +2688,10 @@ class AscendModuleViewer extends Component
         }
         try {
             $attachments = $this->importExpenseReceiptsToFileManager();
+            $ref = (!empty($this->expenseForm['reference']) && str_starts_with($this->expenseForm['reference'], 'ASL-EXP-'))
+                ? $this->expenseForm['reference']
+                : $this->getNextExpenseReference();
+
             $expense = \App\Models\Expense::create([
                 'category'       => $this->expenseForm['category'],
                 'vendor'         => $this->expenseForm['vendor'],
@@ -2540,15 +2699,23 @@ class AscendModuleViewer extends Component
                 'payment_method' => $this->expenseForm['payment_method'],
                 'expense_date'   => $this->expenseForm['expense_date'] ?: now()->toDateString(),
                 'description'    => $this->expenseForm['description'],
-                'reference'      => $this->expenseForm['reference'] ?? null,
+                'reference'      => $ref,
                 'approval_status' => 'pending',
                 'attachments'    => $attachments,
             ]);
             $this->expenseReceiptUrls = [];
             $this->pendingExpenseReceipts = [];
-            $this->expenseForm = ['category' => 'Office Supplies', 'vendor' => '', 'amount' => '', 'payment_method' => 'Bank Transfer', 'expense_date' => '', 'description' => '', 'reference' => ''];
+            $this->expenseForm = [
+                'category' => 'Office Supplies',
+                'vendor' => '',
+                'amount' => '',
+                'payment_method' => 'Bank Transfer',
+                'expense_date' => '',
+                'description' => '',
+                'reference' => $this->getNextExpenseReference(),
+            ];
             $this->hydrateLiveData();
-            session()->flash('status', __('Expense logged and submitted for approval!'));
+            session()->flash('status', __('Expense :ref logged and submitted for approval!', ['ref' => $ref]));
         } catch (\Throwable $e) {
             session()->flash('warning', 'Failed: '.$e->getMessage());
         }
@@ -3453,7 +3620,7 @@ class AscendModuleViewer extends Component
         $tax = $taxable * $this->posTaxRate;
         $total = $taxable + $tax;
 
-        $receiptNo = 'REC-'.rand(10000, 99999);
+        $receiptNo = $this->getNextReceiptNumber();
 
         // Automatic Stock Level Update in Database
         foreach ($this->posCart as $cartItem) {
@@ -3616,7 +3783,7 @@ class AscendModuleViewer extends Component
             'name' => $this->form['name'] ?? '',
             'amount' => $this->form['amount'] ?? '',
             'category' => $this->form['category'] ?? 'Hardware',
-            'sku' => 'SKU-'.rand(1000, 9999),
+            'sku' => $this->getNextSkuCode(),
             'price' => '',
             'cost_price' => '85000',
             'unit_price' => '120000',
@@ -3624,7 +3791,7 @@ class AscendModuleViewer extends Component
             'reorder_level' => '5',
             'location' => 'Lagos HQ Central Warehouse',
             'supplier' => 'Apex Hardware Supplies Ltd',
-            'invoice_number' => 'INV-'.rand(20500, 29999),
+            'invoice_number' => ($type === 'price_quote' || $type === 'quote') ? $this->getNextQuoteNumber() : $this->getNextInvoiceNumber(),
             'client_name' => '',
             'client_phone' => '',
             'client_email' => '',
@@ -3645,6 +3812,10 @@ class AscendModuleViewer extends Component
             'notes' => $this->form['notes'] ?? '',
             'stage' => 'prospecting',
         ];
+
+        if ($type === 'expense') {
+            $this->expenseForm['reference'] = $this->getNextExpenseReference();
+        }
     }
 
     public function closeModal(): void
@@ -3668,13 +3839,15 @@ class AscendModuleViewer extends Component
                     'category' => $this->form['category'] ?: 'Operations',
                     'vendor' => $title,
                     'amount' => $subtotal ?: 150000.00,
-                    'payment_method' => 'bank_transfer',
-                    'expense_date' => now(),
+                    'payment_method' => $this->form['payment_method'] ?? 'Bank Transfer',
+                    'expense_date' => $this->form['issue_date'] ?: now(),
+                    'reference' => (!empty($this->form['reference']) && str_starts_with($this->form['reference'], 'ASL-EXP-')) ? $this->form['reference'] : $this->getNextExpenseReference(),
                     'description' => $this->form['notes'] ?: 'Recorded via portal finance modal',
+                    'approval_status' => 'pending',
                 ]),
                 'transfer' => BankAccount::firstOrCreate(['name' => 'Access Bank HQ'], ['bank_name' => 'Access Bank', 'account_number' => '0129481029', 'balance' => 4850000.00]),
                 default => Invoice::create([
-                    'invoice_number' => $this->form['invoice_number'] ?: ('INV-'.rand(20500, 29999)),
+                    'invoice_number' => (!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-INV-')) ? $this->form['invoice_number'] : $this->getNextInvoiceNumber(),
                     'client_name' => $title,
                     'issue_date' => $this->form['issue_date'] ?: now(),
                     'due_date' => $this->form['due_date'] ?: now()->addDays(14),
@@ -3753,7 +3926,7 @@ class AscendModuleViewer extends Component
                 ]),
             },
             'inventory' => InventoryProduct::create([
-                'sku' => $this->form['sku'] ?: 'SKU-'.rand(1000, 9999),
+                'sku' => (!empty($this->form['sku']) && str_starts_with($this->form['sku'], 'ASL-')) ? $this->form['sku'] : $this->getNextSkuCode(),
                 'name' => $title,
                 'category' => $this->form['category'] ?: 'Hardware',
                 'unit_price' => $subtotal ?: 120000.00,
@@ -4994,25 +5167,71 @@ class AscendModuleViewer extends Component
             $recentExpenses = Expense::query()->latest('expense_date')->take(6)->get();
         }
 
-        // EXPENSE CATEGORIES SUMMARY
-        $categoryBreakdown = $periodExpenses->groupBy('category')->map(function ($items, $cat) use ($totalInputtedExpenses) {
+        // EXPENSE CATEGORIES SUMMARY (Top 5 + Full breakdown)
+        $fullCategoryBreakdown = $periodExpenses->groupBy('category')->map(function ($items, $cat) use ($totalOperatingExpenses) {
             $sum = (float) $items->sum('amount');
-            $pct = $totalInputtedExpenses > 0 ? round(($sum / $totalInputtedExpenses) * 100, 1) : 0;
+            $pct = $totalOperatingExpenses > 0 ? round(($sum / $totalOperatingExpenses) * 100, 1) : 0;
             return [
-                'category' => $cat ?: 'General',
+                'category' => $cat ?: 'General Operations',
                 'amount' => $sum,
                 'count' => $items->count(),
                 'percent' => $pct,
             ];
-        })->sortByDesc('amount')->values()->take(5)->toArray();
+        })->sortByDesc('amount')->values()->toArray();
+
+        $categoryBreakdown = array_slice($fullCategoryBreakdown, 0, 5);
+
+        // PAYMENT METHOD DISTRIBUTION
+        $paymentMethodBreakdown = $periodExpenses->groupBy('payment_method')->map(function ($items, $method) use ($totalInputtedExpenses) {
+            $sum = (float) $items->sum('amount');
+            $pct = $totalInputtedExpenses > 0 ? round(($sum / $totalInputtedExpenses) * 100, 1) : 0;
+            return [
+                'method' => $method ?: 'Bank Transfer',
+                'amount' => $sum,
+                'count' => $items->count(),
+                'percent' => $pct,
+            ];
+        })->sortByDesc('amount')->values()->toArray();
+
+        // EXPENSE APPROVAL STATUS BREAKDOWN
+        $approvalBreakdown = [
+            'approved' => [
+                'count' => $periodExpenses->where('approval_status', 'approved')->count(),
+                'amount' => (float) $periodExpenses->where('approval_status', 'approved')->sum('amount'),
+            ],
+            'pending' => [
+                'count' => $periodExpenses->where('approval_status', 'pending')->count(),
+                'amount' => (float) $periodExpenses->where('approval_status', 'pending')->sum('amount'),
+            ],
+            'rejected' => [
+                'count' => $periodExpenses->where('approval_status', 'rejected')->count(),
+                'amount' => (float) $periodExpenses->where('approval_status', 'rejected')->sum('amount'),
+            ],
+        ];
+
+        // EXPENSE STATS & INSIGHTS
+        $largestExp = $periodExpenses->sortByDesc('amount')->first();
+        $expenseStats = [
+            'average' => $periodExpenses->count() > 0 ? (float) ($totalInputtedExpenses / $periodExpenses->count()) : 0.0,
+            'largest' => $largestExp ? [
+                'vendor' => $largestExp->vendor,
+                'amount' => (float) $largestExp->amount,
+                'category' => $largestExp->category,
+                'date' => ($largestExp->expense_date instanceof \DateTimeInterface) ? $largestExp->expense_date->format('d M Y') : ($largestExp->expense_date ?? '—'),
+            ] : null,
+            'pendingCount' => $approvalBreakdown['pending']['count'],
+            'pendingAmount' => $approvalBreakdown['pending']['amount'],
+            'totalEntries' => $periodExpenses->count(),
+        ];
 
         // RECENT REVENUE STREAM FEED (Combined Invoices + POS Sales)
         $revenueFeed = collect();
 
-        foreach ($periodInvoices->take(6) as $inv) {
+        foreach ($periodInvoices->take(8) as $inv) {
             $amt = (float) ($inv->paid_amount > 0 ? $inv->paid_amount : ($inv->status === 'paid' ? $inv->total : 0));
             if ($amt > 0 || $inv->status === 'paid') {
                 $revenueFeed->push([
+                    'id' => $inv->id,
                     'type' => 'invoice',
                     'title' => 'Invoice Payment — ' . ($inv->client_name ?: 'Client'),
                     'ref' => $inv->invoice_number,
@@ -5025,8 +5244,9 @@ class AscendModuleViewer extends Component
             }
         }
 
-        foreach ($periodPosReceipts->take(6) as $pos) {
+        foreach ($periodPosReceipts->take(8) as $pos) {
             $revenueFeed->push([
+                'id' => $pos->id,
                 'type' => 'pos',
                 'title' => 'POS Cashier Sale — ' . ($pos->cashier_name ?: 'Counter POS'),
                 'ref' => $pos->receipt_number,
@@ -5058,11 +5278,96 @@ class AscendModuleViewer extends Component
             'unpaidInvoicesCount' => $unpaidInvoicesCount,
             'recentExpenses' => $recentExpenses,
             'categoryBreakdown' => $categoryBreakdown,
+            'fullCategoryBreakdown' => $fullCategoryBreakdown,
+            'paymentMethodBreakdown' => $paymentMethodBreakdown,
+            'approvalBreakdown' => $approvalBreakdown,
+            'expenseStats' => $expenseStats,
             'revenueFeed' => $sortedRevenueFeed,
             'bankAccounts' => $bankAccounts,
             'totalLiquidCash' => $totalLiquidCash,
             'periodLabel' => ucfirst(str_replace('_', ' ', $this->financePeriodFilter)),
         ];
+    }
+
+    public function inspectFinancialRecord(string $type, int|string $id): void
+    {
+        if ($type === 'expense') {
+            $exp = Expense::where('id', $id)->orWhere('reference', $id)->first();
+            if ($exp) {
+                $this->inspectRecord = [
+                    'type' => 'expense',
+                    'id' => $exp->id,
+                    'title' => 'Operating Expense Record',
+                    'reference' => $exp->reference ?: ('ASL-EXP-' . str_pad((string) $exp->id, 4, '0', STR_PAD_LEFT)),
+                    'vendor' => $exp->vendor ?: 'General Vendor',
+                    'category' => $exp->category ?: 'Operations',
+                    'amount' => (float) $exp->amount,
+                    'payment_method' => $exp->payment_method ?: 'Bank Transfer',
+                    'date' => ($exp->expense_date instanceof \DateTimeInterface) ? $exp->expense_date->format('d M Y') : ($exp->expense_date ?: ($exp->created_at?->format('d M Y') ?? now()->format('d M Y'))),
+                    'description' => $exp->description ?: 'Operational expense disbursement.',
+                    'approval_status' => $exp->approval_status ?: 'pending',
+                    'approved_by' => $exp->approved_by ? (\App\Models\User::find($exp->approved_by)?->name ?: 'Administrator') : null,
+                    'approved_at' => $exp->approved_at?->format('d M Y H:i'),
+                    'receipt_path' => $exp->receipt_path,
+                    'attachments' => $this->resolveExpenseAttachmentUrls((array) ($exp->attachments ?? [])),
+                ];
+                $this->showInspectModal = true;
+                return;
+            }
+        } elseif ($type === 'invoice') {
+            $inv = Invoice::where('invoice_number', $id)->orWhere('id', $id)->first();
+            if ($inv) {
+                $this->inspectRecord = [
+                    'type' => 'invoice',
+                    'id' => $inv->id,
+                    'title' => 'Commercial Billing Invoice',
+                    'reference' => $inv->invoice_number,
+                    'vendor' => $inv->client_name ?: 'Client',
+                    'category' => 'Revenue & Client Billing',
+                    'amount' => (float) $inv->total,
+                    'subtotal' => (float) $inv->subtotal,
+                    'tax' => (float) $inv->tax,
+                    'paid_amount' => (float) ($inv->paid_amount ?: ($inv->status === 'paid' ? $inv->total : 0)),
+                    'date' => $inv->issue_date?->format('d M Y') ?: ($inv->created_at?->format('d M Y') ?? now()->format('d M Y')),
+                    'due_date' => $inv->due_date?->format('d M Y') ?: 'Upon receipt',
+                    'description' => $inv->notes ?: 'Issued via Ascend ERP billing module.',
+                    'approval_status' => $inv->status,
+                    'items' => $inv->items ?? [],
+                    'quote_id' => data_get($inv->items, 'quote_id'),
+                ];
+                $this->showInspectModal = true;
+                return;
+            }
+        } elseif ($type === 'pos' || $type === 'pos_receipt') {
+            $pos = PosReceipt::where('receipt_number', $id)->orWhere('id', $id)->first();
+            if ($pos) {
+                $this->inspectRecord = [
+                    'type' => 'pos_receipt',
+                    'id' => $pos->id,
+                    'title' => 'POS Cashier Terminal Receipt',
+                    'reference' => $pos->receipt_number,
+                    'vendor' => $pos->cashier_name ?: 'Cashier Station',
+                    'category' => 'Retail POS Sale',
+                    'amount' => (float) $pos->total,
+                    'subtotal' => (float) $pos->subtotal,
+                    'tax' => (float) $pos->tax,
+                    'payment_method' => $pos->payment_method ?: 'Cash / Card',
+                    'date' => $pos->created_at?->format('d M Y, h:i A') ?? now()->format('d M Y'),
+                    'approval_status' => 'settled',
+                    'description' => 'Retail counter checkout finalized at terminal.',
+                ];
+                $this->showInspectModal = true;
+                return;
+            }
+        }
+
+        session()->flash('warning', __('Record details could not be found for :id.', ['id' => $id]));
+    }
+
+    public function closeInspectModal(): void
+    {
+        $this->showInspectModal = false;
+        $this->inspectRecord = null;
     }
 
     public function addExpenseReceiptUrl(): void
@@ -5239,27 +5544,55 @@ class AscendModuleViewer extends Component
             $inv = \App\Models\Invoice::find($details['id']);
             if ($inv) {
                 $newPaid = (float) $inv->paid_amount + $amountPaidNow;
+                $isFullyPaid = $newPaid >= (float) $inv->total;
                 $inv->update([
                     'paid_amount' => $newPaid,
-                    'status' => $newPaid >= (float) $inv->total ? 'paid' : 'partially_paid',
+                    'status' => $isFullyPaid ? 'paid' : 'partially_paid',
                 ]);
+
+                if ($isFullyPaid) {
+                    $quoteId = data_get($inv->items, 'quote_id');
+                    if ($quoteId) {
+                        foreach ($this->priceQuotes as &$q) {
+                            if (($q['id'] ?? null) === $quoteId) {
+                                $q['status'] = 'Paid / Settled';
+                            }
+                        }
+                    }
+                    foreach ($this->salesOrders as &$so) {
+                        if (($quoteId && ($so['quote_id'] ?? null) === $quoteId) || ($so['customer'] ?? null) === $inv->client_name) {
+                            $so['status'] = 'Delivered & Paid';
+                        }
+                    }
+                }
             }
         } elseif ($details['type'] === 'quote') {
-            $qte = \App\Models\PriceQuote::find($details['id']);
-            if ($qte) {
-                $qte->update(['status' => 'accepted']);
-                \App\Models\Invoice::create([
-                    'invoice_number' => 'INV-SETTLED-'.rand(1000, 9999),
-                    'client_name' => $qte->client_name,
-                    'issue_date' => now(),
-                    'due_date' => now(),
-                    'subtotal' => $qte->subtotal,
-                    'tax' => $qte->tax_amount,
-                    'total' => $qte->total_amount,
-                    'paid_amount' => $qte->total_amount,
-                    'status' => 'paid',
-                    'notes' => 'Settled via POS Terminal from Quote '.$qte->quote_number,
-                ]);
+            foreach ($this->priceQuotes as &$q) {
+                if (($q['id'] ?? null) === $details['number']) {
+                    $q['status'] = 'Paid / Settled';
+                }
+            }
+            $invNum = $this->getNextInvoiceNumber();
+            \App\Models\Invoice::create([
+                'invoice_number' => $invNum,
+                'client_name' => $details['customer'] ?? 'Customer',
+                'issue_date' => now(),
+                'due_date' => now(),
+                'subtotal' => $amountPaidNow / 1.075,
+                'tax' => $amountPaidNow - ($amountPaidNow / 1.075),
+                'total' => $amountPaidNow,
+                'paid_amount' => $amountPaidNow,
+                'status' => 'paid',
+                'notes' => 'Settled via POS Terminal from Quote '.$details['number'],
+                'items' => [
+                    'quote_id' => $details['number'],
+                ],
+            ]);
+            foreach ($this->salesOrders as &$so) {
+                if (($so['quote_id'] ?? null) === $details['number'] || ($so['customer'] ?? null) === ($details['customer'] ?? '')) {
+                    $so['status'] = 'Delivered & Paid';
+                    $so['invoice_number'] = $invNum;
+                }
             }
         }
 
@@ -5267,7 +5600,7 @@ class AscendModuleViewer extends Component
 
         $this->fetchedInvoiceDetails = null;
         $this->posInvoiceQuery = '';
-        session()->flash('status', __('Invoice/Quote :num payment successfully recorded & settled!', ['num' => $details['number']]));
+        session()->flash('status', __('Invoice/Quote :num payment successfully recorded & settled across all modules!', ['num' => $details['number']]));
     }
 
     // =========================================================
@@ -5314,6 +5647,8 @@ class AscendModuleViewer extends Component
     {
         $this->hydrateLiveData();
 
+        $search = trim($this->globalSearch);
+
         $dbTasks = ProjectTask::query()->latest()->get();
         if ($dbTasks->isNotEmpty()) {
             $this->tasks = $dbTasks->map(function ($t) {
@@ -5329,17 +5664,88 @@ class AscendModuleViewer extends Component
             })->toArray();
         }
 
+        $dbInvoices = Invoice::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('invoice_number', 'like', "%{$search}%")
+                        ->orWhere('client_name', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        $dbExpenses = Expense::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('reference', 'like', "%{$search}%")
+                        ->orWhere('vendor', 'like', "%{$search}%")
+                        ->orWhere('category', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('payment_method', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        $dbProducts = InventoryProduct::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('sku', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%")
+                        ->orWhere('category', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->get();
+
+        $dbLeads = CrmLead::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('company_name', 'like', "%{$search}%")
+                        ->orWhere('contact_person', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        $dbDeals = CrmDeal::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('deal_name', 'like', "%{$search}%")
+                        ->orWhere('stage', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        $dbPosReceipts = PosReceipt::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('receipt_number', 'like', "%{$search}%")
+                        ->orWhere('cashier_name', 'like', "%{$search}%")
+                        ->orWhere('payment_method', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
         return view('appascend::livewire.ascend-module-viewer', [
             'financeMetrics' => $this->getFinanceOverviewMetrics(),
             'dbBankAccounts' => BankAccount::query()->orderBy('name')->get(),
-            'dbInvoices' => Invoice::query()->latest()->get(),
-            'dbExpenses' => Expense::query()->latest()->get(),
-            'dbLeads' => CrmLead::query()->latest()->get(),
-            'dbDeals' => CrmDeal::query()->latest()->get(),
+            'dbInvoices' => $dbInvoices,
+            'dbExpenses' => $dbExpenses,
+            'dbLeads' => $dbLeads,
+            'dbDeals' => $dbDeals,
             'dbProjects' => Project::query()->latest()->get(),
             'dbProjectTasks' => $dbTasks,
-            'dbProducts' => InventoryProduct::query()->orderBy('name')->get(),
-            'dbPosReceipts' => PosReceipt::query()->latest()->get(),
+            'dbProducts' => $dbProducts,
+            'dbPosReceipts' => $dbPosReceipts,
             'dbRetailerOrders' => RetailerOrder::query()->latest()->get(),
             'dbSocialAdCampaigns' => \App\Models\SocialAdCampaign::query()->latest()->get(),
             'dbScheduledPosts' => \App\Models\ScheduledSocialPost::query()->latest()->get(),
