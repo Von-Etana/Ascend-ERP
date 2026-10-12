@@ -14,6 +14,12 @@ class Expense extends Model
         'expense_date',
         'description',
         'attachments',
+        'receipt_path',
+        'receipt_original_name',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'reference',
     ];
 
     protected function casts(): array

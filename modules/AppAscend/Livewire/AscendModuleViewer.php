@@ -469,7 +469,7 @@ class AscendModuleViewer extends Component
     public ?array $distributorCertData = null;
 
     // === FINANCE MODULE OVERVIEW & TIME PERIOD FILTERING ===
-    public string $financePeriodFilter = 'this_month';
+    public string $financePeriodFilter = 'all_time';
 
     // === MULTIPLE EXPENSE RECEIPTS / ATTACHMENTS ===
     public array $expenseReceiptUrls = [];
@@ -4899,11 +4899,14 @@ class AscendModuleViewer extends Component
         // 1. EXPENSES (Real inputed expenses)
         $expensesQuery = Expense::query();
         if ($dateRange) {
-            $expensesQuery->where(function ($q) use ($dateRange) {
-                $q->whereBetween('expense_date', [$dateRange[0]->toDateString(), $dateRange[1]->toDateString()])
-                  ->orWhere(function ($sub) use ($dateRange) {
+            $startDate = $dateRange[0]->copy()->startOfDay()->toDateTimeString();
+            $endDate = $dateRange[1]->copy()->endOfDay()->toDateTimeString();
+            $expensesQuery->where(function ($q) use ($startDate, $endDate, $dateRange) {
+                $q->whereBetween('expense_date', [$startDate, $endDate])
+                  ->orWhereBetween('expense_date', [$dateRange[0]->toDateString(), $dateRange[1]->toDateString()])
+                  ->orWhere(function ($sub) use ($startDate, $endDate) {
                       $sub->whereNull('expense_date')
-                          ->whereBetween('created_at', $dateRange);
+                          ->whereBetween('created_at', [$startDate, $endDate]);
                   });
             });
         }
@@ -4928,10 +4931,13 @@ class AscendModuleViewer extends Component
         // 2. REVENUE FROM INVOICES
         $invoicesQuery = Invoice::query();
         if ($dateRange) {
-            $invoicesQuery->where(function ($q) use ($dateRange) {
-                $q->whereBetween('issue_date', [$dateRange[0]->toDateString(), $dateRange[1]->toDateString()])
-                  ->orWhereBetween('updated_at', $dateRange)
-                  ->orWhereBetween('created_at', $dateRange);
+            $startDate = $dateRange[0]->copy()->startOfDay()->toDateTimeString();
+            $endDate = $dateRange[1]->copy()->endOfDay()->toDateTimeString();
+            $invoicesQuery->where(function ($q) use ($startDate, $endDate, $dateRange) {
+                $q->whereBetween('issue_date', [$startDate, $endDate])
+                  ->orWhereBetween('issue_date', [$dateRange[0]->toDateString(), $dateRange[1]->toDateString()])
+                  ->orWhereBetween('updated_at', [$startDate, $endDate])
+                  ->orWhereBetween('created_at', [$startDate, $endDate]);
             });
         }
         $periodInvoices = $invoicesQuery->latest()->get();
@@ -4956,7 +4962,9 @@ class AscendModuleViewer extends Component
         // 3. REVENUE FROM POS RECEIPTS
         $posQuery = PosReceipt::query();
         if ($dateRange) {
-            $posQuery->whereBetween('created_at', $dateRange);
+            $startDate = $dateRange[0]->copy()->startOfDay()->toDateTimeString();
+            $endDate = $dateRange[1]->copy()->endOfDay()->toDateTimeString();
+            $posQuery->whereBetween('created_at', [$startDate, $endDate]);
         }
         $periodPosReceipts = $posQuery->latest()->get();
         $posRevenue = (float) $periodPosReceipts->sum('total');
@@ -4967,7 +4975,9 @@ class AscendModuleViewer extends Component
             if (\Illuminate\Support\Facades\Schema::hasTable('retailer_orders')) {
                 $retailerQuery = RetailerOrder::query()->whereIn('payment_status', ['paid', 'confirmed']);
                 if ($dateRange) {
-                    $retailerQuery->whereBetween('created_at', $dateRange);
+                    $startDate = $dateRange[0]->copy()->startOfDay()->toDateTimeString();
+                    $endDate = $dateRange[1]->copy()->endOfDay()->toDateTimeString();
+                    $retailerQuery->whereBetween('created_at', [$startDate, $endDate]);
                 }
                 $retailerRevenue = (float) $retailerQuery->sum('total_amount');
             }
