@@ -58,14 +58,16 @@
             <!-- Header section -->
             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 border-b border-slate-100 pb-8">
                 <div>
-                    <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider {{ match(strtolower($status)) {
-                        'accepted' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                        'converted' => 'bg-purple-50 text-purple-700 border border-purple-200',
-                        'sent' => 'bg-blue-50 text-blue-700 border border-blue-200',
-                        default => 'bg-amber-50 text-amber-700 border border-amber-200',
-                    } }}">
-                        <i class="fa-solid fa-circle text-[8px]"></i>Status: {{ ucfirst($status) }}
-                    </span>
+                    @if (!empty($status) && strtolower($status) !== 'draft')
+                        <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider {{ match(strtolower($status)) {
+                            'accepted' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+                            'converted' => 'bg-purple-50 text-purple-700 border border-purple-200',
+                            'sent' => 'bg-blue-50 text-blue-700 border border-blue-200',
+                            default => 'bg-amber-50 text-amber-700 border border-amber-200',
+                        } }}">
+                            <i class="fa-solid fa-circle text-[8px]"></i>Status: {{ ucfirst($status) }}
+                        </span>
+                    @endif
                     <h2 class="text-2xl sm:text-3xl font-black text-slate-950 mt-3 tracking-tight">Official Quotation Proposal</h2>
                     <p class="text-sm font-mono font-bold text-blue-600 mt-1">#{{ $quoteId }}</p>
                 </div>
@@ -109,7 +111,7 @@
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
                             <tr>
-                                <th class="p-3.5">SKU / Code</th>
+                                <th class="p-3.5">Serial Number</th>
                                 <th class="p-3.5">Description</th>
                                 <th class="p-3.5 text-center">Qty</th>
                                 <th class="p-3.5 text-right">Unit Price (₦)</th>
@@ -124,10 +126,14 @@
                                         $price = (float) ($item['unit_price'] ?? 0);
                                         $amt = (float) ($item['amount'] ?? ($qty * $price));
                                         $desc = !empty($item['description']) ? $item['description'] : (!empty($item['name']) ? $item['name'] : 'Line Item');
-                                        $sku = !empty($item['sku']) ? $item['sku'] : 'GEN-ITEM';
+                                        $serialNumber = !empty($item['serial_number']) 
+                                            ? $item['serial_number'] 
+                                            : (!empty($item['serial_no']) 
+                                                ? $item['serial_no'] 
+                                                : (!empty($item['sku']) ? $item['sku'] : 'SN-'.strtoupper(substr(md5($desc), 0, 8))));
                                     @endphp
                                     <tr class="hover:bg-slate-50 transition">
-                                        <td class="p-3.5 font-mono font-bold text-slate-600">{{ $sku }}</td>
+                                        <td class="p-3.5 font-mono font-bold text-slate-600">{{ $serialNumber }}</td>
                                         <td class="p-3.5 font-semibold text-slate-900">{{ $desc }}</td>
                                         <td class="p-3.5 text-center font-bold">{{ $qty }}</td>
                                         <td class="p-3.5 text-right font-medium">₦{{ number_format($price, 2) }}</td>
@@ -136,7 +142,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td class="p-3.5 font-mono text-slate-500">SRV-SOLAR</td>
+                                    <td class="p-3.5 font-mono text-slate-500 font-bold">SN-SLR-55KVA-01</td>
                                     <td class="p-3.5 font-semibold">Solar Power Solution & Turnkey Installation Bundle</td>
                                     <td class="p-3.5 text-center font-bold">1</td>
                                     <td class="p-3.5 text-right">₦{{ number_format($total, 2) }}</td>

@@ -153,6 +153,24 @@ class AscendWorkspaceSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'Logistics Officer',
+                'slug' => 'logistics',
+                'description' => 'Oversees product dispatch, delivery waybills, gate pass clearance, consignment tracking, and warehouse shipping.',
+                'permissions' => json_encode([
+                    'portal.inventory.*',
+                    'portal.waybills.*',
+                    'portal.pos.*',
+                    'logistics.view',
+                    'logistics.dispatch',
+                    'waybill.generate',
+                    'waybill.verify',
+                    'inventory.view',
+                    'inventory.ship',
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
         // 8. Default Super Admin User

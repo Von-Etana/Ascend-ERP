@@ -2,32 +2,196 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Quote {{ $quote['id'] ?? ($quote['invoice_number'] ?? 'Draft') }} — Ascend Systems</title>
+    <title>Quote {{ $quote['id'] ?? ($quote['invoice_number'] ?? 'Official') }} — Ascend Systems</title>
     <style>
-        * { font-family: 'DejaVu Sans', sans-serif !important; }
-        body { font-family: 'DejaVu Sans', sans-serif !important; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 25px; }
-        .header { border-bottom: 2px solid #2563eb; padding-bottom: 18px; margin-bottom: 20px; }
-        .company-logo-img { max-height: 48px; width: auto; max-width: 220px; display: block; margin-bottom: 8px; }
-        .company-logo-text { font-size: 20px; font-weight: 900; color: #2563eb; letter-spacing: -0.5px; text-transform: uppercase; margin-bottom: 4px; }
-        .contact-info { font-size: 11px; color: #475569; margin-top: 4px; font-weight: 500; }
-        .quote-title { font-size: 28px; font-weight: 900; text-align: right; color: #0f172a; letter-spacing: 1px; }
-        .quote-num { font-size: 13px; font-weight: bold; text-align: right; color: #2563eb; margin-top: 2px; }
-        .details-box { width: 100%; margin-top: 15px; margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background-color: #f8fafc; }
-        .details-table { width: 100%; }
-        .details-table td { vertical-align: top; }
-        .section-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .customer-name { font-size: 15px; font-weight: 800; color: #0f172a; }
-        .customer-detail { font-size: 11px; color: #475569; margin-top: 2px; }
-        .items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .items-table th { background-color: #0f172a; color: #ffffff; padding: 9px 10px; text-align: left; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
-        .items-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
-        .items-table tr:nth-child(even) td { background-color: #f8fafc; }
-        .totals-table { width: 48%; float: right; margin-top: 15px; border-collapse: collapse; }
-        .totals-table td { padding: 5px 10px; font-size: 11px; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .badge-pending { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .terms-box { width: 48%; float: left; margin-top: 15px; padding: 12px; border: 1px dashed #cbd5e1; border-radius: 6px; background-color: #fafafa; font-size: 10px; }
-        .footer { margin-top: 90px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 10px; text-align: center; color: #64748b; line-height: 1.6; }
+        @page {
+            margin: 10mm 12mm 18mm 12mm;
+            size: a4 portrait;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'DejaVu Sans', sans-serif !important;
+        }
+        body {
+            font-family: 'DejaVu Sans', sans-serif !important;
+            color: #1e293b;
+            font-size: 11px;
+            line-height: 1.35;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .company-logo-img {
+            max-height: 40px;
+            width: auto;
+            max-width: 190px;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .company-logo-text {
+            font-size: 18px;
+            font-weight: 900;
+            color: #2563eb;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .contact-info {
+            font-size: 10px;
+            color: #475569;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        .quote-title {
+            font-size: 24px;
+            font-weight: 900;
+            text-align: right;
+            color: #0f172a;
+            letter-spacing: 1px;
+        }
+        .quote-num {
+            font-size: 12px;
+            font-weight: bold;
+            text-align: right;
+            color: #2563eb;
+            margin-top: 2px;
+        }
+        .details-box {
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 7px 10px;
+            background-color: #f8fafc;
+        }
+        .details-table {
+            width: 100%;
+        }
+        .details-table td {
+            vertical-align: top;
+        }
+        .section-label {
+            font-size: 9px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .customer-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .customer-detail {
+            font-size: 10px;
+            color: #475569;
+            margin-top: 1px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+        }
+        .items-table th {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .items-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 10px;
+        }
+        .items-table tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .badge-pending {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        /* Structured Bottom Layout */
+        .bottom-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        .bottom-table td {
+            vertical-align: top;
+        }
+        .terms-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: #f8fafc;
+            padding: 7px 9px;
+            margin-right: 12px;
+        }
+        .terms-title {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
+        }
+        .terms-content {
+            font-size: 8.5px;
+            line-height: 1.35;
+            color: #334155;
+            white-space: pre-wrap;
+        }
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .totals-table td {
+            padding: 4px 6px;
+            font-size: 10px;
+        }
+        .grand-total-row td {
+            font-size: 12.5px;
+            font-weight: bold;
+            color: #1d4ed8;
+            background-color: #eff6ff;
+            border-top: 2px solid #2563eb;
+            padding: 5px 6px;
+        }
+
+        /* Fixed Footnote sticking cleanly to Page 1 */
+        .footer {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            height: 34px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 4px;
+            font-size: 8.5px;
+            text-align: center;
+            color: #64748b;
+            line-height: 1.3;
+        }
     </style>
 </head>
 <body>
@@ -46,6 +210,8 @@
         $discountAmount = (float) ($quote['discount_amount'] ?? 0);
         $tax = (float) ($quote['tax'] ?? 0);
         $total = (float) ($quote['total'] ?? 0);
+        $quoteId = $quote['id'] ?? ($quote['invoice_number'] ?? 'QT-2026');
+        $status = strtolower($quote['status'] ?? '');
     @endphp
 
     <div class="header">
@@ -57,17 +223,19 @@
                     @else
                         <div class="company-logo-text">{{ $companyName }}</div>
                     @endif
-                    <div style="font-size: 13px; font-weight: bold; color: #0f172a;">{{ $companyName }}</div>
+                    <div style="font-size: 12px; font-weight: bold; color: #0f172a;">{{ $companyName }}</div>
                     <div class="contact-info"><strong>Call:</strong> {{ $companyPhone }} &nbsp;|&nbsp; <strong>Email:</strong> {{ $companyEmail }}</div>
                 </td>
                 <td style="width: 45%; text-align: right; vertical-align: top;">
                     <div class="quote-title">QUOTE</div>
-                    <div class="quote-num">#{{ $quote['id'] ?? ($quote['invoice_number'] ?? 'Draft') }}</div>
-                    <div style="margin-top: 6px;">
-                        <span class="badge badge-pending">
-                            STATUS: {{ strtoupper($quote['status'] ?? 'Draft') }}
-                        </span>
-                    </div>
+                    <div class="quote-num">#{{ $quoteId }}</div>
+                    @if (!empty($status) && $status !== 'draft')
+                        <div style="margin-top: 3px;">
+                            <span class="badge badge-pending">
+                                STATUS: {{ strtoupper($quote['status']) }}
+                            </span>
+                        </div>
+                    @endif
                 </td>
             </tr>
         </table>
@@ -103,11 +271,11 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 15%;">SKU / CODE</th>
-                <th style="width: 45%;">ITEM DESCRIPTION</th>
-                <th style="text-align: center; width: 10%;">QTY</th>
+                <th style="width: 22%;">SERIAL NUMBER</th>
+                <th style="width: 40%;">ITEM DESCRIPTION</th>
+                <th style="text-align: center; width: 8%;">QTY</th>
                 <th style="text-align: right; width: 15%;">UNIT PRICE (&#8358;)</th>
-                <th style="text-align: right; width: 18%;">AMOUNT (&#8358;)</th>
+                <th style="text-align: right; width: 15%;">AMOUNT (&#8358;)</th>
             </tr>
         </thead>
         <tbody>
@@ -118,10 +286,14 @@
                         $price = (float) ($item['unit_price'] ?? 0);
                         $amt = (float) ($item['amount'] ?? ($qty * $price));
                         $desc = !empty($item['description']) ? $item['description'] : (!empty($item['name']) ? $item['name'] : 'Line Item');
-                        $sku = !empty($item['sku']) ? $item['sku'] : 'GEN-ITEM';
+                        $serialNumber = !empty($item['serial_number']) 
+                            ? $item['serial_number'] 
+                            : (!empty($item['serial_no']) 
+                                ? $item['serial_no'] 
+                                : (!empty($item['sku']) ? $item['sku'] : 'SN-'.strtoupper(substr(md5($desc), 0, 8))));
                     @endphp
                     <tr>
-                        <td style="font-family: 'DejaVu Sans', monospace; font-size: 10px; font-weight: bold; color: #475569;">{{ $sku }}</td>
+                        <td style="font-family: 'DejaVu Sans', monospace; font-size: 9px; font-weight: bold; color: #475569;">{{ $serialNumber }}</td>
                         <td>
                             <div style="font-weight: bold; color: #0f172a;">{{ $desc }}</div>
                         </td>
@@ -132,7 +304,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td style="font-family: 'DejaVu Sans', monospace; font-size: 10px;">SRV-SOLAR</td>
+                    <td style="font-family: 'DejaVu Sans', monospace; font-size: 9px; font-weight: bold; color: #475569;">SN-SLR-55KVA-01</td>
                     <td>
                         <div style="font-weight: bold; color: #0f172a;">Solar Power Solution & Systems Package</div>
                     </td>
@@ -144,41 +316,44 @@
         </tbody>
     </table>
 
-    <!-- Commercial Terms & Summary Box -->
-    <div style="margin-top: 15px;">
-        <div class="terms-box">
-            <div style="font-weight: bold; color: #0f172a; text-transform: uppercase; margin-bottom: 4px;">Terms & Notes:</div>
-            <div style="white-space: pre-wrap; line-height: 1.4;">{{ $quote['notes'] ?? "• Quote valid for 14 calendar days from date of issue.\n• Turnkey delivery, setup, and commissioning included." }}</div>
-        </div>
+    <!-- Commercial Terms & Summary Box (Structured 2-Column Table) -->
+    <table class="bottom-table">
+        <tr>
+            <td style="width: 55%;">
+                <div class="terms-card">
+                    <div class="terms-title">TERMS & COMMERCIAL CONDITIONS</div>
+                    <div class="terms-content">{{ $quote['notes'] ?? "• Quote validity: 14 calendar days from date of issue.\n• Turnkey delivery, setup, and commissioning included.\n• Payment Terms: Bank Transfer to Ascend Systems Official Accounts.\n• Standard manufacturer warranty applies to all specified hardware." }}</div>
+                </div>
+            </td>
+            <td style="width: 45%;">
+                <table class="totals-table">
+                    <tr>
+                        <td style="color: #64748b;">Gross Line Subtotal:</td>
+                        <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($subtotal, 2) }}</td>
+                    </tr>
+                    @if ($discountAmount > 0)
+                        <tr style="color: #2563eb;">
+                            <td>Discount Applied:</td>
+                            <td style="text-align: right; font-weight: 600;">- &#8358;{{ number_format($discountAmount, 2) }}</td>
+                        </tr>
+                    @endif
+                    <tr>
+                        <td style="color: #64748b;">VAT (7.5%):</td>
+                        <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($tax, 2) }}</td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td>Total Amount Due:</td>
+                        <td style="text-align: right;">&#8358;{{ number_format($total, 2) }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
-        <table class="totals-table">
-            <tr>
-                <td style="color: #64748b;">Gross Line Subtotal:</td>
-                <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($subtotal, 2) }}</td>
-            </tr>
-            @if ($discountAmount > 0)
-                <tr style="color: #2563eb;">
-                    <td>Discount:</td>
-                    <td style="text-align: right; font-weight: 600;">- &#8358;{{ number_format($discountAmount, 2) }}</td>
-                </tr>
-            @endif
-            <tr>
-                <td style="color: #64748b;">VAT (7.5%):</td>
-                <td style="text-align: right; font-weight: 600;">&#8358;{{ number_format($tax, 2) }}</td>
-            </tr>
-            <tr style="font-size: 14px; font-weight: bold; border-top: 2px solid #2563eb;">
-                <td style="color: #2563eb; padding-top: 6px;">Total Amount Due:</td>
-                <td style="text-align: right; color: #2563eb; padding-top: 6px;">&#8358;{{ number_format($total, 2) }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div style="clear: both;"></div>
-
+    <!-- Footnote: Fixed to stick to first page bottom -->
     <div class="footer">
-        <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Quote<br>
-        Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.<br>
-        Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
+        <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Commercial Quotation<br>
+        Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. &nbsp;|&nbsp; Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
     </div>
 </body>
 </html>

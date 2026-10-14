@@ -7413,7 +7413,7 @@
                                     <div class="border-t pt-3 dark:border-slate-800">
                                         <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Module Permissions (Click to Toggle)</p>
                                         <div class="flex flex-wrap gap-1.5">
-                                            @foreach (['finance.view', 'finance.create', 'crm.view', 'crm.edit', 'inventory.view', 'pos.view', 'marketing.view', 'automation.view', 'users.view', 'users.edit'] as $permKey)
+                                            @foreach (['finance.view', 'finance.create', 'crm.view', 'crm.edit', 'inventory.view', 'logistics.view', 'logistics.dispatch', 'waybill.generate', 'pos.view', 'marketing.view', 'automation.view', 'users.view', 'users.edit'] as $permKey)
                                                 @php $hasPerm = collect($r->permissions ?? [])->contains($permKey); @endphp
                                                 <button type="button" wire:click="togglePermissionInRole({{ $r->id }}, '{{ $permKey }}')" class="rounded-lg px-2 py-1 text-[10px] font-bold transition {{ $hasPerm ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-100 text-slate-400 dark:bg-slate-800' }}">
                                                     {{ $hasPerm ? '✓' : '+' }} {{ $permKey }}
@@ -10430,16 +10430,22 @@
                                 <table class="w-full text-left text-xs">
                                     <thead class="bg-slate-50 uppercase text-slate-400 dark:bg-slate-800">
                                         <tr>
-                                            <th class="p-2.5">Item Description</th>
-                                            <th class="p-2.5 text-center">Qty</th>
-                                            <th class="p-2.5 text-right">Unit Rate (NGN)</th>
-                                            <th class="p-2.5 text-right">Line Total (NGN)</th>
+                                            <th class="p-2.5">{{ __('Serial Number') }}</th>
+                                            <th class="p-2.5">{{ __('Item Description') }}</th>
+                                            <th class="p-2.5 text-center">{{ __('Qty') }}</th>
+                                            <th class="p-2.5 text-right">{{ __('Unit Rate (NGN)') }}</th>
+                                            <th class="p-2.5 text-right">{{ __('Line Total (NGN)') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                         @foreach ($inspectQuoteData['items'] as $item)
+                                            @php
+                                                $desc = $item['description'] ?? 'Product Line';
+                                                $sn = !empty($item['serial_number']) ? $item['serial_number'] : (!empty($item['serial_no']) ? $item['serial_no'] : (!empty($item['sku']) ? $item['sku'] : 'SN-'.strtoupper(substr(md5($desc), 0, 8))));
+                                            @endphp
                                             <tr>
-                                                <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $item['description'] ?? 'Product Line' }}</td>
+                                                <td class="p-2.5 font-mono text-slate-500 font-bold">{{ $sn }}</td>
+                                                <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $desc }}</td>
                                                 <td class="p-2.5 text-center font-bold">{{ $item['qty'] ?? 1 }}</td>
                                                 <td class="p-2.5 text-right font-mono">₦{{ number_format((float) ($item['rate'] ?? 0), 2) }}</td>
                                                 <td class="p-2.5 text-right font-mono font-bold text-slate-900 dark:text-white">₦{{ number_format((float) ($item['amount'] ?? 0), 2) }}</td>

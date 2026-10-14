@@ -132,9 +132,11 @@ class PdfExportController
 
         $pdf = Pdf::loadView('pdf.quote', array_merge([
             'quote' => $quote,
-        ], $this->getCompanyInfo()));
+        ], $this->getCompanyInfo()))->setPaper('a4', 'portrait');
 
-        return $pdf->download('Quote-'.($quote['id'] ?? 'Draft').'.pdf');
+        $filename = 'Quote-'.($quote['id'] ?? ($quote['invoice_number'] ?? date('Ymd'))).'.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function downloadWarrantyCertificate(): Response
