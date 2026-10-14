@@ -877,34 +877,85 @@
                         <div class="flex items-center justify-between border-b p-5 dark:border-slate-800">
                             <div>
                                 <h2 class="text-base font-bold text-slate-950 dark:text-white">{{ __('Expense & Receipt Log') }}</h2>
-                                <p class="text-xs text-slate-500">{{ __('All vendor expenses with approval status and receipt attachments') }}</p>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 dark:border-slate-800">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Office Expense Requisitions & Approvals') }}</h3>
+                                    <span class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-500/20">{{ __('Dual Authorization') }}</span>
+                                </div>
+                                <p class="text-xs text-slate-500">{{ __('Operations staff requisition pipeline with Manager review and Admin financial authorization') }}</p>
                             </div>
-                            <span class="rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600">{{ count($expenseRecords) }} Records</span>
+                            <div class="flex items-center gap-2">
+                                <span class="rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600">{{ count($expenseRecords) }} Records</span>
+                            </div>
                         </div>
-                        @if (empty($expenseRecords))
+
+                        <!-- Status Filter Pills -->
+                        <div class="flex flex-wrap items-center gap-2 border-b pb-3 dark:border-slate-800">
+                            <span class="text-[10px] font-bold uppercase text-slate-400 mr-1">{{ __('Filter by Status:') }}</span>
+                            @foreach (['all' => 'All Requisitions', 'pending' => 'Pending Review', 'manager_approved' => 'Manager Approved', 'approved' => 'Fully Authorized', 'rejected' => 'Rejected'] as $fKey => $fLabel)
+                                <button type="button" wire:click="$set('expenseFilterStatus', '{{ $fKey }}')" class="rounded-lg px-2.5 py-1 text-[11px] font-bold transition {{ ($expenseFilterStatus ?? 'all') === $fKey ? 'bg-orange-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300' }}">
+                                    {{ $fLabel }}
+                                    @php
+                                        $fCount = match ($fKey) {
+                                            'pending' => collect($expenseRecords)->where('approval_status', 'pending')->count(),
+                                            'manager_approved' => collect($expenseRecords)->where('approval_status', 'manager_approved')->count(),
+                                            'approved' => collect($expenseRecords)->where('approval_status', 'approved')->count(),
+                                            'rejected' => collect($expenseRecords)->where('approval_status', 'rejected')->count(),
+                                            default => count($expenseRecords),
+                                        };
+                                    @endphp
+                                    <span class="ml-1 opacity-75 font-mono text-[10px]">({{ $fCount }})</span>
+                                </button>
+                            @endforeach
+                        </div>
+
+                        @php
+                            $filteredExpenses = collect($expenseRecords)->filter(function ($e) use ($expenseFilterStatus) {
+                                if (($expenseFilterStatus ?? 'all') === 'all') return true;
+                                return ($e['approval_status'] ?? 'pending') === $expenseFilterStatus;
+                            })->values();
+                        @endphp
+
+                        @if ($filteredExpenses->isEmpty())
                             <div class="flex flex-col items-center py-12 text-center">
                                 <i class="fa-light fa-receipt text-4xl text-slate-300 dark:text-slate-600"></i>
-                                <p class="mt-3 text-sm font-semibold text-slate-500">{{ __('No expenses logged yet') }}</p>
+                                <p class="mt-3 text-sm font-semibold text-slate-500">{{ __('No expense requisitions match this status') }}</p>
                             </div>
                         @else
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-xs">
                                     <thead class="border-b bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
                                         <tr>
-                                            <th class="px-5 py-3 font-bold text-slate-500">{{ __('Vendor / Category') }}</th>
+                                            <th class="px-5 py-3 font-bold text-slate-500">{{ __('Vendor / Purpose') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Raised By / Dept') }}</th>
                                             <th class="px-4 py-3 font-bold text-slate-500">{{ __('Amount') }}</th>
                                             <th class="px-4 py-3 font-bold text-slate-500">{{ __('Date') }}</th>
-                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Receipt') }}</th>
-                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Status') }}</th>
-                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Actions') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Receipts') }}</th>
+                                            <th class="px-4 py-3 font-bold text-slate-500">{{ __('Approval Workflow') }}</th>
+                                            <th class="px-4 py-3 font-bold text-right text-slate-500">{{ __('Actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                        @foreach ($expenseRecords as $exp)
+                                        @foreach ($filteredExpenses as $exp)
                                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                                                 <td class="px-5 py-3">
-                                                    <p class="font-bold text-slate-900 dark:text-white">{{ $exp['vendor'] }}</p>
-                                                    <p class="text-slate-400">{{ $exp['category'] }}</p>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <p class="font-bold text-slate-900 dark:text-white">{{ $exp['vendor'] }}</p>
+                                                        @if (!empty($exp['reference']))
+                                                            <span class="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] font-mono text-slate-500">{{ $exp['reference'] }}</span>
+                                                        @endif
+                                                    </div>
+                                                    <p class="text-[11px] text-slate-400">{{ $exp['category'] }}</p>
+                                                    @if (!empty($exp['description']))
+                                                        <p class="text-[10px] text-slate-500 italic truncate max-w-[180px]">{{ $exp['description'] }}</p>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3">
+                                                    <p class="font-bold text-slate-800 dark:text-slate-200">{{ $exp['requester_name'] ?? 'Operations Staff' }}</p>
+                                                    <span class="inline-block rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[9px] font-semibold text-slate-500">
+                                                        {{ $exp['department'] ?? 'Operations' }}
+                                                    </span>
                                                 </td>
                                                 <td class="px-4 py-3 font-black text-slate-900 dark:text-white">₦{{ number_format($exp['amount'], 2) }}</td>
                                                 <td class="px-4 py-3 text-slate-500">{{ $exp['expense_date'] }}</td>
@@ -925,21 +976,77 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-4 py-3">
-                                                    <span class="rounded-full px-2.5 py-1 text-[10px] font-bold
-                                                        {{ ($exp['approval_status'] ?? 'pending') === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : (($exp['approval_status'] ?? 'pending') === 'rejected' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600') }}">
-                                                        {{ ucfirst($exp['approval_status'] ?? 'pending') }}
-                                                    </span>
-                                                </td>
-                                                <td class="px-4 py-3">
-                                                    <div class="flex items-center gap-1.5">
-                                                        <button type="button" wire:click="editExpense({{ $exp['id'] }})" class="rounded-lg bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-600 hover:bg-sky-500/20 transition" title="{{ __('Edit Expense') }}">
-                                                            <i class="fa-light fa-pen-to-square mr-0.5"></i>{{ __('Edit') }}
-                                                        </button>
-                                                        @if (($exp['approval_status'] ?? 'pending') === 'pending')
-                                                            <button type="button" wire:click="approveExpense({{ $exp['id'] }})" class="rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="{{ __('Approve') }}">✓</button>
-                                                            <button type="button" wire:click="rejectExpense({{ $exp['id'] }})" class="rounded-lg bg-rose-500/10 px-2 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-500/20 transition" title="{{ __('Reject') }}">✗</button>
+                                                    <div class="space-y-1">
+                                                        <!-- Manager Step -->
+                                                        <div class="flex items-center gap-1.5 text-[10px]">
+                                                            <span class="w-14 font-semibold text-slate-400">Manager:</span>
+                                                            @if (($exp['manager_approval_status'] ?? 'pending') === 'approved')
+                                                                <span class="inline-flex items-center gap-0.5 text-emerald-600 font-bold">
+                                                                    <i class="fa-light fa-circle-check"></i> Approved
+                                                                </span>
+                                                            @elseif (($exp['manager_approval_status'] ?? 'pending') === 'rejected')
+                                                                <span class="inline-flex items-center gap-0.5 text-rose-600 font-bold">
+                                                                    <i class="fa-light fa-circle-xmark"></i> Rejected
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center gap-0.5 text-amber-500 font-bold">
+                                                                    <i class="fa-light fa-clock"></i> Pending
+                                                                </span>
+                                                            @endif
+                                                        </div>
+
+                                                        <!-- Admin Step -->
+                                                        <div class="flex items-center gap-1.5 text-[10px]">
+                                                            <span class="w-14 font-semibold text-slate-400">Admin:</span>
+                                                            @if (($exp['admin_approval_status'] ?? 'pending') === 'approved' || ($exp['approval_status'] ?? '') === 'approved')
+                                                                <span class="inline-flex items-center gap-0.5 text-emerald-600 font-bold">
+                                                                    <i class="fa-light fa-badge-check"></i> Authorized
+                                                                </span>
+                                                            @elseif (($exp['admin_approval_status'] ?? 'pending') === 'rejected' || ($exp['approval_status'] ?? '') === 'rejected')
+                                                                <span class="inline-flex items-center gap-0.5 text-rose-600 font-bold">
+                                                                    <i class="fa-light fa-circle-xmark"></i> Declined
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center gap-0.5 text-slate-400 font-medium">
+                                                                    <i class="fa-light fa-clock"></i> Awaiting
+                                                                </span>
+                                                            @endif
+                                                        </div>
+
+                                                        @if (!empty($exp['rejection_reason']))
+                                                            <p class="text-[9px] text-rose-500 italic mt-0.5 truncate max-w-[150px]" title="{{ $exp['rejection_reason'] }}">
+                                                                Reason: {{ $exp['rejection_reason'] }}
+                                                            </p>
                                                         @endif
-                                                        <button type="button" wire:click="deleteExpense({{ $exp['id'] }})" wire:confirm="{{ __('Are you sure you want to delete this expense record?') }}" class="rounded-lg p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition" title="{{ __('Delete Expense') }}">
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-3 text-right">
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <!-- Manager Approval Button -->
+                                                        @if (($exp['manager_approval_status'] ?? 'pending') === 'pending' && ($exp['approval_status'] ?? '') !== 'rejected')
+                                                            <button type="button" wire:click="approveExpenseAsManager({{ $exp['id'] }})" class="rounded-lg bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-500/20 transition" title="{{ __('Approve as Manager') }}">
+                                                                <i class="fa-light fa-user-check mr-0.5"></i>Mgr Approve
+                                                            </button>
+                                                        @endif
+
+                                                        <!-- Admin Final Approval Button -->
+                                                        @if (($exp['approval_status'] ?? 'pending') !== 'approved' && ($exp['approval_status'] ?? '') !== 'rejected')
+                                                            <button type="button" wire:click="approveExpenseAsAdmin({{ $exp['id'] }})" class="rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-600 hover:bg-emerald-500/20 transition" title="{{ __('Authorize as Admin') }}">
+                                                                <i class="fa-light fa-check mr-0.5"></i>Admin Authorize
+                                                            </button>
+                                                        @endif
+
+                                                        <!-- Reject Action -->
+                                                        @if (($exp['approval_status'] ?? 'pending') !== 'rejected' && ($exp['approval_status'] ?? 'pending') !== 'approved')
+                                                            <button type="button" wire:click="rejectExpense({{ $exp['id'] }})" class="rounded-lg bg-rose-500/10 px-2 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-500/20 transition" title="{{ __('Reject Requisition') }}">
+                                                                ✗ Reject
+                                                            </button>
+                                                        @endif
+
+                                                        <button type="button" wire:click="editExpense({{ $exp['id'] }})" class="rounded-lg bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition" title="{{ __('Edit Requisition') }}">
+                                                            <i class="fa-light fa-pen-to-square"></i>
+                                                        </button>
+                                                        <button type="button" wire:click="deleteExpense({{ $exp['id'] }})" wire:confirm="{{ __('Are you sure you want to delete this expense requisition?') }}" class="rounded-lg p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition" title="{{ __('Delete') }}">
                                                             <i class="fa-light fa-trash-can text-xs"></i>
                                                         </button>
                                                     </div>
@@ -958,22 +1065,45 @@
                             @if ($editingExpenseId)
                                 <div>
                                     <h3 class="text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                                        <i class="fa-light fa-pen-to-square"></i>{{ __('Edit Expense #' . $editingExpenseId) }}
+                                        <i class="fa-light fa-pen-to-square"></i>{{ __('Edit Expense Requisition #' . $editingExpenseId) }}
                                     </h3>
-                                    <p class="text-[11px] text-slate-400">{{ __('Modify details and update attachments below') }}</p>
+                                    <p class="text-[11px] text-slate-400">{{ __('Modify requisition details and update receipts below') }}</p>
                                 </div>
                                 <button type="button" wire:click="cancelEditExpense" class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300">
                                     {{ __('Cancel') }}
                                 </button>
                             @else
                                 <div>
-                                    <h3 class="text-sm font-bold text-slate-950 dark:text-white">{{ __('Log New Expense') }}</h3>
-                                    <p class="text-[11px] text-slate-400">{{ __('Record company outflow with multiple receipts') }}</p>
+                                    <h3 class="text-sm font-bold text-slate-950 dark:text-white flex items-center gap-1.5">
+                                        <i class="fa-light fa-hand-holding-dollar text-orange-600"></i>{{ __('Raise Office Expense Requisition') }}
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400">{{ __('Staff & Operations expense request for Manager & Admin approval') }}</p>
                                 </div>
                             @endif
                         </div>
+
+                        <!-- Staff & Department Information -->
+                        <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-orange-50/40 dark:bg-slate-800/40 border border-orange-500/20">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">
+                                    <i class="fa-light fa-user text-orange-600 mr-1"></i>{{ __('Raised By (Staff Name)') }}
+                                </label>
+                                <input wire:model="expenseForm.requester_name" type="text" placeholder="e.g. Babatunde Adeleke" class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">
+                                    <i class="fa-light fa-building text-orange-600 mr-1"></i>{{ __('Department / Unit') }}
+                                </label>
+                                <select wire:model="expenseForm.department" class="w-full rounded-xl border border-slate-200 p-2 text-xs font-semibold outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                                    @foreach (['Operations', 'Sales & Marketing', 'Engineering & Solar EPC', 'Field Logistics', 'Finance & Accounting', 'Customer Support', 'Management'] as $dept)
+                                        <option value="{{ $dept }}">{{ $dept }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Category') }}</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Category / Classification') }}</label>
                             <select wire:model="expenseForm.category" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                                 @foreach (['Office Supplies', 'Cloud & SaaS', 'Travel & Transport', 'Utilities', 'Marketing & Ads', 'Salaries', 'Equipment', 'Maintenance', 'Legal & Compliance', 'Miscellaneous'] as $cat)
                                     <option value="{{ $cat }}">{{ $cat }}</option>
@@ -981,8 +1111,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Vendor / Payee') }}</label>
-                            <input wire:model="expenseForm.vendor" type="text" placeholder="e.g. AWS Nigeria" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">{{ __('Vendor / Payee / Beneficiary') }}</label>
+                            <input wire:model="expenseForm.vendor" type="text" placeholder="e.g. TotalEnergies Fuel Station / Konga Stationery" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm outline-none focus:border-orange-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
@@ -1076,7 +1206,7 @@
                             </div>
                         @else
                             <button type="button" wire:click="saveExpense" class="w-full rounded-xl bg-orange-600 py-3 text-sm font-bold text-white hover:bg-orange-700 transition shadow-md">
-                                <i class="fa-light fa-plus mr-1.5"></i> {{ __('Log Expense') }}
+                                <i class="fa-light fa-paper-plane mr-1.5"></i> {{ __('Submit Requisition') }}
                             </button>
                         @endif
                     </section>
@@ -9787,7 +9917,7 @@
                     </div>
 
                     <!-- Key Details Grid -->
-                    <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div class="grid grid-cols-2 sm:grid-cols-{{ ($inspectRecord['type'] ?? '') === 'expense' ? '3' : '2' }} gap-3 text-xs">
                         <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
                             <p class="text-[10px] font-bold uppercase text-slate-400">{{ ($inspectRecord['type'] ?? '') === 'expense' ? __('Vendor / Payee') : __('Client / Payee') }}</p>
                             <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['vendor'] ?? '—' }}</p>
@@ -9796,6 +9926,20 @@
                             <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Category / Classification') }}</p>
                             <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['category'] ?? '—' }}</p>
                         </div>
+                        @if (($inspectRecord['type'] ?? '') === 'expense')
+                            <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
+                                <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Raised By / Requester') }}</p>
+                                <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
+                                    <i class="fa-light fa-user-circle text-orange-500"></i>{{ $inspectRecord['requester_name'] ?? 'Operations Staff' }}
+                                </p>
+                            </div>
+                            <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
+                                <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Department') }}</p>
+                                <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
+                                    <i class="fa-light fa-building text-slate-400"></i>{{ $inspectRecord['department'] ?? 'Operations' }}
+                                </p>
+                            </div>
+                        @endif
                         <div class="rounded-xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-800/20">
                             <p class="text-[10px] font-bold uppercase text-slate-400">{{ __('Recorded Date') }}</p>
                             <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['date'] ?? '—' }}</p>
@@ -9805,6 +9949,64 @@
                             <p class="mt-1 font-bold text-slate-900 dark:text-white text-sm">{{ $inspectRecord['payment_method'] ?? ($inspectRecord['due_date'] ?? 'Bank Transfer') }}</p>
                         </div>
                     </div>
+
+                    @if (($inspectRecord['type'] ?? '') === 'expense')
+                        <!-- 2-Tier Approval Status Breakdown -->
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">{{ __('Two-Tier Authorization Workflow') }}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Manager Approval Card -->
+                                <div class="rounded-xl border {{ ($inspectRecord['manager_approval_status'] ?? '') === 'approved' ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20' : (($inspectRecord['manager_approval_status'] ?? '') === 'rejected' ? 'border-rose-200 bg-rose-50/50 dark:border-rose-900 dark:bg-rose-950/20' : 'border-amber-200 bg-amber-50/40 dark:border-amber-900 dark:bg-amber-950/20') }} p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+                                            <i class="fa-light fa-user-tie text-blue-500"></i>{{ __('1. Operations / Unit Manager') }}
+                                        </div>
+                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase {{ ($inspectRecord['manager_approval_status'] ?? '') === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : (($inspectRecord['manager_approval_status'] ?? '') === 'rejected' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600') }}">
+                                            {{ ucfirst($inspectRecord['manager_approval_status'] ?? 'pending') }}
+                                        </span>
+                                    </div>
+                                    @if (!empty($inspectRecord['manager_approved_by']))
+                                        <p class="text-[11px] text-slate-500 mt-2">
+                                            <span class="font-semibold">{{ $inspectRecord['manager_approved_by'] }}</span>
+                                            @if (!empty($inspectRecord['manager_approved_at'])) · {{ $inspectRecord['manager_approved_at'] }} @endif
+                                        </p>
+                                    @else
+                                        <p class="text-[11px] text-slate-400 mt-2">{{ __('Awaiting operational sign-off.') }}</p>
+                                    @endif
+                                </div>
+
+                                <!-- Admin Approval Card -->
+                                <div class="rounded-xl border {{ ($inspectRecord['admin_approval_status'] ?? '') === 'approved' ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20' : (($inspectRecord['admin_approval_status'] ?? '') === 'rejected' ? 'border-rose-200 bg-rose-50/50 dark:border-rose-900 dark:bg-rose-950/20' : 'border-amber-200 bg-amber-50/40 dark:border-amber-900 dark:bg-amber-950/20') }} p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+                                            <i class="fa-light fa-shield-check text-emerald-500"></i>{{ __('2. Finance / Super Admin') }}
+                                        </div>
+                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase {{ ($inspectRecord['admin_approval_status'] ?? '') === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : (($inspectRecord['admin_approval_status'] ?? '') === 'rejected' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600') }}">
+                                            {{ ucfirst($inspectRecord['admin_approval_status'] ?? 'pending') }}
+                                        </span>
+                                    </div>
+                                    @if (!empty($inspectRecord['admin_approved_by']))
+                                        <p class="text-[11px] text-slate-500 mt-2">
+                                            <span class="font-semibold">{{ $inspectRecord['admin_approved_by'] }}</span>
+                                            @if (!empty($inspectRecord['admin_approved_at'])) · {{ $inspectRecord['admin_approved_at'] }} @endif
+                                        </p>
+                                    @else
+                                        <p class="text-[11px] text-slate-400 mt-2">{{ __('Awaiting final disbursement authorization.') }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!empty($inspectRecord['rejection_reason']))
+                            <div class="rounded-xl border border-rose-200 bg-rose-50/70 p-3.5 text-xs text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300">
+                                <div class="flex items-center gap-1.5 font-bold mb-1">
+                                    <i class="fa-light fa-circle-exclamation text-rose-500"></i>
+                                    {{ __('Rejection Reason Documented:') }}
+                                </div>
+                                <p class="text-rose-600 dark:text-rose-300">{{ $inspectRecord['rejection_reason'] }}</p>
+                            </div>
+                        @endif
+                    @endif
 
                     <!-- Description / Narrative -->
                     @if (!empty($inspectRecord['description']))
@@ -9881,10 +10083,22 @@
                         <i class="fa-light fa-fingerprint mr-1"></i>{{ __('Ascend ERP Record ID: #') }}{{ $inspectRecord['id'] ?? 0 }}
                     </p>
                     <div class="flex items-center gap-2">
-                        @if (($inspectRecord['type'] ?? '') === 'expense' && ($inspectRecord['approval_status'] ?? '') === 'pending')
-                            <button type="button" wire:click="approveExpense({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
-                                <i class="fa-light fa-check mr-1"></i>{{ __('Approve Expense') }}
-                            </button>
+                        @if (($inspectRecord['type'] ?? '') === 'expense')
+                            @if (($inspectRecord['manager_approval_status'] ?? 'pending') !== 'approved' && ($inspectRecord['approval_status'] ?? '') !== 'rejected')
+                                <button type="button" wire:click="approveExpenseAsManager({{ $inspectRecord['id'] }})" class="rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition">
+                                    <i class="fa-light fa-user-check mr-1"></i>{{ __('Mgr Approve') }}
+                                </button>
+                            @endif
+                            @if (($inspectRecord['admin_approval_status'] ?? 'pending') !== 'approved' && ($inspectRecord['approval_status'] ?? '') !== 'rejected')
+                                <button type="button" wire:click="approveExpenseAsAdmin({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                    <i class="fa-light fa-badge-check mr-1"></i>{{ __('Admin Authorize') }}
+                                </button>
+                            @endif
+                            @if (($inspectRecord['approval_status'] ?? '') !== 'rejected' && ($inspectRecord['approval_status'] ?? '') !== 'approved')
+                                <button type="button" wire:click="rejectExpense({{ $inspectRecord['id'] }})" class="rounded-xl bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 transition">
+                                    <i class="fa-light fa-circle-xmark mr-1"></i>{{ __('Reject') }}
+                                </button>
+                            @endif
                         @elseif (($inspectRecord['type'] ?? '') === 'invoice' && ($inspectRecord['approval_status'] ?? '') !== 'paid')
                             <button type="button" wire:click="markInvoicePaid({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
                                 <i class="fa-light fa-circle-check mr-1"></i>{{ __('Mark Paid') }}

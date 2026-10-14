@@ -315,12 +315,16 @@ class AscendModuleViewer extends Component
         'category' => 'Office Supplies',
         'vendor' => '',
         'amount' => '',
+        'requester_name' => '',
+        'department' => 'Operations',
         'payment_method' => 'Bank Transfer',
         'expense_date' => '',
         'description' => '',
         'reference' => '',
     ];
     public ?int $editingExpenseId = null;
+    public string $expenseRejectionReason = '';
+    public string $expenseFilterStatus = 'all';
     public bool $showReceiptUpload = false;
 
     // === GLOBAL SEARCH & RECORD INSPECTION STATE ===
@@ -1145,17 +1149,27 @@ class AscendModuleViewer extends Component
                 ->limit(30)
                 ->get()
                 ->map(fn ($e) => [
-                    'id'              => $e->id,
-                    'category'        => (string) $e->category,
-                    'vendor'          => (string) $e->vendor,
-                    'amount'          => (float) $e->amount,
-                    'payment_method'  => (string) ($e->payment_method ?? '—'),
-                    'expense_date'    => $e->expense_date?->toDateString() ?? '—',
-                    'description'     => (string) ($e->description ?? ''),
-                    'receipt_path'    => (string) ($e->receipt_path ?? ''),
-                    'attachments'     => $this->resolveExpenseAttachmentUrls((array) ($e->attachments ?? [])),
-                    'approval_status' => (string) ($e->approval_status ?? 'pending'),
-                    'reference'       => (string) ($e->reference ?? ''),
+                    'id'                      => $e->id,
+                    'category'                => (string) $e->category,
+                    'vendor'                  => (string) $e->vendor,
+                    'amount'                  => (float) $e->amount,
+                    'requested_by'            => $e->requested_by,
+                    'requester_name'          => (string) ($e->requester_name ?? 'Operations Staff'),
+                    'department'              => (string) ($e->department ?? 'Operations'),
+                    'payment_method'          => (string) ($e->payment_method ?? '—'),
+                    'expense_date'            => $e->expense_date?->toDateString() ?? '—',
+                    'description'             => (string) ($e->description ?? ''),
+                    'receipt_path'            => (string) ($e->receipt_path ?? ''),
+                    'attachments'             => $this->resolveExpenseAttachmentUrls((array) ($e->attachments ?? [])),
+                    'approval_status'         => (string) ($e->approval_status ?? 'pending'),
+                    'manager_approval_status' => (string) ($e->manager_approval_status ?? 'pending'),
+                    'manager_approved_by'     => $e->manager_approved_by,
+                    'manager_approved_at'     => $e->manager_approved_at?->toDateTimeString(),
+                    'admin_approval_status'   => (string) ($e->admin_approval_status ?? 'pending'),
+                    'admin_approved_by'       => $e->admin_approved_by,
+                    'admin_approved_at'       => $e->admin_approved_at?->toDateTimeString(),
+                    'rejection_reason'        => (string) ($e->rejection_reason ?? ''),
+                    'reference'               => (string) ($e->reference ?? ''),
                 ])
                 ->toArray();
         } catch (\Throwable) { $this->expenseRecords = []; }
@@ -3082,35 +3096,51 @@ class AscendModuleViewer extends Component
             return;
         }
         try {
+            $user = auth()->user();
+            $requester = !empty($this->expenseForm['requester_name']) 
+                ? $this->expenseForm['requester_name'] 
+                : ($user?->name ?: 'Operations Staff');
+
             $attachments = $this->importExpenseReceiptsToFileManager();
             $ref = (!empty($this->expenseForm['reference']) && str_starts_with($this->expenseForm['reference'], 'ASL-EXP-'))
                 ? $this->expenseForm['reference']
                 : $this->getNextExpenseReference();
 
             $expense = \App\Models\Expense::create([
-                'category'       => $this->expenseForm['category'],
-                'vendor'         => $this->expenseForm['vendor'],
-                'amount'         => (float) $this->expenseForm['amount'],
-                'payment_method' => $this->expenseForm['payment_method'],
-                'expense_date'   => $this->expenseForm['expense_date'] ?: now()->toDateString(),
-                'description'    => $this->expenseForm['description'],
-                'reference'      => $ref,
-                'approval_status' => 'pending',
-                'attachments'    => $attachments,
+                'category'                => $this->expenseForm['category'],
+                'vendor'                  => $this->expenseForm['vendor'],
+                'amount'                  => (float) $this->expenseForm['amount'],
+                'requested_by'            => $user?->id,
+                'requester_name'          => $requester,
+                'department'              => $this->expenseForm['department'] ?: 'Operations',
+                'payment_method'          => $this->expenseForm['payment_method'],
+                'expense_date'            => $this->expenseForm['expense_date'] ?: now()->toDateString(),
+                'description'             => $this->expenseForm['description'],
+                'reference'               => $ref,
+                'approval_status'         => 'pending',
+                'manager_approval_status' => 'pending',
+                'admin_approval_status'   => 'pending',
+                'attachments'             => $attachments,
             ]);
             $this->expenseReceiptUrls = [];
             $this->pendingExpenseReceipts = [];
             $this->expenseForm = [
-                'category' => 'Office Supplies',
-                'vendor' => '',
-                'amount' => '',
+                'category'       => 'Office Supplies',
+                'vendor'         => '',
+                'amount'         => '',
+                'requester_name' => '',
+                'department'     => 'Operations',
                 'payment_method' => 'Bank Transfer',
-                'expense_date' => '',
-                'description' => '',
-                'reference' => $this->getNextExpenseReference(),
+                'expense_date'   => '',
+                'description'    => '',
+                'reference'      => $this->getNextExpenseReference(),
             ];
             $this->hydrateLiveData();
-            session()->flash('status', __('Expense :ref logged and submitted for approval!', ['ref' => $ref]));
+            session()->flash('status', __('Requisition :ref for :amount submitted by :requester for Manager and Admin approval!', [
+                'ref'       => $ref,
+                'amount'    => '₦' . number_format($expense->amount, 2),
+                'requester' => $requester,
+            ]));
         } catch (\Throwable $e) {
             session()->flash('warning', 'Failed: '.$e->getMessage());
         }
@@ -3129,6 +3159,8 @@ class AscendModuleViewer extends Component
             'category'       => (string) ($expense->category ?? 'Office Supplies'),
             'vendor'         => (string) ($expense->vendor ?? ''),
             'amount'         => (string) ($expense->amount ?? ''),
+            'requester_name' => (string) ($expense->requester_name ?? ''),
+            'department'     => (string) ($expense->department ?? 'Operations'),
             'payment_method' => (string) ($expense->payment_method ?? 'Bank Transfer'),
             'expense_date'   => $expense->expense_date?->toDateString() ?? now()->toDateString(),
             'description'    => (string) ($expense->description ?? ''),
@@ -3163,10 +3195,12 @@ class AscendModuleViewer extends Component
             'category'       => 'Office Supplies',
             'vendor'         => '',
             'amount'         => '',
+            'requester_name' => '',
+            'department'     => 'Operations',
             'payment_method' => 'Bank Transfer',
             'expense_date'   => '',
             'description'    => '',
-            'reference'      => '',
+            'reference'      => $this->getNextExpenseReference(),
         ];
     }
 
@@ -3195,6 +3229,8 @@ class AscendModuleViewer extends Component
                 'category'       => $this->expenseForm['category'],
                 'vendor'         => $this->expenseForm['vendor'],
                 'amount'         => (float) $this->expenseForm['amount'],
+                'requester_name' => $this->expenseForm['requester_name'] ?: ($expense->requester_name ?: 'Operations Staff'),
+                'department'     => $this->expenseForm['department'] ?: 'Operations',
                 'payment_method' => $this->expenseForm['payment_method'],
                 'expense_date'   => $this->expenseForm['expense_date'] ?: now()->toDateString(),
                 'description'    => $this->expenseForm['description'],
@@ -3205,7 +3241,7 @@ class AscendModuleViewer extends Component
             $id = $expense->id;
             $this->cancelEditExpense();
             $this->hydrateLiveData();
-            session()->flash('status', __('Expense #:id updated successfully!', ['id' => $id]));
+            session()->flash('status', __('Expense Requisition #:id updated successfully!', ['id' => $id]));
         } catch (\Throwable $e) {
             session()->flash('warning', 'Failed to update expense: '.$e->getMessage());
         }
@@ -3353,20 +3389,112 @@ class AscendModuleViewer extends Component
 
     public function approveExpense(int $id): void
     {
-        try {
-            \App\Models\Expense::where('id', $id)->update(['approval_status' => 'approved', 'approved_by' => auth()->id(), 'approved_at' => now()]);
-            $this->hydrateLiveData();
-            session()->flash('status', __('Expense #:id approved.', ['id' => $id]));
-        } catch (\Throwable $e) { session()->flash('warning', $e->getMessage()); }
+        $this->approveExpenseAsAdmin($id);
     }
 
-    public function rejectExpense(int $id): void
+    public function approveExpenseAsManager(int $id): void
     {
         try {
-            \App\Models\Expense::where('id', $id)->update(['approval_status' => 'rejected']);
+            $user = auth()->user();
+            $userId = $user?->id;
+            $userName = $user?->name ?: 'Operations Manager';
+
+            $expense = \App\Models\Expense::find($id);
+            if (! $expense) {
+                session()->flash('warning', __('Expense requisition not found.'));
+                return;
+            }
+
+            $adminStatus = $expense->admin_approval_status ?? 'pending';
+            $overallStatus = ($adminStatus === 'approved') ? 'approved' : 'manager_approved';
+
+            $expense->update([
+                'manager_approval_status' => 'approved',
+                'manager_approved_by'     => $userId,
+                'manager_approved_at'     => now(),
+                'approval_status'         => $overallStatus,
+                'rejection_reason'        => null,
+            ]);
+
             $this->hydrateLiveData();
-            session()->flash('status', __('Expense #:id rejected.', ['id' => $id]));
-        } catch (\Throwable $e) { session()->flash('warning', $e->getMessage()); }
+            session()->flash('status', __('Expense Requisition #:ref (:vendor) approved by Manager :user. Overall status: :status', [
+                'ref'    => $expense->reference ?: $expense->id,
+                'vendor' => $expense->vendor,
+                'user'   => $userName,
+                'status' => strtoupper(str_replace('_', ' ', $overallStatus)),
+            ]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', __('Manager approval failed: :msg', ['msg' => $e->getMessage()]));
+        }
+    }
+
+    public function approveExpenseAsAdmin(int $id): void
+    {
+        try {
+            $user = auth()->user();
+            $userId = $user?->id;
+            $userName = $user?->name ?: 'Finance Administrator';
+
+            $expense = \App\Models\Expense::find($id);
+            if (! $expense) {
+                session()->flash('warning', __('Expense requisition not found.'));
+                return;
+            }
+
+            $expense->update([
+                'admin_approval_status' => 'approved',
+                'admin_approved_by'     => $userId,
+                'admin_approved_at'     => now(),
+                'approval_status'       => 'approved',
+                'approved_by'           => $userId,
+                'approved_at'           => now(),
+                'rejection_reason'      => null,
+            ]);
+
+            $this->hydrateLiveData();
+            session()->flash('status', __('Expense Requisition #:ref (:vendor) fully approved by Administrator :user and authorized for disbursement!', [
+                'ref'    => $expense->reference ?: $expense->id,
+                'vendor' => $expense->vendor,
+                'user'   => $userName,
+            ]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', __('Admin approval failed: :msg', ['msg' => $e->getMessage()]));
+        }
+    }
+
+    public function rejectExpense(int $id, ?string $reason = null): void
+    {
+        try {
+            $user = auth()->user();
+            $userId = $user?->id;
+            $userName = $user?->name ?: 'Approver';
+            $reasonText = $reason ?: ($this->expenseRejectionReason ?: 'Disapproved during expense review.');
+
+            $expense = \App\Models\Expense::find($id);
+            if (! $expense) {
+                session()->flash('warning', __('Expense not found.'));
+                return;
+            }
+
+            $expense->update([
+                'approval_status'         => 'rejected',
+                'manager_approval_status' => 'rejected',
+                'admin_approval_status'   => 'rejected',
+                'rejection_reason'        => $reasonText,
+                'approved_by'             => $userId,
+                'approved_at'             => now(),
+            ]);
+
+            $this->expenseRejectionReason = '';
+            $this->hydrateLiveData();
+            session()->flash('warning', __('Expense Requisition #:ref was rejected by :user. Reason: :reason', [
+                'ref'    => $expense->reference ?: $expense->id,
+                'user'   => $userName,
+                'reason' => $reasonText,
+            ]));
+        } catch (\Throwable $e) {
+            session()->flash('warning', $e->getMessage());
+        }
     }
 
     // =========================================================
@@ -4228,11 +4356,16 @@ class AscendModuleViewer extends Component
                     'category' => $this->form['category'] ?: 'Operations',
                     'vendor' => $title,
                     'amount' => $subtotal ?: 150000.00,
+                    'requested_by' => auth()->id(),
+                    'requester_name' => $this->form['name'] ?: (auth()->user()?->name ?: 'Operations Staff'),
+                    'department' => $this->form['department'] ?? 'Operations',
                     'payment_method' => $this->form['payment_method'] ?? 'Bank Transfer',
                     'expense_date' => $this->form['issue_date'] ?: now(),
                     'reference' => (!empty($this->form['reference']) && str_starts_with($this->form['reference'], 'ASL-EXP-')) ? $this->form['reference'] : $this->getNextExpenseReference(),
                     'description' => $this->form['notes'] ?: 'Recorded via portal finance modal',
                     'approval_status' => 'pending',
+                    'manager_approval_status' => 'pending',
+                    'admin_approval_status' => 'pending',
                 ]),
                 'transfer' => BankAccount::firstOrCreate(['name' => 'Access Bank HQ'], ['bank_name' => 'Access Bank', 'account_number' => '0129481029', 'balance' => 4850000.00]),
                 default => Invoice::create([
@@ -5698,7 +5831,16 @@ class AscendModuleViewer extends Component
                     'date' => ($exp->expense_date instanceof \DateTimeInterface) ? $exp->expense_date->format('d M Y') : ($exp->expense_date ?: ($exp->created_at?->format('d M Y') ?? now()->format('d M Y'))),
                     'description' => $exp->description ?: 'Operational expense disbursement.',
                     'approval_status' => $exp->approval_status ?: 'pending',
-                    'approved_by' => $exp->approved_by ? (\App\Models\User::find($exp->approved_by)?->name ?: 'Administrator') : null,
+                    'requester_name' => $exp->requester_name ?: 'Operations Staff',
+                    'department' => $exp->department ?: 'Operations',
+                    'manager_approval_status' => $exp->manager_approval_status ?: 'pending',
+                    'manager_approved_by' => $exp->manager_approved_by ? (\Modules\AdminUser\Models\User::find($exp->manager_approved_by)?->name ?: 'Operations Manager') : null,
+                    'manager_approved_at' => $exp->manager_approved_at?->format('d M Y H:i'),
+                    'admin_approval_status' => $exp->admin_approval_status ?: 'pending',
+                    'admin_approved_by' => $exp->admin_approved_by ? (\Modules\AdminUser\Models\User::find($exp->admin_approved_by)?->name ?: 'Finance Administrator') : null,
+                    'admin_approved_at' => $exp->admin_approved_at?->format('d M Y H:i'),
+                    'rejection_reason' => $exp->rejection_reason,
+                    'approved_by' => $exp->approved_by ? (\Modules\AdminUser\Models\User::find($exp->approved_by)?->name ?: 'Administrator') : null,
                     'approved_at' => $exp->approved_at?->format('d M Y H:i'),
                     'receipt_path' => $exp->receipt_path,
                     'attachments' => $this->resolveExpenseAttachmentUrls((array) ($exp->attachments ?? [])),
