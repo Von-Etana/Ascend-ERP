@@ -127,6 +127,7 @@ class AscendModuleViewer extends Component
     public bool $showQuoteModal = false;
     public string $quoteStatusFilter = 'all';
     public ?string $activeEditingQuoteId = null;
+    public ?int $editingInvoiceId = null;
 
     public array $salesOrderForm = [
         'customer' => '',
@@ -1433,6 +1434,143 @@ class AscendModuleViewer extends Component
         session()->flash('status', __('Assigned serial Invoice number: :num', ['num' => $this->form['invoice_number']]));
     }
 
+    public function editInvoice(int|string $id): void
+    {
+        $inv = Invoice::where('id', $id)->orWhere('invoice_number', $id)->first();
+        if (! $inv) {
+            session()->flash('warning', __('Invoice details not found.'));
+            return;
+        }
+
+        $this->editingInvoiceId = (int) $inv->id;
+        $this->activeEditingQuoteId = null;
+        $this->modalType = 'invoice';
+        $this->moduleKey = 'finance';
+
+        $itemsData = is_array($inv->items) ? $inv->items : (json_decode($inv->items ?? '[]', true) ?: []);
+        $applyVat = isset($itemsData['apply_vat'])
+            ? filter_var($itemsData['apply_vat'], FILTER_VALIDATE_BOOLEAN)
+            : ((float) $inv->tax > 0);
+
+        $this->form['invoice_number'] = $inv->invoice_number;
+        $this->form['client_name'] = $inv->client_name;
+        $this->form['category'] = $inv->category ?? ($itemsData['category'] ?? 'Solar & Inverter Systems');
+        $this->form['client_phone'] = $itemsData['client_phone'] ?? '';
+        $this->form['client_email'] = $itemsData['client_email'] ?? '';
+        $this->form['client_address'] = $itemsData['client_address'] ?? '';
+        $this->form['client_tin'] = $itemsData['client_tin'] ?? '';
+        $this->form['issue_date'] = ($inv->issue_date instanceof \DateTimeInterface) ? $inv->issue_date->format('Y-m-d') : ($inv->issue_date ?? now()->format('Y-m-d'));
+        $this->form['due_date'] = ($inv->due_date instanceof \DateTimeInterface) ? $inv->due_date->format('Y-m-d') : ($inv->due_date ?? now()->addDays(14)->format('Y-m-d'));
+        $this->form['subtotal'] = (float) $inv->subtotal;
+        $this->form['discount_type'] = $itemsData['discount_type'] ?? 'fixed';
+        $this->form['discount_value'] = (float) ($itemsData['discount_value'] ?? 0);
+        $this->form['discount_amount'] = (float) ($itemsData['discount_amount'] ?? 0);
+        $this->form['promo_code'] = $itemsData['promo_code'] ?? '';
+        $this->form['tax'] = (float) $inv->tax;
+        $this->form['total'] = (float) $inv->total;
+        $this->form['apply_vat'] = $applyVat;
+        $this->form['notes'] = $inv->notes ?? '';
+        $this->form['status'] = $inv->status ?? 'pending';
+
+        // Extract line items safely
+        $rawItems = $itemsData['line_items'] ?? $itemsData;
+        $validItems = [];
+        if (is_array($rawItems)) {
+            foreach ($rawItems as $it) {
+                if (is_array($it) && (isset($it['description']) || isset($it['unit_price']) || isset($it['sku']) || isset($it['qty']) || isset($it['quantity']) || isset($it['name']) || isset($it['price']))) {
+                    $unitPrice = (float) ($it['unit_price'] ?? ($it['rate'] ?? ($it['price'] ?? 0)));
+                    $qty = (int) ($it['quantity'] ?? ($it['qty'] ?? 1));
+                    $amount = (float) ($it['amount'] ?? ($qty * $unitPrice));
+                    $validItems[] = [
+                        'product_id' => $it['product_id'] ?? null,
+                        'sku' => $it['sku'] ?? (!empty($it['serial_number']) ? $it['serial_number'] : ''),
+                        'description' => $it['description'] ?? ($it['name'] ?? 'Product Line Item'),
+                        'quantity' => $qty,
+                        'unit_price' => $unitPrice,
+                        'discount_percent' => (float) ($it['discount_percent'] ?? 0),
+                        'amount' => $amount,
+                    ];
+                }
+            }
+        }
+
+        if (! empty($validItems)) {
+            $this->invoiceItems = array_values($validItems);
+        } else {
+            $this->invoiceItems = [
+                [
+                    'product_id' => '',
+                    'sku' => '',
+                    'description' => 'Commercial Solar & Inverter Equipment / Services',
+                    'quantity' => 1,
+                    'unit_price' => (float) $inv->subtotal,
+                    'discount_percent' => 0,
+                    'amount' => (float) $inv->subtotal,
+                ]
+            ];
+        }
+
+        $this->recalculateInvoiceTotals();
+        $this->showModal = true;
+        $this->showInspectModal = false;
+        session()->flash('status', __('Loaded Invoice :num for editing. You can adjust line items, VAT, or pricing and save changes.', ['num' => $inv->invoice_number]));
+    }
+
+    protected function saveOrUpdateInvoice(string $title, float $subtotal, float $tax, float $total, bool $applyVat): Invoice
+    {
+        $itemsData = [
+            'category' => $this->form['category'] ?: 'Solar & Inverter Systems',
+            'apply_vat' => $applyVat,
+            'client_phone' => $this->form['client_phone'] ?? ($this->form['phone'] ?? ''),
+            'client_email' => $this->form['client_email'] ?? ($this->form['email'] ?? ''),
+            'client_address' => $this->form['client_address'] ?? ($this->form['address'] ?? ''),
+            'client_tin' => $this->form['client_tin'] ?? ($this->form['tin'] ?? ''),
+            'discount_type' => $this->form['discount_type'] ?? 'fixed',
+            'discount_value' => (float) ($this->form['discount_value'] ?? 0),
+            'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
+            'promo_code' => $this->form['promo_code'] ?? '',
+            'line_items' => $this->invoiceItems,
+        ];
+
+        if ($this->editingInvoiceId) {
+            $inv = Invoice::find($this->editingInvoiceId);
+            if ($inv) {
+                if (is_array($inv->items) && isset($inv->items['quote_id'])) {
+                    $itemsData['quote_id'] = $inv->items['quote_id'];
+                }
+
+                $inv->update([
+                    'client_name' => $title,
+                    'category' => $this->form['category'] ?: ($inv->category ?: 'Solar & Inverter Systems'),
+                    'issue_date' => $this->form['issue_date'] ?: ($inv->issue_date ?: now()),
+                    'due_date' => $this->form['due_date'] ?: ($inv->due_date ?: now()->addDays(14)),
+                    'subtotal' => $subtotal,
+                    'tax' => $tax,
+                    'total' => $total,
+                    'notes' => $this->form['notes'] ?: $inv->notes,
+                    'items' => $itemsData,
+                ]);
+
+                $this->editingInvoiceId = null;
+                return $inv;
+            }
+        }
+
+        return Invoice::create([
+            'invoice_number' => (!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-INV-')) ? $this->form['invoice_number'] : $this->getNextInvoiceNumber(),
+            'client_name' => $title,
+            'category' => $this->form['category'] ?: 'Solar & Inverter Systems',
+            'issue_date' => $this->form['issue_date'] ?: now(),
+            'due_date' => $this->form['due_date'] ?: now()->addDays(14),
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'total' => $total,
+            'status' => 'pending',
+            'notes' => $this->form['notes'] ?: 'Created via finance module modal',
+            'items' => $itemsData,
+        ]);
+    }
+
     public function sendInvoiceReminder(int $invoiceId): void
     {
         $inv = Invoice::find($invoiceId);
@@ -2157,11 +2295,17 @@ class AscendModuleViewer extends Component
         }
 
         if (! $quote) {
+            $inv = Invoice::where('invoice_number', $quoteId)->orWhere('id', $quoteId)->first();
+            if ($inv) {
+                $this->editInvoice($inv->id);
+                return;
+            }
             session()->flash('warning', __('Quote details not found.'));
             return;
         }
 
         $this->activeEditingQuoteId = $quote->quote_number;
+        $this->editingInvoiceId = null;
         $this->modalType = 'price_quote';
         $this->form['invoice_number'] = $quote->quote_number;
         $this->form['category'] = $quote->category ?? (is_array($quote->items) ? ($quote->items['category'] ?? 'Solar & Inverter Systems') : 'Solar & Inverter Systems');
@@ -2224,11 +2368,19 @@ class AscendModuleViewer extends Component
         }
 
         if (! $quote) {
+            $inv = Invoice::where('invoice_number', $quoteId)->orWhere('id', $quoteId)->first();
+            if ($inv) {
+                $this->inspectFinancialRecord('invoice', $inv->id);
+                return;
+            }
             session()->flash('warning', __('Quote details not found.'));
             return;
         }
 
         $rawItems = is_array($quote->items) ? $quote->items : (json_decode($quote->items ?? '[]', true) ?: []);
+        $lineItems = isset($rawItems['line_items']) && is_array($rawItems['line_items'])
+            ? $rawItems['line_items']
+            : (is_array($rawItems) && array_is_list($rawItems) ? $rawItems : []);
 
         $this->inspectQuoteData = [
             'id' => $quote->quote_number,
@@ -2245,7 +2397,7 @@ class AscendModuleViewer extends Component
             'total' => (float) $quote->total,
             'status' => $quote->status ?: 'Draft',
             'notes' => $quote->notes ?: 'Commercial solar and inverter proposal issued by Ascend Systems Nigeria.',
-            'items' => $rawItems,
+            'items' => $lineItems,
         ];
 
         $this->showQuoteModal = true;
@@ -4189,6 +4341,8 @@ class AscendModuleViewer extends Component
     {
         $this->modalType = $type;
         $this->showModal = true;
+        $this->editingInvoiceId = null;
+        $this->activeEditingQuoteId = null;
 
         if ($type === 'quote' || $type === 'price_quote') {
             $this->modalType = 'price_quote';
@@ -4339,6 +4493,7 @@ class AscendModuleViewer extends Component
         $this->modalType = '';
         $this->modalData = null;
         $this->activeEditingQuoteId = null;
+        $this->editingInvoiceId = null;
     }
 
     public function submitModalForm(): void
@@ -4368,31 +4523,7 @@ class AscendModuleViewer extends Component
                     'admin_approval_status' => 'pending',
                 ]),
                 'transfer' => BankAccount::firstOrCreate(['name' => 'Access Bank HQ'], ['bank_name' => 'Access Bank', 'account_number' => '0129481029', 'balance' => 4850000.00]),
-                default => Invoice::create([
-                    'invoice_number' => (!empty($this->form['invoice_number']) && str_starts_with($this->form['invoice_number'], 'ASL-INV-')) ? $this->form['invoice_number'] : $this->getNextInvoiceNumber(),
-                    'client_name' => $title,
-                    'category' => $this->form['category'] ?: 'Solar & Inverter Systems',
-                    'issue_date' => $this->form['issue_date'] ?: now(),
-                    'due_date' => $this->form['due_date'] ?: now()->addDays(14),
-                    'subtotal' => $subtotal,
-                    'tax' => $tax,
-                    'total' => $total,
-                    'status' => 'pending',
-                    'notes' => $this->form['notes'] ?: 'Created via finance module modal',
-                    'items' => [
-                        'category' => $this->form['category'] ?: 'Solar & Inverter Systems',
-                        'apply_vat' => $applyVat,
-                        'client_phone' => $this->form['client_phone'] ?? ($this->form['phone'] ?? ''),
-                        'client_email' => $this->form['client_email'] ?? ($this->form['email'] ?? ''),
-                        'client_address' => $this->form['client_address'] ?? ($this->form['address'] ?? ''),
-                        'client_tin' => $this->form['client_tin'] ?? ($this->form['tin'] ?? ''),
-                        'discount_type' => $this->form['discount_type'] ?? 'fixed',
-                        'discount_value' => (float) ($this->form['discount_value'] ?? 0),
-                        'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
-                        'promo_code' => $this->form['promo_code'] ?? '',
-                        'line_items' => $this->invoiceItems,
-                    ],
-                ]),
+                default => $this->saveOrUpdateInvoice($title, $subtotal, $tax, $total, $applyVat),
             },
             'crm' => match ($this->modalType) {
                 'deal' => CrmDeal::create([
@@ -5851,6 +5982,11 @@ class AscendModuleViewer extends Component
         } elseif ($type === 'invoice') {
             $inv = Invoice::where('invoice_number', $id)->orWhere('id', $id)->first();
             if ($inv) {
+                $rawItems = is_array($inv->items) ? $inv->items : (json_decode($inv->items ?? '[]', true) ?: []);
+                $lineItems = isset($rawItems['line_items']) && is_array($rawItems['line_items'])
+                    ? $rawItems['line_items']
+                    : (is_array($rawItems) && array_is_list($rawItems) ? $rawItems : []);
+
                 $this->inspectRecord = [
                     'type' => 'invoice',
                     'id' => $inv->id,
@@ -5866,7 +6002,7 @@ class AscendModuleViewer extends Component
                     'due_date' => $inv->due_date?->format('d M Y') ?: 'Upon receipt',
                     'description' => $inv->notes ?: 'Issued via Ascend ERP billing module.',
                     'approval_status' => $inv->status,
-                    'items' => $inv->items ?? [],
+                    'items' => $lineItems,
                     'quote_id' => data_get($inv->items, 'quote_id'),
                 ];
                 $this->showInspectModal = true;

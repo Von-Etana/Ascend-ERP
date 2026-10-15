@@ -839,6 +839,12 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3.5 text-right space-x-2">
+                                        <button type="button" wire:click="editInvoice({{ $inv->id }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 hover:bg-blue-500/20 transition" title="{{ __('Edit invoice details and line items') }}">
+                                            <i class="fa-light fa-pen-to-square"></i>{{ __('Edit') }}
+                                        </button>
+                                        <button type="button" wire:click="inspectFinancialRecord('invoice', {{ $inv->id }})" class="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="{{ __('Inspect invoice breakdown') }}">
+                                            <i class="fa-light fa-eye"></i>{{ __('View') }}
+                                        </button>
                                         @if ($inv->status !== 'paid')
                                             <button type="button" wire:click="markInvoicePaid({{ $inv->id }})" class="text-xs font-bold text-emerald-600 hover:underline">
                                                 Mark Paid
@@ -8436,8 +8442,24 @@
                 @elseif ($modalType === 'invoice')
                     <div class="flex items-center justify-between border-b pb-4 dark:border-slate-800">
                         <div>
-                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ __('Create New Customer Invoice') }}</h3>
-                            <p class="text-xs text-slate-400">Generate NGN invoice with automatic 7.5% VAT</p>
+                            <div class="flex items-center gap-2 mb-1">
+                                @if ($editingInvoiceId)
+                                    <span class="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600 border border-blue-500/20">
+                                        <i class="fa-light fa-pen-to-square mr-1"></i>{{ __('Updating Existing Invoice') }}
+                                    </span>
+                                    <span class="text-xs text-slate-400 font-mono font-bold">{{ $form['invoice_number'] ?? '' }}</span>
+                                @else
+                                    <span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-500/20">
+                                        <i class="fa-light fa-file-invoice mr-1"></i>{{ __('Commercial Billing Studio') }}
+                                    </span>
+                                @endif
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-950 dark:text-white">
+                                {{ $editingInvoiceId ? __('Edit & Update Customer Invoice') : __('Create New Customer Invoice') }}
+                            </h3>
+                            <p class="text-xs text-slate-400">
+                                {{ $editingInvoiceId ? __('Modify line items, pricing, discounts, VAT status, and client billing info.') : __('Generate NGN invoice with automatic 7.5% VAT') }}
+                            </p>
                         </div>
                         <button type="button" wire:click="closeModal" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
                             <i class="fa-light fa-xmark text-lg"></i>
@@ -8454,9 +8476,11 @@
                                 </div>
                                 <div class="relative mt-1">
                                     <input type="text" wire:model="form.invoice_number" readonly required class="block w-full rounded-2xl border border-slate-200 bg-slate-100 dark:bg-slate-800/80 cursor-not-allowed px-3.5 py-2 text-xs font-mono font-bold text-slate-800 dark:text-slate-200 outline-none">
-                                    <button type="button" wire:click="autoGenerateInvoiceNumber" title="Regenerate next serial invoice number" class="absolute right-2 top-2 text-[10px] font-bold text-emerald-600 hover:underline">
-                                        <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
-                                    </button>
+                                    @if (!$editingInvoiceId)
+                                        <button type="button" wire:click="autoGenerateInvoiceNumber" title="Regenerate next serial invoice number" class="absolute right-2 top-2 text-[10px] font-bold text-emerald-600 hover:underline">
+                                            <i class="fa-light fa-arrows-rotate mr-0.5"></i>Regen
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                             <div>
@@ -8634,7 +8658,9 @@
 
                         <div class="flex justify-end gap-3 pt-4 border-t dark:border-slate-800">
                             <button type="button" wire:click="closeModal" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">Cancel</button>
-                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">Save & Issue Invoice</button>
+                            <button type="submit" class="rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700">
+                                {{ $editingInvoiceId ? __('Update & Save Invoice') : __('Save & Issue Invoice') }}
+                            </button>
                         </div>
                     </form>
                 @elseif ($modalType === 'price_quote' || $modalType === 'quote')
@@ -10061,14 +10087,13 @@
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                         @foreach ($inspectRecord['items'] as $line)
-                                            @if (is_array($line) && isset($line['name']))
-                                                <tr>
-                                                    <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $line['name'] }}</td>
-                                                    <td class="p-2.5 text-center">{{ $line['quantity'] ?? $line['qty'] ?? 1 }}</td>
-                                                    <td class="p-2.5 text-right">₦{{ number_format($line['price'] ?? $line['rate'] ?? 0, 2) }}</td>
-                                                    <td class="p-2.5 text-right font-black">₦{{ number_format(($line['quantity'] ?? 1) * ($line['price'] ?? 0), 2) }}</td>
-                                                </tr>
-                                            @endif
+                                            @if (!is_array($line)) @continue @endif
+                                            <tr>
+                                                <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $line['description'] ?? ($line['name'] ?? 'Product Line Item') }}</td>
+                                                <td class="p-2.5 text-center">{{ $line['quantity'] ?? ($line['qty'] ?? 1) }}</td>
+                                                <td class="p-2.5 text-right font-mono">₦{{ number_format((float) ($line['unit_price'] ?? ($line['price'] ?? ($line['rate'] ?? 0))), 2) }}</td>
+                                                <td class="p-2.5 text-right font-mono font-black">₦{{ number_format((float) ($line['amount'] ?? (($line['quantity'] ?? ($line['qty'] ?? 1)) * ($line['unit_price'] ?? ($line['price'] ?? ($line['rate'] ?? 0))))), 2) }}</td>
+                                            </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -10099,10 +10124,15 @@
                                     <i class="fa-light fa-circle-xmark mr-1"></i>{{ __('Reject') }}
                                 </button>
                             @endif
-                        @elseif (($inspectRecord['type'] ?? '') === 'invoice' && ($inspectRecord['approval_status'] ?? '') !== 'paid')
-                            <button type="button" wire:click="markInvoicePaid({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
-                                <i class="fa-light fa-circle-check mr-1"></i>{{ __('Mark Paid') }}
+                        @elseif (($inspectRecord['type'] ?? '') === 'invoice')
+                            <button type="button" wire:click="editInvoice({{ $inspectRecord['id'] }})" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition">
+                                <i class="fa-light fa-pen-to-square mr-1"></i>{{ __('Edit Invoice') }}
                             </button>
+                            @if (($inspectRecord['approval_status'] ?? '') !== 'paid')
+                                <button type="button" wire:click="markInvoicePaid({{ $inspectRecord['id'] }})" class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition">
+                                    <i class="fa-light fa-circle-check mr-1"></i>{{ __('Mark Paid') }}
+                                </button>
+                            @endif
                         @endif
                         <button type="button" wire:click="closeInspectModal" class="rounded-xl border border-slate-200 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300">
                             {{ __('Close') }}
@@ -10439,16 +10469,20 @@
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                         @foreach ($inspectQuoteData['items'] as $item)
+                                            @if (!is_array($item)) @continue @endif
                                             @php
-                                                $desc = $item['description'] ?? 'Product Line';
+                                                $desc = $item['description'] ?? ($item['name'] ?? 'Product Line');
                                                 $sn = !empty($item['serial_number']) ? $item['serial_number'] : (!empty($item['serial_no']) ? $item['serial_no'] : (!empty($item['sku']) ? $item['sku'] : 'SN-'.strtoupper(substr(md5($desc), 0, 8))));
+                                                $qty = $item['qty'] ?? ($item['quantity'] ?? 1);
+                                                $rate = (float) ($item['rate'] ?? ($item['unit_price'] ?? ($item['price'] ?? 0)));
+                                                $amount = (float) ($item['amount'] ?? ($qty * $rate));
                                             @endphp
                                             <tr>
                                                 <td class="p-2.5 font-mono text-slate-500 font-bold">{{ $sn }}</td>
                                                 <td class="p-2.5 font-bold text-slate-900 dark:text-white">{{ $desc }}</td>
-                                                <td class="p-2.5 text-center font-bold">{{ $item['qty'] ?? 1 }}</td>
-                                                <td class="p-2.5 text-right font-mono">₦{{ number_format((float) ($item['rate'] ?? 0), 2) }}</td>
-                                                <td class="p-2.5 text-right font-mono font-bold text-slate-900 dark:text-white">₦{{ number_format((float) ($item['amount'] ?? 0), 2) }}</td>
+                                                <td class="p-2.5 text-center font-bold">{{ $qty }}</td>
+                                                <td class="p-2.5 text-right font-mono">₦{{ number_format($rate, 2) }}</td>
+                                                <td class="p-2.5 text-right font-mono font-bold text-slate-900 dark:text-white">₦{{ number_format($amount, 2) }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
