@@ -177,16 +177,31 @@ class AscendWorkspaceSeeder extends Seeder
         $superAdminRoleId = DB::table('admin_roles')->where('slug', 'super-admin')->value('id');
 
         DB::table('users')->insertOrIgnore([
-            'name' => 'Ascend Administrator',
-            'username' => 'admin',
-            'email' => 'admin@ascendsystems.ng',
-            'password' => Hash::make('Password123!'),
-            'email_verified_at' => now(),
-            'timezone' => 'Africa/Lagos',
-            'locale' => 'en',
-            'is_super_admin' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'name' => 'Ascend Administrator',
+                'username' => 'admin',
+                'email' => 'admin@ascendsystems.ng',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'timezone' => 'Africa/Lagos',
+                'locale' => 'en',
+                'is_super_admin' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Logistics Manager',
+                'username' => 'logistics',
+                'email' => 'logistics@ascendsystems.ng',
+                'password' => Hash::make('Password123!'),
+                'email_verified_at' => now(),
+                'timezone' => 'Africa/Lagos',
+                'locale' => 'en',
+                'role_id' => DB::table('admin_roles')->where('slug', 'logistics')->value('id'),
+                'is_super_admin' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
         $adminId = DB::table('users')->where('username', 'admin')->value('id');
