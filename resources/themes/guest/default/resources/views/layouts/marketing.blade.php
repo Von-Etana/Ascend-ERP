@@ -75,6 +75,13 @@
                 'active' => request()->is('contact') || request()->is('contact/*'),
                 'hash' => null,
             ],
+            [
+                'key' => 'quote',
+                'label' => __('Get a Quote'),
+                'href' => url('get-a-quote'),
+                'active' => request()->is('get-a-quote') || request()->is('quote*'),
+                'hash' => null,
+            ],
         ]);
     }
     $footerExplore = [
@@ -177,6 +184,11 @@
                             </div>
                         @endif
 
+                        <a href="{{ url('get-a-quote') }}" class="guest-marketing-action-button inline-flex h-11 items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/20 hover:text-emerald-200">
+                            <i class="fa-light fa-calculator text-xs"></i>
+                            {{ __('Get a Quote') }}
+                        </a>
+
                         @auth
                             <a href="{{ route('portal.dashboard') }}" class="guest-marketing-action-button guest-marketing-dashboard-button inline-flex h-11 items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm font-medium text-white/78 transition hover:bg-white/8 hover:text-white">{{ __('Dashboard') }}</a>
                         @else
@@ -244,6 +256,11 @@
                         </div>
                     @endif
                     <div class="grid gap-2 sm:grid-cols-2">
+                        <a href="{{ url('get-a-quote') }}" class="guest-marketing-action-button inline-flex h-11 items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/20 hover:text-emerald-200">
+                            <i class="fa-light fa-calculator text-xs"></i>
+                            {{ __('Get a Quote') }}
+                        </a>
+
                         @auth
                             <a href="{{ route('portal.dashboard') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/10 px-4 py-3 text-sm font-medium text-white/80">{{ __('Dashboard') }}</a>
                         @else

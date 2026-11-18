@@ -50,6 +50,12 @@
                                     {{ __("Contact") }}
                                 </a>
                             </li>
+                            <li class="mr-9 font-medium hover:text-gray-700">
+                                <a href="{{ url('get-a-quote') }}"
+                                   class="{{ request()->is('get-a-quote') || request()->is('quote*') ? 'text-indigo-600 font-bold' : 'text-emerald-600 font-bold hover:text-emerald-700' }}">
+                                    {{ __("Get a Quote") }}
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <div class="w-auto">
@@ -89,6 +95,13 @@
                                     @endforeach
                                 </ul>
                                 @endif
+                            </div>
+
+                            <div class="w-auto mr-3 hidden lg:block">
+                                <a href="{{ url('get-a-quote') }}" class="py-2.5 px-4 text-xs font-bold uppercase tracking-wider rounded-xl text-emerald-700 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 transition ease-in-out duration-200 inline-flex items-center gap-1.5 shadow-xs">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    {{ __("Get a Quote") }}
+                                </a>
                             </div>
 
                             @if(Auth::check())
@@ -183,10 +196,22 @@
                                     {{ __("Contact") }}
                                 </a>
                             </li>
+                            <li class="mb-12">
+                                <a class="font-bold text-emerald-600 hover:text-emerald-700 {{ request()->is('get-a-quote') ? 'text-indigo-600' : '' }}"
+                                   href="{{ url('get-a-quote') }}">
+                                    {{ __("Get a Quote") }}
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <div class="flex flex-col justify-end w-full pb-8">
                         <div class="flex flex-wrap">
+                            <div class="w-full mb-3">
+                                <a href="{{ url('get-a-quote') }}" class="py-3 px-5 w-full text-emerald-700 font-bold rounded-xl bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 transition ease-in-out duration-200 block text-center">
+                                    <i class="fa-light fa-calculator mr-1.5"></i>{{ __("Get a Quote") }}
+                                </a>
+                            </div>
+
                             @if(Auth::check())
                                 <div class="w-full mb-3">
                                     <a href="{{ url('app/dashboard') }}"

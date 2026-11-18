@@ -20,6 +20,7 @@
         $clientPhone = $quote['phone'] ?? ($quote['client_phone'] ?? '');
         $clientEmail = $quote['email'] ?? ($quote['client_email'] ?? '');
         $clientAddress = $quote['address'] ?? ($quote['client_address'] ?? '');
+        $installationAddress = $quote['installation_address'] ?? ($quote['site_address'] ?? ($rawItems['installation_address'] ?? ''));
         $quoteId = $quote['id'] ?? ($quote['invoice_number'] ?? 'QT-2026');
         $status = $quote['status'] ?? 'Draft';
         $subtotal = (float) ($quote['subtotal'] ?? 0);
@@ -84,7 +85,10 @@
                     <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Prepared For (Client):</span>
                     <h3 class="text-base font-bold text-slate-900 mt-1">{{ $clientName }}</h3>
                     @if ($clientAddress)
-                        <p class="text-xs text-slate-600 mt-1"><i class="fa-light fa-location-dot mr-1.5 text-slate-400"></i>{{ $clientAddress }}</p>
+                        <p class="text-xs text-slate-600 mt-1"><i class="fa-light fa-file-invoice mr-1.5 text-slate-400"></i><strong class="text-slate-700">Billing Address:</strong> {{ $clientAddress }}</p>
+                    @endif
+                    @if ($installationAddress)
+                        <p class="text-xs text-slate-600 mt-1"><i class="fa-light fa-solar-panel mr-1.5 text-slate-400"></i><strong class="text-slate-700">Installation Site:</strong> {{ $installationAddress }}</p>
                     @endif
                     @if ($clientPhone || $clientEmail)
                         <div class="text-xs text-slate-600 mt-1 flex flex-wrap gap-3">
@@ -96,7 +100,7 @@
                 <div class="md:text-right">
                     <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Turnkey Provider:</span>
                     <h3 class="text-base font-bold text-slate-900 mt-1">Ascend Systems</h3>
-                    <p class="text-xs text-slate-600 mt-1">Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja</p>
+                    <p class="text-xs text-slate-600 mt-1">Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja</p>
                     <p class="text-xs text-slate-600 mt-1"><i class="fa-light fa-phone mr-1 text-slate-400"></i>+234 811 763 3020 &nbsp;|&nbsp; info@ascendsystems.ng</p>
                 </div>
             </div>
@@ -262,7 +266,7 @@
 
         <!-- Footer -->
         <div class="text-center text-xs text-slate-400 pb-8">
-            &copy; {{ date('Y') }} Ascend Systems Nigeria Ltd. All Rights Reserved. &nbsp;|&nbsp; Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.
+            &copy; {{ date('Y') }} Ascend Systems Nigeria Ltd. All Rights Reserved. &nbsp;|&nbsp; Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja
         </div>
     </div>
 

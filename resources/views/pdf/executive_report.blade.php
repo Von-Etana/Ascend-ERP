@@ -140,7 +140,7 @@
         </thead>
         <tbody>
             <tr>
-                <td><strong>Abuja HQ (Neighborhood Centre, Area 3, Garki)</strong></td>
+                <td><strong>Abuja HQ (Mall of Dubai, Area 11, Garki)</strong></td>
                 <td><strong>Corporate Headquarters</strong></td>
                 <td style="font-weight: bold;">&#8358;12,450,000.00</td>
                 <td style="font-weight: bold; color: #0d9488;">43.8%</td>

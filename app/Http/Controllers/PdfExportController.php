@@ -42,7 +42,7 @@ class PdfExportController
 
         return [
             'companyName'    => 'Ascend Systems',
-            'companyAddress' => 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.',
+            'companyAddress' => 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja',
             'companyPhone'   => '+234 811 763 3020',
             'companyEmail'   => 'info@ascendsystems.ng',
             'companyLogo'    => $logoBase64,

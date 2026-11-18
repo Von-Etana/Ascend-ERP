@@ -31,6 +31,7 @@
         $clientName = $quote['client_name'] ?? 'Client Premises';
         $clientPhone = $quote['phone'] ?? ($quote['client_phone'] ?? '+234 800 000 0000');
         $clientAddress = $quote['address'] ?? ($quote['client_address'] ?? 'Installation Site Address');
+        $installationAddress = $quote['installation_address'] ?? ($quote['site_address'] ?? ($inspectionData['installation_address'] ?? ''));
         $quoteId = $quote['id'] ?? ($quote['invoice_number'] ?? 'QT-2026');
         $inspectionData = $quote['inspection'] ?? [];
     @endphp
@@ -65,8 +66,10 @@
                 <td class="value">{{ $clientPhone }}</td>
             </tr>
             <tr>
-                <td class="label">Site Location:</td>
-                <td class="value" colspan="3">{{ $clientAddress }}</td>
+                <td class="label">Billing Address:</td>
+                <td class="value">{{ $clientAddress }}</td>
+                <td class="label">Installation Site:</td>
+                <td class="value">{{ $installationAddress ?: $clientAddress }}</td>
             </tr>
             <tr>
                 <td class="label">Inspecting Engineer:</td>

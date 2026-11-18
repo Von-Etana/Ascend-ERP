@@ -166,7 +166,7 @@ class AscendModuleViewer extends Component
         'body' => '',
         'cta_text' => 'Learn More',
         'cta_url' => '',
-        'footer' => 'Ascend Systems — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
+        'footer' => 'Ascend Systems — Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
     ];
 
     public array $crmContacts = [];
@@ -697,7 +697,7 @@ class AscendModuleViewer extends Component
     // === SYSTEM GOVERNANCE & ORGANIZATION STATE ===
     public array $orgProfileForm = [
         'company_name' => 'Ascend Systems',
-        'headquarters' => 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.',
+        'headquarters' => 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja',
         'phone' => '+234 811 763 3020',
         'email' => 'info@ascendsystems.ng',
         'tin' => 'TIN-NG-94810291',
@@ -855,8 +855,11 @@ class AscendModuleViewer extends Component
     public function mount(string $moduleKey = 'finance', ?string $activeTab = null): void
     {
         $this->moduleKey = $moduleKey;
+        $requestedTab = request()->query('tab');
         if ($activeTab) {
             $this->activeTab = $activeTab;
+        } elseif ($requestedTab) {
+            $this->activeTab = $requestedTab;
         } else {
             $this->activeTab = match ($moduleKey) {
                 'finance' => 'overview',
@@ -875,6 +878,10 @@ class AscendModuleViewer extends Component
         }
 
         $this->hydrateLiveData();
+
+        if (request()->query('action') === 'create_quote' || request()->query('create') == '1' || request()->query('quote') == '1') {
+            $this->openCreateModal('quote');
+        }
     }
 
     /**
@@ -1055,6 +1062,8 @@ class AscendModuleViewer extends Component
                     'email' => $q->email ?: '—',
                     'phone' => $q->phone ?: '—',
                     'address' => $q->address ?: '',
+                    'client_address' => $q->address ?: '',
+                    'installation_address' => $q->installation_address ?? (is_array($q->items) ? ($q->items['installation_address'] ?? ($q->items['_meta']['installation_address'] ?? '')) : ''),
                     'valid_until' => ($q->valid_until instanceof \DateTimeInterface) ? $q->valid_until->format('Y-m-d') : ($q->valid_until ?: now()->addDays(14)->format('Y-m-d')),
                     'subtotal' => (float) $q->subtotal,
                     'discount_amount' => (float) $q->discount_amount,
@@ -1248,19 +1257,27 @@ class AscendModuleViewer extends Component
             if (\Illuminate\Support\Facades\Schema::hasTable('email_templates')) {
                 $rows = \Illuminate\Support\Facades\DB::table('email_templates')
                     ->latest()->limit(20)->get()->map(fn ($r) => [
-                        'id'       => $r->id,
-                        'name'     => $r->name,
-                        'category' => $r->category,
-                        'subject'  => $r->subject,
-                        'status'   => ucfirst($r->status),
-                        'opens'    => data_get(json_decode($r->stats ?? '{}', true), 'open_rate', '—'),
-                        'clicks'   => data_get(json_decode($r->stats ?? '{}', true), 'click_rate', '—'),
+                        'id'        => $r->id,
+                        'name'      => $r->name,
+                        'category'  => $r->category ?? 'General',
+                        'subject'   => $r->subject ?? '',
+                        'preheader' => property_exists($r, 'preheader') ? ($r->preheader ?? '') : '',
+                        'body'      => property_exists($r, 'body') ? ($r->body ?? '') : (property_exists($r, 'text') ? ($r->text ?? '') : ''),
+                        'cta_text'  => property_exists($r, 'cta_text') ? ($r->cta_text ?? 'Learn More') : 'Learn More',
+                        'cta_url'   => property_exists($r, 'cta_url') ? ($r->cta_url ?? '') : '',
+                        'status'    => property_exists($r, 'status') ? ucfirst($r->status) : 'Active',
+                        'opens'     => data_get(json_decode($r->stats ?? '{}', true), 'open_rate', '—'),
+                        'clicks'    => data_get(json_decode($r->stats ?? '{}', true), 'click_rate', '—'),
                     ])->toArray();
                 if (!empty($rows)) {
                     $this->emailTemplates = $rows;
                 }
             }
         } catch (\Throwable) {}
+
+        if (empty($this->emailTemplates)) {
+            $this->emailTemplates = $this->getDefaultEmailTemplates();
+        }
 
         // --- HR Employees from Database Users ---
         try {
@@ -1290,7 +1307,7 @@ class AscendModuleViewer extends Component
         try {
             $totalSales = PosReceipt::sum('total') + Invoice::where('status', 'paid')->sum('total');
             $this->branchSales = [
-                ['name' => 'Abuja Headquarters (Garki Area 3)', 'type' => 'Corporate HQ', 'sales' => (float) ($totalSales * 0.55), 'share' => '55.0%', 'status' => 'Optimal'],
+                ['name' => 'Abuja Headquarters (Mall of Dubai, Area 11 Garki)', 'type' => 'Corporate HQ', 'sales' => (float) ($totalSales * 0.55), 'share' => '55.0%', 'status' => 'Optimal'],
                 ['name' => 'Lagos Commercial Branch (Victoria Island)', 'type' => 'Regional Office', 'sales' => (float) ($totalSales * 0.30), 'share' => '30.0%', 'status' => 'Active'],
                 ['name' => 'Port Harcourt Logistics Hub', 'type' => 'Logistics Hub', 'sales' => (float) ($totalSales * 0.15), 'share' => '15.0%', 'status' => 'Active'],
             ];
@@ -1457,7 +1474,8 @@ class AscendModuleViewer extends Component
         $this->form['category'] = $inv->category ?? ($itemsData['category'] ?? 'Solar & Inverter Systems');
         $this->form['client_phone'] = $itemsData['client_phone'] ?? '';
         $this->form['client_email'] = $itemsData['client_email'] ?? '';
-        $this->form['client_address'] = $itemsData['client_address'] ?? '';
+        $this->form['client_address'] = $itemsData['client_address'] ?? ($inv->client_address ?? '');
+        $this->form['installation_address'] = $itemsData['installation_address'] ?? ($inv->installation_address ?? ($itemsData['site_address'] ?? ''));
         $this->form['client_tin'] = $itemsData['client_tin'] ?? '';
         $this->form['issue_date'] = ($inv->issue_date instanceof \DateTimeInterface) ? $inv->issue_date->format('Y-m-d') : ($inv->issue_date ?? now()->format('Y-m-d'));
         $this->form['due_date'] = ($inv->due_date instanceof \DateTimeInterface) ? $inv->due_date->format('Y-m-d') : ($inv->due_date ?? now()->addDays(14)->format('Y-m-d'));
@@ -1524,6 +1542,7 @@ class AscendModuleViewer extends Component
             'client_phone' => $this->form['client_phone'] ?? ($this->form['phone'] ?? ''),
             'client_email' => $this->form['client_email'] ?? ($this->form['email'] ?? ''),
             'client_address' => $this->form['client_address'] ?? ($this->form['address'] ?? ''),
+            'installation_address' => $this->form['installation_address'] ?? ($this->form['site_address'] ?? ''),
             'client_tin' => $this->form['client_tin'] ?? ($this->form['tin'] ?? ''),
             'discount_type' => $this->form['discount_type'] ?? 'fixed',
             'discount_value' => (float) ($this->form['discount_value'] ?? 0),
@@ -1938,7 +1957,8 @@ class AscendModuleViewer extends Component
                     'quote_id' => $quote['id'],
                     'client_phone' => $quote['phone'] ?? '',
                     'client_email' => $quote['email'] ?? '',
-                    'client_address' => $quote['address'] ?? '',
+                    'client_address' => $quote['address'] ?? ($quote['client_address'] ?? ''),
+                    'installation_address' => $quote['installation_address'] ?? ($quote['site_address'] ?? ''),
                     'line_items' => $quote['items'] ?? [],
                 ],
             ]);
@@ -2170,6 +2190,8 @@ class AscendModuleViewer extends Component
             'email' => $email,
             'phone' => $phone,
             'address' => $this->form['client_address'] ?? '',
+            'client_address' => $this->form['client_address'] ?? '',
+            'installation_address' => $this->form['installation_address'] ?? '',
             'valid_until' => $this->form['due_date'] ?: now()->addDays(14)->format('Y-m-d'),
             'subtotal' => (float) ($this->form['subtotal'] ?? $amount),
             'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
@@ -2192,6 +2214,7 @@ class AscendModuleViewer extends Component
                         'email' => $email,
                         'phone' => $phone,
                         'address' => $this->form['client_address'] ?? null,
+                        'installation_address' => $this->form['installation_address'] ?? null,
                         'valid_until' => $this->form['due_date'] ?: now()->addDays(14)->toDateString(),
                         'subtotal' => (float) ($this->form['subtotal'] ?? $amount),
                         'discount_amount' => (float) ($this->form['discount_amount'] ?? 0),
@@ -2199,7 +2222,11 @@ class AscendModuleViewer extends Component
                         'total' => $amount,
                         'status' => $status,
                         'notes' => $this->form['notes'] ?: null,
-                        'items' => array_values($items),
+                        'items' => [
+                            'line_items' => array_values($items),
+                            'client_address' => $this->form['client_address'] ?? '',
+                            'installation_address' => $this->form['installation_address'] ?? '',
+                        ],
                     ]
                 );
             }
@@ -2312,7 +2339,10 @@ class AscendModuleViewer extends Component
         $this->form['client_name'] = $quote->client_name;
         $this->form['client_phone'] = $quote->phone ?? '';
         $this->form['client_email'] = $quote->email ?? '';
-        $this->form['client_address'] = $quote->address ?? '';
+        $rawItems = is_array($quote->items) ? $quote->items : (json_decode($quote->items ?? '[]', true) ?: []);
+        $itemsMeta = (isset($rawItems['line_items']) && is_array($rawItems['line_items'])) ? $rawItems : [];
+        $this->form['client_address'] = $quote->address ?? ($itemsMeta['client_address'] ?? ($quote->client_address ?? ''));
+        $this->form['installation_address'] = $quote->installation_address ?? ($itemsMeta['installation_address'] ?? ($quote->site_address ?? ''));
         $this->form['due_date'] = ($quote->valid_until instanceof \DateTimeInterface) ? $quote->valid_until->format('Y-m-d') : ($quote->valid_until ?? now()->addDays(14)->format('Y-m-d'));
         $this->form['status'] = $quote->status ?? 'Draft';
         $this->form['subtotal'] = (float) $quote->subtotal;
@@ -2388,7 +2418,9 @@ class AscendModuleViewer extends Component
             'category' => $quote->category ?? (is_array($rawItems) ? ($rawItems['category'] ?? 'Solar & Inverter Systems') : 'Solar & Inverter Systems'),
             'phone' => $quote->phone ?? '—',
             'email' => $quote->email ?? '—',
-            'address' => $quote->address ?? '—',
+            'address' => $quote->address ?? ($rawItems['client_address'] ?? '—'),
+            'client_address' => $quote->address ?? ($rawItems['client_address'] ?? '—'),
+            'installation_address' => $quote->installation_address ?? ($rawItems['installation_address'] ?? ($rawItems['site_address'] ?? '—')),
             'valid_until' => ($quote->valid_until instanceof \DateTimeInterface) ? $quote->valid_until->format('d M Y') : ($quote->valid_until ?? '—'),
             'created_at' => ($quote->created_at instanceof \DateTimeInterface) ? $quote->created_at->format('d M Y') : now()->format('d M Y'),
             'subtotal' => (float) $quote->subtotal,
@@ -2722,7 +2754,8 @@ class AscendModuleViewer extends Component
                 'notes' => 'B2B Instant Retailer Order: ' . $orderNumber,
                 'items' => [
                     'client_email' => $user?->email ?: '',
-                    'client_address' => $this->orderShippingAddress ?: 'Suite FF002, Area 3 Garki Abuja HQ',
+                    'client_address' => $this->orderShippingAddress ?: 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja',
+                    'installation_address' => $this->orderShippingAddress ?: 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja',
                     'line_items' => array_map(fn($item) => [
                         'sku' => $item['sku'],
                         'description' => $item['name'],
@@ -2747,7 +2780,7 @@ class AscendModuleViewer extends Component
             'total_amount' => $totalAmount,
             'order_type' => $orderType,
             'status' => $status,
-            'shipping_address' => $this->orderShippingAddress ?: 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.',
+            'shipping_address' => $this->orderShippingAddress ?: 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja',
             'notes' => $this->orderNotes,
             'invoice_id' => $invoiceId,
             'paystack_status' => 'unpaid',
@@ -3119,6 +3152,34 @@ class AscendModuleViewer extends Component
             session()->flash('warning', __('Please enter an email subject before sending!'));
             return;
         }
+
+        $resendNotice = '';
+        try {
+            $resend = app(\Modules\AppEmail\Services\ResendEmailService::class);
+            if ($resend->configured()) {
+                $userEmail = auth()->user()?->email;
+                if ($userEmail) {
+                    $bodyHtml = '<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;">'
+                        .'<h2 style="color:#6b21a8;margin-top:0;">'.e($this->emailForm['subject']).'</h2>'
+                        .(!empty($this->emailForm['preheader']) ? '<p style="color:#64748b;font-size:13px;margin-bottom:20px;"><em>'.e($this->emailForm['preheader']).'</em></p>' : '')
+                        .'<div style="font-size:14px;line-height:1.7;color:#334155;">'.nl2br(e($this->emailForm['body'])).'</div>'
+                        .(!empty($this->emailForm['cta_url']) ? '<div style="margin:28px 0;"><a href="'.e($this->emailForm['cta_url']).'" style="background:#7c3aed;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">'.e($this->emailForm['cta_text'] ?: 'Learn More').'</a></div>' : '')
+                        .'<div style="border-top:1px solid #f1f5f9;margin-top:32px;padding-top:16px;font-size:11px;color:#94a3b8;">'
+                        .e($this->emailForm['footer'])
+                        .'</div></div>';
+
+                    $res = $resend->send([
+                        'to' => [$userEmail],
+                        'subject' => $this->emailForm['subject'],
+                        'html' => $bodyHtml,
+                    ]);
+                    if ($res['ok'] ?? false) {
+                        $resendNotice = ' '.__('(Live copy dispatched to :email via Resend)', ['email' => $userEmail]);
+                    }
+                }
+            }
+        } catch (\Throwable) {}
+
         $this->audienceBlasts[] = [
             'subject' => $this->emailForm['subject'],
             'segment' => $this->blastForm['segment'],
@@ -3128,7 +3189,7 @@ class AscendModuleViewer extends Component
             'date' => now()->format('Y-m-d'),
             'status' => 'Sent',
         ];
-        session()->flash('status', __('Email campaign ":subject" dispatched to subscribers!', ['subject' => $this->emailForm['subject']]));
+        session()->flash('status', __('Email campaign ":subject" dispatched to subscribers!:notice', ['subject' => $this->emailForm['subject'], 'notice' => $resendNotice]));
         $this->emailForm = [
             'template' => 'blank',
             'subject' => '',
@@ -3136,8 +3197,50 @@ class AscendModuleViewer extends Component
             'body' => '',
             'cta_text' => 'Learn More',
             'cta_url' => '',
-            'footer' => 'Ascend Systems — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
+            'footer' => 'Ascend Systems — Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
         ];
+    }
+
+    public function sendTestEmail(): void
+    {
+        if (trim($this->emailForm['subject']) === '') {
+            session()->flash('warning', __('Please enter an email subject line before sending a test.'));
+            return;
+        }
+
+        $recipientEmail = auth()->user()?->email ?: 'admin@ascendsystems.ng';
+        try {
+            $resend = app(\Modules\AppEmail\Services\ResendEmailService::class);
+            if (! $resend->configured()) {
+                session()->flash('warning', __('Resend is not configured yet. Please check your RESEND_API_KEY in .env'));
+                return;
+            }
+
+            $bodyHtml = '<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;">'
+                .'<div style="background:#f3e8ff;color:#7e22ce;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:15px;">TEST EMAIL PREVIEW</div>'
+                .'<h2 style="color:#6b21a8;margin-top:0;">'.e($this->emailForm['subject']).'</h2>'
+                .(!empty($this->emailForm['preheader']) ? '<p style="color:#64748b;font-size:13px;margin-bottom:20px;"><em>'.e($this->emailForm['preheader']).'</em></p>' : '')
+                .'<div style="font-size:14px;line-height:1.7;color:#334155;">'.nl2br(e($this->emailForm['body'])).'</div>'
+                .(!empty($this->emailForm['cta_url']) ? '<div style="margin:28px 0;"><a href="'.e($this->emailForm['cta_url']).'" style="background:#7c3aed;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">'.e($this->emailForm['cta_text'] ?: 'Learn More').'</a></div>' : '')
+                .'<div style="border-top:1px solid #f1f5f9;margin-top:32px;padding-top:16px;font-size:11px;color:#94a3b8;">'
+                .e($this->emailForm['footer'])
+                .'</div></div>';
+
+            $result = $resend->send([
+                'to' => [$recipientEmail],
+                'subject' => '[Test] '.$this->emailForm['subject'],
+                'html' => $bodyHtml,
+            ]);
+
+            if ($result['ok'] ?? false) {
+                session()->flash('status', __('Test email successfully sent to :email via Resend API!', ['email' => $recipientEmail]));
+            } else {
+                $err = data_get($result, 'data.message') ?: data_get($result, 'data.body') ?: 'Check verified sender domain and API key permissions.';
+                session()->flash('warning', __('Resend delivery notice: :msg', ['msg' => (string) $err]));
+            }
+        } catch (\Throwable $e) {
+            session()->flash('warning', __('Test send error: :msg', ['msg' => $e->getMessage()]));
+        }
     }
 
     public function duplicateEmailTemplate(int $index): void
@@ -3689,6 +3792,120 @@ class AscendModuleViewer extends Component
         } catch (\Throwable $e) { session()->flash('warning', $e->getMessage()); }
     }
 
+    public function loadEmailTemplate(int|string $index): void
+    {
+        if ($index === '' || $index === null) {
+            return;
+        }
+        $index = (int) $index;
+        if (isset($this->emailTemplates[$index])) {
+            $tmpl = $this->emailTemplates[$index];
+            $this->emailForm['subject'] = $tmpl['subject'] ?? '';
+            $this->emailForm['preheader'] = $tmpl['preheader'] ?? '';
+            $this->emailForm['body'] = $tmpl['body'] ?? '';
+            $this->emailForm['cta_text'] = $tmpl['cta_text'] ?? 'Learn More';
+            $this->emailForm['cta_url'] = $tmpl['cta_url'] ?? '';
+            session()->flash('status', __('Loaded template ":name" into the email editor.', ['name' => $tmpl['name']]));
+        }
+    }
+
+    public function getDefaultEmailTemplates(): array
+    {
+        return [
+            [
+                'id' => 1,
+                'name' => 'Monthly Technology & Clean Energy Brief',
+                'category' => 'Marketing',
+                'subject' => '⚡ Ascend Energy Brief: Maximizing Solar ROI & Commercial Storage in 2026',
+                'preheader' => 'Smart power audits, new LiFePO4 battery warranty terms, and grid-independence tips.',
+                'body' => "Dear Valued Client,\n\nRising fuel and grid tariffs continue to impact commercial operations across Nigeria. At Ascend Systems, we are dedicated to helping businesses achieve 24/7 power autonomy with intelligent hybrid solar systems and Tier-1 LiFePO4 battery storage.\n\nIn this month's brief:\n• Optimizing inverter efficiency during high-load manufacturing cycles\n• New 5-year warranty protection across all Ascend Lithium battery banks\n• How our IoT energy monitoring dashboard helps prevent unexpected downtime\n\nReady to review your facility's energy performance? Contact our engineering team today for a complimentary on-site energy audit.",
+                'cta_text' => 'Schedule Energy Audit',
+                'cta_url' => 'https://ascendsystems.ng/audit',
+                'status' => 'Active',
+                'opens' => '46.8%',
+                'clicks' => '18.4%',
+            ],
+            [
+                'id' => 2,
+                'name' => 'Commercial Solar & Inverter Proposal Follow-Up',
+                'category' => 'Sales',
+                'subject' => '💼 Following Up on Your Ascend Solar Power System Proposal',
+                'preheader' => 'Detailed system sizing, payback analysis, and installation timeline for your review.',
+                'body' => "Dear {{Client Name}},\n\nThank you for considering Ascend Systems for your enterprise power infrastructure. Following our technical assessment of your facility, we prepared a comprehensive proposal tailored to eliminate generator reliance and slash operating overhead by over 55%.\n\nKey Highlights of Your Proposal:\n• High-efficiency Tier-1 Mono Solar Arrays with 25-year performance warranty\n• Pure Sine Wave Hybrid Inverters with zero-switchover seamless transfer\n• 10-Year Cycle Life LiFePO4 Battery Storage Bank\n• Flexible phased deployment and structured milestone payment terms\n\nI would love to arrange a brief 10-minute follow-up call this week to answer any technical questions or adjust system capacities to match your budget.",
+                'cta_text' => 'Review Detailed Quote',
+                'cta_url' => 'https://ascendsystems.ng/quotes',
+                'status' => 'Active',
+                'opens' => '62.5%',
+                'clicks' => '34.1%',
+            ],
+            [
+                'id' => 3,
+                'name' => 'B2B Cold Outreach — Facility Power Cost Reduction',
+                'category' => 'Sales Outreach',
+                'subject' => '⚡ Slashing Facility Diesel Overhead by 60% — Ascend Systems',
+                'preheader' => 'Proven hybrid solar solutions for commercial hubs, hospitals, and corporate offices.',
+                'body' => "Dear {{First Name}},\n\nManaging operational expenses in Nigeria requires decisive steps toward energy independence. For many commercial facilities in Abuja and Lagos, diesel generators consume up to 40% of monthly operational cash flow.\n\nAscend Systems engineers commercial-grade solar and inverter microgrids that seamlessly blend solar generation, battery storage, and public grid power—reducing generator run hours by 60% to 80%.\n\nOur recent installations across corporate offices and logistics hubs have achieved full capital payback in under 18 months.\n\nWould you be open to a 5-minute conversation on how we can model the exact cost savings for {{Company Name}}?",
+                'cta_text' => 'Request Free Cost Analysis',
+                'cta_url' => 'https://ascendsystems.ng/solutions',
+                'status' => 'Active',
+                'opens' => '41.2%',
+                'clicks' => '14.7%',
+            ],
+            [
+                'id' => 4,
+                'name' => 'Product Launch — Ascend Pro Hybrid Inverters',
+                'category' => 'Product Launch',
+                'subject' => '🚀 Introducing Ascend Pro Hybrid Inverters: Zero Switchover, Real-time Cloud Telemetry',
+                'preheader' => 'Next-generation power management with smart load prioritization and mobile app control.',
+                'body' => "Dear Partner,\n\nWe are proud to introduce our latest flagship series: The Ascend Pro Hybrid Inverter & LiFePO4 Energy Storage Solution.\n\nEngineered specifically for demanding African power grids, the new series features:\n• Sub-10ms Zero Switchover (servers, medical equipment, and POS terminals stay online uninterrupted)\n• Dual MPPT Solar Tracking for up to 98% panel harvesting efficiency\n• Native Wi-Fi & Cloud Telemetry for remote diagnostics and automated alerts\n• Seamless parallel capability up to 6 units for large industrial loads\n\nSpecial introductory pricing and wholesale dealer packages are available for orders placed this month.",
+                'cta_text' => 'View Product Specs & Pricing',
+                'cta_url' => 'https://ascendsystems.ng/products/hybrid-pro',
+                'status' => 'Active',
+                'opens' => '54.0%',
+                'clicks' => '27.9%',
+            ],
+            [
+                'id' => 5,
+                'name' => 'Client Onboarding & Warranty Activation Guide',
+                'category' => 'Onboarding',
+                'subject' => '🎉 Welcome to Ascend Systems! Your Warranty & System Access Guide',
+                'preheader' => 'Your warranty certificate, support contacts, and system maintenance instructions.',
+                'body' => "Dear {{Client Name}},\n\nWelcome to the Ascend Systems family! Your solar power installation has been successfully commissioned, load-tested, and activated.\n\nHere are the details for your records:\n• Installation Reference: {{System_ID}}\n• Warranty Period: 5 Years on Battery Banks & Inverters | 25 Years on Solar Panels\n• Support Hotline: +234 811 763 3020 (Dedicated Technical Desk)\n• Customer Portal: Monitor system performance and raise service requests 24/7\n\nOur certified technicians will conduct your first complimentary routine maintenance check in 90 days. Thank you for trusting Ascend Systems with your power autonomy.",
+                'cta_text' => 'Access Customer Portal',
+                'cta_url' => 'https://ascendsystems.ng/portal',
+                'status' => 'Active',
+                'opens' => '76.3%',
+                'clicks' => '39.8%',
+            ],
+            [
+                'id' => 6,
+                'name' => 'Seasonal Battery Upgrade & Solar Trade-in Program',
+                'category' => 'Promotional',
+                'subject' => '🔋 Upgrade to Lithium: Trade In Your Old Lead-Acid Batteries for 20% Off',
+                'preheader' => 'Tired of replacing dead tubular batteries? Switch to 10-year cycle life LiFePO4 today.',
+                'body' => "Dear Valued Customer,\n\nAre your existing lead-acid or tubular inverter batteries struggling to hold a charge through the night?\n\nFor a limited time, Ascend Systems is running our Lithium Upgrade Promotion. Trade in your old, degraded battery bank and receive up to 20% trade-in credit toward brand new Ascend LiFePO4 Lithium Iron Phosphate batteries.\n\nWhy Switch to Lithium?\n• Over 6,000 cycles (lasting 10+ years vs. 18 months for lead-acid)\n• 95% Depth of Discharge with constant voltage output\n• Rapid charging in under 2.5 hours\n• Ultra-compact footprint with built-in Smart Battery Management System (BMS)\n\nContact our sales team today to schedule an evaluation of your current batteries.",
+                'cta_text' => 'Claim Your Trade-In Discount',
+                'cta_url' => 'https://ascendsystems.ng/trade-in',
+                'status' => 'Active',
+                'opens' => '48.6%',
+                'clicks' => '22.1%',
+            ],
+            [
+                'id' => 7,
+                'name' => 'Dormant Account Re-engagement & Special Partner Terms',
+                'category' => 'Re-engagement',
+                'subject' => '⚡ We miss working with you — Exclusive Partner Updates from Ascend Systems',
+                'preheader' => 'Special pricing, priority service dispatch, and new energy management tools for your team.',
+                'body' => "Dear {{First Name}},\n\nWe noticed it's been a while since your last interaction with Ascend Systems, and we wanted to check in.\n\nA lot has evolved across our product lines, including our new smart IoT monitoring platform, reduced turnaround times for maintenance dispatch, and exclusive trade pricing for our returning corporate clients.\n\nWe would love to welcome you back. Reply directly to this email or click below to explore our updated catalog with an exclusive 10% returning-partner discount code on your next invoice.",
+                'cta_text' => 'Reactivate Account & Save 10%',
+                'cta_url' => 'https://ascendsystems.ng/partner-welcome',
+                'status' => 'Active',
+                'opens' => '39.4%',
+                'clicks' => '16.2%',
+            ],
+        ];
+    }
+
     // =========================================================
     // PRIORITY 3: WHATSAPP AUTOMATION
     // =========================================================
@@ -3859,7 +4076,7 @@ class AscendModuleViewer extends Component
             $input = trim($this->agentTaskInput) ?: 'Execute automated intelligent workflow audit';
 
             $responses = [
-                'content' => "### Content AI Generation Output\n\n🚀 **Headline**: Empower Your Enterprise with Ascend ERP — Nigeria's Premier Multi-Branch Platform.\n\n**Body**: Streamline financial accounting, POS receipts, inventory stock tracking, and automated monthly payroll from Abuja HQ (`Suite FF002, Neighborhood Centre, Area 3, Garki`) to all regional branches.\n\n**Call to Action**: Call +234 811 763 3020 or visit info@ascendsystems.ng to schedule a live demo today!",
+                'content' => "### Content AI Generation Output\n\n🚀 **Headline**: Empower Your Enterprise with Ascend ERP — Nigeria's Premier Multi-Branch Platform.\n\n**Body**: Streamline financial accounting, POS receipts, inventory stock tracking, and automated monthly payroll from Abuja HQ (`Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja`) to all regional branches.\n\n**Call to Action**: Call +234 811 763 3020 or visit info@ascendsystems.ng to schedule a live demo today!",
                 'financial' => "### Financial AI Analysis Output\n\n📊 **P&L Variance Audit (Q3 2026)**:\n- **Gross Revenue**: ₦28,450,000.00 (Exceeds Q3 target by +14.2%)\n- **EBITDA Operating Income**: ₦11,150,000.00 (39.2% Operating Margin)\n- **Payroll Liability & Tax Reserve**: ₦2,250,000.00 monthly payroll with 100% PAYE & Pension compliance.\n- **Recommendation**: Reallocate ₦1,500,000 surplus to Abuja HQ inventory stock buffer.",
                 'inbox' => "### Inbox AI Support Triage Output\n\n✉️ **Message Analysis**: Inquiry regarding POS thermal printer paper size & Bluetooth setup.\n- **Sentiment**: Neutral / Technical Request\n- **Suggested Reply Draft**: \"Hello! Ascend POS supports standard 80mm and 58mm direct thermal paper. Navigate to POS Station → Thermal Printer Settings to connect.\"\n- **Escalation**: Low risk (Automated resolution applied).",
                 'crm' => "### CRM Lead AI Scoring Output\n\n🎯 **Lead Qualification Results**:\n- **Northbridge Media Nigeria**: Score 94/100 — Status: Highly Qualified (Expected Deal Value: ₦8,500,000.00)\n- **Apex Technology Solutions**: Score 88/100 — Status: Proposal Delivered\n- **Action Recommendation**: Schedule executive demo with Northbridge decision makers this week.",
@@ -4354,6 +4571,7 @@ class AscendModuleViewer extends Component
             $this->form['client_phone'] = '';
             $this->form['client_email'] = '';
             $this->form['client_address'] = '';
+            $this->form['installation_address'] = '';
             $this->form['client_tin'] = '';
             $this->form['issue_date'] = now()->format('Y-m-d');
             $this->form['due_date'] = now()->addDays(14)->format('Y-m-d');
@@ -4442,7 +4660,7 @@ class AscendModuleViewer extends Component
                 'body' => '',
                 'cta_text' => 'Learn More',
                 'cta_url' => '',
-                'footer' => 'Ascend Systems — Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
+                'footer' => 'Ascend Systems — Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja | Call: +234 811 763 3020 | Mail: info@ascendsystems.ng',
             ];
         }
 
@@ -4465,6 +4683,7 @@ class AscendModuleViewer extends Component
             'client_phone' => '',
             'client_email' => '',
             'client_address' => '',
+            'installation_address' => '',
             'client_tin' => '',
             'discount_type' => 'fixed',
             'discount_value' => '0',
@@ -4821,7 +5040,7 @@ class AscendModuleViewer extends Component
     {
         $captions = [
             'Instagram' => "⚡ Never get caught in darkness again! Ascend 5.5kVA Hybrid Solar Inverter + 10.2kWh LiFePO4 Lithium Battery keeps your Abuja home and office running 24/7 silently and efficiently. ☀️🔋\n\n✅ Dual MPPT Charge Controller\n✅ Seamless 0ms UPS Switchover\n✅ 5-Year Warranty & Installation across Nigeria\n\n📲 DM us or call +234 811 763 3020 for instant quote!",
-            'Facebook' => "Is high diesel cost cutting into your business profits? Ascend Systems delivers industrial solar power, smart automation relays, and high-efficiency mono panels engineered for Nigerian power conditions. 🇳🇬\n\nVisit our Abuja HQ (Suite FF002 Area 3 Garki) or order wholesale online via our B2B Partner Portal!",
+            'Facebook' => "Is high diesel cost cutting into your business profits? Ascend Systems delivers industrial solar power, smart automation relays, and high-efficiency mono panels engineered for Nigerian power conditions. 🇳🇬\n\nVisit our Abuja HQ (Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja) or order wholesale online via our B2B Partner Portal!",
             'LinkedIn' => "Architecting resilient energy & network infrastructure for enterprise enterprises across West Africa. Ascend Systems specializes in 24-Port Fiber Gigabit switches, PTZ 4K Solar Security Cameras, and High-KVA Hybrid Power Systems.\n\nTalk to our senior engineering team today: info@ascendsystems.ng",
             'WhatsApp' => "Hello! ☀️ Thanks for reaching out to Ascend Systems. Here is our official B2B Wholesale Datasheet & Price List for Inverters & Batteries: https://ascendsystems.ng/catalog.pdf",
         ];

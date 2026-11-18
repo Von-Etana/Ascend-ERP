@@ -14,6 +14,7 @@ class PriceQuote extends Model
         'email',
         'phone',
         'address',
+        'installation_address',
         'valid_until',
         'subtotal',
         'discount_amount',

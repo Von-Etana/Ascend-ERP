@@ -214,6 +214,15 @@ Route::post('api/leads/partner-capture', function (\Illuminate\Http\Request $req
 })->name('api.leads.partner-capture');
 
 // Public Client Quotation Review & E-Signature Portal
+Route::get('get-a-quote', function () {
+    return redirect('/portal/ascend/sales?tab=quotes&action=create_quote');
+})->name('get-a-quote');
+Route::get('get-quote', function () {
+    return redirect('/portal/ascend/sales?tab=quotes&action=create_quote');
+})->name('get-quote');
+Route::get('quote', function () {
+    return redirect('/portal/ascend/sales?tab=quotes&action=create_quote');
+});
 Route::get('portal/quote/view', [PublicQuoteController::class, 'showQuote'])->name('portal.quote.public-view');
 Route::get('portal/quote/warranty/pdf', [PdfExportController::class, 'downloadWarrantyCertificate'])->name('portal.quote.warranty.pdf');
 Route::get('portal/quote/job-card/pdf', [PdfExportController::class, 'downloadJobCard'])->name('portal.quote.job-card.pdf');

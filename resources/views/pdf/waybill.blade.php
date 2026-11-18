@@ -32,6 +32,7 @@
         $clientName = $quote['client_name'] ?? 'Client Installation Site';
         $clientPhone = $quote['phone'] ?? ($quote['client_phone'] ?? '+234 800 000 0000');
         $clientAddress = $quote['address'] ?? ($quote['client_address'] ?? 'Customer Delivery Site Address');
+        $installationAddress = $quote['installation_address'] ?? ($quote['site_address'] ?? ($rawItems['installation_address'] ?? ''));
         $quoteId = $quote['id'] ?? ($quote['invoice_number'] ?? 'QT-2026');
     @endphp
 
@@ -65,8 +66,10 @@
                 <td class="value">{{ $clientPhone }}</td>
             </tr>
             <tr>
-                <td class="label">Delivery Destination:</td>
-                <td class="value" colspan="3">{{ $clientAddress }}</td>
+                <td class="label">Billing Address:</td>
+                <td class="value">{{ $clientAddress }}</td>
+                <td class="label">Delivery / Site Destination:</td>
+                <td class="value">{{ $installationAddress ?: $clientAddress }}</td>
             </tr>
             <tr>
                 <td class="label">Dispatched From:</td>

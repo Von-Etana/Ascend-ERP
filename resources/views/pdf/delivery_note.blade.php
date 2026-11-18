@@ -34,6 +34,7 @@
         $clientPhone = $itemsData['client_phone'] ?? ($invoice->client_phone ?? '');
         $clientEmail = $itemsData['client_email'] ?? ($invoice->client_email ?? '');
         $clientAddress = $itemsData['client_address'] ?? ($invoice->client_address ?? '');
+        $installationAddress = $itemsData['installation_address'] ?? ($invoice->installation_address ?? ($itemsData['site_address'] ?? ''));
         $clientTin = $itemsData['client_tin'] ?? ($invoice->client_tin ?? '');
     @endphp
 
@@ -65,7 +66,10 @@
                 <td style="width: 55%;">
                     <div class="section-label">Consignee / Delivery Address:</div>
                     <div class="customer-name">{{ $invoice->client_name }}</div>
-                    <div class="customer-detail"><strong>Delivery Site:</strong> {{ $clientAddress ?: 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.' }}</div>
+                    @if (!empty($clientAddress))
+                        <div class="customer-detail"><strong>Invoice / Billing Address:</strong> {{ $clientAddress }}</div>
+                    @endif
+                    <div class="customer-detail"><strong>Delivery / Installation Site:</strong> {{ $installationAddress ?: ($clientAddress ?: 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja') }}</div>
                     @if (!empty($clientPhone) || !empty($clientEmail))
                         <div class="customer-detail">
                             @if (!empty($clientPhone)) <strong>Contact Phone:</strong> {{ $clientPhone }} @endif
@@ -147,7 +151,7 @@
 
     <div class="footer">
         <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Dispatch & Delivery Acknowledgement Note<br>
-        Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.<br>
+        Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja<br>
         Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
     </div>
 </body>

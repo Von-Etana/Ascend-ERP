@@ -20,7 +20,7 @@ class SystemGovernanceTest extends TestCase
             ->test(AscendModuleViewer::class, ['moduleKey' => 'administration'])
             ->set('activeTab', 'organization')
             ->set('orgProfileForm.company_name', 'Ascend Systems Nigeria Ltd')
-            ->set('orgProfileForm.headquarters', 'Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.')
+            ->set('orgProfileForm.headquarters', 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja')
             ->call('saveOrgProfile')
             ->assertSee('Corporate Organization Profile updated successfully');
     }

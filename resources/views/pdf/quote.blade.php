@@ -206,6 +206,7 @@
         $clientPhone = $quote['phone'] ?? ($quote['client_phone'] ?? '');
         $clientEmail = $quote['email'] ?? ($quote['client_email'] ?? '');
         $clientAddress = $quote['address'] ?? ($quote['client_address'] ?? '');
+        $installationAddress = $quote['installation_address'] ?? ($quote['site_address'] ?? ($rawItems['installation_address'] ?? ''));
         $subtotal = (float) ($quote['subtotal'] ?? 0);
         $discountAmount = (float) ($quote['discount_amount'] ?? 0);
         $tax = (float) ($quote['tax'] ?? 0);
@@ -249,7 +250,10 @@
                     <div class="section-label">Prepared For:</div>
                     <div class="customer-name">{{ $quote['client_name'] ?? 'Prospective Client' }}</div>
                     @if (!empty($clientAddress))
-                        <div class="customer-detail"><strong>Address:</strong> {{ $clientAddress }}</div>
+                        <div class="customer-detail"><strong>Invoice / Billing Address:</strong> {{ $clientAddress }}</div>
+                    @endif
+                    @if (!empty($installationAddress))
+                        <div class="customer-detail"><strong>Installation / Site Address:</strong> {{ $installationAddress }}</div>
                     @endif
                     @if (!empty($clientPhone) || !empty($clientEmail))
                         <div class="customer-detail">
@@ -353,7 +357,7 @@
     <!-- Footnote: Fixed to stick to first page bottom -->
     <div class="footer">
         <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Commercial Quotation<br>
-        Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. &nbsp;|&nbsp; Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
+        Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja &nbsp;|&nbsp; Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
     </div>
 </body>
 </html>

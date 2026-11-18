@@ -34,6 +34,7 @@
         $lineItems = isset($rawItems['line_items']) && is_array($rawItems['line_items']) ? $rawItems['line_items'] : (is_array($rawItems) ? $rawItems : []);
         $clientName = $quote['client_name'] ?? 'Valued Customer';
         $clientAddress = $quote['address'] ?? ($quote['client_address'] ?? 'Customer Installation Site');
+        $installationAddress = $quote['installation_address'] ?? ($quote['site_address'] ?? ($rawItems['installation_address'] ?? ''));
         $quoteId = $quote['id'] ?? ($quote['invoice_number'] ?? 'QT-2026');
         $issueDate = isset($quote['created_at']) ? date('F d, Y', strtotime($quote['created_at'])) : date('F d, Y');
         $expiryDate = date('F d, Y', strtotime('+5 years'));
@@ -61,8 +62,12 @@
                     <td class="value">{{ $clientName }}</td>
                 </tr>
                 <tr>
-                    <td class="label">Site / Installation Location:</td>
+                    <td class="label">Billing Address:</td>
                     <td class="value">{{ $clientAddress }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Site / Installation Location:</td>
+                    <td class="value">{{ $installationAddress ?: $clientAddress }}</td>
                 </tr>
                 <tr>
                     <td class="label">Warranty Coverage Period:</td>
@@ -124,7 +129,7 @@
         </table>
 
         <div class="footer">
-            {{ $companyName }} &nbsp;|&nbsp; Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT. &nbsp;|&nbsp; Call: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }}
+            {{ $companyName }} &nbsp;|&nbsp; Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja &nbsp;|&nbsp; Call: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }}
         </div>
     </div>
 </body>

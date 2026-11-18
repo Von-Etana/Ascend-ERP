@@ -5,7 +5,10 @@
     $contactEmail = trim((string) $options->get('contact_email', 'support@yourcompany.com'));
     $contactPhone = trim((string) $options->get('contact_phone_number', '+1 234 567 890'));
     $workingHours = trim((string) $options->get('contact_working_hours', 'Mon - Fri: 09:00 AM - 06:00 PM'));
-    $contactLocation = trim((string) $options->get('contact_location', '123 Main Street, City, Country'));
+    $contactLocation = trim((string) $options->get('contact_location', 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja'));
+    if ($contactLocation === '123 Main Street, City, Country' || empty($contactLocation)) {
+        $contactLocation = 'Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja';
+    }
     $contactCards = [
         [
             'label' => __('Website'),

@@ -5422,6 +5422,29 @@
                         </div>
 
                         <form wire:submit.prevent="sendEmailCampaign" class="mt-5 space-y-4">
+                            <!-- Quick Template Selector -->
+                            <div class="rounded-2xl border border-purple-200/80 bg-purple-50/70 p-3.5 dark:border-purple-900/40 dark:bg-purple-950/20">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-purple-600 text-white text-xs shadow-xs">
+                                            <i class="fa-light fa-sparkles"></i>
+                                        </span>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ __('Pre-built Email Templates') }}</p>
+                                            <p class="text-[11px] text-slate-500">{{ __('Select a template to instantly populate the composer.') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="w-full sm:w-auto">
+                                        <select wire:change="loadEmailTemplate($event.target.value)" class="w-full sm:w-72 rounded-xl border border-purple-200 bg-white px-3 py-1.5 text-xs font-bold text-purple-900 shadow-2xs outline-none focus:border-purple-500 dark:border-purple-800 dark:bg-slate-900 dark:text-purple-200">
+                                            <option value="">{{ __('— Choose a Template to Load —') }}</option>
+                                            @foreach ($emailTemplates as $tIdx => $tItem)
+                                                <option value="{{ $tIdx }}">[{{ $tItem['category'] }}] {{ $tItem['name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Email Subject Line</label>
                                 <input type="text" wire:model="emailForm.subject" placeholder="e.g. 🚀 Q3 Product Update: New POS Thermal & AI Capabilities" required class="mt-1 block w-full rounded-2xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold outline-none focus:border-purple-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white">
@@ -5448,7 +5471,10 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-end gap-3 pt-3 border-t dark:border-slate-800">
+                            <div class="flex flex-wrap items-center justify-end gap-3 pt-3 border-t dark:border-slate-800">
+                                <button type="button" wire:click="sendTestEmail" class="rounded-2xl border border-purple-200 bg-purple-50/70 px-4 py-2.5 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-300 transition">
+                                    <i class="fa-light fa-paper-plane-top mr-1.5"></i>Send Test via Resend
+                                </button>
                                 <button type="button" wire:click="saveEmailDraft" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200">
                                     <i class="fa-light fa-floppy-disk mr-1.5"></i>Save Draft
                                 </button>
@@ -5499,8 +5525,13 @@
                                     <div><span class="text-slate-400">Open Rate:</span> <span class="font-bold text-emerald-600">{{ $tmpl['opens'] }}</span></div>
                                     <div><span class="text-slate-400">Click Rate:</span> <span class="font-bold text-purple-600">{{ $tmpl['clicks'] }}</span></div>
                                 </div>
-                                <div class="mt-3 pt-2 border-t flex justify-end gap-2 dark:border-slate-800">
-                                    <button type="button" wire:click="duplicateEmailTemplate({{ $idx }})" class="text-[10px] font-bold text-purple-600 hover:underline"><i class="fa-light fa-copy mr-1"></i>Duplicate</button>
+                                <div class="mt-3 pt-2.5 border-t flex items-center justify-between gap-2 dark:border-slate-800">
+                                    <button type="button" wire:click="loadEmailTemplate({{ $idx }})" class="rounded-xl bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/60 dark:text-purple-300 dark:hover:bg-purple-900/60 transition">
+                                        <i class="fa-light fa-arrow-up-right-from-square mr-1"></i>{{ __('Use Template') }}
+                                    </button>
+                                    <button type="button" wire:click="duplicateEmailTemplate({{ $idx }})" class="text-[10px] font-bold text-slate-400 hover:text-purple-600 dark:text-slate-500 dark:hover:text-purple-300 transition">
+                                        <i class="fa-light fa-copy mr-1"></i>Duplicate
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
@@ -7853,7 +7884,7 @@
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-slate-500">Delivery / Shipping Address</label>
-                                    <textarea wire:model="orderShippingAddress" rows="2" placeholder="Suite FF002, Area 3 Garki Abuja HQ or Kano Branch..." class="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
+                                    <textarea wire:model="orderShippingAddress" rows="2" placeholder="Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja or Kano Branch..." class="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-slate-500">Order Notes / Instructions</label>
@@ -8325,7 +8356,7 @@
                             <span>▲</span> ASCEND AI POS STATION
                         </div>
                         <h3 class="text-xl font-black text-slate-950 dark:text-white">Ascend Systems</h3>
-                        <p class="text-xs font-medium text-slate-500 mt-0.5">Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.</p>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja</p>
                         <p class="text-[11px] font-semibold text-slate-400">Call: +234 811 763 3020 &nbsp;|&nbsp; Mail: info@ascendsystems.ng</p>
                         <div class="mt-3 rounded-xl bg-slate-100 p-2 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                             Receipt #: <span class="font-mono text-orange-600">{{ $modalData['receipt_no'] }}</span> &nbsp;·&nbsp; {{ $modalData['date'] }}
@@ -8491,7 +8522,7 @@
 
                         <!-- Customer Detailed Information -->
                         <div class="rounded-2xl border border-slate-200 p-3.5 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
-                            <div class="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('Detailed Customer Contact & Shipping Info') }}</div>
+                            <div class="text-[11px] font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ __('Detailed Customer Contact & Location Addresses') }}</div>
                             <div class="grid gap-3 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Phone Number</label>
@@ -8504,13 +8535,21 @@
                             </div>
                             <div class="grid gap-3 sm:grid-cols-2">
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Delivery / Shipping Address</label>
-                                    <input type="text" wire:model="form.client_address" placeholder="Suite 402, Victoria Island, Lagos" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
+                                        <i class="fa-light fa-file-invoice text-emerald-500"></i> {{ __('Invoice / Billing Address') }}
+                                    </label>
+                                    <input type="text" wire:model="form.client_address" placeholder="e.g. Suite 402, Victoria Island, Lagos" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax ID / TIN</label>
-                                    <input type="text" wire:model="form.client_tin" placeholder="TIN-98491029-001" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
+                                        <i class="fa-light fa-solar-panel text-amber-500"></i> {{ __('Installation / Site Address') }}
+                                    </label>
+                                    <input type="text" wire:model="form.installation_address" placeholder="e.g. Plot 14 Industrial Layout, Idu, Abuja" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                                 </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax ID / TIN</label>
+                                <input type="text" wire:model="form.client_tin" placeholder="TIN-98491029-001" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-mono font-medium outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
@@ -8785,13 +8824,21 @@
                             </div>
                             <div class="grid gap-3 sm:grid-cols-2">
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Site / Delivery Location Address</label>
-                                    <input type="text" wire:model="form.client_address" placeholder="e.g. Plot 14 Industrial Layout, Idu, Abuja" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
+                                        <i class="fa-light fa-file-invoice text-blue-500"></i> {{ __('Invoice / Billing Address') }}
+                                    </label>
+                                    <input type="text" wire:model="form.client_address" placeholder="e.g. Suite 402, Victoria Island, Lagos" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax Identification (TIN)</label>
-                                    <input type="text" wire:model="form.client_tin" placeholder="TIN-NG-84910291" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-mono font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <label class="block text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
+                                        <i class="fa-light fa-solar-panel text-amber-500"></i> {{ __('Installation / Site Address') }}
+                                    </label>
+                                    <input type="text" wire:model="form.installation_address" placeholder="e.g. Plot 14 Industrial Layout, Idu, Abuja" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                                 </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400">Customer Tax Identification (TIN)</label>
+                                <input type="text" wire:model="form.client_tin" placeholder="TIN-NG-84910291" class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-mono font-medium outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                             </div>
                         </div>
 
@@ -10437,18 +10484,27 @@
 
                 <div class="mt-5 space-y-5 max-h-[75vh] overflow-y-auto pr-1">
                     <!-- Client & Contact Card -->
-                    <div class="grid gap-3 sm:grid-cols-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs dark:border-slate-800 dark:bg-slate-800/40">
+                    <div class="grid gap-3 sm:grid-cols-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs dark:border-slate-800 dark:bg-slate-800/40">
                         <div>
                             <span class="text-slate-400 block font-medium">Recipient Client</span>
                             <strong class="text-sm font-bold text-slate-900 dark:text-white">{{ $inspectQuoteData['client_name'] }}</strong>
                         </div>
                         <div>
-                            <span class="text-slate-400 block font-medium">Email</span>
-                            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectQuoteData['email'] ?: '—' }}</span>
+                            <span class="text-slate-400 block font-medium">Contact Details</span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-300 block truncate">{{ $inspectQuoteData['email'] ?: '—' }}</span>
+                            <span class="block text-[11px] text-slate-400">{{ $inspectQuoteData['phone'] ?: '—' }}</span>
                         </div>
                         <div>
-                            <span class="text-slate-400 block font-medium">Phone</span>
-                            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectQuoteData['phone'] ?: '—' }}</span>
+                            <span class="text-slate-400 block font-medium flex items-center gap-1">
+                                <i class="fa-light fa-file-invoice text-blue-500"></i> Billing Address
+                            </span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectQuoteData['client_address'] ?? ($inspectQuoteData['address'] ?? '—') }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block font-medium flex items-center gap-1">
+                                <i class="fa-light fa-solar-panel text-amber-500"></i> Installation Site
+                            </span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">{{ $inspectQuoteData['installation_address'] ?: ($inspectQuoteData['address'] ?? '—') }}</span>
                         </div>
                     </div>
 

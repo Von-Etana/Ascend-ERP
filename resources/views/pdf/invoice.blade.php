@@ -38,6 +38,7 @@
         $clientPhone = $itemsData['client_phone'] ?? ($invoice->client_phone ?? '');
         $clientEmail = $itemsData['client_email'] ?? ($invoice->client_email ?? '');
         $clientAddress = $itemsData['client_address'] ?? ($invoice->client_address ?? '');
+        $installationAddress = $itemsData['installation_address'] ?? ($invoice->installation_address ?? ($itemsData['site_address'] ?? ''));
         $clientTin = $itemsData['client_tin'] ?? ($invoice->client_tin ?? '');
         $promoCode = $itemsData['promo_code'] ?? ($invoice->promo_code ?? '');
         $discountAmount = (float) ($itemsData['discount_amount'] ?? ($invoice->discount_amount ?? 0));
@@ -76,7 +77,10 @@
                     <div class="section-label">Billed To (Client / Customer):</div>
                     <div class="customer-name">{{ $invoice->client_name }}</div>
                     @if (!empty($clientAddress))
-                        <div class="customer-detail"><strong>Address:</strong> {{ $clientAddress }}</div>
+                        <div class="customer-detail"><strong>Invoice / Billing Address:</strong> {{ $clientAddress }}</div>
+                    @endif
+                    @if (!empty($installationAddress))
+                        <div class="customer-detail"><strong>Installation / Site Address:</strong> {{ $installationAddress }}</div>
                     @endif
                     @if (!empty($clientPhone) || !empty($clientEmail))
                         <div class="customer-detail">
@@ -187,7 +191,7 @@
 
     <div class="footer">
         <strong>{{ $companyName }}</strong> &nbsp;|&nbsp; Official Quote<br>
-        Suite FF002, Neighborhood Centre, Area 3, Garki. Abuja. FCT.<br>
+        Suite FF-C1, Mall of Dubai, opposite Hmedix, Gimbiya Street, Area 11. Garki. Abuja<br>
         Phone: {{ $companyPhone }} &nbsp;|&nbsp; Email: {{ $companyEmail }} &nbsp;|&nbsp; Web: www.ascendsystems.ng
     </div>
 </body>
